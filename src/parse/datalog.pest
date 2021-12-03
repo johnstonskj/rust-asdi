@@ -1,0 +1,159 @@
+// ------------------------------------------------------------------------------------------------
+// Top-Level definitions
+// ------------------------------------------------------------------------------------------------
+
+program = {
+    SOI ~ ( statement | query )* ~ EOI
+}
+
+// ------------------------------------------------------------------------------------------------
+// Intermediate definitions
+// ------------------------------------------------------------------------------------------------
+
+statement = {
+    ( rule | fact | pragma ) ~ DOT
+}
+
+fact = {
+    predicate ~ (LEFT_PAREN ~ constant_list ~ RIGHT_PAREN)?
+}
+
+rule = {
+    atom ~ ( rule_separator ~ atom_list )?
+}
+
+pragma = {
+    AT_SIGN ~ identifier ~ ( LEFT_PAREN ~ constant_list? ~ RIGHT_PAREN )?
+}
+
+query = {
+    ( query_prefix ~ atom ~ DOT )
+    | ( atom ~ QMARK )
+}
+
+atom = {
+    predicate ~ (LEFT_PAREN ~ term_list ~ RIGHT_PAREN)
+}
+
+negated_atom = {
+    negation ~ atom
+}
+
+atom_list = _{
+//    ( negated_atom | atom ) ~ ( conjunction ~ ( negated_atom | atom ))*
+    atom ~ ( conjunction ~ atom )*
+}
+
+term = {
+    variable | constant
+}
+
+term_list = _{
+    term ~ ( COMMA ~ term )*
+}
+
+predicate = {
+    relation | string
+}
+
+constant = {
+    identifier | string // | integer | bool
+}
+
+constant_list = _{
+    constant ~ ( COMMA ~ constant)*
+}
+
+identifier = {
+    LOWERCASE_LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
+}
+
+variable = {
+    ( UPPERCASE_LETTER | UNDERSCORE ) ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
+}
+
+relation = {
+    ( LETTER | UNDERSCORE ) ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
+}
+
+string = ${
+    QUOTE ~ string_inner ~ QUOTE
+}
+
+string_inner = @{
+    string_char*
+}
+
+// ------------------------------------------------------------------------------------------------
+// String token definitions
+// ------------------------------------------------------------------------------------------------
+
+string_char = {
+    !( "\"" | "\\" ) ~ ANY
+    | "\\" ~ ( "\"" | "\\" | "t" )
+    | "\\" ~ ( "u" ~ LEFT_BRACE ~ ASCII_HEX_DIGIT{2,6} ~ RIGHT_BRACE )
+}
+
+rule_separator = _{
+    ":-" | "<-" | UC_LEFT_ARROW_FW
+}
+
+negation = _{
+    EXCLAMATION | UC_LOGICAL_NOT_FW | "NOT"
+}
+
+conjunction = _{
+    COMMA | UC_LOGICAL_AND | AMPERSAND | "AND"
+}
+
+disjunction = _{
+    UC_LOGICAL_OR | VERTICAL_BAR | "OR"
+}
+
+query_prefix = _{
+    "?-"
+}
+
+UC_LOGICAL_AND = _{ "⋀" }
+
+UC_LOGICAL_OR = _{ "⋁" }
+
+UC_LOGICAL_NOT_FW = _{ "￢" }
+
+UC_LEFT_ARROW_FW = _{ "⟵" }
+
+LEFT_PAREN = _{ "(" }
+
+RIGHT_PAREN = _{ ")" }
+
+LEFT_BRACE = _{ "{" }
+
+RIGHT_BRACE = _{ "}" }
+
+QUOTE = _{ "\"" }
+
+HYPHEN_MINUS = _{ "-" }
+
+UNDERSCORE = _{ "_" }
+
+AMPERSAND = _{ "&" }
+
+VERTICAL_BAR = _{ "|" }
+
+EXCLAMATION = _{ "!" }
+
+DOT = _{ "." }
+
+COMMA = _{ "," }
+
+QMARK = _{ "?" }
+
+AT_SIGN = _{ "@" }
+
+// ------------------------------------------------------------------------------------------------
+// Built-in rules
+// ------------------------------------------------------------------------------------------------
+
+COMMENT = _{ "#" ~ ( !NEWLINE ~ ANY )* }
+
+WHITESPACE = _{ " " | "\t" | NEWLINE }
