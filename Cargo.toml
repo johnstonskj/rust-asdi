@@ -1,8 +1,10 @@
 [package]
 name = "asdi"
 description = "Another Simplistic Datalog Implementation (in Rust)"
-version = "0.1.0"
+version = "0.1.0-dev"
 edition = "2021"
+repository = "https://github.com/johnstonskj/rust-asdi"
+license-file = "LICENSE"
 
 [features]
 parser = ["pest", "pest_derive"]
