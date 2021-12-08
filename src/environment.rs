@@ -8,6 +8,10 @@ More detailed description, with
 */
 
 use crate::error::{Error, Result};
+use crate::syntax::{
+    CHAR_UNDERSCORE, TYPE_NAME_CONSTANT, TYPE_NAME_IDENTIFIER, TYPE_NAME_PREDICATE,
+    TYPE_NAME_VARIABLE,
+};
 use bimap::BiBTreeMap;
 use paste::paste;
 use std::cell::RefCell;
@@ -84,8 +88,6 @@ macro_rules! environment_impl {
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
-const UNDERSCORE: char = '_';
-
 impl Default for Environment {
     fn default() -> Self {
         Self {
@@ -99,13 +101,13 @@ impl Default for Environment {
 }
 
 impl Environment {
-    environment_impl!(constant, "Constant");
+    environment_impl!(constant, TYPE_NAME_CONSTANT);
 
-    environment_impl!(identifier, "Identifier");
+    environment_impl!(identifier, TYPE_NAME_IDENTIFIER);
 
-    environment_impl!(relation, "Relation");
+    environment_impl!(relation, TYPE_NAME_PREDICATE);
 
-    environment_impl!(variable, "Variable");
+    environment_impl!(variable, TYPE_NAME_VARIABLE);
 
     pub fn is_valid_constant(s: &str) -> bool {
         !s.chars().any(|c| c.is_control())
@@ -115,7 +117,7 @@ impl Environment {
         let mut chars = s.chars();
         !s.is_empty()
             && chars.next().map(|c| c.is_lowercase()).is_some()
-            && chars.all(|c| c.is_alphanumeric() || c == UNDERSCORE)
+            && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
 
     pub fn is_valid_variable(s: &str) -> bool {
@@ -123,9 +125,9 @@ impl Environment {
         !s.is_empty()
             && chars
                 .next()
-                .map(|c| c.is_uppercase() || c == UNDERSCORE)
+                .map(|c| c.is_uppercase() || c == CHAR_UNDERSCORE)
                 .is_some()
-            && chars.all(|c| c.is_alphanumeric() || c == UNDERSCORE)
+            && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
 
     pub fn is_valid_relation(s: &str) -> bool {
@@ -133,9 +135,9 @@ impl Environment {
         !s.is_empty()
             && chars
                 .next()
-                .map(|c| c.is_alphabetic() || c == UNDERSCORE)
+                .map(|c| c.is_alphabetic() || c == CHAR_UNDERSCORE)
                 .is_some()
-            && chars.all(|c| c.is_alphanumeric() || c == UNDERSCORE)
+            && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
 }
 

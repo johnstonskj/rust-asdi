@@ -2,6 +2,7 @@
 Module containing the `Error` type.
  */
 
+use crate::SourceLocation;
 use std::fmt::{Display, Formatter};
 
 // ------------------------------------------------------------------------------------------------
@@ -17,6 +18,10 @@ pub enum Error {
     InvalidPragmaName(String),
     InvalidPragmaArgumentCount(usize, usize),
     InvalidPragmaArgumentType(String),
+    LanguageFeatureDisabled(String),
+    UnknownLanguageFeature(String),
+    HeadVariablesMissingInBody(String, Option<SourceLocation>, Vec<String>),
+    NegativeVariablesNotPositive(String, Option<SourceLocation>, Vec<String>),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -49,6 +54,30 @@ impl Display for Error {
                     "Invalid type for pragma argument, expecting a {}",
                     expecting
                 ),
+                Error::UnknownLanguageFeature(name) =>
+                    format!("unknown or unsupported language feature, '{}'", name),
+                Error::LanguageFeatureDisabled(name) =>
+                    format!("The language feature {} has been disabled.", name),
+                Error::HeadVariablesMissingInBody(rule, loc, vars) =>
+                    format!(
+                        "In rule '{}'{}, the variables '{}' in the head do not appear in any positive literal in the body.",
+                        rule,
+                        match loc {
+                            None => String::new(),
+                            Some(src) => format!(", at {}", src),
+                        },
+                        vars.join(", ")
+                    ),
+                Error::NegativeVariablesNotPositive(rule, loc, vars) =>
+                    format!(
+                        "In rule '{}'{}, the variables '{}' in some negative literals do not appear in any positive literal in the body.",
+                        rule,
+                        match loc {
+                            None => String::new(),
+                            Some(src) => format!(", at {}", src),
+                        },
+                        vars.join(", ")
+                    ),
             }
         )
     }

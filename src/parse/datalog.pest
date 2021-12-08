@@ -14,12 +14,13 @@ statement = {
     ( rule | fact | pragma ) ~ DOT
 }
 
+/* a fact is the same structure as an atom without assumptions, and therefore without variables */
 fact = {
     predicate ~ (LEFT_PAREN ~ constant_list ~ RIGHT_PAREN)?
 }
 
 rule = {
-    atom ~ ( rule_separator ~ atom_list )?
+    atom ~ ( rule_separator ~ literal_list )?
 }
 
 pragma = {
@@ -32,16 +33,19 @@ query = {
 }
 
 atom = {
-    predicate ~ (LEFT_PAREN ~ term_list ~ RIGHT_PAREN)
+    predicate ~ ( LEFT_PAREN ~ term_list ~ RIGHT_PAREN )
 }
 
-negated_atom = {
-    negation ~ atom
+literal = {
+    negation? ~ ( atom | expression )
 }
 
-atom_list = _{
-//    ( negated_atom | atom ) ~ ( conjunction ~ ( negated_atom | atom ))*
-    atom ~ ( conjunction ~ atom )*
+literal_list = _{
+    literal ~ ( conjunction ~ literal )*
+}
+
+expression = {
+    term ~ ( operator ~ term )?
 }
 
 term = {
@@ -57,24 +61,28 @@ predicate = {
 }
 
 constant = {
-    identifier | string // | integer | bool
+    identifier | string | number | boolean
 }
 
 constant_list = _{
     constant ~ ( COMMA ~ constant)*
 }
 
-identifier = {
+identifier = @{
     LOWERCASE_LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
 }
 
-variable = {
+variable = @{
     ( UPPERCASE_LETTER | UNDERSCORE ) ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
 }
 
-relation = {
+relation = @{
     ( LETTER | UNDERSCORE ) ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
 }
+
+// ------------------------------------------------------------------------------------------------
+// Constant definitions
+// ------------------------------------------------------------------------------------------------
 
 string = ${
     QUOTE ~ string_inner ~ QUOTE
@@ -84,21 +92,29 @@ string_inner = @{
     string_char*
 }
 
-// ------------------------------------------------------------------------------------------------
-// String token definitions
-// ------------------------------------------------------------------------------------------------
-
 string_char = {
     !( "\"" | "\\" ) ~ ANY
     | "\\" ~ ( "\"" | "\\" | "t" )
     | "\\" ~ ( "u" ~ LEFT_BRACE ~ ASCII_HEX_DIGIT{2,6} ~ RIGHT_BRACE )
 }
 
+number = @{
+    ( "+" | "-" )? ~ ASCII_DIGIT+ ~ ( DOT ~ ASCII_DIGIT+ )?
+}
+
+boolean = @{
+    AT_SIGN ~ ( "true" | "false" )
+}
+
+// ------------------------------------------------------------------------------------------------
+// Terminal definitions
+// ------------------------------------------------------------------------------------------------
+
 rule_separator = _{
     ":-" | "<-" | UC_LEFT_ARROW_FW
 }
 
-negation = _{
+negation = {
     EXCLAMATION | UC_LOGICAL_NOT_FW | "NOT"
 }
 
@@ -114,6 +130,22 @@ query_prefix = _{
     "?-"
 }
 
+operator = {
+    LESS_THAN | less_or_equal | GREATER_THAN | greater_or_equal | EQUALS | not_equal
+}
+
+less_or_equal = _{
+    "<=" | UC_LTE
+}
+
+greater_or_equal = _{
+    ">=" | UC_GTE
+}
+
+not_equal = _{
+    "!=" | "/=" | UC_NOT_EQUAL
+}
+
 UC_LOGICAL_AND = _{ "⋀" }
 
 UC_LOGICAL_OR = _{ "⋁" }
@@ -122,6 +154,12 @@ UC_LOGICAL_NOT_FW = _{ "￢" }
 
 UC_LEFT_ARROW_FW = _{ "⟵" }
 
+UC_LTE = _{ "≤" }
+
+UC_GTE = _{ "≥" }
+
+UC_NOT_EQUAL = _{ "≠" }
+
 LEFT_PAREN = _{ "(" }
 
 RIGHT_PAREN = _{ ")" }
@@ -129,6 +167,14 @@ RIGHT_PAREN = _{ ")" }
 LEFT_BRACE = _{ "{" }
 
 RIGHT_BRACE = _{ "}" }
+
+LESS_THAN = _{
+    "<"
+}
+
+GREATER_THAN = _{ ">" }
+
+EQUALS = _{ "=" }
 
 QUOTE = _{ "\"" }
 

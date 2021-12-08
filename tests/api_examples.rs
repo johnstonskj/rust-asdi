@@ -18,35 +18,40 @@ fn test_wikipedia_example() {
     let var_y: Term = ancestors.make_term_variable("Y").unwrap();
     let var_z: Term = ancestors.make_term_variable("Z").unwrap();
 
-    let head = Atom::new_with_parameters(ancestor.clone(), vec![var_x.clone(), var_y.clone()]);
+    let head = Atom::new(ancestor.clone(), vec![var_x.clone(), var_y.clone()]);
 
-    ancestors.push(Fact::new_with_parameters(
-        parent.clone(),
-        vec![xerces.clone(), brooke.clone()],
-    ));
-    ancestors.push(Fact::new_with_parameters(
-        parent.clone(),
-        vec![brooke, damocles],
-    ));
-
-    ancestors.push(Rule::new(
-        head.clone(),
-        vec![Atom::new_with_parameters(
+    ancestors
+        .push(Fact::new_with_arguments(
             parent.clone(),
-            vec![var_x.clone(), var_y.clone()],
-        )],
-    ));
-    ancestors.push(Rule::new(
-        head,
-        vec![
-            Atom::new_with_parameters(parent.clone(), vec![var_x.clone(), var_z.clone()]),
-            Atom::new_with_parameters(parent, vec![var_z, var_y]),
-        ],
-    ));
+            vec![xerces.clone(), brooke.clone()],
+        ))
+        .unwrap();
+    ancestors
+        .push(Fact::new_with_arguments(
+            parent.clone(),
+            vec![brooke, damocles],
+        ))
+        .unwrap();
 
-    let query = Atom::new_with_parameters(ancestor, vec![xerces.into(), var_x]);
+    ancestors
+        .push(Rule::new_with_body(
+            head.clone(),
+            vec![Atom::new(parent.clone(), vec![var_x.clone(), var_y.clone()]).into()],
+        ))
+        .unwrap();
+    ancestors
+        .push(Rule::new_with_body(
+            head,
+            vec![
+                Atom::new(parent.clone(), vec![var_x.clone(), var_z.clone()]).into(),
+                Atom::new(parent, vec![var_z, var_y]).into(),
+            ],
+        ))
+        .unwrap();
 
-    ancestors.push(Query::from(query));
+    let query = Atom::new(ancestor, vec![xerces.into(), var_x]);
+
+    ancestors.push(Query::from(query)).unwrap();
 
     println!("{:#?}", ancestors);
 
@@ -79,46 +84,52 @@ fn test_sourceforge_example() {
     let var_y: Term = graph.make_term_variable("Y").unwrap();
     let var_z: Term = graph.make_term_variable("Z").unwrap();
 
-    graph.push(Fact::new_with_parameters(
-        edge.clone(),
-        vec![edge_a.clone(), edge_b.clone()],
-    ));
-
-    graph.push(Fact::new_with_parameters(
-        edge.clone(),
-        vec![edge_b, edge_c.clone()],
-    ));
-
-    graph.push(Fact::new_with_parameters(
-        edge.clone(),
-        vec![edge_c, edge_d.clone()],
-    ));
-
-    graph.push(Fact::new_with_parameters(
-        edge.clone(),
-        vec![edge_d, edge_a],
-    ));
-
-    let head = Atom::new_with_parameters(path.clone(), vec![var_x.clone(), var_y.clone()]);
-
-    graph.push(Rule::new(
-        head.clone(),
-        vec![Atom::new_with_parameters(
+    graph
+        .push(Fact::new_with_arguments(
             edge.clone(),
-            vec![var_x.clone(), var_y.clone()],
-        )],
-    ));
-    graph.push(Rule::new(
-        head,
-        vec![
-            Atom::new_with_parameters(edge, vec![var_x.clone(), var_z.clone()]),
-            Atom::new_with_parameters(path.clone(), vec![var_z, var_y.clone()]),
-        ],
-    ));
+            vec![edge_a.clone(), edge_b.clone()],
+        ))
+        .unwrap();
 
-    let query = Atom::new_with_parameters(path, vec![var_x, var_y]);
+    graph
+        .push(Fact::new_with_arguments(
+            edge.clone(),
+            vec![edge_b, edge_c.clone()],
+        ))
+        .unwrap();
 
-    graph.push(Query::from(query));
+    graph
+        .push(Fact::new_with_arguments(
+            edge.clone(),
+            vec![edge_c, edge_d.clone()],
+        ))
+        .unwrap();
+
+    graph
+        .push(Fact::new_with_arguments(edge.clone(), vec![edge_d, edge_a]))
+        .unwrap();
+
+    let head = Atom::new(path.clone(), vec![var_x.clone(), var_y.clone()]);
+
+    graph
+        .push(Rule::new_with_body(
+            head.clone(),
+            vec![Atom::new(edge.clone(), vec![var_x.clone(), var_y.clone()]).into()],
+        ))
+        .unwrap();
+    graph
+        .push(Rule::new_with_body(
+            head,
+            vec![
+                Atom::new(edge, vec![var_x.clone(), var_z.clone()]).into(),
+                Atom::new(path.clone(), vec![var_z, var_y.clone()]).into(),
+            ],
+        ))
+        .unwrap();
+
+    let query = Atom::new(path, vec![var_x, var_y]);
+
+    graph.push(Query::from(query)).unwrap();
 
     assert_eq!(
         graph.to_string(),
@@ -146,19 +157,23 @@ fn test_that_syllogism() {
 
     let var_x: Term = syllogism.make_term_variable("X").unwrap();
 
-    syllogism.push(Fact::new_with_parameters(
-        human.clone(),
-        vec![socrates.clone()],
-    ));
+    syllogism
+        .push(Fact::new_with_arguments(
+            human.clone(),
+            vec![socrates.clone()],
+        ))
+        .unwrap();
 
-    syllogism.push(Rule::new(
-        Atom::new_with_parameters(mortal.clone(), vec![var_x.clone()]),
-        vec![Atom::new_with_parameters(human, vec![var_x])],
-    ));
+    syllogism
+        .push(Rule::new_with_body(
+            Atom::new(mortal.clone(), vec![var_x.clone()]),
+            vec![Atom::new(human, vec![var_x]).into()],
+        ))
+        .unwrap();
 
-    let query = Atom::new_with_parameters(mortal, vec![socrates.into()]);
+    let query = Atom::new(mortal, vec![socrates.into()]);
 
-    syllogism.push(Query::from(query));
+    syllogism.push(Query::from(query)).unwrap();
 
     assert_eq!(
         syllogism.to_string(),
