@@ -2,6 +2,7 @@
 Module containing the `Error` type.
  */
 
+use crate::features::Feature;
 use crate::SourceLocation;
 use std::fmt::{Display, Formatter};
 
@@ -18,7 +19,8 @@ pub enum Error {
     InvalidPragmaName(String),
     InvalidPragmaArgumentCount(usize, usize),
     InvalidPragmaArgumentType(String),
-    LanguageFeatureDisabled(String),
+    LanguageFeatureDisabled(Feature),
+    LanguageFeatureUnsupported(Feature),
     UnknownLanguageFeature(String),
     HeadVariablesMissingInBody(String, Option<SourceLocation>, Vec<String>),
     NegativeVariablesNotPositive(String, Option<SourceLocation>, Vec<String>),
@@ -56,8 +58,10 @@ impl Display for Error {
                 ),
                 Error::UnknownLanguageFeature(name) =>
                     format!("unknown or unsupported language feature, '{}'", name),
-                Error::LanguageFeatureDisabled(name) =>
-                    format!("The language feature {} has been disabled.", name),
+                Error::LanguageFeatureDisabled(feature) =>
+                    format!("The language feature {} has been disabled.", feature.label()),
+                Error::LanguageFeatureUnsupported(feature) =>
+                    format!("The language feature {} is not supported by the attempted operation.", feature.label()),
                 Error::HeadVariablesMissingInBody(rule, loc, vars) =>
                     format!(
                         "In rule '{}'{}, the variables '{}' in the head do not appear in any positive literal in the body.",

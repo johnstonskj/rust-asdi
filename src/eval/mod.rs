@@ -8,22 +8,37 @@ More detailed description, with
 */
 
 use crate::error::Result;
-use crate::{Program, ProgramElement, Query, Term};
+use crate::{Fact, Program, Query, Term};
+use std::collections::HashSet;
+use std::fmt::Debug;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
-#[derive(Debug)]
-pub enum Results {
-    Singular(Term),
-    Tabular(Vec<Vec<Term>>),
+pub trait Evaluator {
+    fn inference(&self, from_program: &Program) -> Result<HashSet<Fact>>;
+}
+
+pub trait QueryEvaluator {
+    fn evaluate(&self, query: &Query, in_program: &Program) -> Result<Results> {
+        self.evaluate_with_facts(query, in_program, Default::default())
+    }
+
+    fn evaluate_with_facts(
+        &self,
+        _query: &Query,
+        _in_program: &Program,
+        _and_facts: HashSet<Fact>,
+    ) -> Result<Results>;
 }
 
 #[derive(Debug)]
-pub struct NaiveEvaluator {}
-
-pub type InferredAdditions = Vec<ProgramElement>;
+pub enum Results {
+    None,
+    Singular(Term),
+    Tabular(Vec<Vec<Term>>),
+}
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
@@ -41,24 +56,6 @@ pub type InferredAdditions = Vec<ProgramElement>;
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
-impl NaiveEvaluator {
-    pub fn init(&self, _program: &Program) -> Result<()> {
-        Ok(())
-    }
-
-    pub fn infer_once(
-        &self,
-        _program: &Program,
-        _additions: &[ProgramElement],
-    ) -> Result<InferredAdditions> {
-        Ok(Default::default())
-    }
-
-    pub fn evaluate(&self, _program: &Program, _query: &Query) -> Result<()> {
-        Ok(())
-    }
-}
-
 // ------------------------------------------------------------------------------------------------
 // Private Functions
 // ------------------------------------------------------------------------------------------------
@@ -67,6 +64,4 @@ impl NaiveEvaluator {
 // Modules
 // ------------------------------------------------------------------------------------------------
 
-// ------------------------------------------------------------------------------------------------
-// Unit Tests
-// ------------------------------------------------------------------------------------------------
+pub mod naive;

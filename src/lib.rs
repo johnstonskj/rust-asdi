@@ -10,6 +10,60 @@ Tools that operate on the model to _validate_, _derive_, and _evaluate_ the prog
 implementations of traits defined in the [`eval`](eval/index.html) module. This makes it easier to
 integrate new more sophisticated implementations over time.
 
+# Datalog Defined
+
+* **Program**
+  * _Facts_ and _Rules_
+* **Atom** (Atomic Formula)
+  * **Predicate**
+  Variable names **must** begin with a lowercase letter followed by any number of Unicode letters,
+  numbers, or the underscore `_` character.
+    Predicates are sometimes refereed to as _Relations_.
+  * **Fact**
+    Fact arguments may only be _Constants_.
+    Facts are sometimes refereed to as _Axioms_.
+  * **Literal**
+    Literal arguments may be _Constants_ or _Variables_.
+  * **Expression**
+* **Rule**
+  * **head**
+  * **body**
+* **Query**
+* **Constant**
+  * **Identifier**
+  * **String**
+  * **Integer**
+  * **Boolean**
+* **Variable**
+  Variable names **must** begin with an uppercase letter followed by any number of Unicode letters,
+  numbers, or the underscore `_` character.
+
+```abnf
+program         = *[ element ]
+element         = statement / query
+statement       = ( fact / rule ) "."
+query           = ( "?-" query "." ) / ( query "?" )
+fact            = predicate [ constant_list ] "."
+rule            = atom ":-" [ literal_list ] "."
+constant_list   = "(" [ constant *[ "," constant ] ] ")"
+constant        = identifier / string / integer / boolean
+literal_list    = literal *[ conjunction literal ]
+literal         = [ negation ] atom / expression
+atom            = predicate "(" term *[ "," term ] ")"
+expression      = term [ operator term ]
+term_list       = "(" [ term *[ "," term ] ] ")"
+term            = variable / constant
+operator        = "=" / "!=" / "<" / "<=" / ">" / ">="
+predicate       = LC_ALPHA *[ ALPHA / DIGIT / "_" ]
+variable        = UC_ALPHA *[ ALPHA / DIGIT / "_" ]
+identifier      = ALPHA *[ ALPHA / DIGIT / "_" ]
+string          = DQUOTE ... DQUOTE
+conjunction     = "," / "AND"
+negation        = "!" / "NOT"
+```
+
+[Augmented BNF for Syntax Specifications: ABNF](https://datatracker.ietf.org/doc/html/rfc5234)
+
 # Source Syntax
 
 The text representation that the parser feature accepts is intended to be flexible. While the core program
@@ -136,7 +190,7 @@ TBD
 
 use crate::environment::{Environment, EnvironmentRef, Interned};
 use crate::error::{Error, Result};
-use crate::eval::NaiveEvaluator;
+use crate::eval::Evaluator;
 use crate::features::FeatureSet;
 use crate::syntax::*;
 use std::cell::{Ref, RefMut};
@@ -158,11 +212,11 @@ use std::str::FromStr;
 /// all [_rules_](struct.Rule.html), and then any [_queries_](struct.Query.html), this model
 /// makes no such distinction.
 ///
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Program {
     features: FeatureSet,
     environment: EnvironmentRef,
-    elements: Vec<ProgramElement>,
+    elements: HashSet<ProgramElement>,
 }
 
 pub trait SyntacticFragments {
@@ -191,12 +245,20 @@ pub trait SyntacticFragments {
 /// not a part of the processing of the model, rather it affects the parsing and construction of a
 /// model from text representation.
 ///
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ProgramElement {
     Fact(Fact),
     Rule(Rule),
     Pragma(Pragma),
     Query(Query),
+}
+
+// TODO: pivot around relation for atoms and facts
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Relation<T> {
+    predicate: Predicate,
+    arguments: Vec<T>,
+    src_loc: Option<SourceLocation>,
 }
 
 ///
@@ -222,7 +284,7 @@ pub enum ProgramElement {
 /// "known as"(id, "Socrates").
 /// ```
 ///
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Fact {
     predicate: Predicate,
     arguments: Vec<Constant>,
@@ -253,7 +315,7 @@ pub struct Fact {
 /// "an ancestor"(X, Y).
 /// ```
 ///
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Rule {
     head: Atom,
     body: Vec<Literal>,
@@ -272,7 +334,7 @@ pub struct Rule {
 /// ancestor(xerces, X)?
 /// ```
 ///
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Query(Atom);
 
 ///
@@ -289,7 +351,7 @@ pub struct Query(Atom);
 /// @include("file/path")
 /// ```
 ///
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Pragma {
     Include(PathBuf),
     // Input(Interned),
@@ -301,32 +363,32 @@ pub enum Pragma {
 ///
 ///  An Atom has a similar structure to a [_fact_](struct.Fact.html)
 ///
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Atom {
     predicate: Predicate,
     arguments: Vec<Term>,
     src_loc: Option<SourceLocation>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Literal {
     negative: bool,
     inner: LiteralInner,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum LiteralInner {
     Atom(Atom),
     Expression(LiteralExpression),
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct LiteralExpression {
     left: Term,
     rest: Option<(ComparisonOperator, Term)>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ComparisonOperator {
     Equal,
     NotEqual,
@@ -357,7 +419,7 @@ pub enum Predicate {
     String(Interned),
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SourceLocation {
     line: usize,
     column: usize,
@@ -437,21 +499,21 @@ impl SyntacticFragments for Program {
 impl Program {
     pub fn new<E>(elements: E) -> Self
     where
-        E: Into<Vec<ProgramElement>>,
+        E: Into<HashSet<ProgramElement>>,
     {
         Self::new_with_environment_and_features(Default::default(), elements, Default::default())
     }
 
     pub fn new_with_features<E>(elements: E, features: FeatureSet) -> Self
     where
-        E: Into<Vec<ProgramElement>>,
+        E: Into<HashSet<ProgramElement>>,
     {
         Self::new_with_environment_and_features(Default::default(), elements, features)
     }
 
     pub fn new_with_environment<E>(environment: EnvironmentRef, elements: E) -> Self
     where
-        E: Into<Vec<ProgramElement>>,
+        E: Into<HashSet<ProgramElement>>,
     {
         Self::new_with_environment_and_features(environment, elements, Default::default())
     }
@@ -462,7 +524,7 @@ impl Program {
         features: FeatureSet,
     ) -> Self
     where
-        E: Into<Vec<ProgramElement>>,
+        E: Into<HashSet<ProgramElement>>,
     {
         Self {
             features,
@@ -534,7 +596,7 @@ impl Program {
         if let ProgramElement::Rule(rule) = &element {
             rule.check_well_formed(&self.features, &self.environment())?;
         }
-        self.elements.push(element);
+        self.elements.insert(element);
         Ok(())
     }
 
@@ -564,10 +626,6 @@ impl Program {
 
     pub fn elements(&self) -> impl Iterator<Item = &ProgramElement> {
         self.elements.iter()
-    }
-
-    pub fn elements_mut(&mut self) -> impl Iterator<Item = &mut ProgramElement> {
-        self.elements.iter_mut()
     }
 
     // --------------------------------------------------------------------------------------------
@@ -606,18 +664,9 @@ impl Program {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn inference(&self, evaluator: &NaiveEvaluator) -> Result<()> {
-        evaluator.init(self)?;
-
-        let mut inferred: Vec<ProgramElement> = Default::default();
-        loop {
-            let mut additions = evaluator.infer_once(self, &inferred)?;
-            if additions.is_empty() {
-                break;
-            } else {
-                inferred.append(&mut additions)
-            }
-        }
+    pub fn perform_inference(&mut self, evaluator: &dyn Evaluator) -> Result<()> {
+        let new_facts = { evaluator.inference(self)? };
+        self.extend(new_facts.into_iter().map(ProgramElement::from))?;
         Ok(())
     }
 }
@@ -874,12 +923,27 @@ impl Rule {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn head_terms(&self) -> HashSet<&Term> {
+    pub fn distinguished_terms(&self) -> HashSet<&Term> {
         self.head().terms().collect()
     }
 
+    pub fn non_distinguished_terms(&self) -> HashSet<&Term> {
+        let distinguished = self.distinguished_terms();
+        self.terms()
+            .into_iter()
+            .filter(|term| !distinguished.contains(term))
+            .collect()
+    }
+
     pub fn terms(&self) -> HashSet<&Term> {
-        self.body.iter().map(|lit| lit.terms()).flatten().collect()
+        self.body
+            .iter()
+            .map(|lit| lit.terms())
+            .flatten()
+            .collect::<HashSet<&Term>>()
+            .intersection(&self.head.terms().collect())
+            .copied()
+            .collect()
     }
 
     pub fn positive_terms(&self) -> HashSet<&Term> {
@@ -951,7 +1015,7 @@ impl Rule {
             let body_positive_terms = self.positive_terms();
 
             let missing: Vec<&Term> = self
-                .head_terms()
+                .distinguished_terms()
                 .into_iter()
                 .filter(|term| !body_positive_terms.contains(term))
                 .collect();
@@ -987,6 +1051,16 @@ impl Rule {
 }
 
 // ------------------------------------------------------------------------------------------------
+
+impl From<Fact> for Atom {
+    fn from(v: Fact) -> Self {
+        Self {
+            predicate: v.predicate,
+            arguments: v.arguments.into_iter().map(Term::from).collect(),
+            src_loc: None,
+        }
+    }
+}
 
 impl DisplayExt for Atom {
     fn to_extern_string(&self, environment: &Environment) -> String {

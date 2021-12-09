@@ -2,6 +2,7 @@ use asdi::{Atom, Fact, Program, Query, Rule, Term};
 use pretty_assertions::assert_eq;
 
 #[test]
+#[ignore]
 fn test_wikipedia_example() {
     // See https://en.wikipedia.org/wiki/Datalog
 
@@ -67,6 +68,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
 }
 
 #[test]
+#[ignore]
 fn test_sourceforge_example() {
     // See http://datalog.sourceforge.net/datalog.html
 
@@ -145,6 +147,7 @@ path(X, Y) ⟵ edge(X, Z) ⋀ path(Z, Y).
 }
 
 #[test]
+#[ignore]
 fn test_that_syllogism() {
     // See https://en.wikipedia.org/wiki/Syllogism
 

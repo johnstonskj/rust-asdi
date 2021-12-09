@@ -19,7 +19,7 @@ use std::fmt::{Display, Formatter};
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct FeatureSet(u8);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

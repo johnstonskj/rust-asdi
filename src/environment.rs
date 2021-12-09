@@ -22,7 +22,7 @@ use std::rc::Rc;
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Environment {
     counter: u64,
     constants: InternedStrings,
