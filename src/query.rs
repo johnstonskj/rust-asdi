@@ -7,24 +7,29 @@ More detailed description, with
 
 */
 
-use bimap::BiBTreeMap;
-use std::fmt::Debug;
-use std::rc::Rc;
+use crate::idb::Atom;
+use crate::{Predicate, Term, CHAR_PERIOD, QUERY_PREFIX_ASCII};
+use std::fmt::{Display, Formatter};
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
+///
+/// A query simply wraps a single [_atom_](struct.Atom.html) which acts as the goal for the query.
+///
+/// # Examples
+///
+/// It is distinguished in the text representation with either the prefix `?-` and suffix `.`
+/// **or** the suffix `?` and no period.
+///
+/// ```prolog
+/// ?- ancestor(xerces, X).
+/// ancestor(xerces, X)?
+/// ```
+///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct Environment {
-    counter: u64,
-    values: BiBTreeMap<String, Interned>,
-}
-
-pub type EnvironmentRef = Rc<Environment>;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Interned(u64);
+pub struct Query(Atom);
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
@@ -42,39 +47,27 @@ pub struct Interned(u64);
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
-impl Default for Environment {
-    fn default() -> Self {
-        Self {
-            counter: 1,
-            values: Default::default(),
-        }
+impl Display for Query {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}{}", QUERY_PREFIX_ASCII, self.0, CHAR_PERIOD)
     }
 }
 
-impl Environment {
-    pub fn insert<S: Into<String>>(&mut self, s: S) -> Interned {
-        let s = s.into();
-        match self.values.get_by_left(&s) {
-            Some(s) => *s,
-            None => {
-                self.counter += 1;
-                let interned = Interned(self.counter);
-                self.values.insert(s, interned.clone());
-                interned
-            }
-        }
+impl From<Atom> for Query {
+    fn from(v: Atom) -> Self {
+        Self(v)
     }
+}
 
-    pub fn has_value<S: Into<String>>(&self, s: S) -> bool {
-        self.values.contains_left(&s.into())
+impl AsRef<Atom> for Query {
+    fn as_ref(&self) -> &Atom {
+        &self.0
     }
+}
 
-    pub fn interned_from<S: Into<String>>(&self, s: S) -> Option<&Interned> {
-        self.values.get_by_left(&s.into())
-    }
-
-    pub fn string_from(&self, i: &Interned) -> Option<&String> {
-        self.values.get_by_right(i)
+impl Query {
+    pub fn new<T: Into<Vec<Term>>>(predicate: Predicate, terms: T) -> Self {
+        Self(Atom::new(predicate, terms))
     }
 }
 

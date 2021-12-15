@@ -1,188 +1,194 @@
-use asdi::{Atom, Fact, Program, Query, Rule, Term};
-use pretty_assertions::assert_eq;
+use asdi::edb::{AttributeKind, Predicate};
+use asdi::idb::{Atom, Term, Variable};
+use asdi::query::Query;
+use asdi::Program;
+use std::str::FromStr;
+
+pub mod common;
+use common::assert_eq_by_line;
 
 #[test]
-#[ignore]
 fn test_wikipedia_example() {
     // See https://en.wikipedia.org/wiki/Datalog
 
     let mut ancestors = Program::default();
 
-    let parent = ancestors.make_predicate_relation("parent").unwrap();
-    let ancestor = ancestors.make_predicate_relation("ancestor").unwrap();
-
-    let xerces = ancestors.make_constant_identifier("xerces").unwrap();
-    let brooke = ancestors.make_constant_identifier("brooke").unwrap();
-    let damocles = ancestors.make_constant_identifier("damocles").unwrap();
-
-    let var_x: Term = ancestors.make_term_variable("X").unwrap();
-    let var_y: Term = ancestors.make_term_variable("Y").unwrap();
-    let var_z: Term = ancestors.make_term_variable("Z").unwrap();
-
-    let head = Atom::new(ancestor.clone(), vec![var_x.clone(), var_y.clone()]);
-
-    ancestors
-        .push(Fact::new_with_arguments(
-            parent.clone(),
-            vec![xerces.clone(), brooke.clone()],
-        ))
+    let mut parent = ancestors
+        .make_new_relation(
+            Predicate::from_str("parent").unwrap(),
+            [AttributeKind::String, AttributeKind::String],
+        )
         .unwrap();
-    ancestors
-        .push(Fact::new_with_arguments(
-            parent.clone(),
-            vec![brooke, damocles],
-        ))
+    parent.add(["xerces".into(), "brooke".into()]);
+    parent.add(["brooke".into(), "damocles".into()]);
+
+    let ancestor = ancestors
+        .make_new_relation(
+            Predicate::from_str("ancestor").unwrap(),
+            [AttributeKind::String, AttributeKind::String],
+        )
         .unwrap();
 
+    let var_x: Term = Variable::from_str("X").unwrap().into();
+    let var_y: Term = Variable::from_str("Y").unwrap().into();
+    let var_z: Term = Variable::from_str("Z").unwrap().into();
+
     ancestors
-        .push(Rule::new_with_body(
-            head.clone(),
-            vec![Atom::new(parent.clone(), vec![var_x.clone(), var_y.clone()]).into()],
-        ))
+        .add_new_rule(
+            ancestor.predicate().clone(),
+            [var_x.clone(), var_y.clone()],
+            [Atom::new(parent.predicate().clone(), [var_x.clone(), var_y.clone()]).into()],
+        )
         .unwrap();
     ancestors
-        .push(Rule::new_with_body(
-            head,
-            vec![
-                Atom::new(parent.clone(), vec![var_x.clone(), var_z.clone()]).into(),
-                Atom::new(parent, vec![var_z, var_y]).into(),
+        .add_new_rule(
+            ancestor.predicate().clone(),
+            [var_x.clone(), var_y.clone()],
+            [
+                Atom::new(parent.predicate().clone(), [var_x.clone(), var_z.clone()]).into(),
+                Atom::new(ancestor.predicate().clone(), [var_z.clone(), var_y.clone()]).into(),
             ],
-        ))
+        )
         .unwrap();
 
-    let query = Atom::new(ancestor, vec![xerces.into(), var_x]);
+    ancestors
+        .add_new_query(
+            ancestor.predicate().clone(),
+            ["xerces".into(), var_x.into()],
+        )
+        .unwrap();
 
-    ancestors.push(Query::from(query)).unwrap();
+    ancestors.add_relation(parent);
+    ancestors.add_relation(ancestor);
 
-    println!("{:#?}", ancestors);
+    println!(">{}<", ancestors);
 
-    assert_eq!(
-        ancestors.to_string(),
-        r#"parent(xerces, brooke).
+    assert_eq_by_line(
+        &ancestors.to_string(),
+        r#"@declare ancestor(string, string).
+@declare parent(string, string).
+
+parent(xerces, brooke).
 parent(brooke, damocles).
+
 ancestor(X, Y) ⟵ parent(X, Y).
-ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z) ⋀ ancestor(Z, Y).
+
 ?- ancestor(xerces, X).
-"#
+"#,
     )
 }
 
 #[test]
-#[ignore]
 fn test_sourceforge_example() {
     // See http://datalog.sourceforge.net/datalog.html
 
     let mut graph = Program::default();
 
-    let edge = graph.make_predicate_relation("edge").unwrap();
-    let path = graph.make_predicate_relation("path").unwrap();
+    let mut edge = graph
+        .make_new_relation(
+            Predicate::from_str("edge").unwrap(),
+            [AttributeKind::String, AttributeKind::String],
+        )
+        .unwrap();
+    edge.add(["a".into(), "b".into()]);
+    edge.add(["b".into(), "c".into()]);
+    edge.add(["c".into(), "d".into()]);
+    edge.add(["d".into(), "a".into()]);
 
-    let edge_a = graph.make_constant_identifier("a").unwrap();
-    let edge_b = graph.make_constant_identifier("b").unwrap();
-    let edge_c = graph.make_constant_identifier("c").unwrap();
-    let edge_d = graph.make_constant_identifier("d").unwrap();
+    let path = graph
+        .make_new_relation(
+            Predicate::from_str("path").unwrap(),
+            [AttributeKind::String, AttributeKind::String],
+        )
+        .unwrap();
 
-    let var_x: Term = graph.make_term_variable("X").unwrap();
-    let var_y: Term = graph.make_term_variable("Y").unwrap();
-    let var_z: Term = graph.make_term_variable("Z").unwrap();
+    let var_x: Term = Variable::from_str("X").unwrap().into();
+    let var_y: Term = Variable::from_str("Y").unwrap().into();
+    let var_z: Term = Variable::from_str("Z").unwrap().into();
 
     graph
-        .push(Fact::new_with_arguments(
-            edge.clone(),
-            vec![edge_a.clone(), edge_b.clone()],
-        ))
+        .add_new_rule(
+            path.predicate().clone(),
+            [var_x.clone(), var_y.clone()],
+            [Atom::new(edge.predicate().clone(), [var_x.clone(), var_y.clone()]).into()],
+        )
         .unwrap();
 
     graph
-        .push(Fact::new_with_arguments(
-            edge.clone(),
-            vec![edge_b, edge_c.clone()],
-        ))
-        .unwrap();
-
-    graph
-        .push(Fact::new_with_arguments(
-            edge.clone(),
-            vec![edge_c, edge_d.clone()],
-        ))
-        .unwrap();
-
-    graph
-        .push(Fact::new_with_arguments(edge.clone(), vec![edge_d, edge_a]))
-        .unwrap();
-
-    let head = Atom::new(path.clone(), vec![var_x.clone(), var_y.clone()]);
-
-    graph
-        .push(Rule::new_with_body(
-            head.clone(),
-            vec![Atom::new(edge.clone(), vec![var_x.clone(), var_y.clone()]).into()],
-        ))
-        .unwrap();
-    graph
-        .push(Rule::new_with_body(
-            head,
-            vec![
-                Atom::new(edge, vec![var_x.clone(), var_z.clone()]).into(),
-                Atom::new(path.clone(), vec![var_z, var_y.clone()]).into(),
+        .add_new_rule(
+            path.predicate().clone(),
+            [var_x.clone(), var_y.clone()],
+            [
+                Atom::new(edge.predicate().clone(), [var_x.clone(), var_z.clone()]).into(),
+                Atom::new(path.predicate().clone(), [var_z, var_y.clone()]).into(),
             ],
-        ))
+        )
         .unwrap();
 
-    let query = Atom::new(path, vec![var_x, var_y]);
+    let query = Query::new(path.predicate().clone(), vec![var_x, var_y]);
+    graph.add_query(query);
 
-    graph.push(Query::from(query)).unwrap();
+    graph.add_relation(edge);
 
-    assert_eq!(
-        graph.to_string(),
-        r#"edge(a, b).
-edge(b, c).
+    println!("{}", graph);
+
+    assert_eq_by_line(
+        &graph.to_string(),
+        r#"@declare edge(string, string).
+
+edge(a, b).
 edge(c, d).
 edge(d, a).
+edge(b, c).
+
 path(X, Y) ⟵ edge(X, Y).
 path(X, Y) ⟵ edge(X, Z) ⋀ path(Z, Y).
+
 ?- path(X, Y).
-"#
+"#,
     );
 }
 
 #[test]
-#[ignore]
 fn test_that_syllogism() {
     // See https://en.wikipedia.org/wiki/Syllogism
 
     let mut syllogism = Program::default();
+    let p_human = Predicate::from_str("human").unwrap();
 
-    let mortal = syllogism.make_predicate_relation("mortal").unwrap();
-    let human = syllogism.make_predicate_relation("human").unwrap();
+    let mut human = syllogism
+        .make_new_relation(p_human.clone(), [AttributeKind::String])
+        .unwrap();
+    human.add(["Socrates".into()]);
 
-    let socrates = syllogism.make_constant_string("Socrates").unwrap();
+    syllogism.database_mut().add(human);
 
-    let var_x: Term = syllogism.make_term_variable("X").unwrap();
+    let var_x: Term = Variable::from_str("X").unwrap().into();
 
     syllogism
-        .push(Fact::new_with_arguments(
-            human.clone(),
-            vec![socrates.clone()],
-        ))
+        .add_new_rule(
+            Predicate::from_str("mortal").unwrap(),
+            [var_x.clone()],
+            [Atom::new(p_human, [var_x]).into()],
+        )
         .unwrap();
 
     syllogism
-        .push(Rule::new_with_body(
-            Atom::new(mortal.clone(), vec![var_x.clone()]),
-            vec![Atom::new(human, vec![var_x]).into()],
-        ))
+        .add_new_query(Predicate::from_str("mortal").unwrap(), ["Socrates".into()])
         .unwrap();
 
-    let query = Atom::new(mortal, vec![socrates.into()]);
+    println!("{}", syllogism);
 
-    syllogism.push(Query::from(query)).unwrap();
+    assert_eq_by_line(
+        &syllogism.to_string(),
+        r#"@declare human(string).
 
-    assert_eq!(
-        syllogism.to_string(),
-        r#"human("Socrates").
+human(Socrates).
+
 mortal(X) ⟵ human(X).
-?- mortal("Socrates").
-"#
+
+?- mortal(Socrates).
+"#,
     );
 }

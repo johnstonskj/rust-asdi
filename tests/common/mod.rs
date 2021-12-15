@@ -10,6 +10,7 @@ More detailed description, with
 use asdi::features::FeatureSet;
 use asdi::parse::parse_str_with_features;
 use asdi::Program;
+use pretty_assertions::assert_eq;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -26,6 +27,21 @@ use asdi::Program;
 // ------------------------------------------------------------------------------------------------
 // Public Functions
 // ------------------------------------------------------------------------------------------------
+
+#[allow(dead_code)]
+pub fn assert_eq_by_line(given: &str, expected: &str) {
+    let mut lhs = given
+        .split('\n')
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
+    lhs.sort();
+    let mut rhs = expected
+        .split('\n')
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
+    rhs.sort();
+    assert_eq!(lhs, rhs)
+}
 
 #[allow(dead_code)]
 pub fn quick_parser_check<P: Into<Option<Program>>>(s: &str, expected: P) {

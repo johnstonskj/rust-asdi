@@ -1,28 +1,47 @@
 mod common;
 
-use asdi::{Pragma, Program};
 use common::quick_parser_check;
-use std::path::PathBuf;
 
 // ------------------------------------------------------------------------------------------------
 // Success cases
 // ------------------------------------------------------------------------------------------------
 
 #[test]
-fn test_include_success() {
-    quick_parser_check("@include(\"file-name\").", None);
+fn test_declare_success() {
+    quick_parser_check("@declare human (string).", None);
 }
 
 #[test]
-fn test_to_string_success() {
-    let mut program = Program::default();
-    program
-        .push(Pragma::Include(PathBuf::from("file-name")))
-        .unwrap();
-    assert_eq!(
-        program.to_string(),
-        String::from("@include(\"file-name\").\n")
-    )
+fn test_declare_multiple_success() {
+    quick_parser_check("@declare human (string, integer, boolean).", None);
+}
+
+#[test]
+fn test_declare_named_success() {
+    quick_parser_check(
+        "@declare human (name: string, age: integer, boolean).",
+        None,
+    );
+}
+
+#[test]
+fn test_feature_success() {
+    quick_parser_check("@feature(negation, comparisons).", None);
+}
+
+#[test]
+fn test_include_success() {
+    quick_parser_check("@include \"file-name\".", None);
+}
+
+#[test]
+fn test_input_success() {
+    quick_parser_check("@input human \"file-name\".", None);
+}
+
+#[test]
+fn test_output_success() {
+    quick_parser_check("@output mortal \"file-name\".", None);
 }
 
 // ------------------------------------------------------------------------------------------------

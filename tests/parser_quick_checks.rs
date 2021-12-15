@@ -1,4 +1,4 @@
-use asdi::features::{FeatureSet, FEATURE_NEGATION};
+use asdi::features::{FeatureSet, FEATURE_COMPARISONS, FEATURE_NEGATION};
 use asdi::Program;
 
 mod common;
@@ -34,18 +34,8 @@ fn test_parse_identifier_fact() {
 }
 
 #[test]
-fn test_parse_string_identifier_fact() {
-    quick_parser_check("\"edge\"(a, b).", None);
-}
-
-#[test]
 fn test_parse_one_rule_turnstile() {
     quick_parser_check("mortal(X) :- human(X).", None);
-}
-
-#[test]
-fn test_parse_rule_expression_term() {
-    quick_parser_check("thing(X) :- human(X), X.", None);
 }
 
 #[test]
@@ -59,6 +49,16 @@ fn test_parse_rule_expression_negated_term() {
 
 #[test]
 fn test_parse_rule_expression() {
+    quick_parser_check_with_options(
+        "old(X) :- human(X), X > 50.",
+        FeatureSet::default().add_support_for(&FEATURE_COMPARISONS),
+        None,
+    );
+}
+
+#[test]
+#[should_panic]
+fn test_parse_rule_expression_fail() {
     quick_parser_check("old(X) :- human(X), X > 50.", None);
 }
 
@@ -104,7 +104,7 @@ fn test_parse_query_suffixed() {
 
 #[test]
 fn test_parse_pragma_include() {
-    quick_parser_check("@include(\"./file\").", None);
+    quick_parser_check("@include \"./file\".", None);
 }
 
 // ------------------------------------------------------------------------------------------------

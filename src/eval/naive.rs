@@ -7,10 +7,12 @@ More detailed description, with
 
 */
 
+use crate::edb::Predicate;
 use crate::error::Result;
 use crate::eval::Evaluator;
 use crate::features::FEATURE_NEGATION;
-use crate::{Error, Fact, Predicate, Program, SyntacticFragments, Term};
+use crate::idb::Term;
+use crate::{Database, Error, Program, SyntacticFragments};
 use std::collections::{HashMap, HashSet};
 
 // ------------------------------------------------------------------------------------------------
@@ -52,20 +54,22 @@ impl Default for NaiveEvaluator {
 }
 
 impl Evaluator for NaiveEvaluator {
-    fn inference(&self, from_program: &Program) -> Result<HashSet<Fact>> {
-        if from_program.is_positive() {
-            let all_inferred: HashSet<Fact> = Default::default();
-            // for the first iteration use the set of facts already known in the program.
-            let mut inferred_once: HashSet<&Fact> = from_program.facts().collect();
-            loop {
-                // for subsequent iteration only use the facts generated in the previous iteration,
-                inferred_once = self.infer_once(from_program, &all_inferred, &inferred_once)?;
-                if inferred_once.is_empty() {
-                    // nothing new may be inferred.
-                    break;
-                }
-            }
-            Ok(all_inferred)
+    fn inference(&self, program: &Program, _initial_edb: &Database) -> Result<Database> {
+        if program.is_positive() {
+            // let all_inferred: Database = Database::new();
+            // // for the first iteration use the set of facts already known in the program.
+            // let mut inferred_once: &Database = initial_edb;
+            // loop {
+            //     // for subsequent iteration only use the facts generated in the previous iteration,
+            //     let result = self.infer_once(program, &all_inferred, &inferred_once)?;
+            //     inferred_once = &result;
+            //     if inferred_once.is_empty() {
+            //         // nothing new may be inferred.
+            //         break;
+            //     }
+            // }
+            // Ok(all_inferred)
+            Ok(Default::default())
         } else {
             Err(Error::LanguageFeatureDisabled(FEATURE_NEGATION))
         }
@@ -98,12 +102,13 @@ impl NaiveEvaluator {
     //
     // † -- an _intension_ is any property or quality connoted by a word, phrase, or another symbol.
     //
+    #[allow(dead_code)]
     fn infer_once(
         &self,
         from_program: &Program,
-        _all_inferred_facts: &HashSet<Fact>,
-        _this_iteration_facts: &HashSet<&Fact>,
-    ) -> Result<HashSet<&Fact>> {
+        _all_inferred_facts: &Database,
+        _this_iteration_facts: &Database,
+    ) -> Result<Database> {
         for rule in from_program.rules() {
             for _sub_goal in rule.literals() {}
         }
@@ -126,7 +131,9 @@ impl NaiveEvaluator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Atom, Rule, Term};
+    use crate::edb::AttributeKind;
+    use crate::idb::{Atom, Variable};
+    use std::str::FromStr;
 
     #[test]
     #[ignore]
@@ -134,23 +141,23 @@ mod tests {
         // See https://en.wikipedia.org/wiki/Syllogism
 
         let mut syllogism = Program::default();
+        let p_human = Predicate::from_str("human").unwrap();
 
-        let mortal = syllogism.make_predicate_relation("mortal").unwrap();
-        let human = syllogism.make_predicate_relation("human").unwrap();
-
-        let socrates = syllogism.make_constant_string("Socrates").unwrap();
-
-        let var_x: Term = syllogism.make_term_variable("X").unwrap();
-
-        syllogism
-            .push(Fact::new_with_arguments(human.clone(), vec![socrates]))
+        let mut human = syllogism
+            .make_new_relation(p_human.clone(), [AttributeKind::String])
             .unwrap();
+        human.add(["Socrates".into()]);
+
+        syllogism.database_mut().add(human);
+
+        let var_x: Term = Variable::from_str("X").unwrap().into();
 
         syllogism
-            .push(Rule::new_with_body(
-                Atom::new(mortal, vec![var_x.clone()]),
-                vec![Atom::new(human, vec![var_x]).into()],
-            ))
+            .add_new_rule(
+                Predicate::from_str("mortal").unwrap(),
+                [var_x.clone()],
+                [Atom::new(p_human, [var_x]).into()],
+            )
             .unwrap();
 
         assert_eq!(
@@ -160,16 +167,16 @@ mortal(X) ⟵ human(X).
 "#
         );
 
-        syllogism
-            .perform_inference(&NaiveEvaluator::default())
-            .unwrap();
-
-        assert_eq!(
-            syllogism.to_string(),
-            r#"human("Socrates").
-mortal(X) ⟵ human(X).
-mortal("Socrates").
-"#
-        );
+        //         syllogism
+        //             .perform_inference(&NaiveEvaluator::default())
+        //             .unwrap();
+        //
+        //         assert_eq!(
+        //             syllogism.to_string(),
+        //             r#"human("Socrates").
+        // mortal(X) ⟵ human(X).
+        // mortal("Socrates").
+        // "#
+        //         );
     }
 }

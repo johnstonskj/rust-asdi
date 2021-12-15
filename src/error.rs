@@ -2,8 +2,9 @@
 Module containing the `Error` type.
  */
 
+use crate::edb::Predicate;
 use crate::features::Feature;
-use crate::SourceLocation;
+use crate::parse::SourceLocation;
 use std::fmt::{Display, Formatter};
 
 // ------------------------------------------------------------------------------------------------
@@ -24,6 +25,8 @@ pub enum Error {
     UnknownLanguageFeature(String),
     HeadVariablesMissingInBody(String, Option<SourceLocation>, Vec<String>),
     NegativeVariablesNotPositive(String, Option<SourceLocation>, Vec<String>),
+    RelationExists(Predicate),
+    FactDoesNotConformToSchema(Predicate, String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -59,7 +62,7 @@ impl Display for Error {
                 Error::UnknownLanguageFeature(name) =>
                     format!("unknown or unsupported language feature, '{}'", name),
                 Error::LanguageFeatureDisabled(feature) =>
-                    format!("The language feature {} has been disabled.", feature.label()),
+                    format!("The language feature {} is not enabled.", feature.label()),
                 Error::LanguageFeatureUnsupported(feature) =>
                     format!("The language feature {} is not supported by the attempted operation.", feature.label()),
                 Error::HeadVariablesMissingInBody(rule, loc, vars) =>
@@ -82,6 +85,8 @@ impl Display for Error {
                         },
                         vars.join(", ")
                     ),
+                Error::RelationExists(predicate) => format!("The relation '{}' already exists in the extensional database", predicate),
+                Error::FactDoesNotConformToSchema(predicate, terms) => format!("The fact values ({}) do not meet the schema requirements for relation '{}'", terms, predicate),
             }
         )
     }

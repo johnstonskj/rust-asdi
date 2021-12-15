@@ -8,9 +8,9 @@ More detailed description, with
 */
 
 use crate::{
-    DisplayExt, Environment, CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN,
-    DEFAULT_LANGUAGE_NAME, DISJUNCTION_UNICODE_SYMBOL, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
-    PRAGMA_FEATURE_DISJUNCTION, PRAGMA_FEATURE_NEGATION, PRAGMA_FEATURE_OPERATORS,
+    CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DEFAULT_LANGUAGE_NAME,
+    DISJUNCTION_UNICODE_SYMBOL, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
+    PRAGMA_FEATURE_COMPARISONS, PRAGMA_FEATURE_DISJUNCTION, PRAGMA_FEATURE_NEGATION,
     RESERVED_PRAGMA_FEATURE, RESERVED_PREFIX,
 };
 use std::fmt::{Display, Formatter};
@@ -35,8 +35,8 @@ pub const FEATURE_NEGATION: Feature = Feature {
     bit: 1,
 };
 
-pub const FEATURE_OPERATORS: Feature = Feature {
-    label: PRAGMA_FEATURE_OPERATORS,
+pub const FEATURE_COMPARISONS: Feature = Feature {
+    label: PRAGMA_FEATURE_COMPARISONS,
     symbol: OPERATOR_ASCII_EQUAL,
     bit: 2,
 };
@@ -47,8 +47,11 @@ pub const FEATURE_DISJUNCTION: Feature = Feature {
     bit: 4,
 };
 
-pub const ALL_FEATURES: &[&Feature] =
-    &[&FEATURE_NEGATION, &FEATURE_OPERATORS, &FEATURE_DISJUNCTION];
+pub const ALL_FEATURES: &[&Feature] = &[
+    &FEATURE_NEGATION,
+    &FEATURE_COMPARISONS,
+    &FEATURE_DISJUNCTION,
+];
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
@@ -109,43 +112,28 @@ impl From<&[Feature]> for FeatureSet {
 
 impl Display for FeatureSet {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.is_default() {
-            write!(f, "{}", DEFAULT_LANGUAGE_NAME)
-        } else {
-            write!(
-                f,
-                "{}{}{}{}",
-                CHAR_LEFT_PAREN,
-                self.features()
-                    .map(|feat| feat.symbol().to_string())
-                    .collect::<String>(),
-                CHAR_RIGHT_PAREN,
-                DEFAULT_LANGUAGE_NAME,
-            )
-        }
-    }
-}
+        write!(
+            f,
+            "{}",
+            if !self.is_default() {
+                let features = self
+                    .features()
+                    .map(|feat| feat.label().to_string())
+                    .collect::<Vec<String>>();
 
-impl DisplayExt for FeatureSet {
-    fn to_extern_string(&self, _: &Environment) -> String {
-        if !self.is_default() {
-            let features = self
-                .features()
-                .map(|feat| feat.label().to_string())
-                .collect::<Vec<String>>();
-
-            format!(
-                "{}{}{}{}{}{}",
-                RESERVED_PREFIX,
-                RESERVED_PRAGMA_FEATURE,
-                CHAR_LEFT_PAREN,
-                features.join(&format!("{} ", CHAR_COMMA)),
-                CHAR_RIGHT_PAREN,
-                CHAR_PERIOD,
-            )
-        } else {
-            String::new()
-        }
+                format!(
+                    "{}{}{}{}{}{}",
+                    RESERVED_PREFIX,
+                    RESERVED_PRAGMA_FEATURE,
+                    CHAR_LEFT_PAREN,
+                    features.join(&format!("{} ", CHAR_COMMA)),
+                    CHAR_RIGHT_PAREN,
+                    CHAR_PERIOD,
+                )
+            } else {
+                String::new()
+            }
+        )
     }
 }
 
@@ -174,6 +162,22 @@ impl FeatureSet {
             .filter(|feat| self.supports(feat))
             .cloned()
     }
+
+    pub fn label(&self) -> String {
+        if self.is_default() {
+            DEFAULT_LANGUAGE_NAME.to_owned()
+        } else {
+            format!(
+                "{}{}{}{}",
+                CHAR_LEFT_PAREN,
+                self.features()
+                    .map(|feat| feat.symbol().to_string())
+                    .collect::<String>(),
+                CHAR_RIGHT_PAREN,
+                DEFAULT_LANGUAGE_NAME,
+            )
+        }
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -193,40 +197,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_display() {
-        assert_eq!(FeatureSet::default().to_string(), "Datalog");
+    fn test_to_label() {
+        assert_eq!(FeatureSet::default().label(), "Datalog");
         assert_eq!(
             FeatureSet::default()
                 .add_support_for(&FEATURE_NEGATION)
-                .to_string(),
+                .label(),
             "(￢)Datalog"
         );
         assert_eq!(
             FeatureSet::default()
                 .add_support_for(&FEATURE_NEGATION)
                 .add_support_for(&FEATURE_DISJUNCTION)
-                .to_string(),
+                .label(),
             "(￢⋁)Datalog"
         );
     }
 
     #[test]
-    fn test_extern_string() {
-        assert_eq!(
-            FeatureSet::default().to_extern_string(&Environment::default()),
-            ""
-        );
+    fn test_to_string() {
+        assert_eq!(FeatureSet::default().to_string(), "");
         assert_eq!(
             FeatureSet::default()
                 .add_support_for(&FEATURE_NEGATION)
-                .to_extern_string(&Environment::default()),
+                .to_string(),
             "@feature(negation)."
         );
         assert_eq!(
             FeatureSet::default()
                 .add_support_for(&FEATURE_NEGATION)
                 .add_support_for(&FEATURE_DISJUNCTION)
-                .to_extern_string(&Environment::default()),
+                .to_string(),
             "@feature(negation, disjunction)."
         );
     }

@@ -3,28 +3,19 @@
 // ------------------------------------------------------------------------------------------------
 
 program = {
-    SOI ~ ( statement | query )* ~ EOI
+    SOI ~ pragma* ~ ( rule | fact | query )* ~ EOI
 }
 
 // ------------------------------------------------------------------------------------------------
 // Intermediate definitions
 // ------------------------------------------------------------------------------------------------
 
-statement = {
-    ( rule | fact | pragma ) ~ DOT
-}
-
-/* a fact is the same structure as an atom without assumptions, and therefore without variables */
 fact = {
-    predicate ~ (LEFT_PAREN ~ constant_list ~ RIGHT_PAREN)?
+    predicate ~ (LEFT_PAREN ~ constant_list ~ RIGHT_PAREN)? ~ DOT
 }
 
 rule = {
-    atom ~ ( rule_separator ~ literal_list )?
-}
-
-pragma = {
-    AT_SIGN ~ identifier ~ ( LEFT_PAREN ~ constant_list? ~ RIGHT_PAREN )?
+    atom ~ ( rule_separator ~ literal_list )? ~ DOT
 }
 
 query = {
@@ -37,15 +28,15 @@ atom = {
 }
 
 literal = {
-    negation? ~ ( atom | expression )
+    negation? ~ ( atom | comparison )
 }
 
 literal_list = _{
     literal ~ ( conjunction ~ literal )*
 }
 
-expression = {
-    term ~ ( operator ~ term )?
+comparison = {
+    term ~ comparison_operator ~ term ?
 }
 
 term = {
@@ -56,10 +47,6 @@ term_list = _{
     term ~ ( COMMA ~ term )*
 }
 
-predicate = {
-    relation | string
-}
-
 constant = {
     identifier | string | number | boolean
 }
@@ -68,7 +55,7 @@ constant_list = _{
     constant ~ ( COMMA ~ constant)*
 }
 
-identifier = @{
+predicate = @{
     LOWERCASE_LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
 }
 
@@ -76,8 +63,96 @@ variable = @{
     ( UPPERCASE_LETTER | UNDERSCORE ) ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
 }
 
-relation = @{
+identifier = @{
     ( LETTER | UNDERSCORE ) ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
+}
+
+// ------------------------------------------------------------------------------------------------
+// Pragmas
+// ------------------------------------------------------------------------------------------------
+
+pragma = {
+    AT_SIGN ~ (decl_relation | decl_feature | decl_include | decl_input | decl_output) ~ DOT
+}
+
+decl_relation = {
+    pkw_declare ~ predicate ~ LEFT_PAREN ~ attribute_list ~ RIGHT_PAREN
+}
+
+attribute_list = _{
+    attribute ~ (COMMA ~ attribute)*
+}
+
+attribute = {
+    ( predicate ~ ":" )? ~ ( tid_string | tid_integer | tid_boolean )
+}
+
+decl_feature = {
+    pkw_feature ~ LEFT_PAREN ~ feature_list ~ RIGHT_PAREN
+}
+
+feature_list = _{
+    feature_id ~ ( COMMA ~ feature_id )*
+}
+
+feature_id = _{
+    fid_negation | fid_comparisons | fid_disjunction
+}
+
+decl_include = {
+    pkw_include ~ string
+}
+
+decl_input = {
+    pkw_input ~ predicate ~ string
+}
+
+decl_output = {
+    pkw_output ~ predicate ~ string
+}
+
+pkw_declare = _{
+    "declare"
+}
+
+pkw_feature = _{
+    "feature"
+}
+
+pkw_include = _{
+    "include"
+}
+
+pkw_input = _{
+    "input"
+}
+
+pkw_output = _{
+    "output"
+}
+
+tid_string = {
+    "string"
+}
+
+tid_integer = {
+    "integer"
+}
+
+tid_boolean = {
+    "boolean"
+}
+
+fid_negation = {
+    "negation"
+}
+
+fid_comparisons = {
+    "comparisons"
+}
+
+fid_disjunction = {
+    "disjunction"
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -130,7 +205,7 @@ query_prefix = _{
     "?-"
 }
 
-operator = {
+comparison_operator = {
     LESS_THAN | less_or_equal | GREATER_THAN | greater_or_equal | EQUALS | not_equal
 }
 

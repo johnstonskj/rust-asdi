@@ -7,17 +7,16 @@ More detailed description, with
 
 */
 
+use crate::edb::{Constant, Predicate};
 use crate::error::{Error, Result};
-use crate::features::{FeatureSet, FEATURE_NEGATION};
-use crate::{
-    Atom, ComparisonOperator, Constant, Fact, Literal, LiteralExpression, Pragma, Predicate,
-    Program, Query, Rule as DlRule, SourceLocation, Term, RESERVED_BOOLEAN_TRUE, RESERVED_PREFIX,
-    TYPE_NAME_CONST_INTEGER,
-};
+use crate::features::{FeatureSet, FEATURE_COMPARISONS, FEATURE_DISJUNCTION, FEATURE_NEGATION};
+use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Term, Variable};
+use crate::syntax::{RESERVED_BOOLEAN_TRUE, RESERVED_PREFIX, TYPE_NAME_CONST_INTEGER};
+use crate::{Attribute, AttributeKind, Program, Query, Rule as DlRule};
 use pest::iterators::{Pair, Pairs};
 use pest::{Parser, Span};
 use pest_derive::Parser;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display, Formatter};
 use std::fs::read_to_string;
 use std::path::Path;
 use std::str::FromStr;
@@ -25,10 +24,6 @@ use std::str::FromStr;
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
-
-#[derive(Parser)]
-#[grammar = "parse/datalog.pest"]
-struct Datalog;
 
 #[derive(Clone, Debug)]
 pub struct Parsed<T>
@@ -39,9 +34,19 @@ where
     rest: Option<String>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SourceLocation {
+    line: usize,
+    column: usize,
+}
+
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
 // ------------------------------------------------------------------------------------------------
+
+#[derive(Parser)]
+#[grammar = "parse/datalog.pest"]
+struct Datalog;
 
 // ------------------------------------------------------------------------------------------------
 // Private Macros
@@ -75,19 +80,6 @@ pub fn parse_str_with_features(source: &str, features: FeatureSet) -> Result<Par
 // ------------------------------------------------------------------------------------------------
 // Implementations
 // ------------------------------------------------------------------------------------------------
-
-fn make_parsed<T>(parsed: T, original_str: &str, matched_str: &str) -> Parsed<T>
-where
-    T: Clone + Debug,
-{
-    let original_len = original_str.len();
-    let matched_len = matched_str.len();
-    if matched_len < original_len {
-        Parsed::new_with_more(parsed, original_str[matched_len..original_len].to_string())
-    } else {
-        Parsed::new(parsed)
-    }
-}
 
 impl<T> Parsed<T>
 where
@@ -129,6 +121,33 @@ where
 }
 
 // ------------------------------------------------------------------------------------------------
+
+impl From<(usize, usize)> for SourceLocation {
+    fn from(v: (usize, usize)) -> Self {
+        Self {
+            line: v.0,
+            column: v.1,
+        }
+    }
+}
+
+impl Display for SourceLocation {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[line {}, column {}]", self.line, self.column)
+    }
+}
+
+impl SourceLocation {
+    pub fn line(&self) -> usize {
+        self.line
+    }
+
+    pub fn column(&self) -> usize {
+        self.column
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
 // Parser Macros
 // ------------------------------------------------------------------------------------------------
 
@@ -153,15 +172,29 @@ macro_rules! match_then_any {
 macro_rules! match_any {
     (( $input_pairs:expr, $features:expr ) => $program:expr ; $($rule:ident => $call:expr),+ $(; $EOI:ident)?) => {
         for inner_pair in $input_pairs {
-            match inner_pair.as_rule() {
+            match_one!(
+                ( inner_pair, $features ) => $program ;
                 $(
-                    Rule::$rule => $call(inner_pair.into_inner(), $program, $features)?,
-                )+
+                    $rule => $call
+                ),+
                 $(
-                    Rule::$EOI => {}
+                    ; $EOI
                 )?
-                _ => unreachable!(inner_pair.as_str()),
-            }
+            );
+        }
+    };
+}
+
+macro_rules! match_one {
+    (( $input_pair:expr, $features:expr ) => $program:expr ; $($rule:ident => $call:expr),+ $(; $EOI:ident)?) => {
+        match $input_pair.as_rule() {
+            $(
+                Rule::$rule => $call($input_pair.into_inner(), $program, $features)?,
+            )+
+            $(
+                Rule::$EOI => {}
+            )?
+            _ => unreachable!($input_pair.as_str()),
         }
     };
 }
@@ -184,13 +217,30 @@ macro_rules! pest_error {
 // Private Functions
 // ------------------------------------------------------------------------------------------------
 
+fn make_parsed<T>(parsed: T, original_str: &str, matched_str: &str) -> Parsed<T>
+where
+    T: Clone + Debug,
+{
+    let original_len = original_str.len();
+    let matched_len = matched_str.len();
+    if matched_len < original_len {
+        Parsed::new_with_more(parsed, original_str[matched_len..original_len].to_string())
+    } else {
+        Parsed::new(parsed)
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
 fn parse_program(input_pair: Pair<'_, Rule>, features: FeatureSet) -> Result<Program> {
-    let mut program: Program = features.into();
+    let mut program: Program = Program::new_with_features(features);
 
     match_then_any! {
         (input_pair, features) => &mut program ;
         program ;
-        statement => parse_statement,
+        pragma => parse_pragma,
+        fact => parse_fact,
+        rule => parse_rule,
         query => parse_query ;
         EOI
     }
@@ -200,20 +250,6 @@ fn parse_program(input_pair: Pair<'_, Rule>, features: FeatureSet) -> Result<Pro
 
 // ------------------------------------------------------------------------------------------------
 
-fn parse_statement(
-    input_pairs: Pairs<'_, Rule>,
-    program: &mut Program,
-    features: FeatureSet,
-) -> Result<()> {
-    match_any! {
-        (input_pairs, features) => program ;
-        fact => parse_fact,
-        rule => parse_rule,
-        pragma => parse_pragma
-    }
-    Ok(())
-}
-
 fn parse_fact(
     mut input_pairs: Pairs<'_, Rule>,
     program: &mut Program,
@@ -221,21 +257,25 @@ fn parse_fact(
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
     let predicate = match first.as_rule() {
-        Rule::predicate => parse_predicate(first.into_inner(), program, features)?,
+        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
         _ => unreachable!(first.as_str()),
     };
 
-    let mut fact = Fact::new(predicate);
-
+    let mut attributes = Vec::new();
     for inner_pair in input_pairs {
         let constant = match inner_pair.as_rule() {
             Rule::constant => parse_constant(inner_pair.into_inner(), program, features)?,
             _ => unreachable!(inner_pair.as_str()),
         };
-        fact.add_argument(constant);
+        attributes.push(constant);
     }
 
-    program.push(fact)?;
+    let edb = program.database_mut();
+    if let Some(relation) = edb.relation_mut(&predicate) {
+        relation.add(attributes)
+    } else {
+        edb.make_new_relation_from(predicate, &attributes)?;
+    }
 
     Ok(())
 }
@@ -246,6 +286,7 @@ fn parse_rule(
     features: FeatureSet,
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
+    let just_in_case = first.as_span().clone();
     let head = match first.as_rule() {
         Rule::atom => parse_atom(first.into_inner(), program, features)?,
         _ => unreachable!(first.as_str()),
@@ -260,33 +301,172 @@ fn parse_rule(
         body.push(one);
     }
 
-    program.push(DlRule::new_with_body(head, body))?;
+    let rule = DlRule::new_with_body(head, body);
+    if let Err(e) = rule.check_well_formed(&features) {
+        Err(pest_error!(just_in_case, e.to_string()))
+    } else {
+        program.add_rule(rule)?;
+        Ok(())
+    }
+}
+
+fn parse_pragma(
+    input_pairs: Pairs<'_, Rule>,
+    program: &mut Program,
+    features: FeatureSet,
+) -> Result<()> {
+    let inner_pair = input_pairs.into_iter().next().unwrap();
+
+    match_one! {
+        (inner_pair, features) => program ;
+        decl_relation => parse_decl_relation,
+        decl_feature => parse_decl_feature,
+        decl_include => parse_decl_include,
+        decl_input => parse_decl_input,
+        decl_output => parse_decl_output
+    }
 
     Ok(())
 }
 
-fn parse_pragma(
+fn parse_decl_relation(
     mut input_pairs: Pairs<'_, Rule>,
     program: &mut Program,
-    features: FeatureSet,
+    _features: FeatureSet,
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
-    let identifier = match first.as_rule() {
-        Rule::identifier => first.as_str(),
+    let predicate = match first.as_rule() {
+        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
         _ => unreachable!(first.as_str()),
     };
 
-    let mut arguments: Vec<Constant> = Default::default();
+    let mut attributes: Vec<Attribute> = Default::default();
     for inner_pair in input_pairs {
-        let constant = match inner_pair.as_rule() {
-            Rule::constant => parse_constant(inner_pair.into_inner(), program, features)?,
-            _ => unreachable!(inner_pair.as_str()),
-        };
-        arguments.push(constant);
+        match inner_pair.as_rule() {
+            Rule::attribute => attributes.push(parse_attribute(
+                inner_pair.into_inner(),
+                program,
+                _features,
+            )?),
+            _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
+        }
     }
 
-    let pragma = Pragma::try_from(identifier, arguments, &program.environment()).unwrap();
-    program.push(pragma)?;
+    let edb = program.database_mut();
+    edb.make_new_relation(predicate, attributes)?;
+
+    Ok(())
+}
+
+fn parse_attribute(
+    mut input_pairs: Pairs<'_, Rule>,
+    _program: &mut Program,
+    _: FeatureSet,
+) -> Result<Attribute> {
+    for inner_pair in input_pairs {
+        let mut name = None;
+        match inner_pair.as_rule() {
+            Rule::predicate => name = Some(Predicate::from_str_unchecked(inner_pair.as_str())),
+            Rule::tid_string => {
+                return Ok(Attribute::new_inner(name, AttributeKind::String));
+            }
+            Rule::tid_integer => {
+                return Ok(Attribute::new_inner(name, AttributeKind::Integer));
+            }
+            Rule::tid_boolean => {
+                return Ok(Attribute::new_inner(name, AttributeKind::Boolean));
+            }
+            _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
+        }
+    }
+    unreachable!()
+}
+
+fn parse_decl_feature(
+    input_pairs: Pairs<'_, Rule>,
+    program: &mut Program,
+    _features: FeatureSet,
+) -> Result<()> {
+    for inner_pair in input_pairs {
+        match inner_pair.as_rule() {
+            Rule::fid_negation => program.features_mut().add_support_for(&FEATURE_NEGATION),
+            Rule::fid_comparisons => program.features_mut().add_support_for(&FEATURE_COMPARISONS),
+            Rule::fid_disjunction => program.features_mut().add_support_for(&FEATURE_DISJUNCTION),
+            _ => unreachable!(inner_pair.as_str()),
+        };
+    }
+
+    Ok(())
+}
+
+fn parse_decl_include(
+    mut input_pairs: Pairs<'_, Rule>,
+    _: &mut Program,
+    _: FeatureSet,
+) -> Result<()> {
+    let first = input_pairs.next().unwrap();
+    let file_name = match first.as_rule() {
+        Rule::string => first.as_str().to_string(),
+        _ => unreachable!(first.as_str()),
+    };
+
+    if input_pairs.next().is_some() {
+        unreachable!(input_pairs.as_str());
+    } else {
+        // TODO: include and parse `file_name`
+    }
+
+    Ok(())
+}
+
+fn parse_decl_input(
+    mut input_pairs: Pairs<'_, Rule>,
+    _: &mut Program,
+    _: FeatureSet,
+) -> Result<()> {
+    let first = input_pairs.next().unwrap();
+    let predicate = match first.as_rule() {
+        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
+        _ => unreachable!(first.as_str()),
+    };
+
+    let next = input_pairs.next().unwrap();
+    let file_name = match next.as_rule() {
+        Rule::string => next.as_str().to_string(),
+        _ => unreachable!(next.as_str()),
+    };
+
+    if input_pairs.next().is_some() {
+        unreachable!(input_pairs.as_str());
+    } else {
+        // TODO: input data for `predicate` relation from `file_name`
+    }
+
+    Ok(())
+}
+
+fn parse_decl_output(
+    mut input_pairs: Pairs<'_, Rule>,
+    _: &mut Program,
+    _: FeatureSet,
+) -> Result<()> {
+    let first = input_pairs.next().unwrap();
+    let predicate = match first.as_rule() {
+        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
+        _ => unreachable!(first.as_str()),
+    };
+
+    let next = input_pairs.next().unwrap();
+    let file_name = match next.as_rule() {
+        Rule::string => next.as_str().to_string(),
+        _ => unreachable!(next.as_str()),
+    };
+
+    if input_pairs.next().is_some() {
+        unreachable!(input_pairs.as_str());
+    } else {
+        // TODO: output data for `predicate` relation into `file_name`
+    }
 
     Ok(())
 }
@@ -305,7 +485,7 @@ fn parse_query(
     if input_pairs.next().is_some() {
         unreachable!(input_pairs.as_str());
     } else {
-        program.push(Query::from(atom))?;
+        program.add_query(Query::from(atom));
     }
 
     Ok(())
@@ -338,12 +518,12 @@ fn parse_literal(
                 Literal::atom(atom)
             }
         }
-        Rule::expression => {
-            let expression = parse_expression(next.into_inner(), program, features)?;
+        Rule::comparison => {
+            let comparison = parse_comparison(next.into_inner(), program, features)?;
             if negative {
-                Literal::negative_expression(expression)
+                Literal::negative_comparison(comparison)
             } else {
-                Literal::expression(expression)
+                Literal::comparison(comparison)
             }
         }
         _ => unreachable!(next.as_str()),
@@ -358,7 +538,7 @@ fn parse_atom(
     let first = input_pairs.next().unwrap();
     let location = pair_to_src_location(&first);
     let predicate = match first.as_rule() {
-        Rule::predicate => parse_predicate(first.into_inner(), program, features)?,
+        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
         _ => unreachable!(first.as_str()),
     };
 
@@ -371,25 +551,29 @@ fn parse_atom(
         terms.push(term);
     }
 
-    Ok(Atom::new_at_location(predicate, terms, location))
+    Ok(Atom::new_at_location(predicate, &terms, location))
 }
 
-fn parse_expression(
+fn parse_comparison(
     mut input_pairs: Pairs<'_, Rule>,
     program: &mut Program,
     _features: FeatureSet,
-) -> Result<LiteralExpression> {
-    let next = input_pairs.next().unwrap();
-    let term = match next.as_rule() {
-        Rule::term => parse_term(next.into_inner(), program, _features)?,
-        _ => unreachable!(next.as_str()),
-    };
+) -> Result<Comparison> {
+    if !_features.supports(&FEATURE_COMPARISONS) {
+        Err(pest_error!(
+            input_pairs.into_iter().next().unwrap().as_span(),
+            Error::LanguageFeatureDisabled(FEATURE_COMPARISONS).to_string()
+        ))
+    } else {
+        let next = input_pairs.next().unwrap();
+        let term = match next.as_rule() {
+            Rule::term => parse_term(next.into_inner(), program, _features)?,
+            _ => unreachable!(next.as_str()),
+        };
 
-    let next = input_pairs.next();
-
-    if let Some(next) = next {
+        let next = input_pairs.next().unwrap();
         let op = match next.as_rule() {
-            Rule::operator => ComparisonOperator::from_str(next.as_str())?,
+            Rule::comparison_operator => ComparisonOperator::from_str(next.as_str())?,
             _ => unreachable!(next.as_str()),
         };
 
@@ -399,40 +583,37 @@ fn parse_expression(
             _ => unreachable!(next.as_str()),
         };
 
-        Ok(LiteralExpression::new(term, op, right))
-    } else {
-        Ok(LiteralExpression::term(term))
+        Ok(Comparison::new(term, op, right))
     }
 }
-
-fn parse_predicate(
-    mut input_pairs: Pairs<'_, Rule>,
-    program: &mut Program,
-    _features: FeatureSet,
-) -> Result<Predicate> {
-    let first = input_pairs.next().unwrap();
-    let value = match first.as_rule() {
-        Rule::relation => program.make_predicate_relation(first.as_str())?,
-        Rule::string => program.make_predicate_string(first.as_str())?,
-        _ => unreachable!(first.as_str()),
-    };
-
-    if input_pairs.next().is_some() {
-        unreachable!(input_pairs.as_str())
-    }
-
-    Ok(value)
-}
+//
+// fn parse_predicate(
+//     mut input_pairs: Pairs<'_, Rule>,
+//     _program: &mut Program,
+//     _features: FeatureSet,
+// ) -> Result<Predicate> {
+//     let first = input_pairs.next().unwrap();
+//     let value = match first.as_rule() {
+//         Rule::predicate => Predicate::from_str(first.as_str())?,
+//         _ => unreachable!(first.as_str()),
+//     };
+//
+//     if input_pairs.next().is_some() {
+//         unreachable!(input_pairs.as_str())
+//     }
+//
+//     Ok(value)
+// }
 
 fn parse_constant(
     mut input_pairs: Pairs<'_, Rule>,
-    program: &mut Program,
+    _program: &mut Program,
     _features: FeatureSet,
 ) -> Result<Constant> {
     let first = input_pairs.next().unwrap();
     let value = match first.as_rule() {
-        Rule::identifier => program.make_constant_identifier(first.as_str())?,
-        Rule::string => program.make_constant_string(first.as_str())?,
+        Rule::identifier => Constant::String(first.as_str().to_string()),
+        Rule::string => Constant::String(first.as_str().to_string()),
         Rule::number => {
             // if first.as_str().contains('.') {
             //     f64::from_str(first.as_str())
@@ -474,7 +655,7 @@ fn parse_term(
 ) -> Result<Term> {
     let first = input_pairs.next().unwrap();
     let value = match first.as_rule() {
-        Rule::variable => program.make_term_variable(first.as_str())?,
+        Rule::variable => Variable::from_str(first.as_str())?.into(),
         Rule::constant => Term::Constant(parse_constant(first.into_inner(), program, features)?),
         _ => unreachable!(first.as_str()),
     };

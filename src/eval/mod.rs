@@ -7,9 +7,9 @@ More detailed description, with
 
 */
 
+use crate::edb::Constant;
 use crate::error::Result;
-use crate::{Fact, Program, Query, Term};
-use std::collections::HashSet;
+use crate::{Database, Program, Query};
 use std::fmt::Debug;
 
 // ------------------------------------------------------------------------------------------------
@@ -17,27 +17,18 @@ use std::fmt::Debug;
 // ------------------------------------------------------------------------------------------------
 
 pub trait Evaluator {
-    fn inference(&self, from_program: &Program) -> Result<HashSet<Fact>>;
+    fn inference(&self, program: &Program, database: &Database) -> Result<Database>;
 }
 
 pub trait QueryEvaluator {
-    fn evaluate(&self, query: &Query, in_program: &Program) -> Result<Results> {
-        self.evaluate_with_facts(query, in_program, Default::default())
-    }
-
-    fn evaluate_with_facts(
-        &self,
-        _query: &Query,
-        _in_program: &Program,
-        _and_facts: HashSet<Fact>,
-    ) -> Result<Results>;
+    fn evaluate(&self, query: &Query, program: &Program, database: &Database) -> Result<Results>;
 }
 
 #[derive(Debug)]
 pub enum Results {
     None,
-    Singular(Term),
-    Tabular(Vec<Vec<Term>>),
+    Singular(Constant),
+    Tabular(Vec<Vec<Constant>>),
 }
 
 // ------------------------------------------------------------------------------------------------

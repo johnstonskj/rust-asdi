@@ -30,11 +30,14 @@ pub(crate) const RESERVED_PREFIX: &str = "@";
 pub(crate) const RESERVED_BOOLEAN_TRUE: &str = "true";
 pub(crate) const RESERVED_BOOLEAN_FALSE: &str = "false";
 
-pub(crate) const RESERVED_PRAGMA_INCLUDE: &str = "include";
+pub(crate) const RESERVED_PRAGMA_DECLARE: &str = "declare";
 pub(crate) const RESERVED_PRAGMA_FEATURE: &str = "feature";
+pub(crate) const RESERVED_PRAGMA_INCLUDE: &str = "include";
+pub(crate) const RESERVED_PRAGMA_INPUT: &str = "input";
+pub(crate) const RESERVED_PRAGMA_OUTPUT: &str = "output";
 
 pub(crate) const PRAGMA_FEATURE_NEGATION: &str = "negation";
-pub(crate) const PRAGMA_FEATURE_OPERATORS: &str = "operators";
+pub(crate) const PRAGMA_FEATURE_COMPARISONS: &str = "comparisons";
 pub(crate) const PRAGMA_FEATURE_DISJUNCTION: &str = "disjunction";
 
 // ------------------------------------------------------------------------------------------------
@@ -75,6 +78,7 @@ pub(crate) const QUERY_SUFFIX_ASCII: &str = "?";
 pub(crate) const CHAR_LEFT_PAREN: char = '(';
 pub(crate) const CHAR_RIGHT_PAREN: char = ')';
 pub(crate) const CHAR_PERIOD: char = '.';
+pub(crate) const CHAR_COLON: char = ':';
 pub(crate) const CHAR_COMMA: char = ',';
 pub(crate) const CHAR_UNDERSCORE: char = '_';
 
