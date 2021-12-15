@@ -25,6 +25,18 @@ fn test_declare_named_success() {
 }
 
 #[test]
+#[should_panic]
+fn test_declare_type_fail() {
+    quick_parser_check("@declare human (name).", None);
+}
+
+#[test]
+#[should_panic]
+fn test_declare_no_type_fail() {
+    quick_parser_check("@declare human (name:).", None);
+}
+
+#[test]
 fn test_feature_success() {
     quick_parser_check("@feature(negation, comparisons).", None);
 }

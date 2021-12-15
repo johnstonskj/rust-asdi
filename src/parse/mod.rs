@@ -358,8 +358,9 @@ fn parse_decl_relation(
     Ok(())
 }
 
+#[allow(unused_assignments)]
 fn parse_attribute(
-    mut input_pairs: Pairs<'_, Rule>,
+    input_pairs: Pairs<'_, Rule>,
     _program: &mut Program,
     _: FeatureSet,
 ) -> Result<Attribute> {
@@ -413,6 +414,7 @@ fn parse_decl_include(
     if input_pairs.next().is_some() {
         unreachable!(input_pairs.as_str());
     } else {
+        println!("Unimplemented: include and parse `{}`", file_name);
         // TODO: include and parse `file_name`
     }
 
@@ -439,6 +441,10 @@ fn parse_decl_input(
     if input_pairs.next().is_some() {
         unreachable!(input_pairs.as_str());
     } else {
+        println!(
+            "Unimplemented: input data for `{}` relation from `{}`",
+            predicate, file_name
+        );
         // TODO: input data for `predicate` relation from `file_name`
     }
 
@@ -465,6 +471,10 @@ fn parse_decl_output(
     if input_pairs.next().is_some() {
         unreachable!(input_pairs.as_str());
     } else {
+        println!(
+            "Unimplemented: output data for `{}` relation into `{}`",
+            predicate, file_name
+        );
         // TODO: output data for `predicate` relation into `file_name`
     }
 
