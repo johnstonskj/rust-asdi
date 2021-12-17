@@ -271,10 +271,15 @@ fn parse_fact(
     }
 
     let edb = program.database_mut();
+    if !edb.contains(&predicate) {
+        let relation = { edb.make_new_relation_from(predicate.clone(), &attributes)? };
+        edb.add(relation);
+    }
+
     if let Some(relation) = edb.relation_mut(&predicate) {
         relation.add(attributes)
     } else {
-        edb.make_new_relation_from(predicate, &attributes)?;
+        unreachable!()
     }
 
     Ok(())
@@ -352,8 +357,11 @@ fn parse_decl_relation(
         }
     }
 
+    println!("make new relation {} {:?}", predicate, attributes);
+
     let edb = program.database_mut();
-    edb.make_new_relation(predicate, attributes)?;
+    let relation = { edb.make_new_relation(predicate, attributes)? };
+    edb.add(relation);
 
     Ok(())
 }
@@ -495,7 +503,7 @@ fn parse_query(
     if input_pairs.next().is_some() {
         unreachable!(input_pairs.as_str());
     } else {
-        program.add_query(Query::from(atom));
+        program.add_query(Query::from(atom))?;
     }
 
     Ok(())
@@ -623,7 +631,10 @@ fn parse_constant(
     let first = input_pairs.next().unwrap();
     let value = match first.as_rule() {
         Rule::identifier => Constant::String(first.as_str().to_string()),
-        Rule::string => Constant::String(first.as_str().to_string()),
+        Rule::string => {
+            let string = first.as_str();
+            Constant::String(string[1..string.len() - 1].to_string())
+        }
         Rule::number => {
             // if first.as_str().contains('.') {
             //     f64::from_str(first.as_str())

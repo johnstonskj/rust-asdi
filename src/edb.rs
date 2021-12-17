@@ -7,11 +7,15 @@ More detailed description, with
 
 */
 
-use crate::{
-    Error, CHAR_COLON, CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
+use crate::error::{Error, Result};
+use crate::eval::{Column, Table};
+use crate::idb::Atom;
+use crate::syntax::{
+    CHAR_COLON, CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
     RESERVED_BOOLEAN_FALSE, RESERVED_BOOLEAN_TRUE, RESERVED_PRAGMA_DECLARE, RESERVED_PREFIX,
     TYPE_NAME_PREDICATE,
 };
+use crate::Term;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -23,6 +27,10 @@ use std::str::FromStr;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Database {
     relations: BTreeMap<Predicate, Relation>,
+}
+
+pub trait DbValidation {
+    fn validate(&self, against: &mut Database) -> Result<()>;
 }
 
 ///
@@ -74,7 +82,7 @@ pub enum AttributeKind {
     Boolean,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Constant {
     String(String),
     Integer(i64),
@@ -108,25 +116,36 @@ impl Default for Database {
     }
 }
 
+impl Display for Database {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        for relation in self.iter() {
+            writeln!(f, "{}", relation.to_schema_decl())?;
+        }
+        writeln!(f)?;
+
+        for relation in self.iter() {
+            if !relation.is_empty() {
+                for fact in relation.facts() {
+                    writeln!(f, "{}", fact)?;
+                }
+                writeln!(f)?;
+            }
+        }
+        Ok(())
+    }
+}
+
 impl Database {
-    // --------------------------------------------------------------------------------------------
-
-    // pub fn environment(&self) -> &Environment {
-    //     &self.environment
-    // }
-    //
-    // pub fn environment_mut(&mut self) -> &mut Environment {
-    //     &mut self.environment
-    // }
-
-    // --------------------------------------------------------------------------------------------
-
     pub fn is_empty(&self) -> bool {
         self.relations.is_empty()
     }
 
     pub fn len(&self) -> usize {
         self.relations.len()
+    }
+
+    pub fn fact_count(&self) -> usize {
+        self.iter().map(|r| r.len()).sum()
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Relation> {
@@ -142,7 +161,7 @@ impl Database {
         &mut self,
         predicate: Predicate,
         schema: V,
-    ) -> Result<Relation, Error> {
+    ) -> Result<Relation> {
         if self.relations.contains_key(&predicate) {
             Error::RelationExists(predicate).into()
         } else {
@@ -154,7 +173,7 @@ impl Database {
         &mut self,
         predicate: Predicate,
         attributes: &[Constant],
-    ) -> Result<Relation, Error> {
+    ) -> Result<Relation> {
         self.make_new_relation(
             predicate,
             attributes
@@ -182,6 +201,27 @@ impl Database {
 
     // --------------------------------------------------------------------------------------------
 
+    pub fn matches(&self, atom: &Atom) -> Table {
+        if let Some(relation) = self.relation(atom.predicate()) {
+            let results = relation.matches(atom);
+            if atom.variables().count() == 0 {
+                // if all attributes are constant it is a presence query, not a selection.
+                if results.is_empty() {
+                    Table::new_false()
+                } else {
+                    Table::new_true()
+                }
+            } else {
+                results
+            }
+        } else {
+            // TODO: Is this actually an error?
+            Table::empty()
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     pub fn clone_with_schema_only(&self) -> Self {
         Self {
             relations: self
@@ -189,6 +229,16 @@ impl Database {
                 .iter()
                 .map(|(p, r)| (p.clone(), r.clone_with_schema_only()))
                 .collect(),
+        }
+    }
+
+    pub fn merge(&mut self, other: Self) {
+        for (other_predicate, other_relation) in other.relations {
+            if let Some(relation) = self.relations.get_mut(&other_predicate) {
+                relation.merge(other_relation)
+            } else {
+                self.relations.insert(other_predicate, other_relation);
+            }
         }
     }
 }
@@ -210,6 +260,7 @@ impl Relation {
                 facts: Default::default(),
             }
         } else {
+            // TODO: propagate errors
             panic!()
         }
     }
@@ -253,25 +304,13 @@ impl Relation {
         if self.conforms(&fact) {
             self.facts.insert(fact);
         } else {
+            // TODO: propagate errors
             panic!();
         }
     }
 
     pub fn contains(&self, fact: &[Constant]) -> bool {
         self.facts.contains(fact)
-    }
-
-    // TODO: remove?
-
-    pub fn conforms(&self, fact: &[Constant]) -> bool {
-        self.schema
-            .iter()
-            .map(|a| a.kind)
-            .collect::<Vec<AttributeKind>>()
-            == fact
-                .iter()
-                .map(|c| c.kind())
-                .collect::<Vec<AttributeKind>>()
     }
 
     pub fn to_schema_decl(&self) -> String {
@@ -299,6 +338,58 @@ impl Relation {
             schema: self.schema.clone(),
             facts: Default::default(),
         }
+    }
+
+    pub fn merge(&mut self, other: Self) {
+        assert_eq!(self.predicate, other.predicate);
+        assert_eq!(self.schema, other.schema);
+        self.facts.extend(other.facts)
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    pub fn matches(&self, atom: &Atom) -> Table {
+        assert_eq!(atom.predicate(), self.predicate());
+
+        let terms: Vec<&Term> = atom.terms().collect();
+
+        Table::new_with_rows(
+            terms
+                .iter()
+                .filter_map(|t| t.as_variable())
+                .map(|v| Column::from(v.clone()))
+                .collect::<Vec<Column>>(),
+            self.facts
+                .iter()
+                .filter_map(|fact| self.terms_match(&terms, fact))
+                .collect::<Vec<Vec<Constant>>>(),
+        )
+    }
+
+    fn terms_match(&self, terms: &[&Term], fact: &[Constant]) -> Option<Vec<Constant>> {
+        if terms
+            .iter()
+            .enumerate()
+            .filter(|(_, term)| term.is_constant())
+            .all(|(i, term)| term.as_constant().unwrap() == fact.get(i).unwrap())
+        {
+            Some(fact.to_vec())
+        } else {
+            None
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    fn conforms(&self, fact: &[Constant]) -> bool {
+        self.schema
+            .iter()
+            .map(|a| a.kind)
+            .collect::<Vec<AttributeKind>>()
+            == fact
+                .iter()
+                .map(|c| c.kind())
+                .collect::<Vec<AttributeKind>>()
     }
 }
 
@@ -370,7 +461,7 @@ impl Display for AttributeKind {
 impl FromStr for AttributeKind {
     type Err = Error;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match s {
             "str" | "string" => Ok(Self::String),
             "int" | "integer" => Ok(Self::Integer),
@@ -438,6 +529,10 @@ impl Fact {
 
     pub fn values(&self) -> impl Iterator<Item = &Constant> {
         self.values.iter()
+    }
+
+    pub fn arity(&self) -> usize {
+        self.values.len()
     }
 }
 
@@ -527,7 +622,7 @@ impl Display for Predicate {
 impl FromStr for Predicate {
     type Err = Error;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         if Self::is_valid(s) {
             Ok(Self(s.to_owned()))
         } else {
@@ -571,3 +666,41 @@ impl Predicate {
 // ------------------------------------------------------------------------------------------------
 // Modules
 // ------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
+// Unit Tests
+// ------------------------------------------------------------------------------------------------
+
+#[cfg(test)]
+#[cfg(feature = "parser")]
+mod tests {
+    use crate::idb::Variable;
+    use crate::parse::parse_str;
+    use crate::{Atom, Predicate, Term};
+    use std::str::FromStr;
+
+    #[test]
+    fn test_matches() {
+        let program = parse_str(
+            r#"#@declare human(string).
+            
+human("Socrates").
+
+mortal(X) <- human(X).
+
+?- mortal("Socrates").
+"#,
+        )
+        .unwrap()
+        .into_parsed();
+
+        println!("{:#?}", program);
+        println!("{}", program.to_string());
+
+        let human = Predicate::from_str("human").unwrap();
+        let qterm = Atom::new(human, [Term::Variable(Variable::from_str("X").unwrap())]);
+        let results = program.database().matches(&qterm);
+
+        println!("{}", results);
+    }
+}

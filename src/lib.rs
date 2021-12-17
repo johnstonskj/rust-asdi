@@ -188,10 +188,11 @@ TBD
     dyn_drop,
 )]
 
-use crate::edb::{Attribute, AttributeKind, Database, Predicate, Relation};
+use crate::edb::{Attribute, AttributeKind, Database, DbValidation, Predicate, Relation};
 use crate::error::{Error, Result};
+use crate::eval::Table;
 use crate::features::FeatureSet;
-use crate::idb::{Atom, Literal, Rule, Term};
+use crate::idb::{Atom, Literal, Rule, Term, Variable};
 use crate::query::Query;
 use crate::syntax::*;
 use std::collections::HashSet;
@@ -272,17 +273,7 @@ impl Display for Program {
             writeln!(f)?;
         }
 
-        for relation in self.edb.iter() {
-            writeln!(f, "{}", relation.to_schema_decl())?;
-        }
-        writeln!(f)?;
-
-        for relation in self.edb.iter() {
-            for fact in relation.facts() {
-                writeln!(f, "{}", fact)?;
-            }
-        }
-        writeln!(f)?;
+        write!(f, "{}", self.edb)?;
 
         for rule in self.idb.iter() {
             writeln!(f, "{}", rule)?;
@@ -419,7 +410,53 @@ impl Program {
 
     pub fn add_rule(&mut self, rule: Rule) -> Result<bool> {
         rule.check_well_formed(self.features())?;
+
+        self.add_rule_relations(rule.head(), &rule);
+        rule.literals()
+            .filter_map(Literal::as_atom)
+            .for_each(|a| self.add_rule_relations(a, &rule));
+
+        rule.validate(self.database_mut())?;
         Ok(self.idb.insert(rule))
+    }
+
+    fn add_rule_relations(&mut self, atom: &Atom, rule: &Rule) {
+        if !self.edb.contains(atom.predicate()) {
+            let mut schema = Vec::with_capacity(atom.arity());
+            for term in atom.terms() {
+                match term {
+                    Term::Variable(v) => schema.push(self.infer_attribute(v, rule)),
+                    Term::Constant(c) => schema.push(Attribute::from(c.kind())),
+                }
+            }
+            // TODO: propagate errors
+            let relation = self
+                .edb
+                .make_new_relation(atom.predicate().clone(), schema)
+                .unwrap();
+            self.edb.add(relation);
+        }
+    }
+
+    fn infer_attribute(&self, variable: &Variable, rule: &Rule) -> Attribute {
+        let candidates: Vec<(&Predicate, usize)> = rule
+            .literals()
+            .filter_map(Literal::as_atom)
+            .filter_map(|a| {
+                a.terms()
+                    .enumerate()
+                    .filter_map(|(i, term)| term.as_variable().map(|var| (i, var)))
+                    .find(|(_, var)| var == &variable)
+                    .map(|(i, _)| (a.predicate(), i))
+            })
+            .collect();
+        for (predicate, i) in candidates {
+            if let Some(relation) = self.database().relation(predicate) {
+                return relation.schema().get(i).unwrap().clone();
+            }
+        }
+        // TODO: this has to be wrong, it's a multi-level search
+        panic!();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -442,11 +479,20 @@ impl Program {
         terms: T,
     ) -> Result<bool> {
         let query = self.make_new_query(predicate, terms)?;
-        Ok(self.add_query(query))
+        self.add_query(query)
     }
 
-    pub fn add_query(&mut self, query: Query) -> bool {
-        self.queries.insert(query)
+    pub fn add_query(&mut self, query: Query) -> Result<bool> {
+        query.validate(self.database_mut())?;
+        Ok(self.queries.insert(query))
+    }
+
+    pub fn eval_query(&self, query: &Query) -> Result<Table> {
+        Ok(self.database().matches(query.as_ref()))
+    }
+
+    pub fn eval_queries(&self) -> Vec<(&Query, Result<Table>)> {
+        self.queries().map(|q| (q, self.eval_query(q))).collect()
     }
 
     // --------------------------------------------------------------------------------------------

@@ -7,8 +7,11 @@ More detailed description, with
 
 */
 
+use crate::edb::{Database, DbValidation, Predicate};
+use crate::error::Result;
 use crate::idb::Atom;
-use crate::{Predicate, Term, CHAR_PERIOD, QUERY_PREFIX_ASCII};
+use crate::idb::Term;
+use crate::syntax::{CHAR_PERIOD, QUERY_PREFIX_ASCII};
 use std::fmt::{Display, Formatter};
 
 // ------------------------------------------------------------------------------------------------
@@ -62,6 +65,12 @@ impl From<Atom> for Query {
 impl AsRef<Atom> for Query {
     fn as_ref(&self) -> &Atom {
         &self.0
+    }
+}
+
+impl DbValidation for Query {
+    fn validate(&self, against: &mut Database) -> Result<()> {
+        Atom::validate(self.as_ref(), against)
     }
 }
 

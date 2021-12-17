@@ -7,11 +7,11 @@ More detailed description, with
 
 */
 
-use crate::edb::{Constant, Predicate};
+use crate::edb::{Constant, DbValidation, Predicate};
 use crate::error::Result;
 use crate::parse::SourceLocation;
 use crate::{
-    Error, FeatureSet, Relation, SyntacticFragments, CHAR_LEFT_PAREN, CHAR_PERIOD,
+    Database, Error, FeatureSet, Relation, SyntacticFragments, CHAR_LEFT_PAREN, CHAR_PERIOD,
     CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, CONJUNCTION_UNICODE_SYMBOL, EMPTY_STR,
     IMPLICATION_UNICODE_ARROW, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
     OPERATOR_ASCII_GREATER_THAN, OPERATOR_ASCII_GREATER_THAN_OR_EQUAL, OPERATOR_ASCII_LESS_THAN,
@@ -126,7 +126,7 @@ impl Display for Rule {
             "{}{}{}",
             self.head.to_string(),
             if self.body.is_empty() {
-                unreachable!()
+                unreachable!("Rule body is empty!")
             } else {
                 format!(
                     " {} {}",
@@ -173,6 +173,7 @@ impl SyntacticFragments for Rule {
     }
 
     fn is_non_recursive(&self) -> bool {
+        // TODO: this is only direct recursion, need to check for mutual recursive rules.
         let head_predicate = self.head().predicate();
         !self
             .literals()
@@ -184,6 +185,16 @@ impl SyntacticFragments for Rule {
                 }
             })
             .any(|predicate| predicate == head_predicate)
+    }
+}
+
+impl DbValidation for Rule {
+    fn validate(&self, against: &mut Database) -> Result<()> {
+        Atom::validate(self.head(), against)?;
+        for literal in self.literals() {
+            Literal::validate(literal, against)?;
+        }
+        Ok(())
     }
 }
 
@@ -381,7 +392,7 @@ impl Display for Atom {
             self.predicate,
             CHAR_LEFT_PAREN,
             if self.terms.is_empty() {
-                unreachable!()
+                unreachable!("Atom terms are empty")
             } else {
                 self.terms
                     .iter()
@@ -391,6 +402,15 @@ impl Display for Atom {
             },
             CHAR_RIGHT_PAREN,
         )
+    }
+}
+
+impl DbValidation for Atom {
+    fn validate(&self, _db: &mut Database) -> Result<()> {
+        // if !db.contains(self.predicate()) {
+        //     db.make_new_relation_from(self.predicate().clone(), )
+        // }
+        Ok(())
     }
 }
 
@@ -466,6 +486,10 @@ impl Atom {
         self.terms.iter()
     }
 
+    pub fn arity(&self) -> usize {
+        self.terms.len()
+    }
+
     pub fn variables(&self) -> impl Iterator<Item = &Variable> {
         self.terms.iter().filter_map(|t| {
             if let Term::Variable(v) = t {
@@ -507,6 +531,12 @@ impl From<Atom> for Literal {
 impl From<Comparison> for Literal {
     fn from(v: Comparison) -> Self {
         Self::comparison(v)
+    }
+}
+
+impl DbValidation for Literal {
+    fn validate(&self, against: &mut Database) -> Result<()> {
+        LiteralInner::validate(self.inner(), against)
     }
 }
 
@@ -571,8 +601,16 @@ impl Literal {
         self.inner.is_atom()
     }
 
+    pub fn as_atom(&self) -> Option<&Atom> {
+        self.inner.as_atom()
+    }
+
     pub fn is_comparison(&self) -> bool {
-        self.inner.is_expression()
+        self.inner.is_comparison()
+    }
+
+    pub fn as_comparison(&self) -> Option<&Comparison> {
+        self.inner.as_comparison()
     }
 }
 
@@ -603,13 +641,39 @@ impl From<Comparison> for LiteralInner {
     }
 }
 
+impl DbValidation for LiteralInner {
+    fn validate(&self, against: &mut Database) -> Result<()> {
+        match self {
+            LiteralInner::Atom(a) => Atom::validate(a, against),
+            LiteralInner::Comparison(_) => {
+                // TODO: not sure
+                Ok(())
+            }
+        }
+    }
+}
+
 impl LiteralInner {
     pub fn is_atom(&self) -> bool {
         matches!(self, LiteralInner::Atom(_))
     }
 
-    pub fn is_expression(&self) -> bool {
+    pub fn as_atom(&self) -> Option<&Atom> {
+        match self {
+            LiteralInner::Atom(a) => Some(a),
+            _ => None,
+        }
+    }
+
+    pub fn is_comparison(&self) -> bool {
         matches!(self, LiteralInner::Comparison(_))
+    }
+
+    pub fn as_comparison(&self) -> Option<&Comparison> {
+        match self {
+            LiteralInner::Comparison(c) => Some(c),
+            _ => None,
+        }
     }
 }
 
@@ -751,6 +815,30 @@ impl From<i64> for Term {
 impl From<bool> for Term {
     fn from(v: bool) -> Self {
         Constant::from(v).into()
+    }
+}
+
+impl Term {
+    pub fn is_variable(&self) -> bool {
+        matches!(self, Term::Variable(_))
+    }
+
+    pub fn as_variable(&self) -> Option<&Variable> {
+        match self {
+            Term::Variable(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn is_constant(&self) -> bool {
+        matches!(self, Term::Constant(_))
+    }
+
+    pub fn as_constant(&self) -> Option<&Constant> {
+        match self {
+            Term::Constant(c) => Some(c),
+            _ => None,
+        }
     }
 }
 
