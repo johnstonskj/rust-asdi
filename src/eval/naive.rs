@@ -132,19 +132,20 @@ mod tests {
 
     #[test]
     fn test_socrates() {
-        let mut program = parse_str(
-            r#"human("Socrates").
+        const PROGRAM_SOURCE: &str = r#"human("Socrates").
 human("Plato").
 
 mortal(X) <- human(X).
 
 ?- mortal("Socrates").
-"#,
-        )
-        .unwrap()
-        .into_parsed();
+"#;
+        let mut program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
+        println!("-------------------------------------------------------------------------------");
 
-        println!("{}", program);
+        print!("{}", PROGRAM_SOURCE);
+        println!("-------------------------------------------------------------------------------");
+
+        print!("{}", program);
         println!("-------------------------------------------------------------------------------");
 
         let evaluator = NaiveEvaluator::default();
@@ -153,14 +154,14 @@ mortal(X) <- human(X).
 
         program.database_mut().merge(results.unwrap());
 
-        println!("{}", program);
+        print!("{}", program);
         println!("-------------------------------------------------------------------------------");
 
         let is_socrates_mortal = program.queries().next().unwrap();
 
         let results = program.database().matches(is_socrates_mortal.as_ref());
 
-        println!("{} ==>\n{}", is_socrates_mortal, results);
+        print!("{} ==>\n{}", is_socrates_mortal, results);
         println!("-------------------------------------------------------------------------------");
 
         let all_mortals = Query::new(
@@ -170,6 +171,6 @@ mortal(X) <- human(X).
 
         let results = program.database().matches(all_mortals.as_ref());
 
-        println!("{} ==>\n{}", all_mortals, results);
+        print!("{} ==>\n{}", all_mortals, results);
     }
 }
