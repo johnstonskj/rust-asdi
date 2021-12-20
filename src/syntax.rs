@@ -22,6 +22,7 @@ pub(crate) const TYPE_NAME_CONST_STRING: &str = "String";
 pub(crate) const TYPE_NAME_CONST_INTEGER: &str = "Integer";
 pub(crate) const TYPE_NAME_CONST_FLOAT: &str = "Float";
 pub(crate) const TYPE_NAME_CONST_BOOLEAN: &str = "Boolean";
+pub(crate) const TYPE_NAME_CONST_UNKNOWN: &str = "?";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -39,6 +40,10 @@ pub(crate) const RESERVED_PRAGMA_OUTPUT: &str = "output";
 pub(crate) const PRAGMA_FEATURE_NEGATION: &str = "negation";
 pub(crate) const PRAGMA_FEATURE_COMPARISONS: &str = "comparisons";
 pub(crate) const PRAGMA_FEATURE_DISJUNCTION: &str = "disjunction";
+
+// ------------------------------------------------------------------------------------------------
+
+pub(crate) const COLUMN_NAME_UNKNOWN: &str = "_";
 
 // ------------------------------------------------------------------------------------------------
 

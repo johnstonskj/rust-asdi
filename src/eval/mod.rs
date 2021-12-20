@@ -189,6 +189,11 @@ impl Table {
         }
     }
 
+    pub fn extend(&mut self, other: Table) {
+        assert_eq!(self.schema, other.schema);
+        self.rows.extend(other.rows);
+    }
+
     // --------------------------------------------------------------------------------------------
 
     pub fn join_all<V: Into<Vec<Self>>>(tables: V) -> Self {
@@ -299,9 +304,7 @@ impl Schema {
             .filter_map(|(i, c)| c.name().map(|var| (var.clone(), i)))
             .collect();
 
-        let prior = variables.len();
         let variables = BTreeMap::from_iter(variables);
-        assert_eq!(prior, variables.len());
 
         Self { columns, variables }
     }
@@ -349,7 +352,11 @@ impl Schema {
 
     pub fn variable_union(&self, other: &Self) -> Vec<Variable> {
         let mut all: Vec<Variable> = self.variables().cloned().collect();
-        all.extend(other.variables().cloned());
+        for var in other.variables() {
+            if !all.contains(var) {
+                all.push(var.clone());
+            }
+        }
         all
     }
 
@@ -388,15 +395,6 @@ impl Display for Column {
     }
 }
 
-impl Default for Column {
-    fn default() -> Self {
-        Self {
-            name: None,
-            kind: None,
-        }
-    }
-}
-
 impl From<Variable> for Column {
     fn from(v: Variable) -> Self {
         Self {
@@ -420,6 +418,13 @@ impl Column {
         Self {
             name: Some(name),
             kind: Some(kind),
+        }
+    }
+
+    pub fn unknown() -> Self {
+        Self {
+            name: None,
+            kind: None,
         }
     }
 

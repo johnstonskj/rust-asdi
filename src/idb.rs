@@ -431,7 +431,7 @@ impl Atom {
         assert_eq!(terms.len(), schema.len());
         for (i, t) in terms.iter().enumerate() {
             if let Term::Constant(c) = t {
-                if c.kind() != schema.get(i).unwrap().kind() {
+                if c.kind() != schema.get(i).unwrap().kind().unwrap() {
                     return Error::FactDoesNotConformToSchema(
                         relation.predicate().clone(),
                         terms

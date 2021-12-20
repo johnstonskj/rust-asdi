@@ -15,7 +15,8 @@ fact = {
 }
 
 rule = {
-    atom ~ ( rule_separator ~ literal_list )? ~ DOT
+    // FEATURE: disjunction
+    atom ~ ( disjunction ~ atom )* ~ ( rule_separator ~ literal_list )? ~ DOT
 }
 
 query = {
@@ -28,6 +29,8 @@ atom = {
 }
 
 literal = {
+    // FEATURE: negation
+    // FEATURE: comparisons
     negation? ~ ( atom | comparison )
 }
 
@@ -60,11 +63,11 @@ predicate = @{
 }
 
 variable = @{
-    ( UPPERCASE_LETTER | UNDERSCORE ) ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
+    UNDERSCORE | ( UPPERCASE_LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )* )
 }
 
 identifier = @{
-    ( LETTER | UNDERSCORE ) ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
+    LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -197,7 +200,7 @@ conjunction = _{
     COMMA | UC_LOGICAL_AND | AMPERSAND | "AND"
 }
 
-disjunction = _{
+disjunction = {
     UC_LOGICAL_OR | VERTICAL_BAR | "OR"
 }
 

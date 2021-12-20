@@ -290,10 +290,17 @@ fn parse_rule(
     program: &mut Program,
     features: FeatureSet,
 ) -> Result<()> {
+    // TODO: disjunction requires a more complex head!
     let first = input_pairs.next().unwrap();
     let just_in_case = first.as_span().clone();
     let head = match first.as_rule() {
         Rule::atom => parse_atom(first.into_inner(), program, features)?,
+        Rule::disjunction => {
+            return Err(pest_error!(
+                first.as_span(),
+                Error::LanguageFeatureDisabled(FEATURE_DISJUNCTION).to_string()
+            ))
+        }
         _ => unreachable!(first.as_str()),
     };
 
@@ -356,8 +363,6 @@ fn parse_decl_relation(
             _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
         }
     }
-
-    println!("make new relation {} {:?}", predicate, attributes);
 
     let edb = program.database_mut();
     let relation = { edb.make_new_relation(predicate, attributes)? };
@@ -521,7 +526,7 @@ fn parse_literal(
     if negative && !features.supports(&FEATURE_NEGATION) {
         return Err(pest_error!(
             next.as_span(),
-            "The Language feature 'negation' is disabled"
+            Error::LanguageFeatureDisabled(FEATURE_NEGATION).to_string()
         ));
     } else if negative {
         next = input_pairs.next().unwrap();

@@ -455,8 +455,7 @@ impl Program {
                 return relation.schema().get(i).unwrap().clone();
             }
         }
-        // TODO: this has to be wrong, it's a multi-level search
-        panic!();
+        Attribute::unknown()
     }
 
     // --------------------------------------------------------------------------------------------

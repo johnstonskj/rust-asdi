@@ -46,16 +46,13 @@ fn test_wikipedia_example() {
             [var_x.clone(), var_y.clone()],
             [
                 Atom::new(parent.predicate().clone(), [var_x.clone(), var_z.clone()]).into(),
-                Atom::new(ancestor.predicate().clone(), [var_z.clone(), var_y.clone()]).into(),
+                Atom::new(ancestor.predicate().clone(), [var_z, var_y]).into(),
             ],
         )
         .unwrap();
 
     ancestors
-        .add_new_query(
-            ancestor.predicate().clone(),
-            ["xerces".into(), var_x.into()],
-        )
+        .add_new_query(ancestor.predicate().clone(), ["xerces".into(), var_x])
         .unwrap();
 
     ancestors.add_relation(parent);
@@ -127,7 +124,7 @@ fn test_sourceforge_example() {
         .unwrap();
 
     let query = Query::new(path.predicate().clone(), vec![var_x, var_y]);
-    graph.add_query(query);
+    graph.add_query(query).unwrap();
 
     graph.add_relation(edge);
 
@@ -136,6 +133,7 @@ fn test_sourceforge_example() {
     assert_eq_by_line(
         &graph.to_string(),
         r#"@declare edge(string, string).
+@declare path(?, ?).
 
 edge(a, b).
 edge(c, d).
@@ -183,6 +181,7 @@ fn test_that_syllogism() {
     assert_eq_by_line(
         &syllogism.to_string(),
         r#"@declare human(string).
+@declare mortal(string).
 
 human(Socrates).
 

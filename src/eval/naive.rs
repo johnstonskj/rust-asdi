@@ -76,11 +76,14 @@ impl Evaluator for NaiveEvaluator {
                 for rule in program.rules() {
                     let matches: Vec<Table> = rule
                         .literals()
-                        .map(|l| edb.matches(l.as_atom().unwrap()))
+                        .map(|l| {
+                            let mut table = edb.matches(l.as_atom().unwrap());
+                            table.extend(new_db.matches(l.as_atom().unwrap()));
+                            table
+                        })
                         .collect();
                     if matches.iter().all(|result| !result.is_empty()) {
                         // else: not all sub-goals satisfied
-                        // TODO: is join enough?
                         let results = Table::join_all(matches);
                         for row in results.rows() {
                             let relation = new_db.relation_mut(rule.head().predicate()).unwrap();
@@ -116,61 +119,3 @@ impl Evaluator for NaiveEvaluator {
 // ------------------------------------------------------------------------------------------------
 // Modules
 // ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Unit Tests
-// ------------------------------------------------------------------------------------------------
-
-#[cfg(test)]
-#[cfg(feature = "parser")]
-mod tests {
-    use crate::eval::naive::NaiveEvaluator;
-    use crate::eval::Evaluator;
-    use crate::parse::parse_str;
-    use crate::{Predicate, Query, Variable};
-    use std::str::FromStr;
-
-    #[test]
-    fn test_socrates() {
-        const PROGRAM_SOURCE: &str = r#"human("Socrates").
-human("Plato").
-
-mortal(X) <- human(X).
-
-?- mortal("Socrates").
-"#;
-        let mut program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
-        println!("-------------------------------------------------------------------------------");
-
-        print!("{}", PROGRAM_SOURCE);
-        println!("-------------------------------------------------------------------------------");
-
-        print!("{}", program);
-        println!("-------------------------------------------------------------------------------");
-
-        let evaluator = NaiveEvaluator::default();
-
-        let results = evaluator.inference(&program, program.database());
-
-        program.database_mut().merge(results.unwrap());
-
-        print!("{}", program);
-        println!("-------------------------------------------------------------------------------");
-
-        let is_socrates_mortal = program.queries().next().unwrap();
-
-        let results = program.database().matches(is_socrates_mortal.as_ref());
-
-        print!("{} ==>\n{}", is_socrates_mortal, results);
-        println!("-------------------------------------------------------------------------------");
-
-        let all_mortals = Query::new(
-            Predicate::from_str("mortal").unwrap(),
-            [Variable::from_str("X").unwrap().into()],
-        );
-
-        let results = program.database().matches(all_mortals.as_ref());
-
-        print!("{} ==>\n{}", all_mortals, results);
-    }
-}

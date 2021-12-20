@@ -48,3 +48,21 @@ mortal(X) <- human(X).
     );
     assert!(program.is_ok());
 }
+
+#[cfg(feature = "parser")]
+#[test]
+#[ignore]
+fn test_fibonacci() {
+    // Cool, but requires expressions in atom terms.
+    let program = parse_str(
+        r#"@feature(comparisons).
+@declare fib (integer, integer).
+
+fib(0, 0).
+fib(1, 1).
+fib(n+1, x+y) :- fib(n, x), fib(n-1, y), n < 15.
+"#,
+    );
+    println!("{:#?}", program);
+    assert!(program.is_ok());
+}

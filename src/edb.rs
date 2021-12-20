@@ -15,7 +15,7 @@ use crate::syntax::{
     RESERVED_BOOLEAN_FALSE, RESERVED_BOOLEAN_TRUE, RESERVED_PRAGMA_DECLARE, RESERVED_PREFIX,
     TYPE_NAME_PREDICATE,
 };
-use crate::Term;
+use crate::{Term, TYPE_NAME_CONST_UNKNOWN};
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -72,7 +72,7 @@ pub struct Fact {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Attribute {
     name: Option<Predicate>,
-    kind: AttributeKind,
+    kind: Option<AttributeKind>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -153,8 +153,12 @@ impl Database {
     }
 
     pub fn add(&mut self, relation: Relation) {
-        assert!(!self.relations.contains_key(&relation.predicate));
-        self.relations.insert(relation.predicate.clone(), relation);
+        if let Some(existing) = self.relations.get_mut(&relation.predicate) {
+            existing.update_schema(&relation);
+            existing.facts.extend(relation.facts);
+        } else {
+            self.relations.insert(relation.predicate.clone(), relation);
+        }
     }
 
     pub fn make_new_relation<V: Into<Vec<Attribute>>>(
@@ -356,8 +360,10 @@ impl Relation {
         Table::new_with_rows(
             terms
                 .iter()
-                .filter_map(|t| t.as_variable())
-                .map(|v| Column::from(v.clone()))
+                .map(|term| match term {
+                    Term::Variable(v) => Column::from(v.clone()),
+                    Term::Constant(_) => Column::unknown(),
+                })
                 .collect::<Vec<Column>>(),
             self.facts
                 .iter()
@@ -381,15 +387,30 @@ impl Relation {
 
     // --------------------------------------------------------------------------------------------
 
+    fn update_schema(&mut self, other: &Self) {
+        assert_eq!(self.schema.len(), other.schema.len());
+        self.schema
+            .iter_mut()
+            .zip(other.schema().iter())
+            .for_each(|(left, right)| {
+                if let (None, Some(v)) = (&left.name, &right.name) {
+                    left.name = Some(v.clone())
+                }
+                if let (None, Some(v)) = (left.kind, right.kind) {
+                    left.kind = Some(v)
+                }
+            })
+    }
+
     fn conforms(&self, fact: &[Constant]) -> bool {
         self.schema
             .iter()
-            .map(|a| a.kind)
-            .collect::<Vec<AttributeKind>>()
+            .map(|a| a.kind())
+            .collect::<Vec<Option<AttributeKind>>>()
             == fact
                 .iter()
-                .map(|c| c.kind())
-                .collect::<Vec<AttributeKind>>()
+                .map(|c| Some(c.kind()))
+                .collect::<Vec<Option<AttributeKind>>>()
     }
 }
 
@@ -404,20 +425,20 @@ impl Display for Attribute {
                 None => String::new(),
                 Some(v) => format!("{}{} ", v, CHAR_COLON),
             },
-            self.kind
+            match &self.kind {
+                None => TYPE_NAME_CONST_UNKNOWN.to_string(),
+                Some(k) => k.to_string(),
+            }
         )
     }
 }
 
 impl From<AttributeKind> for Attribute {
     fn from(kind: AttributeKind) -> Self {
-        Self { name: None, kind }
-    }
-}
-
-impl From<Attribute> for AttributeKind {
-    fn from(a: Attribute) -> Self {
-        a.kind
+        Self {
+            name: None,
+            kind: Some(kind),
+        }
     }
 }
 
@@ -425,20 +446,37 @@ impl Attribute {
     pub fn new(name: Predicate, kind: AttributeKind) -> Self {
         Self {
             name: Some(name),
-            kind,
+            kind: Some(kind),
         }
     }
 
-    pub(crate) fn new_inner(name: Option<Predicate>, kind: AttributeKind) -> Self {
-        Self { name, kind }
+    pub(crate) fn new_inner<P: Into<Option<Predicate>>, K: Into<Option<AttributeKind>>>(
+        name: P,
+        kind: K,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            kind: kind.into(),
+        }
+    }
+
+    pub(crate) fn unknown() -> Self {
+        Self {
+            name: None,
+            kind: None,
+        }
     }
 
     pub fn name(&self) -> Option<&Predicate> {
         self.name.as_ref()
     }
 
-    pub fn kind(&self) -> AttributeKind {
-        self.kind
+    pub fn kind(&self) -> Option<AttributeKind> {
+        self.kind.as_ref().copied()
+    }
+
+    pub fn has_unknown_kind(&self) -> bool {
+        self.kind.is_none()
     }
 }
 
