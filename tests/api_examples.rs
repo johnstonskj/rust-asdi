@@ -13,21 +13,27 @@ fn test_wikipedia_example() {
 
     let mut ancestors = Program::default();
 
-    let mut parent = ancestors
-        .make_new_relation(
-            Predicate::from_str("parent").unwrap(),
-            [AttributeKind::String, AttributeKind::String],
-        )
-        .unwrap();
-    parent.add(["xerces".into(), "brooke".into()]);
-    parent.add(["brooke".into(), "damocles".into()]);
+    let parent_predicate = Predicate::from_str("parent").unwrap();
+    {
+        let parent = ancestors
+            .add_new_relation(
+                parent_predicate.clone(),
+                [AttributeKind::String.into(), AttributeKind::String.into()],
+            )
+            .unwrap();
+        parent.add(["xerces".into(), "brooke".into()]);
+        parent.add(["brooke".into(), "damocles".into()]);
+    };
 
-    let ancestor = ancestors
-        .make_new_relation(
-            Predicate::from_str("ancestor").unwrap(),
-            [AttributeKind::String, AttributeKind::String],
-        )
-        .unwrap();
+    let ancestor_predicate = Predicate::from_str("ancestor").unwrap();
+    {
+        let _ = ancestors
+            .add_new_relation(
+                ancestor_predicate.clone(),
+                [AttributeKind::String.into(), AttributeKind::String.into()],
+            )
+            .unwrap();
+    };
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
     let var_y: Term = Variable::from_str("Y").unwrap().into();
@@ -35,28 +41,25 @@ fn test_wikipedia_example() {
 
     ancestors
         .add_new_rule(
-            ancestor.predicate().clone(),
+            ancestor_predicate.clone(),
             [var_x.clone(), var_y.clone()],
-            [Atom::new(parent.predicate().clone(), [var_x.clone(), var_y.clone()]).into()],
+            [Atom::new(parent_predicate.clone(), [var_x.clone(), var_y.clone()]).into()],
         )
         .unwrap();
     ancestors
         .add_new_rule(
-            ancestor.predicate().clone(),
+            ancestor_predicate.clone(),
             [var_x.clone(), var_y.clone()],
             [
-                Atom::new(parent.predicate().clone(), [var_x.clone(), var_z.clone()]).into(),
-                Atom::new(ancestor.predicate().clone(), [var_z, var_y]).into(),
+                Atom::new(parent_predicate, [var_x.clone(), var_z.clone()]).into(),
+                Atom::new(ancestor_predicate.clone(), [var_z, var_y]).into(),
             ],
         )
         .unwrap();
 
     ancestors
-        .add_new_query(ancestor.predicate().clone(), ["xerces".into(), var_x])
+        .add_new_query(ancestor_predicate.clone(), ["xerces".into(), var_x])
         .unwrap();
-
-    ancestors.add_relation(parent);
-    ancestors.add_relation(ancestor);
 
     println!(">{}<", ancestors);
 
@@ -82,23 +85,29 @@ fn test_sourceforge_example() {
 
     let mut graph = Program::default();
 
-    let mut edge = graph
-        .make_new_relation(
-            Predicate::from_str("edge").unwrap(),
-            [AttributeKind::String, AttributeKind::String],
-        )
-        .unwrap();
-    edge.add(["a".into(), "b".into()]);
-    edge.add(["b".into(), "c".into()]);
-    edge.add(["c".into(), "d".into()]);
-    edge.add(["d".into(), "a".into()]);
+    let edge_predicate = Predicate::from_str("edge").unwrap();
+    {
+        let edge = graph
+            .add_new_relation(
+                edge_predicate.clone(),
+                [AttributeKind::String.into(), AttributeKind::String.into()],
+            )
+            .unwrap();
+        edge.add(["a".into(), "b".into()]);
+        edge.add(["b".into(), "c".into()]);
+        edge.add(["c".into(), "d".into()]);
+        edge.add(["d".into(), "a".into()]);
+    }
 
-    let path = graph
-        .make_new_relation(
-            Predicate::from_str("path").unwrap(),
-            [AttributeKind::String, AttributeKind::String],
-        )
-        .unwrap();
+    let path_predicate = Predicate::from_str("path").unwrap();
+    {
+        let _ = graph
+            .add_new_relation(
+                path_predicate.clone(),
+                [AttributeKind::String.into(), AttributeKind::String.into()],
+            )
+            .unwrap();
+    }
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
     let var_y: Term = Variable::from_str("Y").unwrap().into();
@@ -106,34 +115,32 @@ fn test_sourceforge_example() {
 
     graph
         .add_new_rule(
-            path.predicate().clone(),
+            path_predicate.clone(),
             [var_x.clone(), var_y.clone()],
-            [Atom::new(edge.predicate().clone(), [var_x.clone(), var_y.clone()]).into()],
+            [Atom::new(edge_predicate.clone(), [var_x.clone(), var_y.clone()]).into()],
         )
         .unwrap();
 
     graph
         .add_new_rule(
-            path.predicate().clone(),
+            path_predicate.clone(),
             [var_x.clone(), var_y.clone()],
             [
-                Atom::new(edge.predicate().clone(), [var_x.clone(), var_z.clone()]).into(),
-                Atom::new(path.predicate().clone(), [var_z, var_y.clone()]).into(),
+                Atom::new(edge_predicate.clone(), [var_x.clone(), var_z.clone()]).into(),
+                Atom::new(path_predicate.clone(), [var_z, var_y.clone()]).into(),
             ],
         )
         .unwrap();
 
-    let query = Query::new(path.predicate().clone(), vec![var_x, var_y]);
+    let query = Query::new(path_predicate.clone(), vec![var_x, var_y]);
     graph.add_query(query).unwrap();
-
-    graph.add_relation(edge);
 
     println!("{}", graph);
 
     assert_eq_by_line(
         &graph.to_string(),
         r#"@declare edge(string, string).
-@declare path(?, ?).
+@declare path(string, string).
 
 edge(a, b).
 edge(c, d).
@@ -156,11 +163,9 @@ fn test_that_syllogism() {
     let p_human = Predicate::from_str("human").unwrap();
 
     let mut human = syllogism
-        .make_new_relation(p_human.clone(), [AttributeKind::String])
+        .add_new_relation(p_human.clone(), [AttributeKind::String.into()])
         .unwrap();
     human.add(["Socrates".into()]);
-
-    syllogism.database_mut().add(human);
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
 
@@ -183,11 +188,11 @@ fn test_that_syllogism() {
         r#"@declare human(string).
 @declare mortal(string).
 
-human(Socrates).
+human("Socrates").
 
 mortal(X) ⟵ human(X).
 
-?- mortal(Socrates).
+?- mortal("Socrates").
 "#,
     );
 }

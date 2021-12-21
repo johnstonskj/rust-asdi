@@ -271,16 +271,13 @@ fn parse_fact(
     }
 
     let edb = program.database_mut();
-    if !edb.contains(&predicate) {
-        let relation = { edb.make_new_relation_from(predicate.clone(), &attributes)? };
-        edb.add(relation);
-    }
-
-    if let Some(relation) = edb.relation_mut(&predicate) {
-        relation.add(attributes)
+    let relation = if !edb.contains(&predicate) {
+        edb.add_new_relation_from(predicate.clone(), &attributes)?
     } else {
-        unreachable!()
-    }
+        edb.relation_mut(&predicate).unwrap()
+    };
+
+    relation.add(attributes);
 
     Ok(())
 }
@@ -364,9 +361,9 @@ fn parse_decl_relation(
         }
     }
 
-    let edb = program.database_mut();
-    let relation = { edb.make_new_relation(predicate, attributes)? };
-    edb.add(relation);
+    let _ = program
+        .database_mut()
+        .add_new_relation(predicate, attributes)?;
 
     Ok(())
 }

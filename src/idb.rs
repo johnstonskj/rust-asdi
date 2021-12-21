@@ -934,8 +934,8 @@ impl Variable {
     pub fn is_valid(s: &str) -> bool {
         let mut chars = s.chars();
         s == VARIABLE_NAME_IGNORE
-            || !s.is_empty()
-                && chars.next().map(|c| c.is_uppercase()).is_some()
+            || (!s.is_empty())
+                && chars.next().map(|c| c.is_uppercase()).unwrap()
                 && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
 }

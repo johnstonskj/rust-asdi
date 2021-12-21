@@ -153,24 +153,25 @@ impl Database {
         }
     }
 
-    pub fn make_new_relation<V: Into<Vec<Attribute>>>(
+    pub fn add_new_relation<V: Into<Vec<Attribute>>>(
         &mut self,
         predicate: Predicate,
         schema: V,
-    ) -> Result<Relation> {
+    ) -> Result<&mut Relation> {
         if self.relations.contains_key(&predicate) {
             Error::RelationExists(predicate).into()
         } else {
-            Ok(Relation::new(predicate, schema))
+            self.add(Relation::new(predicate.clone(), schema));
+            Ok(self.relation_mut(&predicate).unwrap())
         }
     }
 
-    pub fn make_new_relation_from(
+    pub fn add_new_relation_from(
         &mut self,
         predicate: Predicate,
         attributes: &[Constant],
-    ) -> Result<Relation> {
-        self.make_new_relation(
+    ) -> Result<&mut Relation> {
+        self.add_new_relation(
             predicate,
             attributes
                 .iter()
@@ -645,8 +646,8 @@ impl Constant {
 
     fn is_identifier_relaxed(s: &str) -> bool {
         let mut chars = s.chars();
-        !s.is_empty()
-            && chars.next().map(|c| c.is_alphabetic()).is_some()
+        (!s.is_empty())
+            && chars.next().map(|c| c.is_alphabetic()).unwrap()
             && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
 }
@@ -686,8 +687,8 @@ impl From<Predicate> for String {
 impl Predicate {
     pub fn is_valid(s: &str) -> bool {
         let mut chars = s.chars();
-        !s.is_empty()
-            && chars.next().map(|c| c.is_lowercase()).is_some()
+        (!s.is_empty())
+            && chars.next().map(|c| c.is_lowercase()).unwrap()
             && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
 
@@ -711,10 +712,37 @@ impl Predicate {
 #[cfg(test)]
 #[cfg(feature = "parser")]
 mod tests {
+    use crate::edb::Constant;
     use crate::idb::Variable;
     use crate::parse::parse_str;
     use crate::{Atom, Predicate, Term};
     use std::str::FromStr;
+
+    #[test]
+    fn test_is_identifier() {
+        assert!(Constant::is_identifier("socrates"));
+        assert!(Constant::is_identifier("socrates_and_plato"));
+        assert!(Constant::is_identifier("socrates1"));
+        assert!(Constant::is_identifier("greek:socrates"));
+        assert!(Constant::is_identifier("greek:Socrates"));
+        assert!(Constant::is_identifier("greek:socrates_and_plato"));
+        assert!(Constant::is_identifier("greek:Socrates_and_Plato"));
+        assert!(Constant::is_identifier("greek:socrates1"));
+        assert!(Constant::is_identifier("greek:Socrates1"));
+    }
+
+    #[test]
+    fn test_is_not_identifier() {
+        assert!(!Constant::is_identifier("Socrates"));
+        assert!(!Constant::is_identifier("_and_plato"));
+        assert!(!Constant::is_identifier("1socrates"));
+        assert!(!Constant::is_identifier("Greek:socrates"));
+        assert!(!Constant::is_identifier("_greek:socrates"));
+        assert!(!Constant::is_identifier("greek:_and_plato"));
+        assert!(!Constant::is_identifier("greek:socrates:plato"));
+        assert!(!Constant::is_identifier(":greekSocrates"));
+        assert!(!Constant::is_identifier("greek:"));
+    }
 
     #[test]
     fn test_matches() {

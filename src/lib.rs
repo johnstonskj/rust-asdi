@@ -343,29 +343,12 @@ impl Program {
         self.database_mut().add(relation)
     }
 
-    pub fn make_new_relation<V: Into<Vec<AttributeKind>>>(
+    pub fn add_new_relation<V: Into<Vec<Attribute>>>(
         &mut self,
         predicate: Predicate,
         schema: V,
-    ) -> Result<Relation> {
-        self.edb.make_new_relation(
-            predicate,
-            schema
-                .into()
-                .into_iter()
-                .map(|a| a.into())
-                .collect::<Vec<Attribute>>(),
-        )
-    }
-
-    pub fn add_new_relation<V: Into<Vec<AttributeKind>>>(
-        &mut self,
-        predicate: Predicate,
-        schema: V,
-    ) -> Result<()> {
-        let relation = self.make_new_relation(predicate, schema)?;
-        self.database_mut().add(relation);
-        Ok(())
+    ) -> Result<&mut Relation> {
+        self.database_mut().add_new_relation(predicate, schema)
     }
 
     // --------------------------------------------------------------------------------------------
@@ -419,11 +402,9 @@ impl Program {
                 }
             }
             // TODO: propagate errors
-            let relation = self
-                .edb
-                .make_new_relation(atom.predicate().clone(), schema)
-                .unwrap();
-            self.edb.add(relation);
+            let _ = self
+                .database_mut()
+                .add_new_relation(atom.predicate().clone(), schema);
         }
     }
 
