@@ -16,7 +16,7 @@ fact = {
 
 rule = {
     // FEATURE: disjunction
-    atom ~ ( disjunction ~ atom )* ~ ( rule_separator ~ literal_list )? ~ DOT
+    atom ~ ( disjunction ~ atom )* ~ ( material_implication ~ literal_list )? ~ DOT
 }
 
 query = {
@@ -188,7 +188,7 @@ boolean = @{
 // Terminal definitions
 // ------------------------------------------------------------------------------------------------
 
-rule_separator = _{
+material_implication = _{
     ":-" | "<-" | UC_LEFT_ARROW_FW
 }
 
