@@ -530,3 +530,6 @@ pub mod idb;
 pub mod query;
 
 mod syntax;
+
+#[cfg(feature = "typeset")]
+pub mod typeset;

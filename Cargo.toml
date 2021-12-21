@@ -9,6 +9,7 @@ license-file = "LICENSE"
 [features]
 parser = ["pest", "pest_derive"]
 tabular = ["prettytable-rs"]
+typeset = []
 
 [dependencies]
 bimap = "0.6"

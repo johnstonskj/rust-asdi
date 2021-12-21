@@ -45,6 +45,8 @@ pub(crate) const PRAGMA_FEATURE_DISJUNCTION: &str = "disjunction";
 
 pub(crate) const COLUMN_NAME_UNKNOWN: &str = "_";
 
+pub(crate) const VARIABLE_NAME_IGNORE: &str = "_";
+
 // ------------------------------------------------------------------------------------------------
 
 pub(crate) const CONJUNCTION_ASCII: &str = ",";

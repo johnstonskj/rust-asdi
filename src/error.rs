@@ -14,6 +14,7 @@ use std::fmt::{Display, Formatter};
 #[derive(Debug)]
 pub enum Error {
     FileIoError(std::io::Error),
+    FormatError(std::fmt::Error),
     ParserError(Box<dyn std::error::Error>),
     TypeMismatch(String, String),
     InvalidValue(String, String),
@@ -42,6 +43,7 @@ impl Display for Error {
             "{}",
             match self {
                 Self::FileIoError(e) => format!("File IO error, {}", e),
+                Self::FormatError(e) => format!("Formatting error, {}", e),
                 Self::ParserError(e) => e.to_string(),
                 Self::TypeMismatch(expecting, given) => format!(
                     "Type mismatch, expecting {:?}, given {:?}",
@@ -104,6 +106,12 @@ impl std::error::Error for Error {
 impl From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {
         Self::FileIoError(e)
+    }
+}
+
+impl From<std::fmt::Error> for Error {
+    fn from(e: std::fmt::Error) -> Self {
+        Self::FormatError(e)
     }
 }
 

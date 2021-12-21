@@ -18,6 +18,7 @@ use crate::{
     OPERATOR_ASCII_LESS_THAN_OR_EQUAL, OPERATOR_ASCII_NOT_EQUAL, OPERATOR_ASCII_NOT_EQUAL_ALT,
     OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL, OPERATOR_UNICODE_LESS_THAN_OR_EQUAL,
     OPERATOR_UNICODE_NOT_EQUAL, TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
+    VARIABLE_NAME_IGNORE,
 };
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
@@ -54,6 +55,7 @@ use std::str::FromStr;
 ///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Rule {
+    // TODO: for disjunction we may have multiple head atoms
     head: Atom,
     body: Vec<Literal>,
 }
@@ -96,6 +98,7 @@ pub enum ComparisonOperator {
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Term {
+    // TODO: do we represent anonymous variables (syntax: "_") explicitly?
     Variable(Variable),
     Constant(Constant),
 }
@@ -718,6 +721,18 @@ impl Comparison {
         Self::new(left, ComparisonOperator::GreaterThanOrEqual, right)
     }
 
+    pub fn lhs(&self) -> &Term {
+        &self.lhs
+    }
+
+    pub fn rhs(&self) -> &Term {
+        &self.rhs
+    }
+
+    pub fn operator(&self) -> &ComparisonOperator {
+        &self.operator
+    }
+
     pub fn terms(&self) -> Vec<&Term> {
         vec![&self.lhs, &self.rhs]
     }
@@ -875,6 +890,10 @@ impl From<Variable> for String {
 }
 
 impl Variable {
+    pub fn ignore() -> Self {
+        Self(VARIABLE_NAME_IGNORE.to_owned())
+    }
+
     pub fn is_valid(s: &str) -> bool {
         let mut chars = s.chars();
         !s.is_empty()
