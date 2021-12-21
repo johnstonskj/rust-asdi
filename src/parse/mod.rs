@@ -377,8 +377,8 @@ fn parse_attribute(
     _program: &mut Program,
     _: FeatureSet,
 ) -> Result<Attribute> {
+    let mut name = None;
     for inner_pair in input_pairs {
-        let mut name = None;
         match inner_pair.as_rule() {
             Rule::predicate => name = Some(Predicate::from_str_unchecked(inner_pair.as_str())),
             Rule::tid_string => {

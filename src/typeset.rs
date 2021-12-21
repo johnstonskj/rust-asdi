@@ -53,7 +53,7 @@ pub trait Typesetter {
 /// \lstMakeShortInline[language=Datalog]|
 /// /// ```
 ///
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub(crate) struct LatexTypesetter {}
 
 // ------------------------------------------------------------------------------------------------
@@ -73,12 +73,6 @@ pub(crate) struct LatexTypesetter {}
 // ------------------------------------------------------------------------------------------------
 
 const LATEX_INLINE_LISTING: &str = "|";
-
-impl Default for LatexTypesetter {
-    fn default() -> Self {
-        Self {}
-    }
-}
 
 impl Typesetter for LatexTypesetter {
     fn program(&self, value: &Program) -> Result<String> {
@@ -254,21 +248,35 @@ ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
                 .relation(&Predicate::from_str_unchecked("parent"))
                 .unwrap();
             let fact = relation.facts().next().unwrap();
-            assert_eq!(
-                typesetter.fact(&fact, true).unwrap(),
-                String::from(r"|parent($xerces, brooke$).|")
-            )
+            match fact.to_string().as_str() {
+                "parent(xerces, brooke)." => assert_eq!(
+                    typesetter.fact(&fact, true).unwrap(),
+                    String::from(r"|parent($xerces, brooke$).|")
+                ),
+                "parent(brooke, damocles)." => assert_eq!(
+                    typesetter.fact(&fact, true).unwrap(),
+                    String::from(r"|parent($brooke, damocles$).|")
+                ),
+                s => panic!("not expecting fact: {}", s),
+            }
         }
 
         {
             // Test rule
             let rule = program.rules().next().unwrap();
-            assert_eq!(
-                typesetter.rule(rule, true).unwrap(),
-                String::from(
-                    r"|ancestor($X, Y$) $\leftarrow$ parent($X, Z$) $\land$ parent($Z, Y$).|"
-                )
-            )
+            match rule.to_string().as_str() {
+                "ancestor(X, Y) ⟵ parent(X, Y)." => assert_eq!(
+                    typesetter.rule(rule, true).unwrap(),
+                    String::from(r"|ancestor($X, Y$) $\leftarrow$ parent($X, Y$).|")
+                ),
+                "ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y)." => assert_eq!(
+                    typesetter.rule(&rule, true).unwrap(),
+                    String::from(
+                        r"|ancestor($X, Y$) $\leftarrow$ parent($X, Z$) $\land$ parent($Z, Y$).|"
+                    )
+                ),
+                s => panic!("not expecting rule: {}", s),
+            }
         }
 
         {

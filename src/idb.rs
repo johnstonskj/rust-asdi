@@ -352,7 +352,13 @@ impl Rule {
             let missing: Vec<&Term> = self
                 .distinguished_terms()
                 .into_iter()
-                .filter(|term| !body_positive_terms.contains(term))
+                .filter(|term| {
+                    if term.is_variable() {
+                        !body_positive_terms.contains(term)
+                    } else {
+                        false
+                    }
+                })
                 .collect();
             if !missing.is_empty() {
                 return Err(Error::HeadVariablesMissingInBody(
@@ -503,6 +509,10 @@ impl Atom {
         })
     }
 
+    pub fn is_ground(&self) -> bool {
+        self.terms.iter().all(Term::is_constant)
+    }
+
     pub fn source_location(&self) -> Option<&SourceLocation> {
         self.src_loc.as_ref()
     }
@@ -615,6 +625,10 @@ impl Literal {
     pub fn as_comparison(&self) -> Option<&Comparison> {
         self.inner.as_comparison()
     }
+
+    pub fn is_ground(&self) -> bool {
+        self.inner.is_ground()
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -678,6 +692,13 @@ impl LiteralInner {
             _ => None,
         }
     }
+
+    pub fn is_ground(&self) -> bool {
+        match self {
+            LiteralInner::Atom(a) => a.is_ground(),
+            LiteralInner::Comparison(c) => c.is_ground(),
+        }
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -735,6 +756,10 @@ impl Comparison {
 
     pub fn terms(&self) -> Vec<&Term> {
         vec![&self.lhs, &self.rhs]
+    }
+
+    pub fn is_ground(&self) -> bool {
+        self.lhs.is_constant() && self.rhs.is_constant()
     }
 }
 
@@ -855,6 +880,14 @@ impl Term {
             _ => None,
         }
     }
+
+    pub fn is_ignored(&self) -> bool {
+        if let Term::Variable(v) = self {
+            v.is_ignored()
+        } else {
+            false
+        }
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -894,14 +927,16 @@ impl Variable {
         Self(VARIABLE_NAME_IGNORE.to_owned())
     }
 
+    pub fn is_ignored(&self) -> bool {
+        self.as_ref() == VARIABLE_NAME_IGNORE
+    }
+
     pub fn is_valid(s: &str) -> bool {
         let mut chars = s.chars();
-        !s.is_empty()
-            && chars
-                .next()
-                .map(|c| c.is_uppercase() || c == CHAR_UNDERSCORE)
-                .is_some()
-            && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
+        s == VARIABLE_NAME_IGNORE
+            || !s.is_empty()
+                && chars.next().map(|c| c.is_uppercase()).is_some()
+                && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
 }
 

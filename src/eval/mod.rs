@@ -13,6 +13,7 @@ use crate::idb::Variable;
 use crate::{AttributeKind, Database, Program};
 use std::collections::BTreeMap;
 use std::fmt::{Debug, Display, Formatter};
+use tracing::{error, trace};
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -185,6 +186,7 @@ impl Table {
             self.rows.push(row);
             Ok(())
         } else {
+            error!("row {:?} does not conform to schema {:?}", row, self.schema);
             panic!();
         }
     }
@@ -233,6 +235,10 @@ impl Table {
                     {
                         new_row.insert(i, right_row.get(index).unwrap().clone())
                     } else {
+                        error!(
+                            "The column {:?} ({}) was found in neither table.",
+                            column, i
+                        );
                         unreachable!()
                     }
                 }
@@ -250,12 +256,22 @@ impl Table {
             .enumerate()
             .filter_map(|(i, c)| if c.is_anonymous() { Some(i) } else { None })
             .collect();
+        trace!("reduce > remove (before)\n{:?}", remove);
         remove.sort_by(|a, b| b.cmp(a));
+        trace!("reduce > remove (after)\n{:?}", remove);
         for row in &mut self.rows {
             for col in &remove {
                 row.remove(*col);
             }
         }
+        self.schema = Schema::new(
+            self.schema
+                .columns()
+                .into_iter()
+                .filter(|col| col.is_named())
+                .cloned()
+                .collect::<Vec<Column>>(),
+        );
         if dedup {
             self.rows.sort();
             self.rows.dedup();
@@ -437,11 +453,14 @@ impl Column {
     }
 
     pub fn is_anonymous(&self) -> bool {
-        self.name.is_none()
+        match &self.name {
+            None => true,
+            Some(n) => n.is_ignored(),
+        }
     }
 
     pub fn is_named(&self) -> bool {
-        self.name.is_some()
+        !self.is_anonymous()
     }
 }
 

@@ -12,11 +12,13 @@ tabular = ["prettytable-rs"]
 typeset = []
 
 [dependencies]
-bimap = "0.6"
+tracing = "0.1.29"
 
 pest = { version = "2.1", optional = true }
 pest_derive = { version = "2.1", optional = true }
 prettytable-rs = { version = "0.8", optional = true }
+
+# only for environment: bimap = "0.6"
 
 [dev-dependencies]
 pretty_assertions = "1.0"

@@ -211,7 +211,7 @@ use std::fmt::{Display, Formatter};
 /// all [_rules_](struct.Rule.html), and then any [_queries_](struct.Query.html), this model
 /// makes no such distinction.
 ///
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Program {
     features: FeatureSet,
     edb: Database,
@@ -254,17 +254,6 @@ pub trait SyntacticFragments {
 // ------------------------------------------------------------------------------------------------
 // Implementations
 // ------------------------------------------------------------------------------------------------
-
-impl Default for Program {
-    fn default() -> Self {
-        Self {
-            features: Default::default(),
-            edb: Default::default(),
-            idb: Default::default(),
-            queries: Default::default(),
-        }
-    }
-}
 
 impl Display for Program {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

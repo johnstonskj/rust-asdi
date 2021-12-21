@@ -67,6 +67,10 @@ variable = @{
 }
 
 identifier = @{
+    predicate ~ ( COLON ~ identifier_relaxed )?
+}
+
+identifier_relaxed = @{
     LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
 }
 
@@ -273,6 +277,8 @@ COMMA = _{ "," }
 QMARK = _{ "?" }
 
 AT_SIGN = _{ "@" }
+
+COLON = _{ ":" }
 
 // ------------------------------------------------------------------------------------------------
 // Built-in rules

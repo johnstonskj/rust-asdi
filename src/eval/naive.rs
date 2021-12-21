@@ -13,12 +13,13 @@ use crate::eval::{Evaluator, Table};
 use crate::features::FEATURE_NEGATION;
 use crate::idb::Term;
 use crate::{Database, Error, Program, SyntacticFragments};
+use tracing::trace;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct NaiveEvaluator {}
 
 // ------------------------------------------------------------------------------------------------
@@ -36,12 +37,6 @@ pub struct NaiveEvaluator {}
 // ------------------------------------------------------------------------------------------------
 // Implementations
 // ------------------------------------------------------------------------------------------------
-
-impl Default for NaiveEvaluator {
-    fn default() -> Self {
-        Self {}
-    }
-}
 
 impl Evaluator for NaiveEvaluator {
     fn inference(&self, program: &Program, edb: &Database) -> Result<Database> {
@@ -74,6 +69,7 @@ impl Evaluator for NaiveEvaluator {
             loop {
                 let start = new_db.fact_count();
                 for rule in program.rules() {
+                    trace!("infer > rule > {}", rule);
                     let matches: Vec<Table> = rule
                         .literals()
                         .map(|l| {
@@ -84,15 +80,27 @@ impl Evaluator for NaiveEvaluator {
                         .collect();
                     if matches.iter().all(|result| !result.is_empty()) {
                         // else: not all sub-goals satisfied
+                        matches.iter().for_each(|in_table| {
+                            trace!("infer > rule > matched table >\n{}", in_table)
+                        });
                         let results = Table::join_all(matches);
+                        trace!("infer > rule > joined table >\n{}", results);
                         for row in results.rows() {
+                            trace!("infer > rule > row > {:?}", row);
                             let relation = new_db.relation_mut(rule.head().predicate()).unwrap();
                             let new_fact = rule
                                 .head()
                                 .terms()
-                                .map(|term| match term {
-                                    Term::Variable(v) => row.get(v.clone()).unwrap(),
-                                    Term::Constant(c) => c,
+                                .map(|term| {
+                                    trace!(
+                                        "infer > rule > row > joined term {:?} ? {}",
+                                        term,
+                                        term.is_ignored()
+                                    );
+                                    match term {
+                                        Term::Variable(v) => row.get(v.clone()).unwrap(),
+                                        Term::Constant(c) => c,
+                                    }
                                 })
                                 .cloned()
                                 .collect::<Vec<Constant>>();

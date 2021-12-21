@@ -24,7 +24,7 @@ use std::str::FromStr;
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Database {
     relations: BTreeMap<Predicate, Relation>,
 }
@@ -107,14 +107,6 @@ pub struct Predicate(String);
 // ------------------------------------------------------------------------------------------------
 // Implementations
 // ------------------------------------------------------------------------------------------------
-
-impl Default for Database {
-    fn default() -> Self {
-        Self {
-            relations: Default::default(),
-        }
-    }
-}
 
 impl Display for Database {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -308,6 +300,7 @@ impl Relation {
         if self.conforms(&fact) {
             self.facts.insert(fact);
         } else {
+            println!("{:?} ?= {:?}", self.schema(), fact);
             // TODO: propagate errors
             panic!();
         }
@@ -639,12 +632,21 @@ impl Constant {
     }
 
     pub fn is_identifier(s: &str) -> bool {
+        let parts = s.split(CHAR_COLON).collect::<Vec<&str>>();
+        if parts.len() == 1 {
+            Predicate::is_valid(s)
+        } else if parts.len() == 2 {
+            Predicate::is_valid(parts.get(0).unwrap())
+                && Self::is_identifier_relaxed(parts.get(1).unwrap())
+        } else {
+            false
+        }
+    }
+
+    fn is_identifier_relaxed(s: &str) -> bool {
         let mut chars = s.chars();
         !s.is_empty()
-            && chars
-                .next()
-                .map(|c| c.is_alphabetic() || c == CHAR_UNDERSCORE)
-                .is_some()
+            && chars.next().map(|c| c.is_alphabetic()).is_some()
             && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
 }
@@ -685,10 +687,7 @@ impl Predicate {
     pub fn is_valid(s: &str) -> bool {
         let mut chars = s.chars();
         !s.is_empty()
-            && chars
-                .next()
-                .map(|c| c.is_lowercase() || c == CHAR_UNDERSCORE)
-                .is_some()
+            && chars.next().map(|c| c.is_lowercase()).is_some()
             && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
 
