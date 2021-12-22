@@ -162,7 +162,7 @@ fn test_that_syllogism() {
     let mut syllogism = Program::default();
     let p_human = Predicate::from_str("human").unwrap();
 
-    let mut human = syllogism
+    let human = syllogism
         .add_new_relation(p_human.clone(), [AttributeKind::String.into()])
         .unwrap();
     human.add(["Socrates".into()]);
