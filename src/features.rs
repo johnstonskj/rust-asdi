@@ -5,9 +5,37 @@ More detailed description, with
 
 # Example
 
+```datalog
+@features(negation, comparisons, disjunction).
+```
+
+## Negation
+
+```datalog
+@features(negation).
+alive(X) :- person(X) AND NOT dead(X).
+alive(X) :- person(X) ∧ ￢dead(X).
+```
+
+## Comparisons
+
+```datalog
+@features(comparisons).
+old(X) :- age(X, Y) ∧ Y > 75.
+```
+
+## Disjunction
+
+```datalog
+@features(disjunction).
+mother(X, Y) OR father(X, Y) :- parent(X, Y).
+mother(X, Y) ∨ father(X, Y) :- parent(X, Y).
+```
+
+
 */
 
-use crate::{
+use crate::syntax::{
     CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DEFAULT_LANGUAGE_NAME,
     DISJUNCTION_UNICODE_SYMBOL, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
     PRAGMA_FEATURE_COMPARISONS, PRAGMA_FEATURE_DISJUNCTION, PRAGMA_FEATURE_NEGATION,

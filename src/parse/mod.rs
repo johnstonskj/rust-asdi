@@ -7,12 +7,13 @@ More detailed description, with
 
 */
 
-use crate::edb::{Constant, Predicate};
+use crate::edb::{Attribute, AttributeKind, Constant, Predicate};
 use crate::error::{Error, Result};
 use crate::features::{FeatureSet, FEATURE_COMPARISONS, FEATURE_DISJUNCTION, FEATURE_NEGATION};
-use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Term, Variable};
+use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Rule as DlRule, Term, Variable};
+use crate::program::Program;
+use crate::query::Query;
 use crate::syntax::{RESERVED_BOOLEAN_TRUE, RESERVED_PREFIX, TYPE_NAME_CONST_INTEGER};
-use crate::{Attribute, AttributeKind, Program, Query, Rule as DlRule};
 use pest::iterators::{Pair, Pairs};
 use pest::{Parser, Span};
 use pest_derive::Parser;
@@ -349,7 +350,7 @@ fn parse_decl_relation(
         _ => unreachable!(first.as_str()),
     };
 
-    let mut attributes: Vec<Attribute> = Default::default();
+    let mut attributes: Vec<Attribute<Predicate>> = Default::default();
     for inner_pair in input_pairs {
         match inner_pair.as_rule() {
             Rule::attribute => attributes.push(parse_attribute(
@@ -373,7 +374,7 @@ fn parse_attribute(
     input_pairs: Pairs<'_, Rule>,
     _program: &mut Program,
     _: FeatureSet,
-) -> Result<Attribute> {
+) -> Result<Attribute<Predicate>> {
     let mut name = None;
     for inner_pair in input_pairs {
         match inner_pair.as_rule() {

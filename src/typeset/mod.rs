@@ -7,13 +7,12 @@ More detailed description, with
 
 */
 
-use crate::edb::{Constant, Fact};
+use crate::edb::{AttributeName, Constant, Fact};
 use crate::error::Result;
-use crate::idb::{ComparisonOperator, LiteralInner};
-use crate::{
-    Atom, Literal, Program, Query, Rule, Term, CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD,
-    CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
-};
+use crate::idb::{Atom, ComparisonOperator, Literal, LiteralInner, Rule, Term};
+use crate::program::Program;
+use crate::query::Query;
+use crate::syntax::{CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE};
 use std::fmt::Write;
 
 // ------------------------------------------------------------------------------------------------
@@ -22,7 +21,9 @@ use std::fmt::Write;
 
 pub trait Typesetter {
     fn program(&self, value: &Program) -> Result<String>;
-    fn fact(&self, value: &Fact, inline: bool) -> Result<String>;
+    fn fact<T>(&self, value: &Fact<'_, T>, inline: bool) -> Result<String>
+    where
+        T: AttributeName;
     fn rule(&self, value: &Rule, inline: bool) -> Result<String>;
     fn query(&self, value: &Query, inline: bool) -> Result<String>;
 }
@@ -97,7 +98,10 @@ impl Typesetter for LatexTypesetter {
         Ok(result)
     }
 
-    fn fact(&self, value: &Fact, inline: bool) -> Result<String> {
+    fn fact<T>(&self, value: &Fact<'_, T>, inline: bool) -> Result<String>
+    where
+        T: AttributeName,
+    {
         let mut result = String::new();
         if inline {
             write!(result, "{}", LATEX_INLINE_LISTING)?;
@@ -105,13 +109,13 @@ impl Typesetter for LatexTypesetter {
         write!(
             result,
             "{}{}${}${}{}",
-            match &value.predicate() {
+            match &value.name() {
                 None => CHAR_UNDERSCORE.to_string(),
                 Some(p) => p.to_string(),
             },
             CHAR_LEFT_PAREN,
             value
-                .values()
+                .iter()
                 .map(Constant::to_string)
                 .collect::<Vec<String>>()
                 .join(&format!("{} ", CHAR_COMMA)),
@@ -219,9 +223,9 @@ impl LatexTypesetter {
 #[cfg(feature = "parser")]
 #[cfg(test)]
 mod tests {
+    use crate::edb::Predicate;
     use crate::parse::parse_str;
     use crate::typeset::{LatexTypesetter, Typesetter};
-    use crate::Predicate;
 
     #[test]
     fn test_wikipedia_example() {

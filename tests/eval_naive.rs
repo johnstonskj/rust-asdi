@@ -1,9 +1,9 @@
-use asdi::edb::Predicate;
 use asdi::eval::naive::NaiveEvaluator;
 use asdi::eval::Evaluator;
 use asdi::idb::Variable;
 use asdi::parse::parse_str;
 use asdi::query::Query;
+use asdi::r#mod::Predicate;
 use std::str::FromStr;
 
 #[test]
@@ -71,7 +71,7 @@ mortal(X) <- human(X).
     let query = program.queries().next().unwrap();
 
     let results = program.database().matches(query.as_ref());
-    assert_eq!(results.schema().column_count(), 1);
+    assert_eq!(results.schema().arity(), 1);
     assert_eq!(results.len(), 1);
 
     print!("{} ==>\n{}", query, results);
@@ -83,7 +83,7 @@ mortal(X) <- human(X).
     );
 
     let results = program.database().matches(query.as_ref());
-    assert_eq!(results.schema().column_count(), 1);
+    assert_eq!(results.schema().arity(), 1);
     assert_eq!(results.len(), 2);
 
     print!("{} ==>\n{}", query, results);
@@ -154,7 +154,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
     let query = program.queries().next().unwrap();
 
     let results = program.database().matches(query.as_ref());
-    assert_eq!(results.schema().column_count(), 2);
+    assert_eq!(results.schema().arity(), 2);
     assert_eq!(results.len(), 2);
 
     print!("{} ==>\n{}", query, results);
@@ -230,7 +230,7 @@ path(X, Y) ⟵ edge(X, Z) ⋀ path(Z, Y).
     let query = program.queries().next().unwrap();
 
     let results = program.database().matches(query.as_ref());
-    assert_eq!(results.schema().column_count(), 2);
+    assert_eq!(results.schema().arity(), 2);
     assert_eq!(results.len(), 16);
 
     print!("{} ==>\n{}", query, results);

@@ -7,19 +7,21 @@ More detailed description, with
 
 */
 
-use crate::edb::{Constant, DbValidation, Predicate};
+use crate::edb::{AttributeName, Constant, Database, DbValidation, Predicate, Relation};
+use crate::error::Error;
 use crate::error::Result;
+use crate::features::FeatureSet;
 use crate::parse::SourceLocation;
-use crate::{
-    Database, Error, FeatureSet, Relation, SyntacticFragments, CHAR_LEFT_PAREN, CHAR_PERIOD,
-    CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, CONJUNCTION_UNICODE_SYMBOL, EMPTY_STR,
-    IMPLICATION_UNICODE_ARROW, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
+use crate::syntax::{
+    CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, CONJUNCTION_UNICODE_SYMBOL,
+    EMPTY_STR, IMPLICATION_UNICODE_ARROW, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
     OPERATOR_ASCII_GREATER_THAN, OPERATOR_ASCII_GREATER_THAN_OR_EQUAL, OPERATOR_ASCII_LESS_THAN,
     OPERATOR_ASCII_LESS_THAN_OR_EQUAL, OPERATOR_ASCII_NOT_EQUAL, OPERATOR_ASCII_NOT_EQUAL_ALT,
     OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL, OPERATOR_UNICODE_LESS_THAN_OR_EQUAL,
     OPERATOR_UNICODE_NOT_EQUAL, TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
     VARIABLE_NAME_IGNORE,
 };
+use crate::SyntacticFragments;
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -258,6 +260,12 @@ impl Rule {
 
     // --------------------------------------------------------------------------------------------
 
+    pub fn is_ground(&self) -> bool {
+        self.head().is_ground() && self.literals().all(|lit| lit.is_ground())
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     pub fn distinguished_terms(&self) -> HashSet<&Term> {
         self.head().terms().collect()
     }
@@ -437,12 +445,12 @@ impl Atom {
     pub fn new_from<T: Into<Vec<Term>>>(relation: &Relation, terms: T) -> Result<Self> {
         let terms = terms.into();
         let schema = relation.schema();
-        assert_eq!(terms.len(), schema.len());
+        assert_eq!(terms.len(), schema.arity());
         for (i, t) in terms.iter().enumerate() {
             if let Term::Constant(c) = t {
                 if c.kind() != schema.get(i).unwrap().kind().unwrap() {
                     return Error::FactDoesNotConformToSchema(
-                        relation.predicate().clone(),
+                        relation.name().clone(),
                         terms
                             .iter()
                             .map(|t| t.to_string())
@@ -454,7 +462,7 @@ impl Atom {
             }
         }
         Ok(Self {
-            predicate: relation.predicate().clone(),
+            predicate: relation.name().clone(),
             terms,
             src_loc: None,
         })
@@ -582,10 +590,6 @@ impl Literal {
         }
     }
 
-    pub fn is_positive(&self) -> bool {
-        !self.negative
-    }
-
     pub fn inner(&self) -> &LiteralInner {
         &self.inner
     }
@@ -624,6 +628,10 @@ impl Literal {
 
     pub fn as_comparison(&self) -> Option<&Comparison> {
         self.inner.as_comparison()
+    }
+
+    pub fn is_positive(&self) -> bool {
+        !self.negative
     }
 
     pub fn is_ground(&self) -> bool {
@@ -883,7 +891,7 @@ impl Term {
 
     pub fn is_ignored(&self) -> bool {
         if let Term::Variable(v) = self {
-            v.is_ignored()
+            v.is_anonymous()
         } else {
             false
         }
@@ -922,12 +930,14 @@ impl From<Variable> for String {
     }
 }
 
+impl AttributeName for Variable {}
+
 impl Variable {
-    pub fn ignore() -> Self {
+    pub fn anonymous() -> Self {
         Self(VARIABLE_NAME_IGNORE.to_owned())
     }
 
-    pub fn is_ignored(&self) -> bool {
+    pub fn is_anonymous(&self) -> bool {
         self.as_ref() == VARIABLE_NAME_IGNORE
     }
 

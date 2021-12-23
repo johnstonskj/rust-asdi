@@ -7,12 +7,14 @@ More detailed description, with
 
 */
 
-use crate::edb::Constant;
-use crate::error::Result;
-use crate::eval::{Evaluator, Table};
+use crate::edb::{Constant, Database};
+use crate::error::{Error, Result};
+use crate::eval::Evaluator;
 use crate::features::FEATURE_NEGATION;
 use crate::idb::Term;
-use crate::{Database, Error, Program, SyntacticFragments};
+use crate::program::Program;
+use crate::query::View;
+use crate::SyntacticFragments;
 use tracing::trace;
 
 // ------------------------------------------------------------------------------------------------
@@ -70,7 +72,7 @@ impl Evaluator for NaiveEvaluator {
                 let start = new_db.fact_count();
                 for rule in program.rules() {
                     trace!("infer > rule > {}", rule);
-                    let matches: Vec<Table> = rule
+                    let matches: Vec<View> = rule
                         .literals()
                         .map(|l| {
                             let mut table = edb.matches(l.as_atom().unwrap());
@@ -83,10 +85,10 @@ impl Evaluator for NaiveEvaluator {
                         matches.iter().for_each(|in_table| {
                             trace!("infer > rule > matched table >\n{}", in_table)
                         });
-                        let results = Table::join_all(matches);
+                        let results = View::join_all(matches)?;
                         trace!("infer > rule > joined table >\n{}", results);
-                        for row in results.rows() {
-                            trace!("infer > rule > row > {:?}", row);
+                        for fact in results.facts() {
+                            trace!("infer > rule > row > {:?}", fact);
                             let relation = new_db.relation_mut(rule.head().predicate()).unwrap();
                             let new_fact = rule
                                 .head()
@@ -98,7 +100,7 @@ impl Evaluator for NaiveEvaluator {
                                         term.is_ignored()
                                     );
                                     match term {
-                                        Term::Variable(v) => row.get(v.clone()).unwrap(),
+                                        Term::Variable(v) => fact.get(v.clone()).unwrap(),
                                         Term::Constant(c) => c,
                                     }
                                 })

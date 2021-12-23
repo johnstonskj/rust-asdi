@@ -1,6 +1,6 @@
-use asdi::edb::{AttributeKind, Predicate};
 use asdi::idb::{Atom, Term, Variable};
 use asdi::query::Query;
+use asdi::r#mod::{AttributeKind, Predicate};
 use asdi::Program;
 use std::str::FromStr;
 
