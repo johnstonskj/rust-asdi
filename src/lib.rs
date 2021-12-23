@@ -12,54 +12,69 @@ integrate new more sophisticated implementations over time.
 
 # Datalog Defined
 
-* **Program**
-  * _Facts_ and _Rules_
-* **Atom** (Atomic Formula)
-  * **Predicate**
-  Variable names **must** begin with a lowercase letter followed by any number of Unicode letters,
-  numbers, or the underscore `_` character.
-    Predicates are sometimes refereed to as _Relations_.
-  * **Fact**
-    Fact arguments may only be _Constants_.
-    Facts are sometimes refereed to as _Axioms_.
-  * **Literal**
-    Literal arguments may be _Constants_ or _Variables_.
-  * **Expression**
-* **Rule**
-  * **head**
-  * **body**
-* **Query**
-* **Constant**
-  * **Identifier**
-  * **String**
-  * **Integer**
-  * **Boolean**
-* **Variable**
-  Variable names **must** begin with an uppercase letter followed by any number of Unicode letters,
-  numbers, or the underscore `_` character.
+**Programs**
 
 ```abnf
-program         = *[ element ]
-element         = statement / query
-statement       = ( fact / rule ) "."
-query           = ( "?-" query "." ) / ( query "?" )
+program         = *[ fact ] *[ rule ] *[ query ]
+```
+
+**Facts**
+
+```abnf
 fact            = predicate [ constant_list ] "."
-rule            = atom ":-" [ literal_list ] "."
-constant_list   = "(" [ constant *[ "," constant ] ] ")"
-constant        = identifier / string / integer / boolean
-literal_list    = literal *[ conjunction literal ]
-literal         = [ negation ] atom / expression
-atom            = predicate "(" term *[ "," term ] ")"
-expression      = term [ operator term ]
-term_list       = "(" [ term *[ "," term ] ] ")"
-term            = variable / constant
-operator        = "=" / "!=" / "<" / "<=" / ">" / ">="
 predicate       = LC_ALPHA *[ ALPHA / DIGIT / "_" ]
-variable        = UC_ALPHA *[ ALPHA / DIGIT / "_" ]
-identifier      = ALPHA *[ ALPHA / DIGIT / "_" ]
-string          = DQUOTE ... DQUOTE
-conjunction     = "," / "AND" / "∧"
-negation        = "!" / "NOT" / "￢"
+constant_list   = "(" [ constant *[ "," constant ] ] ")"
+```
+
+**Constant Values**
+
+```abnf
+constant        = string / integer / boolean
+string          = short_string / quoted_string
+short_string    = predicate [ ":" ALPHA *[ ALPHA / DIGIT / "_" ] ]
+quoted_string   = DQUOTE ... DQUOTE
+integer         = +DIGIT
+boolean         = "@true" / "@false"
+```
+
+**Rules**
+
+```abnf
+rule            = atom implication [ literal_list ] "."
+implication     = ":-" / "<-"
+```
+
+**Atoms**
+
+```abnf
+atom            = predicate term_list
+term_list       = "(" term *[ "," term ] ")"
+term            = variable / constant
+variable        = named_variable / anon_variable
+named_variable  = UC_ALPHA *[ ALPHA / DIGIT / "_" ]
+anon_variable   = "_"
+```
+
+**Literals**
+
+```abnf
+literal_list    = literal *[ conjunction literal ]
+literal         = [ negation ] atom / comparison
+negation        = "!" / "NOT"
+conjunction     = "," / "AND"
+```
+
+**Comparisons**
+
+```abnf
+comparison      = term [ operator term ]
+operator        = "=" / "!=" / "<" / "<=" / ">" / ">="
+```
+
+**Queries**
+
+```abnf
+query           = ( "?-" atom "." ) / ( atom "?" )
 ```
 
 [Augmented BNF for Syntax Specifications: ABNF](https://datatracker.ietf.org/doc/html/rfc5234)
