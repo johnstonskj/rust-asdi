@@ -23,7 +23,7 @@ prettytable-rs = { version = "0.8", optional = true }
 
 [dev-dependencies]
 pretty_assertions = "1.0"
-proptest = "0.10"
+proptest = "1.0"
 
 [package.metadata.docs.rs]
 rustdoc-args = [ "--html-in-header", "doc-src/header.html" ]
