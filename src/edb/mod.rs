@@ -21,9 +21,12 @@ fact(str:Short).
 */
 
 use crate::error::{Error, Result};
-use crate::idb::Atom;
+use crate::idb::{Atom, Term};
 use crate::query::{Matches, Query, View};
-use crate::syntax::{CHAR_UNDERSCORE, TYPE_NAME_PREDICATE};
+use crate::syntax::{
+    CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, RESERVED_PRAGMA_DECLARE,
+    RESERVED_PREFIX, TYPE_NAME_PREDICATE,
+};
 use std::collections::BTreeMap;
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
@@ -41,6 +44,32 @@ pub struct Database {
 pub trait DbValidation {
     fn validate(&self, against: &mut Database) -> Result<()>;
 }
+
+///
+/// A fact is a simple statement that is either a [_predicate_](enum.Predicate.html) on it's own,
+/// or a _predicate_ with one or more [_constant_](enum.Constant.html) arguments.
+///
+/// # Examples
+///
+/// Note that predicate identifiers always start with a lowercase character, and constants may be
+/// identifiers, double-quoted string, integer, or boolean values.
+///
+/// ```prolog
+/// predicate.
+/// predicate(id, id).
+/// predicate("str", 1).
+/// predicate(id, "str").
+/// ```
+///
+/// A predicate may be an identifier, or a string, as shown in the following.
+///
+/// ```prolog
+/// name(id, "Socrates").
+/// "known as"(id, "Socrates").
+/// ```
+///
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Relation(BaseRelation<Predicate>);
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Predicate(String);
@@ -213,6 +242,101 @@ impl Database {
 
 // ------------------------------------------------------------------------------------------------
 
+impl Display for Relation {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Matches for Relation {
+    fn matches(&self, atom: &Atom) -> View {
+        assert_eq!(atom.predicate(), self.name());
+        self.0.matches(atom)
+    }
+
+    #[allow(single_use_lifetimes)]
+    fn match_terms<'a, V: Into<Vec<&'a Term>>>(&self, terms: V) -> View {
+        self.0.match_terms(terms)
+    }
+}
+
+impl Relation {
+    pub fn new<V: Into<Schema<Predicate>>>(name: Predicate, schema: V) -> Self {
+        Self(BaseRelation::new_named(name, schema))
+    }
+
+    pub fn clone_with_schema_only(&self) -> Self {
+        Self(BaseRelation::clone_with_schema_only(&self.0))
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    pub fn name(&self) -> &Predicate {
+        self.0.name().unwrap()
+    }
+
+    pub fn is_anonymous(&self) -> bool {
+        self.0.is_anonymous()
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    pub fn schema(&self) -> &Schema<Predicate> {
+        self.0.schema()
+    }
+
+    pub fn arity(&self) -> usize {
+        self.0.arity()
+    }
+
+    pub fn has_attribute<I: Into<AttributeIndex<Predicate>>>(&self, index: I) -> bool {
+        self.0.has_attribute(index)
+    }
+
+    pub(crate) fn update_schema(&mut self, other: &Self) {
+        self.0.update_schema(&other.0)
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn facts(&self) -> impl Iterator<Item = Fact<'_, Predicate>> + '_ {
+        self.0.facts()
+    }
+
+    pub fn add<V: Into<Vec<Constant>>>(&mut self, fact: V) -> Result<()> {
+        self.0.add(fact)
+    }
+
+    pub fn extend(&mut self, other: Self) -> Result<()> {
+        self.0.extend(other.0)
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    pub fn to_schema_decl(&self) -> String {
+        format!(
+            "{}{} {}{}{}{}{}",
+            RESERVED_PREFIX,
+            RESERVED_PRAGMA_DECLARE,
+            self.0.name().map(|n| n.to_string()).unwrap_or_default(),
+            CHAR_LEFT_PAREN,
+            self.0.schema().to_string(),
+            CHAR_RIGHT_PAREN,
+            CHAR_PERIOD
+        )
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
 impl Display for Predicate {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
@@ -271,9 +395,7 @@ pub use constant::Constant;
 
 mod relation;
 pub(crate) use relation::BaseRelation;
-pub use relation::{
-    Attribute, AttributeIndex, AttributeKind, AttributeName, Fact, Relation, Schema,
-};
+pub use relation::{Attribute, AttributeIndex, AttributeKind, AttributeName, Fact, Schema};
 
 // ------------------------------------------------------------------------------------------------
 // Unit Tests
