@@ -1,4 +1,4 @@
-use crate::edb::{Attribute, Database, DbValidation, Predicate, Relation};
+use crate::edb::{Attribute, Database, DbValidation, Predicate, Relation, Schema};
 use crate::error::Result;
 use crate::features::FeatureSet;
 use crate::idb::{Atom, Literal, Rule, Term, Variable};
@@ -122,12 +122,13 @@ impl Program {
         self.database_mut().add(relation)
     }
 
-    pub fn add_new_relation<V: Into<Vec<Attribute<Predicate>>>>(
+    pub fn add_new_relation<V: Into<Schema<Predicate>>>(
         &mut self,
         predicate: Predicate,
         schema: V,
     ) -> Result<&mut Relation> {
-        self.database_mut().add_new_relation(predicate, schema)
+        self.database_mut()
+            .add_new_relation(predicate, schema.into())
     }
 
     // --------------------------------------------------------------------------------------------

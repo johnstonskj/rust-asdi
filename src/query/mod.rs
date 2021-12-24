@@ -50,7 +50,7 @@ use crate::error::Result;
 use crate::idb::Term;
 use crate::idb::{Atom, Variable};
 use crate::syntax::{CHAR_PERIOD, QUERY_PREFIX_ASCII};
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -120,11 +120,11 @@ impl Matches for View {
 }
 
 impl View {
-    pub fn new<V: Into<Vec<Attribute<Variable>>>>(schema: V) -> Self {
+    pub fn new<V: Into<Schema<Variable>>>(schema: V) -> Self {
         Self(BaseRelation::new(schema))
     }
 
-    pub fn new_with_facts<V: Into<Vec<Attribute<Variable>>>, C: Into<Vec<Vec<Constant>>>>(
+    pub fn new_with_facts<V: Into<Schema<Variable>>, C: Into<Vec<Vec<Constant>>>>(
         schema: V,
         facts: C,
     ) -> Self {
@@ -209,7 +209,7 @@ impl View {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn join_all<V: Into<Vec<Self>>>(views: V) -> Result<Self> {
+    pub fn join_all<V: Into<Vec<Self>> + Debug>(views: V) -> Result<Self> {
         Ok(Self(BaseRelation::join_all(
             views
                 .into()

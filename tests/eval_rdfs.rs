@@ -73,7 +73,7 @@ triple(P, "rdf:type", "rdfs:Class") :- triple(_, "rdfs:subPropertyOf", P).
 
     let results = evaluator.inference(&program, program.database());
 
-    program.database_mut().merge(results.unwrap());
+    program.database_mut().merge(results.unwrap()).unwrap();
 
     print!("{}", program);
 }

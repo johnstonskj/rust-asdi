@@ -25,8 +25,9 @@ use crate::idb::Atom;
 use crate::query::{Matches, Query, View};
 use crate::syntax::{CHAR_UNDERSCORE, TYPE_NAME_PREDICATE};
 use std::collections::BTreeMap;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
+use tracing::trace;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -97,23 +98,31 @@ impl Database {
     }
 
     pub fn add(&mut self, relation: Relation) {
-        if let Some(existing) = self.relations.get_mut(&relation.name()) {
+        if let Some(existing) = self.relations.get_mut(relation.name()) {
             existing.update_schema(&relation);
-            existing.extend(relation);
+            existing.extend(relation).unwrap();
         } else {
             self.relations.insert(relation.name().clone(), relation);
         }
     }
 
-    pub fn add_new_relation<V: Into<Vec<Attribute<Predicate>>>>(
+    pub fn add_new_relation<V: Into<Schema<Predicate>> + Debug>(
         &mut self,
         predicate: Predicate,
         schema: V,
     ) -> Result<&mut Relation> {
+        trace!(
+            "add_new_relation > predicate: {}, schema: {:?}",
+            predicate,
+            schema
+        );
+        let predicate = predicate;
         if self.relations.contains_key(&predicate) {
             Error::RelationExists(predicate).into()
         } else {
-            self.add(Relation::new(predicate.clone(), schema));
+            let relation = Relation::new(predicate.clone(), schema);
+            trace!("add_new_relation < relation: {:?}", relation);
+            self.add(relation);
             Ok(self.relation_mut(&predicate).unwrap())
         }
     }
@@ -156,6 +165,11 @@ impl Database {
 
     pub fn matches(&self, atom: &Atom) -> View {
         if let Some(relation) = self.relation(atom.predicate()) {
+            trace!(
+                "matches > predicate: {}, relation: {:?}",
+                atom.predicate(),
+                relation.name()
+            );
             let results = relation.matches(atom);
             if atom.variables().count() == 0 {
                 // if all attributes are constant it is a presence query, not a selection.

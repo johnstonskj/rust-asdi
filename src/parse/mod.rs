@@ -278,9 +278,7 @@ fn parse_fact(
         edb.relation_mut(&predicate).unwrap()
     };
 
-    relation.add(attributes);
-
-    Ok(())
+    relation.add(attributes)
 }
 
 fn parse_rule(

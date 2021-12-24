@@ -68,18 +68,23 @@ impl Evaluator for NaiveEvaluator {
         //
         if program.is_positive() {
             let mut new_db = edb.clone_with_schema_only();
+            trace!("infer > new_db > {:?}", new_db);
             loop {
                 let start = new_db.fact_count();
                 for rule in program.rules() {
                     trace!("infer > rule > {}", rule);
-                    let matches: Vec<View> = rule
+                    let matches: Result<Vec<View>> = rule
                         .literals()
                         .map(|l| {
                             let mut table = edb.matches(l.as_atom().unwrap());
-                            table.extend(new_db.matches(l.as_atom().unwrap()));
-                            table
+                            trace!("infer > matches > table > {:#?}", table);
+                            table.extend(new_db.matches(l.as_atom().unwrap()))?;
+                            trace!("infer > matches > table (extended) > {:#?}", table);
+                            Ok(table)
                         })
                         .collect();
+                    // TODO: Propagate errors!
+                    let matches = matches.unwrap();
                     if matches.iter().all(|result| !result.is_empty()) {
                         // else: not all sub-goals satisfied
                         matches.iter().for_each(|in_table| {
@@ -106,7 +111,7 @@ impl Evaluator for NaiveEvaluator {
                                 })
                                 .cloned()
                                 .collect::<Vec<Constant>>();
-                            relation.add(new_fact);
+                            relation.add(new_fact)?;
                         }
                     }
                 }

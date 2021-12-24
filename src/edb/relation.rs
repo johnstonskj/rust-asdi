@@ -9,7 +9,7 @@ More detailed description, with
 
 use crate::edb::{Constant, Predicate};
 use crate::error::{Error, Result};
-use crate::idb::Atom;
+use crate::idb::{Atom, Comparison};
 use crate::idb::{Term, Variable};
 use crate::query::{Matches, View};
 use crate::syntax::{
@@ -17,7 +17,7 @@ use crate::syntax::{
     RESERVED_PRAGMA_DECLARE, RESERVED_PREFIX, TYPE_NAME_CONST_UNKNOWN,
 };
 use std::borrow::Cow;
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
 use tracing::{error, trace};
@@ -143,7 +143,7 @@ impl Matches for Relation {
 }
 
 impl Relation {
-    pub fn new<V: Into<Vec<Attribute<Predicate>>>>(name: Predicate, schema: V) -> Self {
+    pub fn new<V: Into<Schema<Predicate>>>(name: Predicate, schema: V) -> Self {
         Self(BaseRelation::new_named(name, schema))
     }
 
@@ -164,7 +164,7 @@ impl Relation {
     // --------------------------------------------------------------------------------------------
 
     pub fn schema(&self) -> &Schema<Predicate> {
-        &self.0.schema()
+        self.0.schema()
     }
 
     pub fn arity(&self) -> usize {
@@ -247,13 +247,32 @@ where
 }
 
 #[cfg(not(feature = "tabular"))]
-impl<T> Display for BaseRelation<T> {
+impl<T> Display for BaseRelation<T>
+where
+    T: AttributeName,
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "| {} |", self.schema.iter().join(" | "))?;
+        writeln!(
+            f,
+            "| {} |",
+            self.schema
+                .iter()
+                .map(|a| a.to_string())
+                .collect::<Vec<String>>()
+                .join(" | ")
+        )?;
 
         for row in self.iter() {
-            writeln!(f, "| {} |", row.join(" | "))?;
+            writeln!(
+                f,
+                "| {} |",
+                row.iter()
+                    .map(|a| a.to_string())
+                    .collect::<Vec<String>>()
+                    .join(" | ")
+            )?;
         }
+        Ok(())
     }
 }
 
@@ -269,36 +288,36 @@ where
         }
     }
 
-    pub(crate) fn new<V: Into<Vec<Attribute<T>>>>(schema: V) -> Self {
+    pub(crate) fn new<V: Into<Schema<T>>>(schema: V) -> Self {
         Self {
             name: None,
-            schema: Schema::from(schema.into()),
+            schema: schema.into(),
             facts: Default::default(),
         }
     }
 
-    pub(crate) fn new_named<V: Into<Vec<Attribute<T>>>>(name: Predicate, schema: V) -> Self {
+    pub(crate) fn new_named<V: Into<Schema<T>>>(name: Predicate, schema: V) -> Self {
         Self {
             name: Some(name),
-            schema: Schema::from(schema.into()),
+            schema: schema.into(),
             facts: Default::default(),
         }
     }
 
-    pub(crate) fn new_with_facts<V: Into<Vec<Attribute<T>>>, C: Into<Vec<Vec<Constant>>>>(
+    pub(crate) fn new_with_facts<V: Into<Schema<T>>, C: Into<Vec<Vec<Constant>>>>(
         schema: V,
         facts: C,
     ) -> Self {
         Self {
             name: None,
-            schema: Schema::from(schema.into()),
+            schema: schema.into(),
             facts: HashSet::from_iter(facts.into()),
         }
     }
 
     pub(crate) fn clone_with_schema_only(&self) -> Self {
         Self {
-            name: None,
+            name: self.name.clone(),
             schema: self.schema.clone(),
             facts: Default::default(),
         }
@@ -337,25 +356,18 @@ where
         self.schema
             .iter_mut()
             .zip(other.schema().iter())
-            .for_each(|(left, right)| {
-                if let (None, Some(v)) = (&left.name, &right.name) {
-                    left.name = Some(v.clone())
-                }
-                if let (None, Some(v)) = (left.kind, right.kind) {
-                    left.kind = Some(v)
-                }
-            })
+            .for_each(|(left, right)| left.update_from(right))
     }
 
     pub(crate) fn conforms(&self, fact: &[Constant]) -> bool {
         self.schema
             .iter()
             .map(|a| a.kind())
-            .collect::<Vec<Option<AttributeKind>>>()
-            == fact
-                .iter()
-                .map(|c| Some(c.kind()))
-                .collect::<Vec<Option<AttributeKind>>>()
+            .zip(fact.iter())
+            .all(|(attribute, constant)| match attribute {
+                None => true,
+                Some(kind) => kind == constant.kind(),
+            })
     }
 
     // --------------------------------------------------------------------------------------------
@@ -383,7 +395,7 @@ where
         if self.conforms(&fact) {
             self.facts.insert(fact);
         } else {
-            println!("{} ?= {:?}", self.schema(), fact);
+            error!("Provided row does not conform to schema.");
             // TODO: propagate errors
             panic!();
         }
@@ -391,7 +403,9 @@ where
     }
 
     pub(crate) fn extend(&mut self, other: Self) -> Result<()> {
+        trace!("extend > name {:?} == {:?}", self.name, other.name);
         assert_eq!(self.name, other.name);
+        trace!("extend > schema {:?} == {:?}", self.schema, other.schema);
         assert_eq!(self.schema, other.schema);
         for fact in other.facts.into_iter() {
             self.add(fact)?;
@@ -399,7 +413,7 @@ where
         Ok(())
     }
 
-    fn contains(&self, fact: &[Constant]) -> bool {
+    pub(crate) fn contains(&self, fact: &[Constant]) -> bool {
         self.facts.contains(fact)
     }
 
@@ -419,9 +433,16 @@ where
         View::new_with_facts(
             terms
                 .iter()
-                .map(|term| match term {
-                    Term::Variable(v) => Attribute::from(v.clone()),
-                    Term::Constant(_) => Attribute::anonymous(),
+                .enumerate()
+                .map(|(i, term)| {
+                    let mut term = match term {
+                        Term::Variable(v) => Attribute::from(v.clone()),
+                        Term::Constant(v) => Attribute::typed(v.kind()),
+                    };
+                    if term.kind.is_none() {
+                        term.kind = self.schema().get(i).unwrap().kind();
+                    }
+                    term
                 })
                 .collect::<Vec<Attribute<Variable>>>(),
             self.facts
@@ -446,8 +467,68 @@ where
 
     // --------------------------------------------------------------------------------------------
 
-    pub(crate) fn select(&self, equalities: HashMap<AttributeIndex<T>, Constant>) -> Self {
+    pub(crate) fn select(&self, _comparisons: &[Comparison]) -> Self {
         todo!()
+    }
+
+    pub(crate) fn select_attributes(&self, attributes: HashSet<AttributeIndex<T>>) -> Self {
+        let selection: Vec<usize> = attributes
+            .iter()
+            .map(|a| {
+                assert!(self.schema().contains(a.clone()));
+                match a {
+                    AttributeIndex::Name(n) => self.schema().name_to_index(n).unwrap(),
+                    AttributeIndex::Index(i) => *i,
+                }
+            })
+            .collect();
+        self.select_attributes_by_index(&selection)
+    }
+
+    pub(crate) fn select_attributes_by_index(&self, attributes: &[usize]) -> Self {
+        let schema = Schema::new(
+            self.schema
+                .iter()
+                .enumerate()
+                .filter_map(|(i, attr)| {
+                    if attributes.contains(&i) {
+                        Some(attr)
+                    } else {
+                        None
+                    }
+                })
+                .cloned()
+                .collect::<Vec<Attribute<T>>>(),
+        );
+
+        let facts: Vec<Vec<Constant>> = self
+            .iter()
+            .map(|row| {
+                row.iter()
+                    .enumerate()
+                    .filter_map(|(i, attr)| {
+                        if attributes.contains(&i) {
+                            Some(attr)
+                        } else {
+                            None
+                        }
+                    })
+                    .cloned()
+                    .collect::<Vec<Constant>>()
+            })
+            .collect();
+
+        Self::new_with_facts(schema, facts)
+    }
+
+    pub(crate) fn select_only_named(&self) -> Self {
+        let selection: Vec<usize> = self
+            .schema
+            .iter()
+            .enumerate()
+            .filter_map(|(i, c)| if !c.is_anonymous() { Some(i) } else { None })
+            .collect();
+        self.select_attributes_by_index(&selection)
     }
 
     pub(crate) fn project<A: Into<AttributeIndex<T>>>(&self, attributes: Vec<A>) -> Self {
@@ -497,9 +578,7 @@ where
         let mut views = views.into();
         assert!(!views.is_empty());
         if views.len() == 1 {
-            let mut result = views.remove(0);
-            result.reduce();
-            Ok(result)
+            Ok(views.remove(0))
         } else {
             let mut views = views.into_iter();
             let mut result = views.next().unwrap();
@@ -511,9 +590,16 @@ where
     }
 
     pub(crate) fn join(&self, other: &Self) -> Result<Self> {
-        let mut new_table: Self = Self::new(self.schema().name_union(other.schema()));
+        let mut new_table: Self = Self::new(
+            self.schema()
+                .name_union(other.schema())
+                .into_iter()
+                .map(|n| Attribute::from(n))
+                .collect::<Vec<Attribute<T>>>(),
+        );
         let common_variables = self.schema().name_intersection(other.schema());
 
+        // TODO: infer attribute types for new results!
         for left_row in self.iter() {
             for right_row in other.filter(
                 common_variables
@@ -536,36 +622,46 @@ where
                         unreachable!()
                     }
                 }
-                // TODO: propagate errors
-                new_table.add(new_row);
+                new_table.add(new_row)?;
             }
         }
         Ok(new_table)
     }
-
-    fn reduce(&mut self) {
-        let mut remove: Vec<usize> = self
-            .schema
-            .iter()
-            .enumerate()
-            .filter_map(|(i, c)| if c.is_anonymous() { Some(i) } else { None })
-            .collect();
-        trace!("reduce > remove (before)\n{:?}", remove);
-        remove.sort_by(|a, b| b.cmp(a));
-        trace!("reduce > remove (after)\n{:?}", remove);
-        for row in &mut self.iter() {
-            for col in &remove {
-                row.remove(*col);
-            }
-        }
-        self.schema = Schema::new(
-            self.schema
-                .iter()
-                .filter(|col| !col.is_anonymous())
-                .cloned()
-                .collect::<Vec<Attribute<T>>>(),
-        );
-    }
+    //
+    // fn remove_anonymous_attributes(&mut self) {
+    //     let mut remove: Vec<usize> = self
+    //         .schema
+    //         .iter()
+    //         .enumerate()
+    //         .filter_map(|(i, c)| if c.is_anonymous() { Some(i) } else { None })
+    //         .collect();
+    //     trace!("reduce > remove (before)\n{:?}", remove);
+    //     remove.sort_by(|a, b| b.cmp(a));
+    //     trace!("reduce > remove (after)\n{:?}", remove);
+    //
+    //     let mut result: HashSet<Vec<Constant>> = HashSet::with_capacity(self.facts.len());
+    //     for mut row in self.facts.drain() {
+    //         mutator(&mut row)?;
+    //         result.insert(row);
+    //     }
+    //     self.facts = result;
+    //
+    //
+    //     self.mutate(|row| {
+    //         for col in &remove {
+    //             row.remove(*col);
+    //         }
+    //         Ok(())
+    //     })
+    //     .unwrap();
+    //     self.schema = Schema::new(
+    //         self.schema
+    //             .iter()
+    //             .filter(|col| !col.is_anonymous())
+    //             .cloned()
+    //             .collect::<Vec<Attribute<T>>>(),
+    //     );
+    // }
 
     fn filter(&self, values: Vec<(Constant, usize)>) -> impl Iterator<Item = &Vec<Constant>> {
         self.iter()
@@ -610,27 +706,40 @@ where
     }
 }
 
-impl<T> From<T> for Schema<T>
-where
-    T: AttributeName,
-{
-    fn from(v: T) -> Self {
-        Self::new(vec![Attribute::from(v)])
-    }
-}
-
-impl<T> From<Vec<T>> for Schema<T>
-where
-    T: AttributeName,
-{
-    fn from(vs: Vec<T>) -> Self {
-        Self::new(
-            vs.into_iter()
-                .map(Attribute::from)
-                .collect::<Vec<Attribute<T>>>(),
-        )
-    }
-}
+// impl<T> From<Vec<AttributeKind>> for Schema<T>
+// where
+//     T: AttributeName,
+// {
+//     fn from(cs: Vec<AttributeKind>) -> Self {
+//         Self::new(
+//             cs.into_iter()
+//                 .map(|k| Attribute::from(k))
+//                 .collect::<Vec<Attribute<T>>>(),
+//         )
+//     }
+// }
+//
+// impl<T> From<T> for Schema<T>
+// where
+//     T: AttributeName,
+// {
+//     fn from(v: T) -> Self {
+//         Self::new(vec![Attribute::from(v)])
+//     }
+// }
+//
+// impl<T> From<Vec<T>> for Schema<T>
+// where
+//     T: AttributeName,
+// {
+//     fn from(vs: Vec<T>) -> Self {
+//         Self::new(
+//             vs.into_iter()
+//                 .map(Attribute::from)
+//                 .collect::<Vec<Attribute<T>>>(),
+//         )
+//     }
+// }
 
 impl<T> Schema<T>
 where
@@ -760,10 +869,7 @@ where
     T: AttributeName,
 {
     fn from(kind: AttributeKind) -> Self {
-        Self {
-            name: None,
-            kind: Some(kind),
-        }
+        Self::typed(kind)
     }
 }
 
@@ -772,10 +878,7 @@ where
     T: AttributeName,
 {
     fn from(name: T) -> Self {
-        Self {
-            name: Some(name),
-            kind: None,
-        }
+        Self::named(name)
     }
 }
 
@@ -783,24 +886,53 @@ impl<T> Attribute<T>
 where
     T: AttributeName,
 {
-    pub fn new(name: T, kind: AttributeKind) -> Self {
-        Self {
-            name: Some(name),
-            kind: Some(kind),
-        }
+    pub fn anonymous() -> Self {
+        Self::new_inner(None, None)
     }
 
-    pub fn new_inner<P: Into<Option<T>>, K: Into<Option<AttributeKind>>>(name: P, kind: K) -> Self {
+    pub fn named(name: T) -> Self {
+        Self::new_inner(name, None)
+    }
+
+    pub fn typed(kind: AttributeKind) -> Self {
+        Self::new_inner(None, kind)
+    }
+
+    pub fn string() -> Self {
+        Self::new_inner(None, AttributeKind::String)
+    }
+
+    pub fn string_named(name: T) -> Self {
+        Self::new_inner(name, AttributeKind::String)
+    }
+
+    pub fn integer() -> Self {
+        Self::new_inner(None, AttributeKind::Integer)
+    }
+
+    pub fn integer_named(name: T) -> Self {
+        Self::new_inner(name, AttributeKind::Integer)
+    }
+
+    pub fn boolean() -> Self {
+        Self::new_inner(None, AttributeKind::Boolean)
+    }
+
+    pub fn boolean_named(name: T) -> Self {
+        Self::new_inner(name, AttributeKind::Boolean)
+    }
+
+    pub fn new(name: T, kind: AttributeKind) -> Self {
+        Self::new_inner(name, kind)
+    }
+
+    pub(crate) fn new_inner<P: Into<Option<T>>, K: Into<Option<AttributeKind>>>(
+        name: P,
+        kind: K,
+    ) -> Self {
         Self {
             name: name.into(),
             kind: kind.into(),
-        }
-    }
-
-    pub fn anonymous() -> Self {
-        Self {
-            name: None,
-            kind: None,
         }
     }
 
@@ -818,6 +950,15 @@ where
 
     pub fn is_untyped(&self) -> bool {
         self.kind.is_none()
+    }
+
+    pub fn update_from(&mut self, other: &Self) {
+        if let (None, Some(v)) = (&self.name, &other.name) {
+            self.name = Some(v.clone())
+        }
+        if let (None, Some(v)) = (self.kind, other.kind) {
+            self.kind = Some(v)
+        }
     }
 }
 
@@ -949,7 +1090,7 @@ impl<'a, T> Fact<'a, T>
 where
     T: AttributeName,
 {
-    pub fn new(from: &'a BaseRelation<T>, values: Cow<'a, Vec<Constant>>) -> Self {
+    pub(crate) fn new(from: &'a BaseRelation<T>, values: Cow<'a, Vec<Constant>>) -> Self {
         Self { from, values }
     }
 

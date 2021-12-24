@@ -1,7 +1,7 @@
+use asdi::edb::{Attribute, Predicate};
 use asdi::idb::{Atom, Term, Variable};
+use asdi::program::Program;
 use asdi::query::Query;
-use asdi::r#mod::{AttributeKind, Predicate};
-use asdi::Program;
 use std::str::FromStr;
 
 pub mod common;
@@ -18,11 +18,11 @@ fn test_wikipedia_example() {
         let parent = ancestors
             .add_new_relation(
                 parent_predicate.clone(),
-                [AttributeKind::String.into(), AttributeKind::String.into()],
+                vec![Attribute::string(), Attribute::string()],
             )
             .unwrap();
-        parent.add(["xerces".into(), "brooke".into()]);
-        parent.add(["brooke".into(), "damocles".into()]);
+        parent.add(["xerces".into(), "brooke".into()]).unwrap();
+        parent.add(["brooke".into(), "damocles".into()]).unwrap();
     };
 
     let ancestor_predicate = Predicate::from_str("ancestor").unwrap();
@@ -30,7 +30,7 @@ fn test_wikipedia_example() {
         let _ = ancestors
             .add_new_relation(
                 ancestor_predicate.clone(),
-                [AttributeKind::String.into(), AttributeKind::String.into()],
+                vec![Attribute::string(), Attribute::string()],
             )
             .unwrap();
     };
@@ -58,7 +58,7 @@ fn test_wikipedia_example() {
         .unwrap();
 
     ancestors
-        .add_new_query(ancestor_predicate.clone(), ["xerces".into(), var_x])
+        .add_new_query(ancestor_predicate, ["xerces".into(), var_x])
         .unwrap();
 
     println!(">{}<", ancestors);
@@ -90,13 +90,13 @@ fn test_sourceforge_example() {
         let edge = graph
             .add_new_relation(
                 edge_predicate.clone(),
-                [AttributeKind::String.into(), AttributeKind::String.into()],
+                vec![Attribute::string(), Attribute::string()],
             )
             .unwrap();
-        edge.add(["a".into(), "b".into()]);
-        edge.add(["b".into(), "c".into()]);
-        edge.add(["c".into(), "d".into()]);
-        edge.add(["d".into(), "a".into()]);
+        edge.add(["a".into(), "b".into()]).unwrap();
+        edge.add(["b".into(), "c".into()]).unwrap();
+        edge.add(["c".into(), "d".into()]).unwrap();
+        edge.add(["d".into(), "a".into()]).unwrap();
     }
 
     let path_predicate = Predicate::from_str("path").unwrap();
@@ -104,7 +104,7 @@ fn test_sourceforge_example() {
         let _ = graph
             .add_new_relation(
                 path_predicate.clone(),
-                [AttributeKind::String.into(), AttributeKind::String.into()],
+                vec![Attribute::string(), Attribute::string()],
             )
             .unwrap();
     }
@@ -126,13 +126,13 @@ fn test_sourceforge_example() {
             path_predicate.clone(),
             [var_x.clone(), var_y.clone()],
             [
-                Atom::new(edge_predicate.clone(), [var_x.clone(), var_z.clone()]).into(),
+                Atom::new(edge_predicate, [var_x.clone(), var_z.clone()]).into(),
                 Atom::new(path_predicate.clone(), [var_z, var_y.clone()]).into(),
             ],
         )
         .unwrap();
 
-    let query = Query::new(path_predicate.clone(), vec![var_x, var_y]);
+    let query = Query::new(path_predicate, vec![var_x, var_y]);
     graph.add_query(query).unwrap();
 
     println!("{}", graph);
@@ -163,9 +163,9 @@ fn test_that_syllogism() {
     let p_human = Predicate::from_str("human").unwrap();
 
     let human = syllogism
-        .add_new_relation(p_human.clone(), [AttributeKind::String.into()])
+        .add_new_relation(p_human.clone(), vec![Attribute::string()])
         .unwrap();
-    human.add(["Socrates".into()]);
+    human.add(["Socrates".into()]).unwrap();
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
 

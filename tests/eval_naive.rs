@@ -1,9 +1,9 @@
+use asdi::edb::Predicate;
 use asdi::eval::naive::NaiveEvaluator;
 use asdi::eval::Evaluator;
 use asdi::idb::Variable;
 use asdi::parse::parse_str;
 use asdi::query::Query;
-use asdi::r#mod::Predicate;
 use std::str::FromStr;
 
 #[test]
@@ -46,7 +46,7 @@ mortal(X) <- human(X).
 
     let results = evaluator.inference(&program, program.database());
 
-    program.database_mut().merge(results.unwrap());
+    program.database_mut().merge(results.unwrap()).unwrap();
 
     assert_eq!(
         program
@@ -129,7 +129,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
 
     let results = evaluator.inference(&program, program.database());
 
-    program.database_mut().merge(results.unwrap());
+    program.database_mut().merge(results.unwrap()).unwrap();
 
     assert_eq!(
         program
@@ -205,7 +205,7 @@ path(X, Y) ⟵ edge(X, Z) ⋀ path(Z, Y).
 
     let results = evaluator.inference(&program, program.database());
 
-    program.database_mut().merge(results.unwrap());
+    program.database_mut().merge(results.unwrap()).unwrap();
 
     assert_eq!(
         program
