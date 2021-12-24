@@ -1,3 +1,12 @@
+/*!
+One-line description.
+
+More detailed description, with
+
+# Example
+
+ */
+
 use crate::edb::{Attribute, Database, DbValidation, Predicate, Relation, Schema};
 use crate::error::Result;
 use crate::features::FeatureSet;
