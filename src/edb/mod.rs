@@ -397,6 +397,8 @@ mod relation;
 pub(crate) use relation::BaseRelation;
 pub use relation::{Attribute, AttributeIndex, AttributeKind, AttributeName, Fact, Schema};
 
+pub mod io;
+
 // ------------------------------------------------------------------------------------------------
 // Unit Tests
 // ------------------------------------------------------------------------------------------------
