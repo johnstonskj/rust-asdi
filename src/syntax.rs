@@ -39,6 +39,7 @@ pub(crate) const RESERVED_PRAGMA_OUTPUT: &str = "output";
 
 pub(crate) const PRAGMA_FEATURE_NEGATION: &str = "negation";
 pub(crate) const PRAGMA_FEATURE_COMPARISONS: &str = "comparisons";
+pub(crate) const PRAGMA_FEATURE_CONSTRAINTS: &str = "constraints";
 pub(crate) const PRAGMA_FEATURE_DISJUNCTION: &str = "disjunction";
 
 // ------------------------------------------------------------------------------------------------
@@ -58,6 +59,9 @@ pub(crate) const DISJUNCTION_ASCII: &str = ";";
 pub(crate) const DISJUNCTION_ASCII_SYMBOL: &str = "|";
 pub(crate) const DISJUNCTION_ASCII_WORD: &str = "OR";
 pub(crate) const DISJUNCTION_UNICODE_SYMBOL: &str = "⋁";
+
+pub(crate) const TRUE_UNICODE_SYMBOL: &str = "⊤";
+pub(crate) const FALSE_UNICODE_SYMBOL: &str = "⊥";
 
 pub(crate) const NOT_ASCII_SYMBOL: &str = "!";
 pub(crate) const NOT_ASCII_WORD: &str = "NOT";
@@ -88,6 +92,7 @@ pub(crate) const CHAR_PERIOD: char = '.';
 pub(crate) const CHAR_COLON: char = ':';
 pub(crate) const CHAR_COMMA: char = ',';
 pub(crate) const CHAR_UNDERSCORE: char = '_';
+pub(crate) const CHAR_SEMI_COLON: char = ';';
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants

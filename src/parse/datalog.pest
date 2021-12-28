@@ -15,9 +15,20 @@ fact = {
 }
 
 rule = {
-    // FEATURE: disjunction
-    atom ~ ( disjunction ~ atom )* ~ ( material_implication ~ literal_list )? ~ DOT
+    rule_head? ~ material_implication ~ rule_body ~ DOT
 }
+
+rule_head = {
+    // FEATURE: !!!
+    "⊥"
+             // FEATURE: disjunction
+    | atom ~ ( disjunction ~ atom )*
+}
+
+rule_body = {
+    literal_list
+}
+
 
 query = {
     ( query_prefix ~ atom ~ DOT )
@@ -185,7 +196,6 @@ number = @{
 }
 
 boolean = @{
-    "⊤" | "⊥" |
     AT_SIGN ~ ( "true" | "false" )
 }
 
@@ -208,7 +218,7 @@ conjunction = _{
 }
 
 disjunction = {
-    UC_LOGICAL_OR | VERTICAL_BAR | "OR"
+    SEMI_COLON | UC_LOGICAL_OR | VERTICAL_BAR | "OR"
 }
 
 query_prefix = _{
@@ -282,6 +292,8 @@ QMARK = _{ "?" }
 AT_SIGN = _{ "@" }
 
 COLON = _{ ":" }
+
+SEMI_COLON = _{ ";" }
 
 // ------------------------------------------------------------------------------------------------
 // Built-in rules

@@ -33,13 +33,21 @@ mother(X, Y) ∨ father(X, Y) :- parent(X, Y).
 ```
 
 
+## Constraints
+
+```datalog
+@features(constraints).
+⊤ :- dead(X) AND alive(X).
+:- dead(X) AND alive(X).
+```
+
 */
 
 use crate::syntax::{
     CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DEFAULT_LANGUAGE_NAME,
-    DISJUNCTION_UNICODE_SYMBOL, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
-    PRAGMA_FEATURE_COMPARISONS, PRAGMA_FEATURE_DISJUNCTION, PRAGMA_FEATURE_NEGATION,
-    RESERVED_PRAGMA_FEATURE, RESERVED_PREFIX,
+    DISJUNCTION_UNICODE_SYMBOL, FALSE_UNICODE_SYMBOL, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
+    PRAGMA_FEATURE_COMPARISONS, PRAGMA_FEATURE_CONSTRAINTS, PRAGMA_FEATURE_DISJUNCTION,
+    PRAGMA_FEATURE_NEGATION, RESERVED_PRAGMA_FEATURE, RESERVED_PREFIX,
 };
 use std::fmt::{Display, Formatter};
 
@@ -75,10 +83,17 @@ pub const FEATURE_DISJUNCTION: Feature = Feature {
     bit: 4,
 };
 
+pub const FEATURE_CONSTRAINTS: Feature = Feature {
+    label: PRAGMA_FEATURE_CONSTRAINTS,
+    symbol: FALSE_UNICODE_SYMBOL,
+    bit: 5,
+};
+
 pub const ALL_FEATURES: &[&Feature] = &[
     &FEATURE_NEGATION,
     &FEATURE_COMPARISONS,
     &FEATURE_DISJUNCTION,
+    &FEATURE_CONSTRAINTS,
 ];
 
 // ------------------------------------------------------------------------------------------------
