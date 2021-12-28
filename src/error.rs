@@ -24,6 +24,7 @@ pub enum Error {
     LanguageFeatureDisabled(Feature),
     LanguageFeatureUnsupported(Feature),
     UnknownLanguageFeature(String),
+    InvalidHeadCount(usize, usize, usize, Option<SourceLocation>),
     HeadVariablesMissingInBody(String, Option<SourceLocation>, Vec<String>),
     NegativeVariablesNotPositive(String, Option<SourceLocation>, Vec<String>),
     RelationExists(Predicate),
@@ -67,13 +68,23 @@ impl Display for Error {
                     format!("The language feature {} is not enabled.", feature.label()),
                 Error::LanguageFeatureUnsupported(feature) =>
                     format!("The language feature {} is not supported by the attempted operation.", feature.label()),
+                Error::InvalidHeadCount(count, min, max, loc) =>
+                    format!(
+                        "Rule{} has invalid number of head atoms, {}, for current feature set. expecting {}..{}",
+                        match loc {
+                            None => String::new(),
+                            Some(src) => format!(" (at {})", src),
+                        },
+                        count,
+                        min,max,
+                    ),
                 Error::HeadVariablesMissingInBody(rule, loc, vars) =>
                     format!(
                         "In rule '{}'{}, the variables '{}' in the head do not appear in any positive literal in the body.",
                         rule,
                         match loc {
                             None => String::new(),
-                            Some(src) => format!(", at {}", src),
+                            Some(src) => format!(" (at {})", src),
                         },
                         vars.join(", ")
                     ),

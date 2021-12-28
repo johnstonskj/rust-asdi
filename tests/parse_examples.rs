@@ -9,7 +9,7 @@ fn test_wikipedia_example() {
 parent(brooke, damocles).
 
 ancestor(X, Y) ⟵ parent(X, Y).
-ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
 ?- ancestor(xerces, X).
 "#,

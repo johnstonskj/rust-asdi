@@ -10,12 +10,13 @@ More detailed description, with
 use crate::edb::{AttributeName, Constant, Database, DbValidation, Predicate, Relation};
 use crate::error::Error;
 use crate::error::Result;
-use crate::features::FeatureSet;
+use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
 use crate::parse::SourceLocation;
 use crate::syntax::{
     CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, CONJUNCTION_UNICODE_SYMBOL,
-    EMPTY_STR, IMPLICATION_UNICODE_ARROW, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
-    OPERATOR_ASCII_GREATER_THAN, OPERATOR_ASCII_GREATER_THAN_OR_EQUAL, OPERATOR_ASCII_LESS_THAN,
+    DISJUNCTION_UNICODE_SYMBOL, EMPTY_STR, FALSE_UNICODE_SYMBOL, IMPLICATION_UNICODE_ARROW,
+    NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL, OPERATOR_ASCII_GREATER_THAN,
+    OPERATOR_ASCII_GREATER_THAN_OR_EQUAL, OPERATOR_ASCII_LESS_THAN,
     OPERATOR_ASCII_LESS_THAN_OR_EQUAL, OPERATOR_ASCII_NOT_EQUAL, OPERATOR_ASCII_NOT_EQUAL_ALT,
     OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL, OPERATOR_UNICODE_LESS_THAN_OR_EQUAL,
     OPERATOR_UNICODE_NOT_EQUAL, TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
@@ -57,8 +58,7 @@ use std::str::FromStr;
 ///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Rule {
-    // TODO: for disjunction we may have multiple head atoms
-    head: Atom,
+    head: Vec<Atom>, // Vec<Atom>
     body: Vec<Literal>,
 }
 
@@ -129,7 +129,17 @@ impl Display for Rule {
         write!(
             f,
             "{}{}{}",
-            self.head.to_string(),
+            if self.head.is_empty() {
+                FALSE_UNICODE_SYMBOL.to_string()
+            } else if self.head.len() == 1 {
+                self.head.get(0).unwrap().to_string()
+            } else {
+                self.head
+                    .iter()
+                    .map(|atom| atom.to_string())
+                    .collect::<Vec<String>>()
+                    .join(&format!(" {} ", DISJUNCTION_UNICODE_SYMBOL))
+            },
             if self.body.is_empty() {
                 unreachable!("Rule body is empty!")
             } else {
@@ -179,7 +189,10 @@ impl SyntacticFragments for Rule {
 
     fn is_non_recursive(&self) -> bool {
         // TODO: this is only direct recursion, need to check for mutual recursive rules.
-        let head_predicate = self.head().predicate();
+        let head_predicates = self
+            .head()
+            .map(|atom| atom.predicate())
+            .collect::<Vec<&Predicate>>();
         !self
             .literals()
             .filter_map(|lit| {
@@ -189,13 +202,15 @@ impl SyntacticFragments for Rule {
                     None
                 }
             })
-            .any(|predicate| predicate == head_predicate)
+            .any(|predicate| head_predicates.contains(&predicate))
     }
 }
 
 impl DbValidation for Rule {
     fn validate(&self, against: &mut Database) -> Result<()> {
-        Atom::validate(self.head(), against)?;
+        for atom in self.head() {
+            Atom::validate(atom, against)?;
+        }
         for literal in self.literals() {
             Literal::validate(literal, against)?;
         }
@@ -204,24 +219,53 @@ impl DbValidation for Rule {
 }
 
 impl Rule {
-    pub fn new(head: Atom) -> Self {
+    pub fn new<B: Into<Vec<Literal>>>(head: Atom, body: B) -> Self {
+        let body = body.into();
+        assert!(!body.is_empty());
         Self {
-            head,
-            body: Default::default(),
+            head: vec![head],
+            body,
         }
     }
 
-    pub fn new_with_body<V: Into<Vec<Literal>>>(head: Atom, body: V) -> Self {
+    pub fn new_constraint<B: Into<Vec<Literal>>>(body: B) -> Self {
+        let body = body.into();
+        assert!(!body.is_empty());
         Self {
-            head,
-            body: body.into(),
+            head: Vec::default(),
+            body,
+        }
+    }
+
+    pub fn new_disjunction<A: Into<Vec<Atom>>, B: Into<Vec<Literal>>>(head: A, body: B) -> Self {
+        let head = head.into();
+        assert!(!head.is_empty());
+        let body = body.into();
+        assert!(!body.is_empty());
+        Self { head, body }
+    }
+
+    pub(crate) fn new_inner<A: Into<Vec<Atom>>, B: Into<Vec<Literal>>>(head: A, body: B) -> Self {
+        let body = body.into();
+        assert!(!body.is_empty());
+        Self {
+            head: head.into(),
+            body,
         }
     }
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn head(&self) -> &Atom {
-        &self.head
+    pub fn head(&self) -> impl Iterator<Item = &Atom> {
+        self.head.iter()
+    }
+
+    pub fn is_constraint(&self) -> bool {
+        self.head.is_empty()
+    }
+
+    pub fn is_disjunction(&self) -> bool {
+        self.head.len() > 1
     }
 
     // --------------------------------------------------------------------------------------------
@@ -261,13 +305,13 @@ impl Rule {
     // --------------------------------------------------------------------------------------------
 
     pub fn is_ground(&self) -> bool {
-        self.head().is_ground() && self.literals().all(|lit| lit.is_ground())
+        self.head().all(|atom| atom.is_ground()) && self.literals().all(|lit| lit.is_ground())
     }
 
     // --------------------------------------------------------------------------------------------
 
     pub fn distinguished_terms(&self) -> HashSet<&Term> {
-        self.head().terms().collect()
+        self.head().map(|atom| atom.terms()).flatten().collect()
     }
 
     pub fn non_distinguished_terms(&self) -> HashSet<&Term> {
@@ -284,7 +328,7 @@ impl Rule {
             .map(|lit| lit.terms())
             .flatten()
             .collect::<HashSet<&Term>>()
-            .intersection(&self.head.terms().collect())
+            .intersection(&self.distinguished_terms())
             .copied()
             .collect()
     }
@@ -310,7 +354,7 @@ impl Rule {
     // --------------------------------------------------------------------------------------------
 
     pub fn head_variables(&self) -> HashSet<&Variable> {
-        self.head().variables().collect()
+        self.head().map(|atom| atom.variables()).flatten().collect()
     }
 
     pub fn variables(&self) -> HashSet<&Variable> {
@@ -353,12 +397,33 @@ impl Rule {
     /// 2. all variables that appear in a negative literal in the body of a clause also appears in some
     ///    positive literal in the body of the clause.
     ///
-    pub fn check_well_formed(&self, _features: &FeatureSet) -> Result<()> {
-        if !self.body.is_empty() {
-            let body_positive_terms = self.positive_terms();
+    pub fn check_well_formed(&self, features: &FeatureSet) -> Result<()> {
+        let (min, max) = if features.supports(&FEATURE_DISJUNCTION) {
+            (1, usize::MAX)
+        } else if features.supports(&FEATURE_CONSTRAINTS) {
+            (0, usize::MAX)
+        } else {
+            (1, 1)
+        };
+        let head_len = self.head.len();
+        if head_len < min || head_len > max {
+            println!("HC: {:#?}", self);
+            return Err(Error::InvalidHeadCount(
+                head_len,
+                min,
+                max,
+                match self.head.get(0) {
+                    None => None,
+                    Some(atom) => atom.source_location().cloned(),
+                },
+            ));
+        }
 
-            let missing: Vec<&Term> = self
-                .distinguished_terms()
+        let body_positive_terms = self.positive_terms();
+
+        for atom in self.head() {
+            let missing: Vec<&Term> = atom
+                .terms()
                 .into_iter()
                 .filter(|term| {
                     if term.is_variable() {
@@ -370,8 +435,8 @@ impl Rule {
                 .collect();
             if !missing.is_empty() {
                 return Err(Error::HeadVariablesMissingInBody(
-                    self.head().predicate().to_string(),
-                    self.head().source_location().cloned(),
+                    atom.predicate().to_string(),
+                    atom.source_location().cloned(),
                     missing
                         .iter()
                         .map(|t| t.to_string())
@@ -386,8 +451,8 @@ impl Rule {
                 .collect();
             if !missing.is_empty() {
                 return Err(Error::NegativeVariablesNotPositive(
-                    self.head().predicate().to_string(),
-                    self.head().source_location().cloned(),
+                    atom.predicate().to_string(),
+                    atom.source_location().cloned(),
                     missing
                         .iter()
                         .map(|t| t.to_string())

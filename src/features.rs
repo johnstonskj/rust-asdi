@@ -86,7 +86,7 @@ pub const FEATURE_DISJUNCTION: Feature = Feature {
 pub const FEATURE_CONSTRAINTS: Feature = Feature {
     label: PRAGMA_FEATURE_CONSTRAINTS,
     symbol: FALSE_UNICODE_SYMBOL,
-    bit: 5,
+    bit: 8,
 };
 
 pub const ALL_FEATURES: &[&Feature] = &[
@@ -253,7 +253,7 @@ mod tests {
                 .add_support_for(&FEATURE_NEGATION)
                 .add_support_for(&FEATURE_DISJUNCTION)
                 .label(),
-            "(￢⋁)Datalog"
+            "(￢∨)Datalog"
         );
     }
 

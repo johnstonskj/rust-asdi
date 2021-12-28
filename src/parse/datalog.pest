@@ -19,8 +19,8 @@ rule = {
 }
 
 rule_head = {
-    // FEATURE: !!!
-    "⊥"
+    // FEATURE: constraints
+    UC_FALSUM
              // FEATURE: disjunction
     | atom ~ ( disjunction ~ atom )*
 }
@@ -90,23 +90,23 @@ identifier_relaxed = @{
 // ------------------------------------------------------------------------------------------------
 
 pragma = {
-    AT_SIGN ~ (decl_relation | decl_feature | decl_include | decl_input | decl_output) ~ DOT
+    AT_SIGN ~ (pragma_declare | pragma_feature | pragma_include | pragma_input | pragma_output) ~ DOT
 }
 
-decl_relation = {
-    pkw_declare ~ predicate ~ LEFT_PAREN ~ attribute_list ~ RIGHT_PAREN
+pragma_declare = {
+    keyword_declare ~ predicate ~ LEFT_PAREN ~ attribute_declaration_list ~ RIGHT_PAREN
 }
 
-attribute_list = _{
-    attribute ~ (COMMA ~ attribute)*
+attribute_declaration_list = _{
+    attribute_declaration ~ (COMMA ~ attribute_declaration)*
 }
 
-attribute = {
-    ( predicate ~ ":" )? ~ ( tid_string | tid_integer | tid_boolean )
+attribute_declaration = {
+    ( predicate ~ ":" )? ~ ( type_id_string | type_id_integer | type_id_boolean )
 }
 
-decl_feature = {
-    pkw_feature ~ LEFT_PAREN ~ feature_list ~ RIGHT_PAREN
+pragma_feature = {
+    keyword_feature ~ LEFT_PAREN ~ feature_list ~ RIGHT_PAREN
 }
 
 feature_list = _{
@@ -114,62 +114,66 @@ feature_list = _{
 }
 
 feature_id = _{
-    fid_negation | fid_comparisons | fid_disjunction
+    feature_id_negation | feature_id_comparisons | feature_id_constraints | feature_id_disjunction
 }
 
-decl_include = {
-    pkw_include ~ string
+pragma_include = {
+    keyword_include ~ LEFT_PAREN ~ string ~ RIGHT_PAREN
 }
 
-decl_input = {
-    pkw_input ~ LEFT_PAREN ~ predicate ~ COMMA ~ string ~ (COMMA ~ string) ~ RIGHT_PAREN
+pragma_input = {
+    keyword_input ~ LEFT_PAREN ~ predicate ~ COMMA ~ string ~ ( COMMA ~ string )? ~ RIGHT_PAREN
 }
 
-decl_output = {
-    pkw_output ~ LEFT_PAREN ~ predicate ~ COMMA ~ string ~ (COMMA ~ string) ~ RIGHT_PAREN
+pragma_output = {
+    keyword_output ~ LEFT_PAREN ~ predicate ~ COMMA ~ string ~ ( COMMA ~ string )? ~ RIGHT_PAREN
 }
 
-pkw_declare = _{
+keyword_declare = _{
     "declare"
 }
 
-pkw_feature = _{
+keyword_feature = _{
     "feature"
 }
 
-pkw_include = _{
+keyword_include = _{
     "include"
 }
 
-pkw_input = _{
+keyword_input = _{
     "input"
 }
 
-pkw_output = _{
+keyword_output = _{
     "output"
 }
 
-tid_string = {
+type_id_string = {
     "string"
 }
 
-tid_integer = {
+type_id_integer = {
     "integer"
 }
 
-tid_boolean = {
+type_id_boolean = {
     "boolean"
 }
 
-fid_negation = {
+feature_id_negation = {
     "negation"
 }
 
-fid_comparisons = {
+feature_id_comparisons = {
     "comparisons"
 }
 
-fid_disjunction = {
+feature_id_constraints = {
+    "constraints"
+}
+
+feature_id_disjunction = {
     "disjunction"
 }
 
@@ -217,7 +221,7 @@ conjunction = _{
     COMMA | UC_LOGICAL_AND | AMPERSAND | "AND"
 }
 
-disjunction = {
+disjunction = _{
     SEMI_COLON | UC_LOGICAL_OR | VERTICAL_BAR | "OR"
 }
 
@@ -241,13 +245,17 @@ not_equal = _{
     "!=" | "/=" | UC_NOT_EQUAL
 }
 
-UC_LOGICAL_AND = _{ "⋀" }
+UC_LOGICAL_AND = _{ "∧" }
 
-UC_LOGICAL_OR = _{ "⋁" }
+UC_LOGICAL_OR = _{ "∨" }
 
 UC_LOGICAL_NOT_FW = _{ "￢" }
 
 UC_LEFT_ARROW_FW = _{ "⟵" }
+
+UC_TRUTH = _{ "⊤" }
+
+UC_FALSUM = _{ "⊥" }
 
 UC_LTE = _{ "≤" }
 

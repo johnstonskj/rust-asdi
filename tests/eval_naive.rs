@@ -95,7 +95,7 @@ fn test_wikipedia_example() {
 parent(brooke, damocles).
 
 ancestor(X, Y) ⟵ parent(X, Y).
-ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
 ?- ancestor(xerces, X).
 "#;
@@ -171,7 +171,7 @@ edge(d, a).
 edge(b, c).
 
 path(X, Y) ⟵ edge(X, Y).
-path(X, Y) ⟵ edge(X, Z) ⋀ path(Z, Y).
+path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
 
 ?- path(X, Y).
 "#;

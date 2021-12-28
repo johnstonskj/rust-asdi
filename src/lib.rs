@@ -1,92 +1,218 @@
 /*!
-Another Simplistic Datalog Implementation (ASDI), in Rust.
+Another Simplistic [Datalog](https://en.wikipedia.org/wiki/Datalog) Implementation (ASDI), in Rust.
 
-This package provides a data model to represent Datalog programs in memory, a parser for common
-syntactic expression, and some evaluation implementations. The text representation parser is a separate
-feature, so if you only need to construct and evaluate programs using the API you do not pull
-in the [Pest](https://pest.rs) parser and support.
+This package provides a data model to represent [Datalog](https://en.wikipedia.org/wiki/Datalog)
+programs in memory, a parser for the textual representation, and some evaluation implementations.
 
-Tools that operate on the model to _validate_, _derive_, and _evaluate_ the program are
-implementations of traits defined in the [`eval`](eval/index.html) module. This makes it easier to
-integrate new more sophisticated implementations over time.
+The text representation parser is a separate feature, so if you only need to construct and evaluate
+programs using the API you may opt out of the [Pest](https://pest.rs) parser and support.
 
 # Datalog Defined
 
-**Programs**
+Datalog is a logic programming language and a subset of the earlier
+[Prolog](https://en.wikipedia.org/wiki/Prolog).
+
+The descriptions below use both mathematical definitions as well as ABNF
+([Augmented BNF for Syntax Specifications](https://datatracker.ietf.org/doc/html/rfc5234))
+descriptions. The ABNF description is somewhat simplified from the grammar used in the ASDI
+parser although they do not significantly affect the expressiveness of the language. For example,
+the parser accepts a number of representations of common operators or connectives so that
+conjunction may be denoted as `","`, `"&"`, `"AND"`, or `"∧"`.
+
+
+$$\mathcal{P}=\lbrace\mathcal{D},\mathcal{R}\rbrace$$
+
+$\mathcal{D}$ is commonly referred to as the *Extensional Database* or EDB.
+$\mathcal{R}$ is commonly referred to as the *Intensional Database* or IDB.
+
+
+$$\mathcal{D}=\lbrace\mathcal{P},\mathcal{V},\mathcal{C}\rbrace$$
+
+
+When referring to the specifics of the language we will use the common format $\text{\small{Datalog}}$ with
+superscripts that identify specific language extensions; for example, $\text{\small{Datalog}}^{\lnot}$ is
+the language extended with negation of literals, and $\text{\small{Datalog}}^{\lnot=}$. is the
+language extended with negation of literals and comparison expressions. The order of superscript
+symbols is irrelevant.
+
+There exists a relatively simple translation from most Datalog rules to first-order predicate
+logic, such that the following simple rule:
+
+```datalog
+ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
+```
+
+Can be expressed in the following manner:
+
+$$\forall x\forall y\forall z \left(parent(x, z) ∧ ancestor(z, y) \Rightarrow ancestor(x, y) \right)$$
+
+
+## Programs
 
 ```abnf
 program         = *[ fact ] *[ rule ] *[ query ]
 ```
 
-**Facts**
+## Facts
 
-```abnf
-fact            = predicate [ constant_list ] "."
-predicate       = LC_ALPHA *[ ALPHA / DIGIT / "_" ]
-constant_list   = "(" [ constant *[ "," constant ] ] ")"
+Facts are introduced in the form _predicate_ followed by a period (end of statement marker) or a
+set of _arguments_ within parenthesis.
+
+```datalog
+parent("Xerces", brooke).
 ```
 
-**Constant Values**
+$p\left(c_{1} \ldots c_{n}\right)$ where predicate $p \in \mathcal{P}$, constant $c \in \mathcal{C}$,
+and $n \in \mathbb{P}$. The value $n$ is also termed the arity of the predicate $p$.
+
+```abnf
+fact            = predicate [ constant-list ] "."
+predicate       = LC_ALPHA *[ ALPHA / DIGIT / "_" ]
+constant-list   = "(" [ constant *[ "," constant ] ] ")"
+```
+
+## Constant Values
+
+* String
+* Integer
+* Boolean `@true` or `@false`
 
 ```abnf
 constant        = string / integer / boolean
-string          = short_string / quoted_string
-short_string    = predicate [ ":" ALPHA *[ ALPHA / DIGIT / "_" ] ]
-quoted_string   = DQUOTE ... DQUOTE
+string          = short-string / quoted-string
+short-string    = predicate [ ":" ALPHA *[ ALPHA / DIGIT / "_" ] ]
+quoted-string   = DQUOTE ... DQUOTE
 integer         = +DIGIT
-boolean         = "@true" / "@false"
+boolean         = "@true" / "⊤" / "@false" / "⊥"
 ```
 
-**Rules**
+Boolean values may also be represented using `⊤` (down tack `\u{22a4}`) for true, and `⊥` (up tack
+`\u{22a5}`) for false.
+
+## Rules
 
 ```abnf
-rule            = atom implication [ literal_list ] "."
-implication     = ":-" / "<-"
+rule            = head implication body "."
+head            = [ atom *[ disjunction atom ] | "⊥" ]
+disjuntion      = "|" / "OR" / "∨"
+implication     = ":-" / "<-" / "⟵"
+body            = literal-list
 ```
 
-**Atoms**
+Implication may also be written using the Unicode character `⟵` (long leftwards arrow `\u{27f5}`).
+
+```datalog
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Y) <- parent(X, Y).
+ancestor(X, Y) ⟵ parent(X, Y).
+```
+
+```datalog
+father(X) ⋁ mother(X) :- parent(X).
+```
+
+**SOME LANGUAGE FEATURE**
+
+```datalog
+⊥ :- alive(X), dead(X).
+:- alive(X), dead(X).
+```
+
+**Facts** are ...
+
+## Atoms
+
+$p\left(t_{1} \ldots t_{n}\right)$ where predicate $p \in \mathcal{P}$ and $n \in \mathbb{P}$.
+A term $t$ is either a constant $t \in \mathcal{C}$, a variable $t \in \mathcal{V}$, or the
+anonymous variable notation `_`.
+The value $n$ is also termed the arity of the predicate $p$.
 
 ```abnf
-atom            = predicate term_list
-term_list       = "(" term *[ "," term ] ")"
+atom            = predicate term-list
+term-list       = "(" term *[ "," term ] ")"
 term            = variable / constant
-variable        = named_variable / anon_variable
-named_variable  = UC_ALPHA *[ ALPHA / DIGIT / "_" ]
-anon_variable   = "_"
+variable        = named-variable / anon-variable
+named-variable  = UC_ALPHA *[ ALPHA / DIGIT / "_" ]
+anon-variable   = "_"
 ```
 
-**Literals**
+## Literals
+
+The addition of the rule `negation` is only present in the $\text{\small{Datalog}}^{\lnot}$ language.
+Similarly, the addition of the `comparison` rule is only present in the $\text{\small{Datalog}}^{=}$
+language.
 
 ```abnf
-literal_list    = literal *[ conjunction literal ]
+literal-list    = literal *[ conjunction literal ]
 literal         = [ negation ] atom / comparison
-negation        = "!" / "NOT"
-conjunction     = "," / "AND"
+negation        = "!" / "NOT" / "￢"
+conjunction     = "," / "&" / "AND" / "∧"
 ```
 
-**Comparisons**
+Negation may also be written using the Unicode character `￢` (full-width not sign `\u{ffe2}`),
+and conjunction may be written with the Unicode character `∧` (logical and `\u{2227}`).
+
+```datalog
+ancestor(X, Y) ⟵ parent(X, Z), ancestor(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z) & ancestor(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z) ∧ ancestor(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z) AND ancestor(Z, Y).
+```
+
+## Comparisons
 
 ```abnf
-comparison      = term [ operator term ]
-operator        = "=" / "!=" / "<" / "<=" / ">" / ">="
+comparison      = term operator term
+operator        = "=" / "!=" / "/=" / "≠" / "<" / "<=" / "≤" / ">" / ">=" / "≥"
 ```
 
-**Queries**
+The Unicode characters `≠` (not equal to `\u{2260}`), `≤` (less-than or equal to `\u{2264}`), and
+`≥` (greater-than or equal to `\u{2265}`) may be substituted for the common comparison operators.
+
+## Queries
 
 ```abnf
 query           = ( "?-" atom "." ) / ( atom "?" )
 ```
 
-[Augmented BNF for Syntax Specifications: ABNF](https://datatracker.ietf.org/doc/html/rfc5234)
+```datalog
+?- ancestor(xerces, X).
+ancestor(xerces, X)?
+```
 
-# Source Syntax
+## Pragmas
 
-The text representation that the parser feature accepts is intended to be flexible. While the core program
-elements are fixed, there are a number of different operator styles in common usage and where
-possible the parser will accept them all.
+```abnf
+pragma          = declare / include / input / output
 
-For example, the following is a simple yet complete program and written using Unicode characters
-for an expressive representation.
+declare         = "@declare" predicate attribute-list "."
+attribute-list  = "(" attribute-decl *[ "," attribute-decl ] ")"
+attribute-decl  = [ predicate ":" ] attribute-type
+attribute-type  = "boolean" / "integer" / "string"
+
+include         = "@include" quoted-string "."
+
+input           = "@input" "(" predicate "," quoted-string [ "," quoted-string ] ")" "."
+
+output          = "@output" "(" predicate "," quoted-string [ "," quoted-string ] ")" "."
+```
+
+```datalog
+@include("file").
+@declare human(name: string).
+@input(human, "file", "csv").
+@output(human, "file", "text").
+```
+
+## Comments
+
+```datalog
+## Here's a comment
+?- ancestor(xerces, X). # and another
+```
+
+
+# Example
 
 ```datalog
 parent(xerces, brooke).
@@ -98,76 +224,6 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 ?- ancestor(xerces, X).
 ```
 
-## Facts
-
-Facts are introduced in the form _predicate_ followed by a period (end of statement marker) or a
-set of _arguments_ within parenthesis. A predicate is either an
-
-```datalog
-parent("Xerces", brooke).
-```
-
-### Constants
-
-* Identifier
-* String
-* Integer
-* Float
-* Boolean `@true` or `@false`
-
-## Rules
-
-* The ASCII string `":-"` (colon `\u{3a}` and hyphen-minus `\u{2d}`).
-* The ASCII string `"<-"` (less-than `\u{3c}` and hyphen-minus `\u{2d}`).
-* The Unicode character `⟵` (long/full-width leftwards arrow `\u{27f5}`).
-
-```datalog
-ancestor(X, Y) :- parent(X, Y).
-ancestor(X, Y) <- parent(X, Y).
-ancestor(X, Y) ⟵ parent(X, Y).
-```
-
-* The ASCII character `,` (comma `\u{2c}`).
-* The ASCII character `&` (comma `\u{26}`).
-* The Unicode character `∧` (logical and `\u{2227}`).
-* The case-sensitive ASCII string `"AND"`.
-
-```datalog
-ancestor(X, Y) ⟵ parent(X, Z), ancestor(Z, Y).
-ancestor(X, Y) ⟵ parent(X, Z) & ancestor(Z, Y).
-ancestor(X, Y) ⟵ parent(X, Z) ∧ ancestor(Z, Y).
-ancestor(X, Y) ⟵ parent(X, Z) AND ancestor(Z, Y).
-```
-
-$$\forall x\forall y\forall z \left(parent(x, z) ∧ ancestor(z, y) \Rightarrow ancestor(x, y) \right)$$
-
-## Queries
-
-question mark `\u{3f}`
-
-```datalog
-?- ancestor(xerces, X).
-ancestor(xerces, X)?
-```
-
-## Pragmas
-
-commercial at `\u{40}`
-
-```datalog
-@include("file").
-```
-
-## Comments
-
-```datalog
-## Here's a comment
-?- ancestor(xerces, X). # and another
-```
-
-# Example
-
-TBD
 
 */
 

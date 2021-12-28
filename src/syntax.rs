@@ -53,12 +53,12 @@ pub(crate) const VARIABLE_NAME_IGNORE: &str = "_";
 pub(crate) const CONJUNCTION_ASCII: &str = ",";
 pub(crate) const CONJUNCTION_ASCII_SYMBOL: &str = "&";
 pub(crate) const CONJUNCTION_ASCII_WORD: &str = "AND";
-pub(crate) const CONJUNCTION_UNICODE_SYMBOL: &str = "⋀";
+pub(crate) const CONJUNCTION_UNICODE_SYMBOL: &str = "∧";
 
 pub(crate) const DISJUNCTION_ASCII: &str = ";";
 pub(crate) const DISJUNCTION_ASCII_SYMBOL: &str = "|";
 pub(crate) const DISJUNCTION_ASCII_WORD: &str = "OR";
-pub(crate) const DISJUNCTION_UNICODE_SYMBOL: &str = "⋁";
+pub(crate) const DISJUNCTION_UNICODE_SYMBOL: &str = "∨";
 
 pub(crate) const TRUE_UNICODE_SYMBOL: &str = "⊤";
 pub(crate) const FALSE_UNICODE_SYMBOL: &str = "⊥";

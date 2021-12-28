@@ -43,7 +43,7 @@ fn test_feature_success() {
 
 #[test]
 fn test_include_success() {
-    quick_parser_check(r#"@include(human, "file-name")."#, None);
+    quick_parser_check(r#"@include("file-name")."#, None);
 }
 
 #[test]

@@ -12,7 +12,10 @@ use crate::error::Result;
 use crate::idb::{Atom, ComparisonOperator, Literal, LiteralInner, Rule, Term};
 use crate::program::Program;
 use crate::query::Query;
-use crate::syntax::{CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE};
+use crate::syntax::{
+    CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
+    DISJUNCTION_UNICODE_SYMBOL,
+};
 use std::fmt::Write;
 
 // ------------------------------------------------------------------------------------------------
@@ -134,10 +137,20 @@ impl Typesetter for LatexTypesetter {
             write!(result, "{}", LATEX_INLINE_LISTING)?;
         }
 
+        let head: Vec<&Atom> = value.head().collect();
         write!(
             result,
             "{} $\\leftarrow$ {}{}",
-            self.atom(value.head())?,
+            if head.is_empty() {
+                "$\\bot$".to_string()
+            } else if head.len() == 1 {
+                self.atom(head.get(0).unwrap())?
+            } else {
+                head.iter()
+                    .map(|atom| atom.to_string())
+                    .collect::<Vec<String>>()
+                    .join(&format!(" {} ", DISJUNCTION_UNICODE_SYMBOL))
+            },
             value
                 .literals()
                 .map(|l| self.literal(l))
@@ -234,7 +247,7 @@ mod tests {
 parent(brooke, damocles).
 
 ancestor(X, Y) ⟵ parent(X, Y).
-ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
 ?- ancestor(xerces, X).
 "#,
@@ -273,7 +286,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
                     typesetter.rule(rule, true).unwrap(),
                     String::from(r"|ancestor($X, Y$) $\leftarrow$ parent($X, Y$).|")
                 ),
-                "ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y)." => assert_eq!(
+                "ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y)." => assert_eq!(
                     typesetter.rule(&rule, true).unwrap(),
                     String::from(
                         r"|ancestor($X, Y$) $\leftarrow$ parent($X, Z$) $\land$ parent($Z, Y$).|"

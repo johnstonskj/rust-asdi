@@ -1,4 +1,6 @@
-use asdi::features::{FeatureSet, FEATURE_COMPARISONS, FEATURE_NEGATION};
+use asdi::features::{
+    FeatureSet, FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION,
+};
 use asdi::program::Program;
 
 mod common;
@@ -39,24 +41,6 @@ fn test_parse_one_rule_turnstile() {
 }
 
 #[test]
-fn test_parse_rule_expression_negated_term() {
-    quick_parser_check_with_options(
-        "alien(X) :- living(X), ! human(X).",
-        FeatureSet::default().add_support_for(&FEATURE_NEGATION),
-        None,
-    );
-}
-
-#[test]
-fn test_parse_rule_expression() {
-    quick_parser_check_with_options(
-        "old(X) :- human(X), X > 50.",
-        FeatureSet::default().add_support_for(&FEATURE_COMPARISONS),
-        None,
-    );
-}
-
-#[test]
 #[should_panic]
 fn test_parse_rule_expression_fail() {
     quick_parser_check("old(X) :- human(X), X > 50.", None);
@@ -74,7 +58,7 @@ fn test_parse_one_rule_ascii_arrow() {
 
 #[test]
 fn test_parse_one_rule_multiples_unicode_and() {
-    quick_parser_check("path(X, Y) ⟵ edge(X, Z) ⋀ path(Z, Y).", None);
+    quick_parser_check("path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).", None);
 }
 
 #[test]
@@ -104,7 +88,67 @@ fn test_parse_query_suffixed() {
 
 #[test]
 fn test_parse_pragma_include() {
-    quick_parser_check("@include \"./file\".", None);
+    quick_parser_check(r#"@include("./file")."#, None);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Feature-gated success cases
+// ------------------------------------------------------------------------------------------------
+
+#[test]
+fn test_parse_rule_expression_negated_term() {
+    quick_parser_check_with_options(
+        "alien(X) :- living(X), ! human(X).",
+        FeatureSet::default().add_support_for(&FEATURE_NEGATION),
+        None,
+    );
+}
+
+#[test]
+fn test_parse_rule_with_comparisons() {
+    quick_parser_check_with_options(
+        "old(X) :- human(X), X > 50.",
+        FeatureSet::default().add_support_for(&FEATURE_COMPARISONS),
+        None,
+    );
+}
+
+#[test]
+fn test_parse_constraint_rule() {
+    quick_parser_check_with_options(
+        "⊥ :- dead(X) AND alive(X).",
+        FeatureSet::default().add_support_for(&FEATURE_CONSTRAINTS),
+        None,
+    );
+    quick_parser_check_with_options(
+        ":- dead(X) AND alive(X).",
+        FeatureSet::default().add_support_for(&FEATURE_CONSTRAINTS),
+        None,
+    );
+}
+
+#[test]
+fn test_parse_rule_with_disjunction() {
+    quick_parser_check_with_options(
+        "mother(X); father(X) :- parent(X).",
+        FeatureSet::default().add_support_for(&FEATURE_DISJUNCTION),
+        None,
+    );
+    quick_parser_check_with_options(
+        "mother(X) | father(X) :- parent(X).",
+        FeatureSet::default().add_support_for(&FEATURE_DISJUNCTION),
+        None,
+    );
+    quick_parser_check_with_options(
+        "mother(X) OR father(X) :- parent(X).",
+        FeatureSet::default().add_support_for(&FEATURE_DISJUNCTION),
+        None,
+    );
+    quick_parser_check_with_options(
+        "mother(X) ∨ father(X) :- parent(X).",
+        FeatureSet::default().add_support_for(&FEATURE_DISJUNCTION),
+        None,
+    );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -113,19 +157,19 @@ fn test_parse_pragma_include() {
 
 #[test]
 #[should_panic]
-fn test_parse_disabled_negated_term() {
+fn test_fail_disabled_negated_term() {
     quick_parser_check("alien(X) :- ! human(X).", None);
 }
 
 #[test]
 #[should_panic]
-fn test_parse_well_formed_1() {
+fn test_fail_not_well_formed_1() {
     quick_parser_check("mortal(X, Y) :- human(X).", None);
 }
 
 #[test]
 #[should_panic]
-fn test_parse_well_formed_2() {
+fn test_fail_not_well_formed_2() {
     quick_parser_check_with_options(
         "alien(X) :- ! human(X).",
         FeatureSet::default().add_support_for(&FEATURE_NEGATION),

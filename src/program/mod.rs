@@ -153,10 +153,7 @@ impl Program {
         head_terms: H,
         body: B,
     ) -> Result<Rule> {
-        Ok(Rule::new_with_body(
-            Atom::new(head_predicate, head_terms),
-            body,
-        ))
+        Ok(Rule::new(Atom::new(head_predicate, head_terms), body))
     }
 
     pub fn add_new_rule<H: Into<Vec<Term>>, B: Into<Vec<Literal>>>(
@@ -172,7 +169,7 @@ impl Program {
     pub fn add_rule(&mut self, rule: Rule) -> Result<bool> {
         rule.check_well_formed(self.features())?;
 
-        self.add_rule_relations(rule.head(), &rule);
+        //TODO: fix this: self.add_rule_relations(rule.head(), &rule);
         rule.literals()
             .filter_map(Literal::as_atom)
             .for_each(|a| self.add_rule_relations(a, &rule));

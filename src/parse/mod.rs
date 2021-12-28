@@ -9,7 +9,9 @@ More detailed description, with
 
 use crate::edb::{Attribute, AttributeKind, Constant, Predicate};
 use crate::error::{Error, Result};
-use crate::features::{FeatureSet, FEATURE_COMPARISONS, FEATURE_DISJUNCTION, FEATURE_NEGATION};
+use crate::features::{
+    FeatureSet, FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION,
+};
 use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Rule as DlRule, Term, Variable};
 use crate::program::Program;
 use crate::query::Query;
@@ -282,24 +284,58 @@ fn parse_fact(
 }
 
 fn parse_rule(
-    mut input_pairs: Pairs<'_, Rule>,
+    input_pairs: Pairs<'_, Rule>,
     program: &mut Program,
     features: FeatureSet,
 ) -> Result<()> {
-    // TODO: disjunction requires a more complex head!
-    let first = input_pairs.next().unwrap();
-    let just_in_case = first.as_span().clone();
-    let head = match first.as_rule() {
-        Rule::atom => parse_atom(first.into_inner(), program, features)?,
-        Rule::disjunction => {
-            return Err(pest_error!(
-                first.as_span(),
-                Error::LanguageFeatureDisabled(FEATURE_DISJUNCTION).to_string()
-            ))
+    let mut head: Vec<Atom> = Default::default();
+    for inner_pair in input_pairs {
+        let span = inner_pair.as_span();
+        match inner_pair.as_rule() {
+            Rule::rule_head => head = parse_rule_head(inner_pair.into_inner(), program, features)?,
+            Rule::rule_body => {
+                let body = parse_rule_body(inner_pair.into_inner(), program, features)?;
+                let rule = DlRule::new_inner(head, body);
+                if let Err(e) = rule.check_well_formed(&features) {
+                    return Err(pest_error!(span, e.to_string()));
+                } else {
+                    program.add_rule(rule)?;
+                    break;
+                }
+            }
+            _ => unreachable!(inner_pair.as_str()),
         }
-        _ => unreachable!(first.as_str()),
-    };
+    }
+    Ok(())
+}
 
+fn parse_rule_head(
+    input_pairs: Pairs<'_, Rule>,
+    program: &mut Program,
+    features: FeatureSet,
+) -> Result<Vec<Atom>> {
+    let mut body: Vec<Atom> = Default::default();
+    for inner_pair in input_pairs {
+        let one = match inner_pair.as_rule() {
+            Rule::atom => parse_atom(inner_pair.into_inner(), program, features)?,
+            _ => unreachable!(inner_pair.as_str()),
+        };
+        body.push(one);
+    }
+    if body.is_empty() && !features.supports(&FEATURE_CONSTRAINTS) {
+        Err(Error::LanguageFeatureDisabled(FEATURE_CONSTRAINTS))
+    } else if body.len() > 1 && !features.supports(&FEATURE_DISJUNCTION) {
+        Err(Error::LanguageFeatureDisabled(FEATURE_DISJUNCTION))
+    } else {
+        Ok(body)
+    }
+}
+
+fn parse_rule_body(
+    input_pairs: Pairs<'_, Rule>,
+    program: &mut Program,
+    features: FeatureSet,
+) -> Result<Vec<Literal>> {
     let mut body: Vec<Literal> = Default::default();
     for inner_pair in input_pairs {
         let one = match inner_pair.as_rule() {
@@ -308,14 +344,7 @@ fn parse_rule(
         };
         body.push(one);
     }
-
-    let rule = DlRule::new_with_body(head, body);
-    if let Err(e) = rule.check_well_formed(&features) {
-        Err(pest_error!(just_in_case, e.to_string()))
-    } else {
-        program.add_rule(rule)?;
-        Ok(())
-    }
+    Ok(body)
 }
 
 fn parse_pragma(
@@ -327,11 +356,11 @@ fn parse_pragma(
 
     match_one! {
         (inner_pair, features) => program ;
-        decl_relation => parse_decl_relation,
-        decl_feature => parse_decl_feature,
-        decl_include => parse_decl_include,
-        decl_input => parse_decl_input,
-        decl_output => parse_decl_output
+        pragma_declare => parse_decl_relation,
+        pragma_feature => parse_decl_feature,
+        pragma_include => parse_decl_include,
+        pragma_input => parse_decl_input,
+        pragma_output => parse_decl_output
     }
 
     Ok(())
@@ -351,7 +380,7 @@ fn parse_decl_relation(
     let mut attributes: Vec<Attribute<Predicate>> = Default::default();
     for inner_pair in input_pairs {
         match inner_pair.as_rule() {
-            Rule::attribute => attributes.push(parse_attribute(
+            Rule::attribute_declaration => attributes.push(parse_attribute(
                 inner_pair.into_inner(),
                 program,
                 _features,
@@ -377,13 +406,13 @@ fn parse_attribute(
     for inner_pair in input_pairs {
         match inner_pair.as_rule() {
             Rule::predicate => name = Some(Predicate::from_str_unchecked(inner_pair.as_str())),
-            Rule::tid_string => {
+            Rule::type_id_string => {
                 return Ok(Attribute::new_inner(name, AttributeKind::String));
             }
-            Rule::tid_integer => {
+            Rule::type_id_integer => {
                 return Ok(Attribute::new_inner(name, AttributeKind::Integer));
             }
-            Rule::tid_boolean => {
+            Rule::type_id_boolean => {
                 return Ok(Attribute::new_inner(name, AttributeKind::Boolean));
             }
             _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
@@ -399,9 +428,16 @@ fn parse_decl_feature(
 ) -> Result<()> {
     for inner_pair in input_pairs {
         match inner_pair.as_rule() {
-            Rule::fid_negation => program.features_mut().add_support_for(&FEATURE_NEGATION),
-            Rule::fid_comparisons => program.features_mut().add_support_for(&FEATURE_COMPARISONS),
-            Rule::fid_disjunction => program.features_mut().add_support_for(&FEATURE_DISJUNCTION),
+            Rule::feature_id_negation => program.features_mut().add_support_for(&FEATURE_NEGATION),
+            Rule::feature_id_comparisons => {
+                program.features_mut().add_support_for(&FEATURE_COMPARISONS)
+            }
+            Rule::feature_id_disjunction => {
+                program.features_mut().add_support_for(&FEATURE_DISJUNCTION)
+            }
+            Rule::feature_id_constraints => {
+                program.features_mut().add_support_for(&FEATURE_CONSTRAINTS)
+            }
             _ => unreachable!(inner_pair.as_str()),
         };
     }

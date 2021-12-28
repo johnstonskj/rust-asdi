@@ -72,7 +72,7 @@ parent(xerces, brooke).
 parent(brooke, damocles).
 
 ancestor(X, Y) ⟵ parent(X, Y).
-ancestor(X, Y) ⟵ parent(X, Z) ⋀ ancestor(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z) ∧ ancestor(Z, Y).
 
 ?- ancestor(xerces, X).
 "#,
@@ -148,7 +148,7 @@ edge(d, a).
 edge(b, c).
 
 path(X, Y) ⟵ edge(X, Y).
-path(X, Y) ⟵ edge(X, Z) ⋀ path(Z, Y).
+path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
 
 ?- path(X, Y).
 "#,
@@ -186,7 +186,6 @@ fn test_that_syllogism() {
     assert_eq_by_line(
         &syllogism.to_string(),
         r#"@declare human(string).
-@declare mortal(string).
 
 human("Socrates").
 

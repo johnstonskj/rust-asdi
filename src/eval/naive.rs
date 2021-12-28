@@ -11,7 +11,7 @@ use crate::edb::{Constant, Database};
 use crate::error::{Error, Result};
 use crate::eval::Evaluator;
 use crate::features::FEATURE_NEGATION;
-use crate::idb::Term;
+use crate::idb::{Atom, Term};
 use crate::program::Program;
 use crate::query::View;
 use crate::SyntacticFragments;
@@ -93,10 +93,12 @@ impl Evaluator for NaiveEvaluator {
                         let results = View::join_all(matches)?;
                         trace!("infer > rule > joined table >\n{}", results);
                         for fact in results.facts() {
+                            let head_predicates = rule.head().collect::<Vec<&Atom>>();
+                            assert_eq!(head_predicates.len(), 1);
+                            let head = head_predicates.get(0).unwrap();
                             trace!("infer > rule > row > {:?}", fact);
-                            let relation = new_db.relation_mut(rule.head().predicate()).unwrap();
-                            let new_fact = rule
-                                .head()
+                            let relation = new_db.relation_mut(head.predicate()).unwrap();
+                            let new_fact = head
                                 .terms()
                                 .map(|term| {
                                     trace!(
