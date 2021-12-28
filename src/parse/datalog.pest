@@ -111,11 +111,11 @@ decl_include = {
 }
 
 decl_input = {
-    pkw_input ~ predicate ~ string
+    pkw_input ~ LEFT_PAREN ~ predicate ~ COMMA ~ string ~ (COMMA ~ string) ~ RIGHT_PAREN
 }
 
 decl_output = {
-    pkw_output ~ predicate ~ string
+    pkw_output ~ LEFT_PAREN ~ predicate ~ COMMA ~ string ~ (COMMA ~ string) ~ RIGHT_PAREN
 }
 
 pkw_declare = _{
@@ -185,8 +185,11 @@ number = @{
 }
 
 boolean = @{
+    "⊤" | "⊥" |
     AT_SIGN ~ ( "true" | "false" )
 }
+
+
 
 // ------------------------------------------------------------------------------------------------
 // Terminal definitions

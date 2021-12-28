@@ -43,17 +43,17 @@ fn test_feature_success() {
 
 #[test]
 fn test_include_success() {
-    quick_parser_check("@include \"file-name\".", None);
+    quick_parser_check(r#"@include(human, "file-name")."#, None);
 }
 
 #[test]
 fn test_input_success() {
-    quick_parser_check("@input human \"file-name\".", None);
+    quick_parser_check(r#"@input(human, "file-name")."#, None);
 }
 
 #[test]
 fn test_output_success() {
-    quick_parser_check("@output mortal \"file-name\".", None);
+    quick_parser_check(r#"@output(mortal, "file-name")."#, None);
 }
 
 // ------------------------------------------------------------------------------------------------
