@@ -174,7 +174,7 @@ impl View {
     // --------------------------------------------------------------------------------------------
 
     pub fn schema(&self) -> &Schema<Variable> {
-        &self.0.schema()
+        self.0.schema()
     }
 
     pub fn arity(&self) -> usize {
