@@ -1,5 +1,5 @@
 /*!
-Module containing the `Error` type.
+This module containing the `Error` and `Result` types.
  */
 
 use crate::edb::Predicate;
@@ -11,6 +11,9 @@ use std::fmt::{Display, Formatter};
 // Public Types
 // ------------------------------------------------------------------------------------------------
 
+///
+/// The type for all errors returned from this library.
+///
 #[derive(Debug)]
 pub enum Error {
     FileIoError(std::io::Error),
@@ -31,6 +34,9 @@ pub enum Error {
     FactDoesNotConformToSchema(Predicate, String),
 }
 
+///
+/// The result of operations where the error returned is `asdi::error::Error`.
+///
 pub type Result<T> = std::result::Result<T, Error>;
 
 // ------------------------------------------------------------------------------------------------

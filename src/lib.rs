@@ -12,58 +12,126 @@ programs using the API you may opt out of the [Pest](https://pest.rs) parser and
 Datalog is a logic programming language and a subset of the earlier
 [Prolog](https://en.wikipedia.org/wiki/Prolog).
 
-The descriptions below use both mathematical definitions as well as ABNF
-([Augmented BNF for Syntax Specifications](https://datatracker.ietf.org/doc/html/rfc5234))
-descriptions. The ABNF description is somewhat simplified from the grammar used in the ASDI
-parser although they do not significantly affect the expressiveness of the language. For example,
-the parser accepts a number of representations of common operators or connectives so that
-conjunction may be denoted as `","`, `"&"`, `"AND"`, or `"∧"`.
-
-
-$$\mathcal{P}=\lbrace\mathcal{D},\mathcal{R}\rbrace$$
-
-$\mathcal{D}$ is commonly referred to as the *Extensional Database* or EDB.
-$\mathcal{R}$ is commonly referred to as the *Intensional Database* or IDB.
-
-
-$$\mathcal{D}=\lbrace\mathcal{P},\mathcal{V},\mathcal{C}\rbrace$$
-
-
 When referring to the specifics of the language we will use the common format $\text{\small{Datalog}}$ with
 superscripts that identify specific language extensions; for example, $\text{\small{Datalog}}^{\lnot}$ is
 the language extended with negation of literals, and $\text{\small{Datalog}}^{\lnot=}$. is the
 language extended with negation of literals and comparison expressions. The order of superscript
 symbols is irrelevant.
 
-There exists a relatively simple translation from most Datalog rules to first-order predicate
-logic, such that the following simple rule:
+## Abstract Syntax
 
-```datalog
-ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
-```
+Datalog rules $\small R$ are built from a language $\small \mathcal{L}=\lbrace\mathcal{C},\mathcal{P},\mathcal{V}\rbrace$
+that contains the
 
-Can be expressed in the following manner:
+1. $\small \mathcal{C}$ -- the finite sets of symbols for all constants; e.g. `hello`, `"hi"`
+   `123`,
+2. $\small \mathcal{P}$ -- the finite set of alphanumeric character strings that begin with a
+   lowercase character; e.g. `human`, `size`, `a`,
+3. $\small \mathcal{V}$ -- the finite set of alphanumeric character strings that begin with an
+   uppercase character; e.g. `X`, `A`, `Var`.
 
-$$\forall x\forall y\forall z \left(parent(x, z) ∧ ancestor(z, y) \Rightarrow ancestor(x, y) \right)$$
+Each rule $\small r \in R$ has the form:
 
+$$\tag{i}\small A_1, \ldots, A_m \leftarrow L_1, \ldots, L_n$$
 
-## Programs
+1. a head $\small head(r)$, is the set of _atom_ values $\small A_1, \ldots, A_m$ where $\small m \in \mathbb{N}$,
+2. a body $\small body(r)$, is a set of _literal_ values $\small L_1, \ldots, L_n$ where $\small n \in \mathbb{N}$,
+3. a rule is _ground_ if its head and its body are both ground:
+
+$$\tag{ii}\small ground\(r\) \leftarrow \(\forall{a}\in head\(r\)\) \(\forall{l}\in body\(r\)\) \(ground(a) \land ground\(l\)\)$$
+
+The cardinality of the head, the value of $\small m$, defines the type of the rule, as follows.
+
+$$\tag{iii}\small form = \begin{cases} pure, &\text{if } m = 1 \\\\ constraint, &\text{if } m = 0 \land \text{Datalog}^{\lnot} \\\\ disjunct, &\text{if } m > 1  \land \text{Datalog}^{\lor}\end{cases}$$
+
+Atoms represent _relations_; they have
+
+1. a predicate, $\small p \in \mathcal{P}$, that names the relationship,
+1. a set of terms $\small t_1, \ldots, t_k$ where $\small t \in \mathcal{T}$ and
+   $\small k \in \mathbb{N}^{+}$ that represent the relation attribute values,
+1. a fixed arity, that is for all atoms sharing the same predicate the value of $\small k$ will
+   match,
+1. in a typed $\small\text{Datalog}$ each term $\small t_i$ shall have a type and for each value of
+   $\small i$ all atoms sharing the same predicate will have the same type for $\small t_i$,
+1. Terms in $\small \mathcal{T}$ may be constant values or variables, such that
+   $\small\mathcal{T}=\mathcal{C}\cup\mathcal{V}\cup\bar{t}$ where $\small\bar{t}$ represents an
+   unused variable (denoted in the text representation as an underscore `"_"`),
+1. an atom is _ground_ if all of it's terms are constants:
+
+$$\tag{iv}\small ground\(a\) \leftarrow \forall{t}\in terms\(a\) \(t \in \mathcal{C}\)$$
+
+Literals represent clauses that select from relations.
+
+1. a literal may be an atom, or in $\text{\small{Datalog}}^{=}$ a conditional expression,
+1. in $\text{\small{Datalog}}^{\lnot}$ a literal may be _negated_,
+1. a rule is termed _positive_ if all of its literals are positive:
+
+$$\tag{v}\small positive(r) \leftarrow \(\forall{l}\in body\(r\)\) \(\lnot negated\(l\)\)$$
+
+Any ground rule where $\small m=1$ and where $\small n=0$ is termed a _fact_ as it is true by nature of
+having body, or alternatively we may consider the body be comprised of the truth value $\small\top$.
+
+$$\tag{vi}\small fact(r) \leftarrow \(|head\(r\)|=1 \land |body\(r\)|=0\)$$
+
+> Note that it is not possible to combine the _constraint_ form of a rule from (iii) and the fact
+> form in (vi); $\small head\(r\)=\empty \land body\(r\)=\empty$ is not a valid rule.
+
+An atom may be also used as a _goal clause_, or a _query_ in that it's constant and variable terms may be
+used to match facts from the known facts or those that may be inferred from the set of rules
+introduced. A ground goal is simply determining that any fact exists that matches all of the constant
+values provided and will return true or false. In the case that one or more variables exist a set of
+facts will be returned that match the expressed constants and provide the corresponding values for
+the variables.
+
+The set of facts known a-priori is termed the _extensional_ database or EDB and as it only contains
+relations comprised of constant values (ground facts) it looks a lot like a relational database. The
+set of rules, and any inferred facts are termed the _intensional_ database or IDB. A Datalog program
+$\small P$ is therefore a set comprising the extensional database $\small D_{E}$, the
+intensional database $\small D_{I}$, and a set of queries.
+
+$$\tag{vii}\small P=\lbrace D_E, D_I, Q \rbrace$$
+
+This implies, at least, that the set of predicates accessible to queries in the program is the union
+of predicates in the extensional and intensional databases.
+
+$$\tag{viii}\small \mathcal{P}_P = \mathcal{P}_E \cup \mathcal{P}_I$$
+
+It should be obvious that the same exists for constants and variables;
+$\small \mathcal{C}_P = \mathcal{C}_E \cup \mathcal{C}_I$ and
+$\small \mathcal{V}_P = \mathcal{V}_E \cup \mathcal{V}_I$.
+
+Datalog does not, in general, allow the rules comprising the intensional database to infer new
+values for predicates that exist in the extensional database. This may be expressed as follows,
+although in the textual representation it is expressed as an error to define a rule with a head
+predicate that exists in the extensional database.
+
+$$\tag{ix}\small \mathcal{P}_E \cap \mathcal{P}_I = \empty$$
+
+The same restriction is not required for constants in $\small \mathcal{C}_P$ or variables in
+$\small \mathcal{V}_P$.
+
+## Concrete Syntax
+
+The definitions below use ABNF
+([Augmented BNF for Syntax Specifications](https://datatracker.ietf.org/doc/html/rfc5234)) and
+focus both on the concrete syntax as expressed in the text representation.
+The ABNF definition is somewhat simplified from the grammar used in the ASDI parser although any
+deviations do not significantly affect the meaning of the language.
+
+### Programs
+
+A program consists of a set of facts that comprise the extensional database, a list of rules that
+comprise the intensional database, and possibly a set of queries to interrogate the result of any
+reasoning performed over the program.
 
 ```abnf
 program         = *[ fact ] *[ rule ] *[ query ]
 ```
 
-## Facts
+### Facts
 
-Facts are introduced in the form _predicate_ followed by a period (end of statement marker) or a
-set of _arguments_ within parenthesis.
-
-```datalog
-parent("Xerces", brooke).
-```
-
-$p\left(c_{1} \ldots c_{n}\right)$ where predicate $p \in \mathcal{P}$, constant $c \in \mathcal{C}$,
-and $n \in \mathbb{P}$. The value $n$ is also termed the arity of the predicate $p$.
+Facts may only be expressed in the form of stand-alone ground atoms and **must** appear before any
+rules.
 
 ```abnf
 fact            = predicate [ constant-list ] "."
@@ -71,7 +139,14 @@ predicate       = LC_ALPHA *[ ALPHA / DIGIT / "_" ]
 constant-list   = "(" [ constant *[ "," constant ] ] ")"
 ```
 
-## Constant Values
+The following demonstrates a simple fact denoting that the constant `brooke` representing some
+individual is the parent of some individual represented by the constant `"Xerces"`.
+
+```datalog
+parent("Xerces", brooke).
+```
+
+### Constant Values
 
 * String
 * Integer
@@ -87,19 +162,23 @@ boolean         = "@true" / "⊤" / "@false" / "⊥"
 ```
 
 Boolean values may also be represented using `⊤` (down tack `\u{22a4}`) for true, and `⊥` (up tack
-`\u{22a5}`) for false.
+`\u{22a5}`) for false where this may improve readability.
 
-## Rules
+### Rules
+
+As facts are treated as separate from rules in the text representation there is no need for empty
+bodies, all rules **must** have at least one literal.
 
 ```abnf
 rule            = head implication body "."
 head            = [ atom *[ disjunction atom ] | "⊥" ]
-disjuntion      = "|" / "OR" / "∨"
+disjuntion      = ";" / "|" / "OR" / "∨"
 implication     = ":-" / "<-" / "⟵"
 body            = literal-list
 ```
 
-Implication may also be written using the Unicode character `⟵` (long leftwards arrow `\u{27f5}`).
+Material mplication may also be written using the Unicode character `⟵` (long leftwards arrow
+`\u{27f5}`).
 
 ```datalog
 ancestor(X, Y) :- parent(X, Y).
@@ -107,25 +186,30 @@ ancestor(X, Y) <- parent(X, Y).
 ancestor(X, Y) ⟵ parent(X, Y).
 ```
 
+The language feature `disjunction` allows for multiple atoms to appear in the rule's head with the
+semantics that these are choices. For example, the following describes the rule that _if X is a
+parent then X is **either** a father **or** mother_.
+
 ```datalog
+@feature(disjunction).
+
 father(X) ⋁ mother(X) :- parent(X).
 ```
 
-**SOME LANGUAGE FEATURE**
+The language feature `constraints` allows the specification of rules with no head, i.e. rules that
+may never be true. In this case the material implication symbol is **required**, the falsum
+value is optional for readability.
 
 ```datalog
+@feature(constraints).
+
 ⊥ :- alive(X), dead(X).
 :- alive(X), dead(X).
 ```
 
-**Facts** are ...
+### Atoms
 
-## Atoms
 
-$p\left(t_{1} \ldots t_{n}\right)$ where predicate $p \in \mathcal{P}$ and $n \in \mathbb{P}$.
-A term $t$ is either a constant $t \in \mathcal{C}$, a variable $t \in \mathcal{V}$, or the
-anonymous variable notation `_`.
-The value $n$ is also termed the arity of the predicate $p$.
 
 ```abnf
 atom            = predicate term-list
@@ -136,7 +220,7 @@ named-variable  = UC_ALPHA *[ ALPHA / DIGIT / "_" ]
 anon-variable   = "_"
 ```
 
-## Literals
+### Literals
 
 The addition of the rule `negation` is only present in the $\text{\small{Datalog}}^{\lnot}$ language.
 Similarly, the addition of the `comparison` rule is only present in the $\text{\small{Datalog}}^{=}$
@@ -159,7 +243,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ ancestor(Z, Y).
 ancestor(X, Y) ⟵ parent(X, Z) AND ancestor(Z, Y).
 ```
 
-## Comparisons
+### Comparisons
 
 ```abnf
 comparison      = term operator term
@@ -169,7 +253,7 @@ operator        = "=" / "!=" / "/=" / "≠" / "<" / "<=" / "≤" / ">" / ">=" / 
 The Unicode characters `≠` (not equal to `\u{2260}`), `≤` (less-than or equal to `\u{2264}`), and
 `≥` (greater-than or equal to `\u{2265}`) may be substituted for the common comparison operators.
 
-## Queries
+### Queries
 
 ```abnf
 query           = ( "?-" atom "." ) / ( atom "?" )
@@ -180,7 +264,7 @@ query           = ( "?-" atom "." ) / ( atom "?" )
 ancestor(xerces, X)?
 ```
 
-## Pragmas
+### Pragmas
 
 ```abnf
 pragma          = declare / include / input / output
@@ -198,19 +282,17 @@ output          = "@output" "(" predicate "," quoted-string [ "," quoted-string 
 ```
 
 ```datalog
-@include("file").
 @declare human(name: string).
-@input(human, "file", "csv").
-@output(human, "file", "text").
+@input(human, "data/humans.csv", "csv").
+@output(mortal, "data/mortals.txt", "text").
 ```
 
-## Comments
+### Comments
 
 ```datalog
 ## Here's a comment
 ?- ancestor(xerces, X). # and another
 ```
-
 
 # Example
 
@@ -224,6 +306,34 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 ?- ancestor(xerces, X).
 ```
 
+```rust
+use asdi::program::Program;
+use asdi::edb::{Attribute, Predicate};
+use asdi::idb::{Atom, Term};
+use std::str::FromStr;
+
+let mut syllogism = Program::default();
+let p_human = Predicate::from_str("human").unwrap();
+
+let human = syllogism
+    .add_new_relation(p_human.clone(), vec![Attribute::string()])
+    .unwrap();
+human.add(["Socrates".into()]).unwrap();
+
+let var_x: Term = Variable::from_str("X").unwrap().into();
+
+syllogism
+    .add_new_rule(
+        Predicate::from_str("mortal").unwrap(),
+        [var_x.clone()],
+        [Atom::new(p_human, [var_x]).into()],
+    )
+    .unwrap();
+
+syllogism
+    .add_new_query(Predicate::from_str("mortal").unwrap(), ["Socrates".into()])
+    .unwrap();
+```
 
 */
 
