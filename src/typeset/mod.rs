@@ -172,7 +172,7 @@ impl LatexTypesetter {
     fn atom(&self, value: &Atom) -> Result<String> {
         Ok(format!(
             "{}{}${}${}",
-            value.predicate(),
+            value.label(),
             CHAR_LEFT_PAREN,
             value
                 .terms()

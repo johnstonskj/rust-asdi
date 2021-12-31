@@ -786,12 +786,12 @@ impl Program {
         rule.check_well_formed(self.features())?;
 
         for atom in rule.head() {
-            if self.asserted.contains(atom.predicate()) {
+            if self.asserted.contains(atom.label()) {
                 return Err(Error::ExtensionalPredicateInRuleHead(
-                    atom.predicate().clone(),
+                    atom.label().clone(),
                     atom.source_location().cloned(),
                 ));
-            } else if !self.infer.contains(atom.predicate()) {
+            } else if !self.infer.contains(atom.label()) {
                 let mut schema = Vec::with_capacity(atom.arity());
                 for term in atom.terms() {
                     match term {
@@ -800,7 +800,7 @@ impl Program {
                     }
                 }
                 self.intensional_mut()
-                    .add_new_relation(atom.predicate().clone(), schema)?;
+                    .add_new_relation(atom.label().clone(), schema)?;
             }
         }
 
@@ -818,7 +818,7 @@ impl Program {
                     .enumerate()
                     .filter_map(|(i, term)| term.as_variable().map(|var| (i, var)))
                     .find(|(_, var)| var == &variable)
-                    .map(|(i, _)| (a.predicate(), i))
+                    .map(|(i, _)| (a.label(), i))
             })
             .collect();
         for (predicate, i) in candidates {

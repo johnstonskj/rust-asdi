@@ -90,7 +90,7 @@ impl Evaluator for NaiveEvaluator {
                                     }
                                     Ok(view)
                                 } else {
-                                    Err(Error::RelationDoesNotExist(atom.predicate().clone()))
+                                    Err(Error::RelationDoesNotExist(atom.label().clone()))
                                 }
                             } else {
                                 Err(Error::LanguageFeatureDisabled(FEATURE_COMPARISONS))
@@ -107,7 +107,7 @@ impl Evaluator for NaiveEvaluator {
                             let head_predicates = rule.head().collect::<Vec<&Atom>>();
                             assert_eq!(head_predicates.len(), 1);
                             let head = head_predicates.get(0).unwrap();
-                            let relation = new_db.relation_mut(head.predicate()).unwrap();
+                            let relation = new_db.relation_mut(head.label()).unwrap();
                             let new_fact = head
                                 .terms()
                                 .map(|term| {

@@ -210,7 +210,7 @@ impl View {
 
     pub fn attribute_index(&self, index: AttributeIndex<Variable>) -> Option<usize> {
         let index = match &index {
-            AttributeIndex::Name(n) => self.schema.name_to_index(n),
+            AttributeIndex::Label(n) => self.schema.label_to_index(n),
             AttributeIndex::Index(i) => Some(*i),
         };
         index.map(|index| {
@@ -428,12 +428,12 @@ impl View {
     pub(crate) fn join(&self, other: &Self) -> Result<Self> {
         let mut new_table: Self = Self::new(
             self.schema()
-                .name_union(other.schema())
+                .label_union(other.schema())
                 .into_iter()
                 .map(|n| Attribute::from(n))
                 .collect::<Vec<Attribute<Variable>>>(),
         );
-        let common_variables = self.schema().name_intersection(other.schema());
+        let common_variables = self.schema().label_intersection(other.schema());
 
         // TODO: infer attribute types for new results!
         for left_row in self.iter() {
@@ -445,9 +445,10 @@ impl View {
             ) {
                 let mut new_row: Vec<Constant> = Vec::with_capacity(new_table.schema().arity());
                 for (i, column) in new_table.schema().iter().enumerate() {
-                    if let Some(index) = self.schema().name_to_index(column.name().unwrap()) {
+                    if let Some(index) = self.schema().label_to_index(column.label().unwrap()) {
                         new_row.insert(i, left_row.get(index).unwrap().clone())
-                    } else if let Some(index) = other.schema().name_to_index(column.name().unwrap())
+                    } else if let Some(index) =
+                        other.schema().label_to_index(column.label().unwrap())
                     {
                         new_row.insert(i, right_row.get(index).unwrap().clone())
                     } else {

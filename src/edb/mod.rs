@@ -46,7 +46,7 @@ where
     T: AttributeName,
 {
     attributes: Vec<Attribute<T>>,
-    named_index: BTreeMap<T, usize>,
+    label_index: BTreeMap<T, usize>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -54,7 +54,7 @@ pub struct Attribute<T>
 where
     T: AttributeName,
 {
-    name: Option<T>,
+    label: Option<T>,
     kind: Option<AttributeKind>,
 }
 
@@ -63,7 +63,7 @@ pub enum AttributeIndex<T>
 where
     T: AttributeName,
 {
-    Name(T),
+    Label(T),
     Index(usize),
 }
 
@@ -81,14 +81,14 @@ pub struct Relations(BTreeMap<Predicate, Relation>);
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Relation {
-    name: Rc<Predicate>,
+    label: Rc<Predicate>,
     schema: Schema<Predicate>,
     facts: HashSet<Fact>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Fact {
-    name: Rc<Predicate>,
+    label: Rc<Predicate>,
     values: Vec<Constant>,
 }
 
@@ -118,23 +118,6 @@ pub struct Predicate(String);
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
-// impl<T> Display for Schema<T>
-// where
-//     T: AttributeName + Display,
-// {
-//     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-//         write!(
-//             f,
-//             "{}",
-//             self.attributes
-//                 .iter()
-//                 .map(Attribute::to_string)
-//                 .collect::<Vec<String>>()
-//                 .join(&format!("{} ", CHAR_COMMA))
-//         )
-//     }
-// }
-
 impl<T> From<Attribute<T>> for Schema<T>
 where
     T: AttributeName,
@@ -162,7 +145,7 @@ where
         let named: Vec<(T, usize)> = attributes
             .iter()
             .enumerate()
-            .filter_map(|(i, c)| c.name().map(|var| (var.clone(), i)))
+            .filter_map(|(i, c)| c.label().map(|var| (var.clone(), i)))
             .collect();
         let pre_hash_len = named.len();
 
@@ -172,14 +155,14 @@ where
 
         Self {
             attributes,
-            named_index: named,
+            label_index: named,
         }
     }
 
     pub fn empty() -> Self {
         Self {
             attributes: Default::default(),
-            named_index: Default::default(),
+            label_index: Default::default(),
         }
     }
 
@@ -199,20 +182,16 @@ where
         self.attributes.iter_mut()
     }
 
-    pub fn has_named(&self) -> bool {
-        !self.named_index.is_empty()
-    }
-
-    pub fn contains<I: Into<AttributeIndex<T>>>(&self, index: I) -> bool {
-        match index.into() {
-            AttributeIndex::Name(n) => self.named_index.contains_key(&n),
-            AttributeIndex::Index(i) => i < self.arity(),
-        }
-    }
+    // pub fn contains<I: Into<AttributeIndex<T>>>(&self, index: I) -> bool {
+    //     match index.into() {
+    //         AttributeIndex::Label(n) => self.named_index.contains_key(&n),
+    //         AttributeIndex::Index(i) => i < self.arity(),
+    //     }
+    // }
 
     pub fn get<I: Into<AttributeIndex<T>>>(&self, index: I) -> Option<&Attribute<T>> {
         match index.into() {
-            AttributeIndex::Name(n) => match self.named_index.get(&n) {
+            AttributeIndex::Label(n) => match self.label_index.get(&n) {
                 Some(i) => self.attributes.get(*i),
                 None => None,
             },
@@ -220,25 +199,25 @@ where
         }
     }
 
-    pub fn names(&self) -> impl Iterator<Item = &T> {
-        self.named_index.keys()
+    pub fn labels(&self) -> impl Iterator<Item = &T> {
+        self.label_index.keys()
     }
 
-    pub fn name_intersection(&self, other: &Self) -> Vec<(&T, usize, usize)> {
-        self.named_index
+    pub fn label_intersection(&self, other: &Self) -> Vec<(&T, usize, usize)> {
+        self.label_index
             .iter()
             .filter_map(|(var, i)| {
                 other
-                    .named_index
+                    .label_index
                     .get(var)
                     .map(|other_i| (var, *i, *other_i))
             })
             .collect()
     }
 
-    pub fn name_union(&self, other: &Self) -> Vec<T> {
-        let mut all: Vec<T> = self.names().cloned().collect();
-        for var in other.names() {
+    pub fn label_union(&self, other: &Self) -> Vec<T> {
+        let mut all: Vec<T> = self.labels().cloned().collect();
+        for var in other.labels() {
             if !all.contains(var) {
                 all.push(var.clone());
             }
@@ -246,8 +225,8 @@ where
         all
     }
 
-    pub fn name_to_index(&self, n: &T) -> Option<usize> {
-        self.named_index.get(n).copied()
+    pub fn label_to_index(&self, n: &T) -> Option<usize> {
+        self.label_index.get(n).copied()
     }
 
     pub fn conforms(&mut self, row: &[Constant]) -> bool {
@@ -261,36 +240,15 @@ where
             })
     }
     pub fn to_column_decl(&self, emit_unknown: bool) -> String {
-        format!(
-            "{}",
-            self.attributes
-                .iter()
-                .map(|a| a.to_column_decl(emit_unknown))
-                .collect::<Vec<String>>()
-                .join(&format!("{} ", CHAR_COMMA))
-        )
+        self.attributes
+            .iter()
+            .map(|a| a.to_column_decl(emit_unknown))
+            .collect::<Vec<String>>()
+            .join(&format!("{} ", CHAR_COMMA))
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-
-// impl<T> Display for Attribute<T>
-// where
-//     T: AttributeName,
-// {
-//     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-//         write!(
-//             f,
-//             "{}",
-//             match (&self.name, &self.kind) {
-//                 (None, None) => String::new(),
-//                 (Some(n), Some(k)) => format!("{}{} {}", n, CHAR_COLON, k),
-//                 (Some(n), None) => format!("{}", n),
-//                 (None, Some(k)) => format!("{}{} {}", COLUMN_NAME_UNKNOWN, CHAR_COLON, k),
-//             },
-//         )
-//     }
-// }
 
 impl<T> From<AttributeKind> for Attribute<T>
 where
@@ -306,7 +264,7 @@ where
     T: AttributeName,
 {
     fn from(name: T) -> Self {
-        Self::named(name)
+        Self::labeled(name)
     }
 }
 
@@ -318,7 +276,7 @@ where
         Self::new_inner(None, None)
     }
 
-    pub fn named(name: T) -> Self {
+    pub fn labeled(name: T) -> Self {
         Self::new_inner(name, None)
     }
 
@@ -330,7 +288,7 @@ where
         Self::new_inner(None, AttributeKind::String)
     }
 
-    pub fn string_named(name: T) -> Self {
+    pub fn string_labeled(name: T) -> Self {
         Self::new_inner(name, AttributeKind::String)
     }
 
@@ -338,7 +296,7 @@ where
         Self::new_inner(None, AttributeKind::Integer)
     }
 
-    pub fn integer_named(name: T) -> Self {
+    pub fn integer_labeled(name: T) -> Self {
         Self::new_inner(name, AttributeKind::Integer)
     }
 
@@ -346,7 +304,7 @@ where
         Self::new_inner(None, AttributeKind::Boolean)
     }
 
-    pub fn boolean_named(name: T) -> Self {
+    pub fn boolean_labeled(name: T) -> Self {
         Self::new_inner(name, AttributeKind::Boolean)
     }
 
@@ -359,24 +317,24 @@ where
         kind: K,
     ) -> Self {
         Self {
-            name: name.into(),
+            label: name.into(),
             kind: kind.into(),
         }
     }
 
-    pub fn name(&self) -> Option<&T> {
-        self.name.as_ref()
+    pub fn label(&self) -> Option<&T> {
+        self.label.as_ref()
     }
 
     pub fn is_anonymous(&self) -> bool {
-        self.name.is_none()
+        self.label.is_none()
     }
 
     pub fn kind(&self) -> Option<AttributeKind> {
         self.kind.as_ref().copied()
     }
 
-    pub fn override_kind(&mut self, kind: AttributeKind) -> Option<AttributeKind> {
+    pub(crate) fn override_kind(&mut self, kind: AttributeKind) -> Option<AttributeKind> {
         let old_kind = self.kind;
         self.kind = Some(kind);
         old_kind
@@ -387,8 +345,8 @@ where
     }
 
     pub fn update_from(&mut self, other: &Self) {
-        if let (None, Some(v)) = (&self.name, &other.name) {
-            self.name = Some(v.clone())
+        if let (None, Some(v)) = (&self.label, &other.label) {
+            self.label = Some(v.clone())
         }
         if let (None, Some(v)) = (self.kind, other.kind) {
             self.kind = Some(v)
@@ -396,7 +354,7 @@ where
     }
 
     pub fn to_column_decl(&self, emit_unknown: bool) -> String {
-        match (&self.name, &self.kind) {
+        match (&self.label, &self.kind) {
             (None, None) => String::new(),
             (Some(n), Some(k)) => format!("{}{} {}", n, CHAR_COLON, k),
             (Some(n), None) => format!("{}", n),
@@ -427,7 +385,7 @@ where
     T: AttributeName,
 {
     fn from(v: T) -> Self {
-        Self::Name(v)
+        Self::Label(v)
     }
 }
 
@@ -436,18 +394,18 @@ where
     T: AttributeName,
 {
     pub fn is_named(&self) -> bool {
-        matches!(self, Self::Name(_))
+        matches!(self, Self::Label(_))
     }
 
     pub fn as_name(&self) -> Option<&T> {
         match self {
-            Self::Name(v) => Some(v),
+            Self::Label(v) => Some(v),
             _ => None,
         }
     }
 
     pub fn is_indexed(&self) -> bool {
-        matches!(self, Self::Name(_))
+        matches!(self, Self::Label(_))
     }
 
     pub fn as_index(&self) -> Option<&usize> {
@@ -571,10 +529,10 @@ impl Relations {
     }
 
     pub fn matches(&self, atom: &Atom) -> Option<View> {
-        if let Some(relation) = self.0.get(atom.predicate()) {
+        if let Some(relation) = self.0.get(atom.label()) {
             trace!(
                 "matches > predicate: {}, relation: {:?}",
-                atom.predicate(),
+                atom.label(),
                 relation.name()
             );
             let results = relation.matches(atom);
@@ -619,7 +577,7 @@ impl Relations {
 impl Relation {
     pub fn new<V: Into<Schema<Predicate>>>(name: Predicate, schema: V) -> Self {
         Self {
-            name: Rc::from(name),
+            label: Rc::from(name),
             schema: schema.into(),
             facts: Default::default(),
         }
@@ -627,7 +585,7 @@ impl Relation {
 
     pub fn clone_with_schema_only(&self) -> Self {
         Self {
-            name: self.name.clone(),
+            label: self.label.clone(),
             schema: self.schema.clone(),
             facts: Default::default(),
         }
@@ -636,7 +594,7 @@ impl Relation {
     // --------------------------------------------------------------------------------------------
 
     pub fn name(&self) -> &Predicate {
-        &self.name
+        &self.label
     }
 
     // --------------------------------------------------------------------------------------------
@@ -664,17 +622,6 @@ impl Relation {
             })
     }
 
-    // pub fn attribute_index(&self, index: AttributeIndex<Variable>) -> Option<usize> {
-    //     let index = match &index {
-    //         AttributeIndex::Name(n) => self.schema.name_to_index(n),
-    //         AttributeIndex::Index(i) => Some(*i),
-    //     };
-    //     index.map(|index| {
-    //         assert!(index < self.schema.arity());
-    //         index
-    //     })
-    // }
-
     // --------------------------------------------------------------------------------------------
 
     pub fn is_empty(&self) -> bool {
@@ -692,7 +639,7 @@ impl Relation {
     pub fn add_as_fact<V: Into<Vec<Constant>>>(&mut self, values: V) -> Result<()> {
         let values: Vec<Constant> = values.into();
         if self.schema.conforms(&values) {
-            self.add(Fact::new(self.name.clone(), values))?;
+            self.add(Fact::new(self.label.clone(), values))?;
         } else {
             error!("Provided row does not conform to schema.");
             // TODO: propagate errors
@@ -703,14 +650,14 @@ impl Relation {
 
     pub fn add(&mut self, fact: Fact) -> Result<()> {
         // TODO: propagate errors
-        assert_eq!(fact.name, self.name);
+        assert_eq!(fact.label, self.label);
         self.facts.insert(fact);
         Ok(())
     }
 
     pub fn extend(&mut self, other: Self) -> Result<()> {
-        trace!("extend > name {:?} == {:?}", self.name, other.name);
-        assert_eq!(self.name, other.name);
+        trace!("extend > name {:?} == {:?}", self.label, other.label);
+        assert_eq!(self.label, other.label);
         trace!("extend > schema {:?} == {:?}", self.schema, other.schema);
         assert_eq!(self.schema, other.schema);
         for fact in other.facts.into_iter() {
@@ -794,7 +741,7 @@ impl Display for Fact {
         write!(
             f,
             "{}{}{}{}{}",
-            self.name,
+            self.label,
             CHAR_LEFT_PAREN,
             self.iter()
                 .map(Constant::to_string)
@@ -815,13 +762,13 @@ impl From<Fact> for Vec<Constant> {
 impl Fact {
     pub fn new<V: Into<Vec<Constant>>>(name: Rc<Predicate>, values: V) -> Self {
         Self {
-            name,
+            label: name,
             values: values.into(),
         }
     }
 
     pub fn name(&self) -> &Predicate {
-        &self.name
+        &self.label
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Constant> {

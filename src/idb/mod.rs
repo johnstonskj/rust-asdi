@@ -63,7 +63,7 @@ pub struct Rule {
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Atom {
-    predicate: Predicate,
+    label: Predicate,
     terms: Vec<Term>,
     src_loc: Option<SourceLocation>,
 }
@@ -352,13 +352,13 @@ impl Rule {
         // TODO: this is only direct recursion, need to check for mutual recursive rules.
         let head_predicates = self
             .head()
-            .map(|atom| atom.predicate())
+            .map(|atom| atom.label())
             .collect::<Vec<&Predicate>>();
         !self
             .literals()
             .filter_map(|lit| {
                 if let LiteralInner::Atom(atom) = lit.inner() {
-                    Some(atom.predicate())
+                    Some(atom.label())
                 } else {
                     None
                 }
@@ -493,7 +493,7 @@ impl Rule {
                 .collect();
             if !missing.is_empty() {
                 return Err(Error::HeadVariablesMissingInBody(
-                    atom.predicate().to_string(),
+                    atom.label().to_string(),
                     atom.source_location().cloned(),
                     missing
                         .iter()
@@ -509,7 +509,7 @@ impl Rule {
                 .collect();
             if !missing.is_empty() {
                 return Err(Error::NegativeVariablesNotPositive(
-                    atom.predicate().to_string(),
+                    atom.label().to_string(),
                     atom.source_location().cloned(),
                     missing
                         .iter()
@@ -529,7 +529,7 @@ impl Display for Atom {
         write!(
             f,
             "{}{}{}{}",
-            self.predicate,
+            self.label,
             CHAR_LEFT_PAREN,
             if self.terms.is_empty() {
                 unreachable!("Atom terms are empty")
@@ -546,11 +546,11 @@ impl Display for Atom {
 }
 
 impl Atom {
-    pub fn new<T: Into<Vec<Term>>>(predicate: Predicate, terms: T) -> Self {
+    pub fn new<T: Into<Vec<Term>>>(label: Predicate, terms: T) -> Self {
         let terms = terms.into();
         assert!(!terms.is_empty());
         Self {
-            predicate,
+            label,
             terms,
             src_loc: None,
         }
@@ -576,24 +576,24 @@ impl Atom {
             }
         }
         Ok(Self {
-            predicate: relation.name().clone(),
+            label: relation.name().clone(),
             terms,
             src_loc: None,
         })
     }
 
-    pub fn new_at_location(predicate: Predicate, terms: &[Term], location: SourceLocation) -> Self {
+    pub fn new_at_location(label: Predicate, terms: &[Term], location: SourceLocation) -> Self {
         let terms: Vec<Term> = terms.into();
         assert!(!terms.is_empty());
         Self {
-            predicate,
+            label,
             terms,
             src_loc: Some(location),
         }
     }
 
-    pub fn predicate(&self) -> &Predicate {
-        &self.predicate
+    pub fn label(&self) -> &Predicate {
+        &self.label
     }
 
     pub fn push<V: Into<Term>>(&mut self, argument: V) -> &mut Self {
