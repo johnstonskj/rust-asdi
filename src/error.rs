@@ -32,6 +32,7 @@ pub enum Error {
     HeadVariablesMissingInBody(String, Option<SourceLocation>, Vec<String>),
     NegativeVariablesNotPositive(String, Option<SourceLocation>, Vec<String>),
     RelationExists(Predicate),
+    RelationDoesNotExist(Predicate),
     FactDoesNotConformToSchema(Predicate, String),
 }
 
@@ -109,7 +110,8 @@ impl Display for Error {
                         },
                         vars.join(", ")
                     ),
-                Error::RelationExists(predicate) => format!("The relation '{}' already exists in the extensional database", predicate),
+                Error::RelationExists(predicate) => format!("The relation '{}' already exists in the extensional database.", predicate),
+                Error::RelationDoesNotExist(predicate) => format!("The relation '{}' does not exist in the selected database.", predicate),
                 Error::FactDoesNotConformToSchema(predicate, terms) => format!("The fact values ({}) do not meet the schema requirements for relation '{}'", terms, predicate),
             }
         )

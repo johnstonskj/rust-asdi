@@ -435,31 +435,70 @@ The results of this query would not include the age column:
 TBD.
 
 ```abnf
-pragma          = assert / infer / input / output
+pragma          = feature / assert / infer / input / output
+
+feature         = "@feature" feature-list "."
+feature-list    = "(" feature-id *[ "," feature-id ] ")"
+feature-id      = "comparisons" / "constraints" / "disjunction" / "negation"
 
 assert          = "@assert" predicate attribute-list "."
-infer           = "@infer" predicate attribute-list "."
+infer           = "@infer" ( predicate attribute-list / infer_from ) "."
 attribute-list  = "(" attribute-decl *[ "," attribute-decl ] ")"
 attribute-decl  = [ predicate ":" ] attribute-type
 attribute-type  = "boolean" / "integer" / "string"
+infer_from      = "from" predicate
 
-input           = "@input" "(" predicate "," file-name [ "," file-type ] ")" "."
-output          = "@output" "(" predicate "," file-name [ "," file-type ] ")" "."
+input           = "@input" io-details "."
+output          = "@output" io-details "."
+io-details      = "(" predicate "," file-name [ "," file-type ] ")"
 file-name       = quoted-string
 file-type       = quoted-string
 ```
 
-* `assert` -- defines an intensional relation.
-* `infer` -- defines an extensional relation.
-* `input` -- input values for an intensional relation from the referenced source file.
-* `output` -- output values from the extensional relation into the referenced source file.
+The `feature` pragma determines which Datalog language is in use. Use of syntax not supported by the
+selected language feature will result in errors.
+
+```datalog
+@feature(negation).
+@feature(comparisons, disjunction).
+```
+
+The `assert` pragma describes a new relation in the extensional database. The parser can determine
+the schema for facts from their types in the database. The use of this pragma is therefore optional,
+but recommended.
+
+```datalog
+@assert human(name: string).
+```
+
+The `infer` pragma describes a new relation in the intensional database. Typically the parser
+can determine the schema for relational literals from their context, The use of this pragma
+is therefore optional, but recommended. The alternate form is more explicit in that it defines
+an intensional relation in terms of a previously defined extensional relation.
+
+```datalog
+@infer mortal(name: string).
+## alternatively ...
+@assert human(name: string).
+@infer mortal from human.
+```
+
+The `input` pragma instructs the parser to load facts for the named extensional relation from an
+external file. This pragma **requires** that the relation be previously defined via the `assert`
+pragma.
 
 ```datalog
 @assert human(name: string).
 @input(human, "data/humans.csv", "csv").
+```
 
+The `output` pragma instructs the parser to write facts from the named intensional relation to an
+external file. This pragma **requires** that the relation be previously defined via the `infer`
+pragma.
+
+```datalog
 @infer mortal(name: string).
-@output(mortal, "data/mortals.txt", "text").
+@output(mortal, "data/mortals.txt").
 ```
 
 ### Comments
@@ -482,6 +521,9 @@ mortal(X) <- human(X).
 
 ?- mortal("Socrates").
 ```
+
+Note in this example we allow the parser to identify the schema for the relations `human` and
+`mortal` rather than using the pragmas `assert` and `infer`.
 
 The following is the same example constructed via the ASDI library.
 
@@ -837,11 +879,11 @@ impl Program {
         Ok(self.queries.insert(query))
     }
 
-    pub fn eval_query(&self, query: &Query) -> Result<View> {
+    pub fn eval_query(&self, query: &Query) -> Result<Option<View>> {
         Ok(self.extensional().matches(query.as_ref()))
     }
 
-    pub fn eval_queries(&self) -> Vec<(&Query, Result<View>)> {
+    pub fn eval_queries(&self) -> Vec<(&Query, Result<Option<View>>)> {
         self.queries().map(|q| (q, self.eval_query(q))).collect()
     }
 

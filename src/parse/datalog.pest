@@ -90,19 +90,19 @@ identifier_relaxed = @{
 // ------------------------------------------------------------------------------------------------
 
 pragma = {
-    AT_SIGN ~ (pragma_assert | pragma_infer | pragma_feature | pragma_include | pragma_input | pragma_output) ~ DOT
+    AT_SIGN ~ (pragma_assert | pragma_infer | pragma_feature | pragma_input | pragma_output) ~ DOT
 }
 
 pragma_assert = {
-    keyword_assert ~ predicate ~ LEFT_PAREN ~ attribute_declaration_list ~ RIGHT_PAREN
+    keyword_assert ~ predicate ~ attribute_declaration_list
 }
 
 pragma_infer = {
-    keyword_infer ~ predicate ~ LEFT_PAREN ~ attribute_declaration_list ~ RIGHT_PAREN
+    keyword_infer ~ predicate ~ ( attribute_declaration_list | ( "from" ~ predicate ))
 }
 
 attribute_declaration_list = _{
-    attribute_declaration ~ (COMMA ~ attribute_declaration)*
+    LEFT_PAREN ~ attribute_declaration ~ (COMMA ~ attribute_declaration)* ~ RIGHT_PAREN
 }
 
 attribute_declaration = {
@@ -119,10 +119,6 @@ feature_list = _{
 
 feature_id = _{
     feature_id_negation | feature_id_comparisons | feature_id_constraints | feature_id_disjunction
-}
-
-pragma_include = {
-    keyword_include ~ LEFT_PAREN ~ string ~ RIGHT_PAREN
 }
 
 pragma_input = {

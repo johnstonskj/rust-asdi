@@ -60,6 +60,12 @@ datalog = function(hljs) {
     begin: /:/
   };
 
+  const INFER_FROM = {
+    scope: 'keyword',
+    begin: /from/,
+    relevance: 1,
+  };
+
   const PRAGMA_LIST = {
     scope: 'punctuation',
     begin: /\(/,
@@ -80,6 +86,7 @@ datalog = function(hljs) {
     begin: /@[a-z]+/,
     end: /\./,
     contains: [
+      INFER_FROM,
       PREDICATE,
       PRAGMA_LIST,
       hljs.QUOTE_STRING_MODE,

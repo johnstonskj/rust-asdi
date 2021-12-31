@@ -87,8 +87,13 @@ fn test_parse_query_suffixed() {
 }
 
 #[test]
-fn test_parse_pragma_include() {
-    quick_parser_check(r#"@include("./file")."#, None);
+fn test_parse_pragma_assert() {
+    quick_parser_check(r#"@assert human(string)."#, None);
+}
+
+#[test]
+fn test_parse_pragma_assert_named() {
+    quick_parser_check(r#"@assert human(name: string)."#, None);
 }
 
 // ------------------------------------------------------------------------------------------------

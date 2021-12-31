@@ -570,7 +570,7 @@ impl Relations {
         self.0.get_mut(predicate)
     }
 
-    pub fn matches(&self, atom: &Atom) -> View {
+    pub fn matches(&self, atom: &Atom) -> Option<View> {
         if let Some(relation) = self.0.get(atom.predicate()) {
             trace!(
                 "matches > predicate: {}, relation: {:?}",
@@ -581,16 +581,15 @@ impl Relations {
             if atom.variables().count() == 0 {
                 // if all attributes are constant it is a presence query, not a selection.
                 if results.is_empty() {
-                    View::new_false()
+                    Some(View::new_false())
                 } else {
-                    View::new_true()
+                    Some(View::new_true())
                 }
             } else {
-                results
+                Some(results)
             }
         } else {
-            // TODO: Is this actually an error?
-            View::empty()
+            None
         }
     }
 
@@ -1049,11 +1048,11 @@ mortal(X) <- human(X).
             human.clone(),
             [Term::Variable(Variable::from_str("X").unwrap())],
         );
-        let results = program.extensional().matches(&qterm);
+        let results = program.extensional().matches(&qterm).unwrap();
         println!("{}", results);
 
         let qterm = Atom::new(human, [Term::Constant(Constant::from("Socrates"))]);
-        let results = program.extensional().matches(&qterm);
+        let results = program.extensional().matches(&qterm).unwrap();
         println!("{}", results);
     }
 }

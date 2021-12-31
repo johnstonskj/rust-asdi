@@ -9,7 +9,7 @@ More detailed description, with
 
 use crate::edb::Constant;
 use crate::error::{Error, Result};
-use crate::features::FEATURE_NEGATION;
+use crate::features::{FEATURE_COMPARISONS, FEATURE_NEGATION};
 use crate::idb::{eval::Evaluator, Atom, Term, View};
 use crate::{Program, Relations};
 use tracing::trace;
@@ -64,36 +64,49 @@ impl Evaluator for NaiveEvaluator {
         // † -- an _intension_ is any property or quality connoted by a word, phrase, or another symbol.
         //
         if program.is_positive() {
-            let mut new_db = program.extensional().clone_with_schema_only();
-            trace!("infer > new_db > {:?}", new_db);
+            let mut new_db = program.intensional().clone_with_schema_only();
             loop {
                 let start = new_db.all_len();
                 for rule in program.rules().iter() {
                     trace!("infer > rule > {}", rule);
+
                     let matches: Result<Vec<View>> = rule
                         .literals()
                         .map(|l| {
-                            let mut table = program.extensional().matches(l.as_atom().unwrap());
-                            trace!("infer > matches > table > {:#?}", table);
-                            table.extend(new_db.matches(l.as_atom().unwrap()))?;
-                            trace!("infer > matches > table (extended) > {:#?}", table);
-                            Ok(table)
+                            if let Some(atom) = l.as_atom() {
+                                if let Some(view) = program.extensional().matches(atom) {
+                                    trace!("infer > extensional matches > view > {}\n{}", l, view);
+                                    Ok(view)
+                                } else if let Some(mut view) = program.intensional().matches(atom) {
+                                    trace!("infer > intensional matches > view > {}\n{}", l, view);
+                                    if let Some(previous_matches) = new_db.matches(atom) {
+                                        trace!(
+                                            "infer > matches > previous > {}\n{}",
+                                            l,
+                                            previous_matches
+                                        );
+                                        view.extend(previous_matches)?;
+                                        trace!("infer > matches > view (extended) >\n{}", view);
+                                    }
+                                    Ok(view)
+                                } else {
+                                    Err(Error::RelationDoesNotExist(atom.predicate().clone()))
+                                }
+                            } else {
+                                Err(Error::LanguageFeatureDisabled(FEATURE_COMPARISONS))
+                            }
                         })
                         .collect();
-                    // TODO: Propagate errors!
-                    let matches = matches.unwrap();
+
+                    let matches = matches?;
+
                     if matches.iter().all(|result| !result.is_empty()) {
-                        // else: not all sub-goals satisfied
-                        matches.iter().for_each(|in_table| {
-                            trace!("infer > rule > matched table >\n{}", in_table)
-                        });
                         let results = View::join_all(matches)?;
                         trace!("infer > rule > joined table >\n{}", results);
                         for fact in results.iter() {
                             let head_predicates = rule.head().collect::<Vec<&Atom>>();
                             assert_eq!(head_predicates.len(), 1);
                             let head = head_predicates.get(0).unwrap();
-                            trace!("infer > rule > row > {:?}", fact);
                             let relation = new_db.relation_mut(head.predicate()).unwrap();
                             let new_fact = head
                                 .terms()

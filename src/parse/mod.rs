@@ -360,7 +360,6 @@ fn parse_pragma(
         pragma_assert => parse_decl_asserted_relation,
         pragma_infer => parse_decl_inferred_relation,
         pragma_feature => parse_decl_feature,
-        pragma_include => parse_decl_include,
         pragma_input => parse_decl_input,
         pragma_output => parse_decl_output
     }
@@ -412,6 +411,14 @@ fn parse_decl_inferred_relation(
         match inner_pair.as_rule() {
             Rule::attribute_declaration => {
                 attributes.push(parse_attribute(inner_pair.into_inner(), program, features)?)
+            }
+            Rule::predicate => {
+                let name = Predicate::from_str_unchecked(inner_pair.as_str());
+                if let Some(from) = program.extensional().relation(&name) {
+                    attributes.extend(from.schema().iter().cloned());
+                } else {
+                    return Err(Error::RelationDoesNotExist(name));
+                }
             }
             _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
         }
@@ -473,30 +480,9 @@ fn parse_decl_feature(
     Ok(())
 }
 
-fn parse_decl_include(
-    mut input_pairs: Pairs<'_, Rule>,
-    _: &mut Program,
-    _: FeatureSet,
-) -> Result<()> {
-    let first = input_pairs.next().unwrap();
-    let file_name = match first.as_rule() {
-        Rule::string => first.as_str().to_string(),
-        _ => unreachable!(first.as_str()),
-    };
-
-    if input_pairs.next().is_some() {
-        unreachable!(input_pairs.as_str());
-    } else {
-        println!("Unimplemented: include and parse `{}`", file_name);
-        // TODO: include and parse `file_name`
-    }
-
-    Ok(())
-}
-
 fn parse_decl_input(
     mut input_pairs: Pairs<'_, Rule>,
-    _: &mut Program,
+    program: &mut Program,
     _: FeatureSet,
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
@@ -505,28 +491,32 @@ fn parse_decl_input(
         _ => unreachable!(first.as_str()),
     };
 
-    let next = input_pairs.next().unwrap();
-    let file_name = match next.as_rule() {
-        Rule::string => next.as_str().to_string(),
-        _ => unreachable!(next.as_str()),
-    };
-
-    if input_pairs.next().is_some() {
-        unreachable!(input_pairs.as_str());
+    if let None = program.extensional().relation(&predicate) {
+        Err(Error::RelationDoesNotExist(predicate))
     } else {
-        println!(
-            "Unimplemented: input data for `{}` relation from `{}`",
-            predicate, file_name
-        );
-        // TODO: input data for `predicate` relation from `file_name`
-    }
+        let next = input_pairs.next().unwrap();
+        let file_name = match next.as_rule() {
+            Rule::string => next.as_str().to_string(),
+            _ => unreachable!(next.as_str()),
+        };
 
-    Ok(())
+        if input_pairs.next().is_some() {
+            unreachable!(input_pairs.as_str());
+        } else {
+            println!(
+                "Unimplemented: input data for `{}` relation from `{}`",
+                predicate, file_name
+            );
+            // TODO: input data for `predicate` relation from `file_name`
+        }
+
+        Ok(())
+    }
 }
 
 fn parse_decl_output(
     mut input_pairs: Pairs<'_, Rule>,
-    _: &mut Program,
+    program: &mut Program,
     _: FeatureSet,
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
@@ -535,23 +525,27 @@ fn parse_decl_output(
         _ => unreachable!(first.as_str()),
     };
 
-    let next = input_pairs.next().unwrap();
-    let file_name = match next.as_rule() {
-        Rule::string => next.as_str().to_string(),
-        _ => unreachable!(next.as_str()),
-    };
-
-    if input_pairs.next().is_some() {
-        unreachable!(input_pairs.as_str());
+    if let None = program.intensional().relation(&predicate) {
+        Err(Error::RelationDoesNotExist(predicate))
     } else {
-        println!(
-            "Unimplemented: output data for `{}` relation into `{}`",
-            predicate, file_name
-        );
-        // TODO: output data for `predicate` relation into `file_name`
-    }
+        let next = input_pairs.next().unwrap();
+        let file_name = match next.as_rule() {
+            Rule::string => next.as_str().to_string(),
+            _ => unreachable!(next.as_str()),
+        };
 
-    Ok(())
+        if input_pairs.next().is_some() {
+            unreachable!(input_pairs.as_str());
+        } else {
+            println!(
+                "Unimplemented: output data for `{}` relation into `{}`",
+                predicate, file_name
+            );
+            // TODO: output data for `predicate` relation into `file_name`
+        }
+
+        Ok(())
+    }
 }
 
 fn parse_query(

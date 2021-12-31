@@ -16,7 +16,7 @@ mortal(X) <- human(X).
     print!("{}", PROGRAM_SOURCE);
     println!("-------------------------------------------------------------------------------");
 
-    let mut program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
+    let program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
 
     assert_eq!(
         program
@@ -28,7 +28,7 @@ mortal(X) <- human(X).
     );
     assert_eq!(
         program
-            .extensional()
+            .intensional()
             .relation(&Predicate::from_str("mortal").unwrap())
             .unwrap()
             .len(),
@@ -41,9 +41,9 @@ mortal(X) <- human(X).
 
     let evaluator = NaiveEvaluator::default();
 
-    let results = evaluator.inference(&program);
+    let new_intensional = evaluator.inference(&program).unwrap();
 
-    program.extensional_mut().merge(results.unwrap()).unwrap();
+    println!("RESULT: {:#?}", new_intensional);
 
     assert_eq!(
         program
@@ -54,8 +54,7 @@ mortal(X) <- human(X).
         2
     );
     assert_eq!(
-        program
-            .extensional()
+        new_intensional
             .relation(&Predicate::from_str("mortal").unwrap())
             .unwrap()
             .len(),
@@ -67,7 +66,7 @@ mortal(X) <- human(X).
 
     let query = program.queries().next().unwrap();
 
-    let results = program.extensional().matches(query.as_ref());
+    let results = new_intensional.matches(query.as_ref()).unwrap();
     assert_eq!(results.schema().arity(), 1);
     assert_eq!(results.len(), 1);
 
@@ -79,7 +78,7 @@ mortal(X) <- human(X).
         [Variable::from_str("X").unwrap().into()],
     );
 
-    let results = program.extensional().matches(query.as_ref());
+    let results = new_intensional.matches(query.as_ref()).unwrap();
     assert_eq!(results.schema().arity(), 1);
     assert_eq!(results.len(), 2);
 
@@ -126,7 +125,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
     let results = evaluator.inference(&program);
 
-    program.extensional_mut().merge(results.unwrap()).unwrap();
+    program.intensional_mut().merge(results.unwrap()).unwrap();
 
     assert_eq!(
         program
@@ -150,7 +149,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
     let query = program.queries().next().unwrap();
 
-    let results = program.extensional().matches(query.as_ref());
+    let results = program.intensional().matches(query.as_ref()).unwrap();
     assert_eq!(results.schema().arity(), 2);
     assert_eq!(results.len(), 2);
 
@@ -175,7 +174,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
     print!("{}", PROGRAM_SOURCE);
     println!("-------------------------------------------------------------------------------");
 
-    let mut program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
+    let program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
 
     assert_eq!(
         program
@@ -199,9 +198,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
 
     let evaluator = NaiveEvaluator::default();
 
-    let results = evaluator.inference(&program);
-
-    program.extensional_mut().merge(results.unwrap()).unwrap();
+    let results = evaluator.inference(&program).unwrap();
 
     assert_eq!(
         program
@@ -212,8 +209,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
         4
     );
     assert_eq!(
-        program
-            .intensional()
+        results
             .relation(&Predicate::from_str("path").unwrap())
             .unwrap()
             .len(),
@@ -225,7 +221,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
 
     let query = program.queries().next().unwrap();
 
-    let results = program.extensional().matches(query.as_ref());
+    let results = results.matches(query.as_ref()).unwrap();
     assert_eq!(results.schema().arity(), 2);
     assert_eq!(results.len(), 16);
 
