@@ -7,14 +7,11 @@ More detailed description, with
 
 */
 
-use crate::edb::{Constant, Database};
+use crate::edb::Constant;
 use crate::error::{Error, Result};
-use crate::eval::Evaluator;
 use crate::features::FEATURE_NEGATION;
-use crate::idb::{Atom, Term};
-use crate::program::Program;
-use crate::query::View;
-use crate::SyntacticFragments;
+use crate::idb::{eval::Evaluator, Atom, Term, View};
+use crate::{Program, Relations};
 use tracing::trace;
 
 // ------------------------------------------------------------------------------------------------
@@ -41,7 +38,7 @@ pub struct NaiveEvaluator {}
 // ------------------------------------------------------------------------------------------------
 
 impl Evaluator for NaiveEvaluator {
-    fn inference(&self, program: &Program, edb: &Database) -> Result<Database> {
+    fn inference(&self, program: &Program) -> Result<Relations> {
         //
         // The following is taken from [Datalog -- Logical Rules
         // Recursion](http://infolab.stanford.edu/~ullman/fcdb/aut07/slides/dlog.pdf).
@@ -67,16 +64,16 @@ impl Evaluator for NaiveEvaluator {
         // † -- an _intension_ is any property or quality connoted by a word, phrase, or another symbol.
         //
         if program.is_positive() {
-            let mut new_db = edb.clone_with_schema_only();
+            let mut new_db = program.extensional().clone_with_schema_only();
             trace!("infer > new_db > {:?}", new_db);
             loop {
-                let start = new_db.fact_count();
-                for rule in program.rules() {
+                let start = new_db.all_len();
+                for rule in program.rules().iter() {
                     trace!("infer > rule > {}", rule);
                     let matches: Result<Vec<View>> = rule
                         .literals()
                         .map(|l| {
-                            let mut table = edb.matches(l.as_atom().unwrap());
+                            let mut table = program.extensional().matches(l.as_atom().unwrap());
                             trace!("infer > matches > table > {:#?}", table);
                             table.extend(new_db.matches(l.as_atom().unwrap()))?;
                             trace!("infer > matches > table (extended) > {:#?}", table);
@@ -92,7 +89,7 @@ impl Evaluator for NaiveEvaluator {
                         });
                         let results = View::join_all(matches)?;
                         trace!("infer > rule > joined table >\n{}", results);
-                        for fact in results.facts() {
+                        for fact in results.iter() {
                             let head_predicates = rule.head().collect::<Vec<&Atom>>();
                             assert_eq!(head_predicates.len(), 1);
                             let head = head_predicates.get(0).unwrap();
@@ -107,17 +104,19 @@ impl Evaluator for NaiveEvaluator {
                                         term.is_ignored()
                                     );
                                     match term {
-                                        Term::Variable(v) => fact.get(v.clone()).unwrap(),
+                                        Term::Variable(v) => fact
+                                            .get(results.attribute_index(v.clone().into()).unwrap())
+                                            .unwrap(),
                                         Term::Constant(c) => c,
                                     }
                                 })
                                 .cloned()
                                 .collect::<Vec<Constant>>();
-                            relation.add(new_fact)?;
+                            relation.add_as_fact(new_fact)?;
                         }
                     }
                 }
-                if start == new_db.fact_count() {
+                if start == new_db.all_len() {
                     // no more facts were found, so return
                     break;
                 }

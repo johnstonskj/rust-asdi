@@ -31,7 +31,8 @@ pub(crate) const RESERVED_PREFIX: &str = "@";
 pub(crate) const RESERVED_BOOLEAN_TRUE: &str = "true";
 pub(crate) const RESERVED_BOOLEAN_FALSE: &str = "false";
 
-pub(crate) const RESERVED_PRAGMA_DECLARE: &str = "declare";
+pub(crate) const RESERVED_PRAGMA_ASSERT: &str = "assert";
+pub(crate) const RESERVED_PRAGMA_INFER: &str = "infer";
 pub(crate) const RESERVED_PRAGMA_FEATURE: &str = "feature";
 pub(crate) const RESERVED_PRAGMA_INCLUDE: &str = "include";
 pub(crate) const RESERVED_PRAGMA_INPUT: &str = "input";

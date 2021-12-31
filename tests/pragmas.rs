@@ -7,33 +7,35 @@ use common::quick_parser_check;
 // ------------------------------------------------------------------------------------------------
 
 #[test]
-fn test_declare_success() {
-    quick_parser_check("@declare human (string).", None);
+fn test_declare_assert_success() {
+    quick_parser_check("@assert human (string).", None);
 }
 
 #[test]
-fn test_declare_multiple_success() {
-    quick_parser_check("@declare human (string, integer, boolean).", None);
+fn test_declare_assert_multiple_success() {
+    quick_parser_check("@assert human (string, integer, boolean).", None);
 }
 
 #[test]
-fn test_declare_named_success() {
-    quick_parser_check(
-        "@declare human (name: string, age: integer, boolean).",
-        None,
-    );
-}
-
-#[test]
-#[should_panic]
-fn test_declare_type_fail() {
-    quick_parser_check("@declare human (name).", None);
+fn test_declare_assert_named_success() {
+    quick_parser_check("@assert human (name: string, age: integer, boolean).", None);
 }
 
 #[test]
 #[should_panic]
-fn test_declare_no_type_fail() {
-    quick_parser_check("@declare human (name:).", None);
+fn test_declare_assert_type_fail() {
+    quick_parser_check("@assert human (name).", None);
+}
+
+#[test]
+fn test_declare_infer_success() {
+    quick_parser_check("@infer human (string).", None);
+}
+
+#[test]
+#[should_panic]
+fn test_declare_assert_no_type_fail() {
+    quick_parser_check("@assert human (name:).", None);
 }
 
 #[test]

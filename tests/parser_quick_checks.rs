@@ -1,7 +1,7 @@
 use asdi::features::{
     FeatureSet, FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION,
 };
-use asdi::program::Program;
+use asdi::Program;
 
 mod common;
 use common::{quick_parser_check, quick_parser_check_with_options};

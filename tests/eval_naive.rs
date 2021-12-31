@@ -1,9 +1,6 @@
 use asdi::edb::Predicate;
-use asdi::eval::naive::NaiveEvaluator;
-use asdi::eval::Evaluator;
-use asdi::idb::Variable;
+use asdi::idb::{Evaluator, NaiveEvaluator, Query, Variable};
 use asdi::parse::parse_str;
-use asdi::query::Query;
 use std::str::FromStr;
 
 #[test]
@@ -23,7 +20,7 @@ mortal(X) <- human(X).
 
     assert_eq!(
         program
-            .database()
+            .extensional()
             .relation(&Predicate::from_str("human").unwrap())
             .unwrap()
             .len(),
@@ -31,7 +28,7 @@ mortal(X) <- human(X).
     );
     assert_eq!(
         program
-            .database()
+            .extensional()
             .relation(&Predicate::from_str("mortal").unwrap())
             .unwrap()
             .len(),
@@ -44,13 +41,13 @@ mortal(X) <- human(X).
 
     let evaluator = NaiveEvaluator::default();
 
-    let results = evaluator.inference(&program, program.database());
+    let results = evaluator.inference(&program);
 
-    program.database_mut().merge(results.unwrap()).unwrap();
+    program.extensional_mut().merge(results.unwrap()).unwrap();
 
     assert_eq!(
         program
-            .database()
+            .extensional()
             .relation(&Predicate::from_str("human").unwrap())
             .unwrap()
             .len(),
@@ -58,7 +55,7 @@ mortal(X) <- human(X).
     );
     assert_eq!(
         program
-            .database()
+            .extensional()
             .relation(&Predicate::from_str("mortal").unwrap())
             .unwrap()
             .len(),
@@ -70,7 +67,7 @@ mortal(X) <- human(X).
 
     let query = program.queries().next().unwrap();
 
-    let results = program.database().matches(query.as_ref());
+    let results = program.extensional().matches(query.as_ref());
     assert_eq!(results.schema().arity(), 1);
     assert_eq!(results.len(), 1);
 
@@ -82,7 +79,7 @@ mortal(X) <- human(X).
         [Variable::from_str("X").unwrap().into()],
     );
 
-    let results = program.database().matches(query.as_ref());
+    let results = program.extensional().matches(query.as_ref());
     assert_eq!(results.schema().arity(), 1);
     assert_eq!(results.len(), 2);
 
@@ -107,7 +104,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
     assert_eq!(
         program
-            .database()
+            .extensional()
             .relation(&Predicate::from_str("parent").unwrap())
             .unwrap()
             .len(),
@@ -115,7 +112,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
     );
     assert_eq!(
         program
-            .database()
+            .intensional()
             .relation(&Predicate::from_str("ancestor").unwrap())
             .unwrap()
             .len(),
@@ -127,13 +124,13 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
     let evaluator = NaiveEvaluator::default();
 
-    let results = evaluator.inference(&program, program.database());
+    let results = evaluator.inference(&program);
 
-    program.database_mut().merge(results.unwrap()).unwrap();
+    program.extensional_mut().merge(results.unwrap()).unwrap();
 
     assert_eq!(
         program
-            .database()
+            .extensional()
             .relation(&Predicate::from_str("parent").unwrap())
             .unwrap()
             .len(),
@@ -141,7 +138,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
     );
     assert_eq!(
         program
-            .database()
+            .intensional()
             .relation(&Predicate::from_str("ancestor").unwrap())
             .unwrap()
             .len(),
@@ -153,7 +150,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
     let query = program.queries().next().unwrap();
 
-    let results = program.database().matches(query.as_ref());
+    let results = program.extensional().matches(query.as_ref());
     assert_eq!(results.schema().arity(), 2);
     assert_eq!(results.len(), 2);
 
@@ -162,8 +159,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
 #[test]
 fn test_sourceforge_example() {
-    const PROGRAM_SOURCE: &str = r#"@declare edge(string, string).
-@declare path(string, string).
+    const PROGRAM_SOURCE: &str = r#"@assert edge(string, string).
 
 edge(a, b).
 edge(c, d).
@@ -183,7 +179,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
 
     assert_eq!(
         program
-            .database()
+            .extensional()
             .relation(&Predicate::from_str("edge").unwrap())
             .unwrap()
             .len(),
@@ -191,7 +187,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
     );
     assert_eq!(
         program
-            .database()
+            .intensional()
             .relation(&Predicate::from_str("path").unwrap())
             .unwrap()
             .len(),
@@ -203,13 +199,13 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
 
     let evaluator = NaiveEvaluator::default();
 
-    let results = evaluator.inference(&program, program.database());
+    let results = evaluator.inference(&program);
 
-    program.database_mut().merge(results.unwrap()).unwrap();
+    program.extensional_mut().merge(results.unwrap()).unwrap();
 
     assert_eq!(
         program
-            .database()
+            .extensional()
             .relation(&Predicate::from_str("edge").unwrap())
             .unwrap()
             .len(),
@@ -217,7 +213,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
     );
     assert_eq!(
         program
-            .database()
+            .intensional()
             .relation(&Predicate::from_str("path").unwrap())
             .unwrap()
             .len(),
@@ -229,7 +225,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
 
     let query = program.queries().next().unwrap();
 
-    let results = program.database().matches(query.as_ref());
+    let results = program.extensional().matches(query.as_ref());
     assert_eq!(results.schema().arity(), 2);
     assert_eq!(results.len(), 16);
 

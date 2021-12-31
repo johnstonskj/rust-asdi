@@ -7,15 +7,13 @@ More detailed description, with
 
 */
 
-use crate::edb::{AttributeName, Constant, Fact};
+use crate::edb::{Constant, Fact};
 use crate::error::Result;
-use crate::idb::{Atom, ComparisonOperator, Literal, LiteralInner, Rule, Term};
-use crate::program::Program;
-use crate::query::Query;
+use crate::idb::{Atom, ComparisonOperator, Literal, LiteralInner, Query, Rule, Term};
 use crate::syntax::{
-    CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
-    DISJUNCTION_UNICODE_SYMBOL,
+    CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DISJUNCTION_UNICODE_SYMBOL,
 };
+use crate::Program;
 use std::fmt::Write;
 
 // ------------------------------------------------------------------------------------------------
@@ -24,9 +22,7 @@ use std::fmt::Write;
 
 pub trait Typesetter {
     fn program(&self, value: &Program) -> Result<String>;
-    fn fact<T>(&self, value: &Fact<'_, T>, inline: bool) -> Result<String>
-    where
-        T: AttributeName;
+    fn fact(&self, value: &Fact, inline: bool) -> Result<String>;
     fn rule(&self, value: &Rule, inline: bool) -> Result<String>;
     fn query(&self, value: &Query, inline: bool) -> Result<String>;
 }
@@ -83,13 +79,13 @@ impl Typesetter for LatexTypesetter {
         let mut result = String::new();
         writeln!(result, r"\begin{{lstlisting}}[language=Prolog,mathescape]")?;
 
-        for relation in value.database().iter() {
-            for fact in relation.facts() {
+        for relation in value.extensional().iter() {
+            for fact in relation.iter() {
                 writeln!(result, "{}", self.fact(&fact, false)?)?;
             }
         }
 
-        for rule in value.rules() {
+        for rule in value.rules().iter() {
             writeln!(result, "{}", self.rule(rule, false)?)?;
         }
 
@@ -101,10 +97,7 @@ impl Typesetter for LatexTypesetter {
         Ok(result)
     }
 
-    fn fact<T>(&self, value: &Fact<'_, T>, inline: bool) -> Result<String>
-    where
-        T: AttributeName,
-    {
+    fn fact(&self, value: &Fact, inline: bool) -> Result<String> {
         let mut result = String::new();
         if inline {
             write!(result, "{}", LATEX_INLINE_LISTING)?;
@@ -112,10 +105,7 @@ impl Typesetter for LatexTypesetter {
         write!(
             result,
             "{}{}${}${}{}",
-            match &value.name() {
-                None => CHAR_UNDERSCORE.to_string(),
-                Some(p) => p.to_string(),
-            },
+            value.name(),
             CHAR_LEFT_PAREN,
             value
                 .iter()
@@ -261,10 +251,10 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
         {
             // Test fact
             let relation = program
-                .database()
+                .extensional()
                 .relation(&Predicate::from_str_unchecked("parent"))
                 .unwrap();
-            let fact = relation.facts().next().unwrap();
+            let fact = relation.iter().next().unwrap();
             match fact.to_string().as_str() {
                 "parent(xerces, brooke)." => assert_eq!(
                     typesetter.fact(&fact, true).unwrap(),
@@ -280,7 +270,8 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
         {
             // Test rule
-            let rule = program.rules().next().unwrap();
+            let mut rules = program.rules().iter();
+            let rule = rules.next().unwrap();
             match rule.to_string().as_str() {
                 "ancestor(X, Y) ⟵ parent(X, Y)." => assert_eq!(
                     typesetter.rule(rule, true).unwrap(),

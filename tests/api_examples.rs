@@ -1,7 +1,6 @@
 use asdi::edb::{Attribute, Predicate};
-use asdi::idb::{Atom, Term, Variable};
-use asdi::program::Program;
-use asdi::query::Query;
+use asdi::idb::{Atom, Query, Term, Variable};
+use asdi::Program;
 use std::str::FromStr;
 
 pub mod common;
@@ -21,19 +20,15 @@ fn test_wikipedia_example() {
                 vec![Attribute::string(), Attribute::string()],
             )
             .unwrap();
-        parent.add(["xerces".into(), "brooke".into()]).unwrap();
-        parent.add(["brooke".into(), "damocles".into()]).unwrap();
+        parent
+            .add_as_fact(["xerces".into(), "brooke".into()])
+            .unwrap();
+        parent
+            .add_as_fact(["brooke".into(), "damocles".into()])
+            .unwrap();
     };
 
     let ancestor_predicate = Predicate::from_str("ancestor").unwrap();
-    {
-        let _ = ancestors
-            .add_new_relation(
-                ancestor_predicate.clone(),
-                vec![Attribute::string(), Attribute::string()],
-            )
-            .unwrap();
-    };
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
     let var_y: Term = Variable::from_str("Y").unwrap().into();
@@ -65,8 +60,9 @@ fn test_wikipedia_example() {
 
     assert_eq_by_line(
         &ancestors.to_string(),
-        r#"@declare ancestor(string, string).
-@declare parent(string, string).
+        r#"@assert parent(string, string).
+
+@infer ancestor(string, string).
 
 parent(xerces, brooke).
 parent(brooke, damocles).
@@ -93,21 +89,13 @@ fn test_sourceforge_example() {
                 vec![Attribute::string(), Attribute::string()],
             )
             .unwrap();
-        edge.add(["a".into(), "b".into()]).unwrap();
-        edge.add(["b".into(), "c".into()]).unwrap();
-        edge.add(["c".into(), "d".into()]).unwrap();
-        edge.add(["d".into(), "a".into()]).unwrap();
+        edge.add_as_fact(["a".into(), "b".into()]).unwrap();
+        edge.add_as_fact(["b".into(), "c".into()]).unwrap();
+        edge.add_as_fact(["c".into(), "d".into()]).unwrap();
+        edge.add_as_fact(["d".into(), "a".into()]).unwrap();
     }
 
     let path_predicate = Predicate::from_str("path").unwrap();
-    {
-        let _ = graph
-            .add_new_relation(
-                path_predicate.clone(),
-                vec![Attribute::string(), Attribute::string()],
-            )
-            .unwrap();
-    }
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
     let var_y: Term = Variable::from_str("Y").unwrap().into();
@@ -139,8 +127,9 @@ fn test_sourceforge_example() {
 
     assert_eq_by_line(
         &graph.to_string(),
-        r#"@declare edge(string, string).
-@declare path(string, string).
+        r#"@assert edge(string, string).
+
+@infer path(string, string).
 
 edge(a, b).
 edge(c, d).
@@ -165,7 +154,7 @@ fn test_that_syllogism() {
     let human = syllogism
         .add_new_relation(p_human.clone(), vec![Attribute::string()])
         .unwrap();
-    human.add(["Socrates".into()]).unwrap();
+    human.add_as_fact(["Socrates".into()]).unwrap();
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
 
@@ -185,7 +174,9 @@ fn test_that_syllogism() {
 
     assert_eq_by_line(
         &syllogism.to_string(),
-        r#"@declare human(string).
+        r#"@assert human(string).
+
+@infer mortal(string).
 
 human("Socrates").
 

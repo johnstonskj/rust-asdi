@@ -1,5 +1,4 @@
 use asdi::features::{FeatureSet, FEATURE_NEGATION};
-use asdi::SyntacticFragments;
 
 mod common;
 use crate::common::{quick_program_check, quick_program_check_with_options};

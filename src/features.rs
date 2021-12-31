@@ -247,7 +247,12 @@ impl FeatureSet {
     }
 
     pub fn all() -> Self {
-        Self::from(ALL_FEATURES.to_vec())
+        Self::from(vec![
+            FEATURE_NEGATION,
+            FEATURE_COMPARISONS,
+            FEATURE_CONSTRAINTS,
+            FEATURE_DISJUNCTION,
+        ])
     }
 
     pub fn supports(&self, feature: &Feature) -> bool {

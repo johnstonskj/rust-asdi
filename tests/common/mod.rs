@@ -9,7 +9,7 @@ More detailed description, with
 
 use asdi::features::FeatureSet;
 use asdi::parse::parse_str_with_features;
-use asdi::program::Program;
+use asdi::Program;
 use pretty_assertions::assert_eq;
 
 // ------------------------------------------------------------------------------------------------

@@ -1,0 +1,551 @@
+/*!
+One-line description.
+
+More detailed description, with
+
+# Example
+
+# Query Forms
+
+**Natural join** ($\Join$) is a binary operator that is written as $R \Join S$ where $R$ and $S$ are
+relations. The result of the natural join is the set of all combinations of tuples in $R$
+and $S$ that are equal on their common attribute names.
+
+**Projection** ($\Pi$) is a unary operation written as
+$\Pi_{a_{1},\ldots ,a_{n}}(R)$ where $a_{1},\ldots ,a_{n}$ is a set of attribute names. The
+result of such projection is defined as the set that is obtained when all tuples in $R$ are
+restricted to the set $\lbrace a_{1},\ldots ,a_{n}\rbrace$.
+
+> Note: when implemented in SQL standard the "default projection" returns a multiset instead
+> of a set, and the $\Pi$ projection to eliminate duplicate data is obtained by the addition
+> of the `DISTINCT` keyword.
+
+**Generalized Selection** ($\sigma$) is a unary operation written as
+$\sigma_{\varphi}(R)$ where $\varphi$ is a propositional formula that consists
+of atoms as allowed in the normal selection and the logical operators $\land$ (and), $\lor$
+(or) and $\lnot$ (negation). This selection selects all those tuples in $R$ for which $\varphi$
+holds.
+
+Although relational algebra seems powerful enough for most practical purposes, there are some
+simple and natural operators on relations that cannot be expressed by relational algebra.
+One of them is the transitive closure of a binary relation. Given a domain $D$, let binary
+relation $R$ be a subset of $D\times D$. The transitive closure $R^{+}$ of $R$ is the smallest
+subset of $D\times D$ that contains $R$ and satisfies the following condition:
+
+$$\forall x\forall y\forall z\left((x,y)\in R^{+}\land (y,z)\in R^{+}\Rightarrow (x,z)\in R^{+}\right)$$
+
+In Datalog
+
+```prolog
+r_plus(X, Z) :- r(X, Y), r_plus(Y, Z).
+```
+
+*/
+
+use crate::edb::{Attribute, AttributeIndex, AttributeKind, Constant, Fact, Predicate, Schema};
+use crate::error::Result;
+use crate::idb::Term;
+use crate::idb::{Atom, Variable};
+use crate::syntax::{CHAR_PERIOD, QUERY_PREFIX_ASCII};
+use std::collections::HashSet;
+use std::fmt::{Debug, Display, Formatter};
+use tracing::{error, trace};
+
+// ------------------------------------------------------------------------------------------------
+// Public Types & Constants
+// ------------------------------------------------------------------------------------------------
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Query(Atom);
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct View {
+    schema: Schema<Variable>,
+    facts: HashSet<Row>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Row(Vec<Constant>);
+
+// ------------------------------------------------------------------------------------------------
+// Private Types & Constants
+// ------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
+// Private Macros
+// ------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
+// Public Functions
+// ------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
+// Implementations
+// ------------------------------------------------------------------------------------------------
+
+impl Display for Query {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}{}", QUERY_PREFIX_ASCII, self.0, CHAR_PERIOD)
+    }
+}
+
+impl From<Atom> for Query {
+    fn from(v: Atom) -> Self {
+        Self(v)
+    }
+}
+
+impl AsRef<Atom> for Query {
+    fn as_ref(&self) -> &Atom {
+        &self.0
+    }
+}
+
+impl Query {
+    pub fn new<T: Into<Vec<Term>>>(predicate: Predicate, terms: T) -> Self {
+        Self(Atom::new(predicate, terms))
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+#[cfg(feature = "tabular")]
+impl Display for View {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        use prettytable::format::Alignment;
+        use prettytable::Table;
+        use prettytable::{Attr, Cell};
+
+        let mut table = Table::new();
+
+        table.set_titles(
+            self.schema
+                .iter()
+                .map(|c| Cell::new_align(&c.to_string(), Alignment::CENTER).with_style(Attr::Bold))
+                .collect(),
+        );
+
+        for row in self.iter() {
+            table.add_row(row.iter().map(|c| Cell::new(&c.to_string())).collect());
+        }
+
+        write!(f, "{}", table)
+    }
+}
+
+#[cfg(not(feature = "tabular"))]
+impl Display for View {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "| {} |",
+            self.schema
+                .iter()
+                .map(|a| a.to_string())
+                .collect::<Vec<String>>()
+                .join(" | ")
+        )?;
+
+        for row in self.iter() {
+            writeln!(
+                f,
+                "| {} |",
+                row.iter()
+                    .map(|a| a.to_string())
+                    .collect::<Vec<String>>()
+                    .join(" | ")
+            )?;
+        }
+        Ok(())
+    }
+}
+
+impl View {
+    pub fn empty() -> Self {
+        Self {
+            schema: Schema::empty(),
+            facts: Default::default(),
+        }
+    }
+
+    pub fn new<V: Into<Schema<Variable>>>(schema: V) -> Self {
+        Self {
+            schema: schema.into(),
+            facts: Default::default(),
+        }
+    }
+
+    pub fn new_with_facts<V: Into<Schema<Variable>>, C: Into<Vec<Row>>>(
+        schema: V,
+        facts: C,
+    ) -> Self {
+        Self {
+            schema: schema.into(),
+            facts: HashSet::from_iter(facts.into()),
+        }
+    }
+
+    pub fn new_true() -> Self {
+        Self::new_with_facts(
+            vec![Attribute::from(AttributeKind::Boolean)],
+            vec![Row::from(Constant::new_true())],
+        )
+    }
+
+    pub fn new_false() -> Self {
+        Self::new_with_facts(
+            vec![Attribute::from(AttributeKind::Boolean)],
+            vec![Row::from(Constant::new_false())],
+        )
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    pub fn schema(&self) -> &Schema<Variable> {
+        &self.schema
+    }
+
+    pub fn attribute_index(&self, index: AttributeIndex<Variable>) -> Option<usize> {
+        let index = match &index {
+            AttributeIndex::Name(n) => self.schema.name_to_index(n),
+            AttributeIndex::Index(i) => Some(*i),
+        };
+        index.map(|index| {
+            assert!(index < self.schema.arity());
+            index
+        })
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    pub fn is_empty(&self) -> bool {
+        self.facts.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.facts.len()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &Row> {
+        self.facts.iter()
+    }
+
+    pub fn add(&mut self, row: Row) -> Result<()> {
+        self.facts.insert(row);
+        Ok(())
+    }
+
+    pub fn extend(&mut self, other: Self) -> Result<()> {
+        trace!("extend > schema {:?} == {:?}", self.schema, other.schema);
+        assert_eq!(self.schema, other.schema);
+        for fact in other.facts.into_iter() {
+            self.add(fact)?;
+        }
+        Ok(())
+    }
+
+    // pub(crate) fn contains(&self, fact: &[Constant]) -> bool {
+    //     self.facts.contains(fact)
+    // }
+
+    // --------------------------------------------------------------------------------------------
+    // Query
+    // --------------------------------------------------------------------------------------------
+
+    // pub(crate) fn matches(&self, atom: &Atom) -> View {
+    //     let terms: Vec<&Term> = atom.terms().collect();
+    //     self.match_terms(terms)
+    // }
+    //
+    // #[allow(single_use_lifetimes)]
+    // fn match_terms<'a, V: Into<Vec<&'a Term>>>(&self, terms: V) -> View {
+    //     let terms = terms.into();
+    //
+    //     View::new_with_facts(
+    //         terms
+    //             .iter()
+    //             .enumerate()
+    //             .map(|(i, term)| {
+    //                 let mut term = match term {
+    //                     Term::Variable(v) => Attribute::from(v.clone()),
+    //                     Term::Constant(v) => Attribute::typed(v.kind()),
+    //                 };
+    //                 if term.kind().is_none() {
+    //                     if let Some(kind) = self.schema().get(i).unwrap().kind() {
+    //                         term.override_kind(kind);
+    //                     }
+    //                 }
+    //                 term
+    //             })
+    //             .collect::<Vec<Attribute<Variable>>>(),
+    //         self.facts
+    //             .iter()
+    //             .filter_map(|fact| self.match_terms_inner(&terms, fact.values()))
+    //             .collect::<Vec<Row>>(),
+    //     )
+    // }
+    //
+    // fn match_terms_inner(&self, terms: &[&Term], fact: &[Constant]) -> Option<Row> {
+    //     if terms
+    //         .iter()
+    //         .enumerate()
+    //         .filter(|(_, term)| term.is_constant())
+    //         .all(|(i, term)| term.as_constant().unwrap() == fact.get(i).unwrap())
+    //     {
+    //         Some(Row::from(fact.to_vec()))
+    //     } else {
+    //         None
+    //     }
+    // }
+
+    // --------------------------------------------------------------------------------------------
+
+    // pub(crate) fn select(&self, _comparisons: &[Comparison]) -> Self {
+    //     todo!()
+    // }
+
+    // pub(crate) fn select_attributes(&self, attributes: HashSet<AttributeIndex<T>>) -> Self {
+    //     let selection: Vec<usize> = attributes
+    //         .iter()
+    //         .map(|a| {
+    //             assert!(self.schema().contains(a.clone()));
+    //             match a {
+    //                 AttributeIndex::Name(n) => self.schema().name_to_index(n).unwrap(),
+    //                 AttributeIndex::Index(i) => *i,
+    //             }
+    //         })
+    //         .collect();
+    //     self.select_attributes_by_index(&selection)
+    // }
+
+    // pub(crate) fn select_attributes_by_index(&self, attributes: &[usize]) -> Self {
+    //     let schema = Schema::new(
+    //         self.schema
+    //             .iter()
+    //             .enumerate()
+    //             .filter_map(|(i, attr)| {
+    //                 if attributes.contains(&i) {
+    //                     Some(attr)
+    //                 } else {
+    //                     None
+    //                 }
+    //             })
+    //             .cloned()
+    //             .collect::<Vec<Attribute<T>>>(),
+    //     );
+    //
+    //     let facts: Vec<Vec<Constant>> = self
+    //         .iter()
+    //         .map(|row| {
+    //             row.iter()
+    //                 .enumerate()
+    //                 .filter_map(|(i, attr)| {
+    //                     if attributes.contains(&i) {
+    //                         Some(attr)
+    //                     } else {
+    //                         None
+    //                     }
+    //                 })
+    //                 .cloned()
+    //                 .collect::<Vec<Constant>>()
+    //         })
+    //         .collect();
+    //
+    //     Self::new_with_facts(schema, facts)
+    // }
+
+    // pub(crate) fn select_only_named(&self) -> Self {
+    //     let selection: Vec<usize> = self
+    //         .schema
+    //         .iter()
+    //         .enumerate()
+    //         .filter_map(|(i, c)| if !c.is_anonymous() { Some(i) } else { None })
+    //         .collect();
+    //     self.select_attributes_by_index(&selection)
+    // }
+
+    // pub(crate) fn project<A: Into<AttributeIndex<T>>>(&self, attributes: Vec<A>) -> Self {
+    //     let attributes: HashSet<usize> = HashSet::from_iter(attributes.into_iter().map(|a| {
+    //         let a: AttributeIndex<T> = a.into();
+    //         match a {
+    //             AttributeIndex::Name(n) => self.schema().name_to_index(&n).unwrap(),
+    //             AttributeIndex::Index(i) => i,
+    //         }
+    //     }));
+    //     Self {
+    //         name: None,
+    //         schema: Schema::new(
+    //             self.schema()
+    //                 .iter()
+    //                 .enumerate()
+    //                 .filter_map(|(i, a)| {
+    //                     if attributes.contains(&i) {
+    //                         Some(a)
+    //                     } else {
+    //                         None
+    //                     }
+    //                 })
+    //                 .cloned()
+    //                 .collect::<Vec<Attribute<T>>>(),
+    //         ),
+    //         facts: self
+    //             .iter()
+    //             .map(|f| {
+    //                 f.iter()
+    //                     .enumerate()
+    //                     .filter_map(|(i, c)| {
+    //                         if attributes.contains(&i) {
+    //                             Some(c)
+    //                         } else {
+    //                             None
+    //                         }
+    //                     })
+    //                     .cloned()
+    //                     .collect()
+    //             })
+    //             .collect(),
+    //     }
+    // }
+
+    pub fn join_all<V: Into<Vec<View>>>(views: V) -> Result<Self> {
+        let mut views = views.into();
+        assert!(!views.is_empty());
+        if views.len() == 1 {
+            Ok(views.remove(0))
+        } else {
+            let mut views = views.into_iter();
+            let mut result = views.next().unwrap();
+            for next in views {
+                result = result.join(&next)?;
+            }
+            Ok(result)
+        }
+    }
+
+    pub(crate) fn join(&self, other: &Self) -> Result<Self> {
+        let mut new_table: Self = Self::new(
+            self.schema()
+                .name_union(other.schema())
+                .into_iter()
+                .map(|n| Attribute::from(n))
+                .collect::<Vec<Attribute<Variable>>>(),
+        );
+        let common_variables = self.schema().name_intersection(other.schema());
+
+        // TODO: infer attribute types for new results!
+        for left_row in self.iter() {
+            for right_row in other.filter(
+                common_variables
+                    .iter()
+                    .map(|(_, left_i, right_i)| (left_row.get(*left_i).unwrap().clone(), *right_i))
+                    .collect(),
+            ) {
+                let mut new_row: Vec<Constant> = Vec::with_capacity(new_table.schema().arity());
+                for (i, column) in new_table.schema().iter().enumerate() {
+                    if let Some(index) = self.schema().name_to_index(column.name().unwrap()) {
+                        new_row.insert(i, left_row.get(index).unwrap().clone())
+                    } else if let Some(index) = other.schema().name_to_index(column.name().unwrap())
+                    {
+                        new_row.insert(i, right_row.get(index).unwrap().clone())
+                    } else {
+                        error!(
+                            "The column {:?} ({}) was found in neither table.",
+                            column, i
+                        );
+                        unreachable!()
+                    }
+                }
+                new_table.add(new_row.into())?;
+            }
+        }
+        Ok(new_table)
+    }
+    //
+    // fn remove_anonymous_attributes(&mut self) {
+    //     let mut remove: Vec<usize> = self
+    //         .schema
+    //         .iter()
+    //         .enumerate()
+    //         .filter_map(|(i, c)| if c.is_anonymous() { Some(i) } else { None })
+    //         .collect();
+    //     trace!("reduce > remove (before)\n{:?}", remove);
+    //     remove.sort_by(|a, b| b.cmp(a));
+    //     trace!("reduce > remove (after)\n{:?}", remove);
+    //
+    //     let mut result: HashSet<Vec<Constant>> = HashSet::with_capacity(self.facts.len());
+    //     for mut row in self.facts.drain() {
+    //         mutator(&mut row)?;
+    //         result.insert(row);
+    //     }
+    //     self.facts = result;
+    //
+    //
+    //     self.mutate(|row| {
+    //         for col in &remove {
+    //             row.remove(*col);
+    //         }
+    //         Ok(())
+    //     })
+    //     .unwrap();
+    //     self.schema = Schema::new(
+    //         self.schema
+    //             .iter()
+    //             .filter(|col| !col.is_anonymous())
+    //             .cloned()
+    //             .collect::<Vec<Attribute<T>>>(),
+    //     );
+    // }
+
+    fn filter(&self, values: Vec<(Constant, usize)>) -> impl Iterator<Item = &Row> {
+        self.iter()
+            .filter(move |row| values.iter().all(|(v, i)| row.get(*i).unwrap() == v))
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl From<Vec<Constant>> for Row {
+    fn from(v: Vec<Constant>) -> Self {
+        Self(v)
+    }
+}
+
+impl From<Constant> for Row {
+    fn from(v: Constant) -> Self {
+        Self(vec![v])
+    }
+}
+
+impl From<Row> for Vec<Constant> {
+    fn from(v: Row) -> Self {
+        v.0
+    }
+}
+
+impl From<Fact> for Row {
+    fn from(v: Fact) -> Self {
+        Self(v.into())
+    }
+}
+
+impl Row {
+    pub fn iter(&self) -> impl Iterator<Item = &Constant> {
+        self.0.iter()
+    }
+
+    // fn values(&self) -> &Vec<Constant> {
+    //     &self.0
+    // }
+
+    pub fn get(&self, index: usize) -> Option<&Constant> {
+        self.0.get(index)
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private Functions
+// ------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
+// Modules
+// ------------------------------------------------------------------------------------------------

@@ -1,10 +1,11 @@
-use asdi::eval::naive::NaiveEvaluator;
-use asdi::eval::Evaluator;
+use asdi::idb::{Evaluator, NaiveEvaluator};
 use asdi::parse::parse_str;
 
 #[test]
 fn test_rdfs() {
-    const PROGRAM_SOURCE: &str = r#"@declare triple(subject: string, predicate: string, object: string).
+    const PROGRAM_SOURCE: &str = r#"@assert triple(subject: string, predicate: string, object: string).
+
+@infer class(resource: string).
 
 # Section 2.1: Resoure
 triple(rdfs:Resource, "rdf:type", "rdfs:Class").
@@ -42,23 +43,24 @@ triple("foo", "rdfs:domain", "Thing").
 
 # -------------------------------------------------------------------------------
 
-triple(C, "rdf:type", "rdfs:Class") :- triple(_, "rdf:type", C).
+instanceOf(R, C) :- triple(R, "rdf:type", C).
+class(C) :- triple(_, "rdf:type", C).
 
 # Section 3.1: range
-triple(P, "rdf:type", "rdfs:Property") :- triple(P, "rdfs:range", _).
-triple(C, "rdf:type", "rdfs:Class") :- triple(_, "rdfs:range", C).
+instanceOf(P, "rdfs:Property") :- triple(P, "rdfs:range", _).
+instanceOf(C, "rdfs:Class") :- triple(_, "rdfs:range", C).
 
 # Section 3.2: domain
-triple(P, "rdf:type", "rdfs:Property") :- triple(P, "rdfs:domain", _).
-triple(C, "rdf:type", "rdfs:Class") :- triple(_, "rdfs:domain", C).
+instanceOf(P, "rdfs:Property") :- triple(P, "rdfs:domain", _).
+instanceOf(C, "rdfs:Class") :- triple(_, "rdfs:domain", C).
 
 # Section 3.4: subClassOf
-triple(C, "rdf:type", "rdfs:Class") :- triple(C, "rdfs:subClassOf", _).
-triple(C, "rdf:type", "rdfs:Class") :- triple(_, "rdfs:subClassOf", C).
+instanceOf(C, "rdfs:Class") :- triple(C, "rdfs:subClassOf", _).
+instanceOf(C, "rdfs:Class") :- triple(_, "rdfs:subClassOf", C).
 
 # Section 3.4: subPropertyOf
-triple(P, "rdf:type", "rdfs:Class") :- triple(P, "rdfs:subPropertyOf", _).
-triple(P, "rdf:type", "rdfs:Class") :- triple(_, "rdfs:subPropertyOf", P).
+instanceOf(P, "rdfs:Class") :- triple(P, "rdfs:subPropertyOf", _).
+instanceOf(P, "rdfs:Class") :- triple(_, "rdfs:subPropertyOf", P).
 "#;
 
     print!("{}", PROGRAM_SOURCE);
@@ -71,9 +73,9 @@ triple(P, "rdf:type", "rdfs:Class") :- triple(_, "rdfs:subPropertyOf", P).
 
     let evaluator = NaiveEvaluator::default();
 
-    let results = evaluator.inference(&program, program.database());
+    let results = evaluator.inference(&program);
 
-    program.database_mut().merge(results.unwrap()).unwrap();
+    program.extensional_mut().merge(results.unwrap()).unwrap();
 
     print!("{}", program);
 }

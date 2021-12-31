@@ -27,6 +27,7 @@ pub enum Error {
     LanguageFeatureDisabled(Feature),
     LanguageFeatureUnsupported(Feature),
     UnknownLanguageFeature(String),
+    ExtensionalPredicateInRuleHead(Predicate, Option<SourceLocation>),
     InvalidHeadCount(usize, usize, usize, Option<SourceLocation>),
     HeadVariablesMissingInBody(String, Option<SourceLocation>, Vec<String>),
     NegativeVariablesNotPositive(String, Option<SourceLocation>, Vec<String>),
@@ -74,6 +75,10 @@ impl Display for Error {
                     format!("The language feature {} is not enabled.", feature.label()),
                 Error::LanguageFeatureUnsupported(feature) =>
                     format!("The language feature {} is not supported by the attempted operation.", feature.label()),
+                Error::ExtensionalPredicateInRuleHead(name, loc) => format!("A predicate {} from the EDB was present in a rule head{}.", name, match loc {
+                    None => String::new(),
+                    Some(src) => format!(" (at {})", src),
+                }),
                 Error::InvalidHeadCount(count, min, max, loc) =>
                     format!(
                         "Rule{} has invalid number of head atoms, {}, for current feature set. expecting {}..{}",

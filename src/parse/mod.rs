@@ -12,10 +12,11 @@ use crate::error::{Error, Result};
 use crate::features::{
     FeatureSet, FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION,
 };
-use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Rule as DlRule, Term, Variable};
-use crate::program::Program;
-use crate::query::Query;
+use crate::idb::{
+    Atom, Comparison, ComparisonOperator, Literal, Query, Rule as DlRule, Term, Variable,
+};
 use crate::syntax::{RESERVED_BOOLEAN_TRUE, RESERVED_PREFIX, TYPE_NAME_CONST_INTEGER};
+use crate::Program;
 use pest::iterators::{Pair, Pairs};
 use pest::{Parser, Span};
 use pest_derive::Parser;
@@ -273,14 +274,14 @@ fn parse_fact(
         attributes.push(constant);
     }
 
-    let edb = program.database_mut();
+    let edb = program.extensional_mut();
     let relation = if !edb.contains(&predicate) {
         edb.add_new_relation_from(predicate.clone(), &attributes)?
     } else {
         edb.relation_mut(&predicate).unwrap()
     };
 
-    relation.add(attributes)
+    relation.add_as_fact(attributes)
 }
 
 fn parse_rule(
@@ -356,7 +357,8 @@ fn parse_pragma(
 
     match_one! {
         (inner_pair, features) => program ;
-        pragma_declare => parse_decl_relation,
+        pragma_assert => parse_decl_asserted_relation,
+        pragma_infer => parse_decl_inferred_relation,
         pragma_feature => parse_decl_feature,
         pragma_include => parse_decl_include,
         pragma_input => parse_decl_input,
@@ -366,10 +368,10 @@ fn parse_pragma(
     Ok(())
 }
 
-fn parse_decl_relation(
+fn parse_decl_asserted_relation(
     mut input_pairs: Pairs<'_, Rule>,
     program: &mut Program,
-    _features: FeatureSet,
+    features: FeatureSet,
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
     let predicate = match first.as_rule() {
@@ -380,17 +382,43 @@ fn parse_decl_relation(
     let mut attributes: Vec<Attribute<Predicate>> = Default::default();
     for inner_pair in input_pairs {
         match inner_pair.as_rule() {
-            Rule::attribute_declaration => attributes.push(parse_attribute(
-                inner_pair.into_inner(),
-                program,
-                _features,
-            )?),
+            Rule::attribute_declaration => {
+                attributes.push(parse_attribute(inner_pair.into_inner(), program, features)?)
+            }
             _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
         }
     }
 
     let _ = program
-        .database_mut()
+        .extensional_mut()
+        .add_new_relation(predicate, attributes)?;
+
+    Ok(())
+}
+
+fn parse_decl_inferred_relation(
+    mut input_pairs: Pairs<'_, Rule>,
+    program: &mut Program,
+    features: FeatureSet,
+) -> Result<()> {
+    let first = input_pairs.next().unwrap();
+    let predicate = match first.as_rule() {
+        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
+        _ => unreachable!(first.as_str()),
+    };
+
+    let mut attributes: Vec<Attribute<Predicate>> = Default::default();
+    for inner_pair in input_pairs {
+        match inner_pair.as_rule() {
+            Rule::attribute_declaration => {
+                attributes.push(parse_attribute(inner_pair.into_inner(), program, features)?)
+            }
+            _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
+        }
+    }
+
+    let _ = program
+        .intensional_mut()
         .add_new_relation(predicate, attributes)?;
 
     Ok(())

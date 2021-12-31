@@ -7,11 +7,8 @@ More detailed description, with
 
 */
 
-use crate::edb::{AttributeName, Constant, Database, DbValidation, Predicate, Relation};
-use crate::error::Error;
-use crate::error::Result;
-use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
-use crate::parse::SourceLocation;
+use crate::edb::{AttributeName, Constant};
+use crate::error::{Error, Result};
 use crate::syntax::{
     CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, CONJUNCTION_UNICODE_SYMBOL,
     DISJUNCTION_UNICODE_SYMBOL, EMPTY_STR, FALSE_UNICODE_SYMBOL, IMPLICATION_UNICODE_ARROW,
@@ -22,7 +19,6 @@ use crate::syntax::{
     OPERATOR_UNICODE_NOT_EQUAL, TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
     VARIABLE_NAME_IGNORE,
 };
-use crate::SyntacticFragments;
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -30,6 +26,9 @@ use std::str::FromStr;
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct Rules(HashSet<Rule>);
 
 ///
 /// A rule has a head, and a body where the head and each element of the body is an
@@ -56,9 +55,9 @@ use std::str::FromStr;
 /// "an ancestor"(X, Y).
 /// ```
 ///
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Rule {
-    head: Vec<Atom>, // Vec<Atom>
+    head: Vec<Atom>,
     body: Vec<Literal>,
 }
 
@@ -124,6 +123,79 @@ pub struct Variable(String);
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
+impl Display for Variable {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl FromStr for Variable {
+    type Err = Error;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        if Self::is_valid(s) {
+            Ok(Self(s.to_owned()))
+        } else {
+            Error::InvalidValue(TYPE_NAME_VARIABLE.to_owned(), s.to_owned()).into()
+        }
+    }
+}
+
+impl AsRef<str> for Variable {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl From<Variable> for String {
+    fn from(v: Variable) -> Self {
+        v.0
+    }
+}
+
+impl AttributeName for Variable {}
+
+impl Variable {
+    pub fn anonymous() -> Self {
+        Self(VARIABLE_NAME_IGNORE.to_owned())
+    }
+
+    pub fn is_anonymous(&self) -> bool {
+        self.as_ref() == VARIABLE_NAME_IGNORE
+    }
+
+    pub fn is_valid(s: &str) -> bool {
+        let mut chars = s.chars();
+        s == VARIABLE_NAME_IGNORE
+            || (!s.is_empty())
+                && chars.next().map(|c| c.is_uppercase()).unwrap()
+                && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for Rules {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        for rule in self.iter() {
+            writeln!(f, "{}", rule)?;
+        }
+        Ok(())
+    }
+}
+
+impl Rules {
+    pub fn iter(&self) -> impl Iterator<Item = &Rule> {
+        self.0.iter()
+    }
+
+    pub fn add(&mut self, rule: Rule) {
+        self.0.insert(rule);
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
 impl Display for Rule {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -155,66 +227,6 @@ impl Display for Rule {
             },
             CHAR_PERIOD,
         )
-    }
-}
-
-impl SyntacticFragments for Rule {
-    fn is_positive(&self) -> bool {
-        self.body.iter().all(Literal::is_positive)
-    }
-
-    fn is_linear(&self) -> bool {
-        self.body.len() == 1
-    }
-
-    fn is_guarded(&self) -> bool {
-        let all_variables = self.variables();
-        self.literals().any(|lit| {
-            let lit_variables: HashSet<&Variable> = HashSet::from_iter(lit.variables().into_iter());
-            lit_variables == all_variables
-        })
-    }
-
-    fn is_frontier_guarded(&self) -> bool {
-        let frontier_variables: HashSet<&Variable> = self
-            .head_variables()
-            .intersection(&self.variables())
-            .copied()
-            .collect();
-        self.literals().any(|lit| {
-            let lit_variables: HashSet<&Variable> = HashSet::from_iter(lit.variables().into_iter());
-            lit_variables == frontier_variables
-        })
-    }
-
-    fn is_non_recursive(&self) -> bool {
-        // TODO: this is only direct recursion, need to check for mutual recursive rules.
-        let head_predicates = self
-            .head()
-            .map(|atom| atom.predicate())
-            .collect::<Vec<&Predicate>>();
-        !self
-            .literals()
-            .filter_map(|lit| {
-                if let LiteralInner::Atom(atom) = lit.inner() {
-                    Some(atom.predicate())
-                } else {
-                    None
-                }
-            })
-            .any(|predicate| head_predicates.contains(&predicate))
-    }
-}
-
-impl DbValidation for Rule {
-    fn validate(&self, against: &mut Database) -> Result<()> {
-        for atom in self.head() {
-            Atom::validate(atom, against)?;
-        }
-        for literal in self.literals() {
-            Literal::validate(literal, against)?;
-        }
-        Ok(())
     }
 }
 
@@ -306,6 +318,52 @@ impl Rule {
 
     pub fn is_ground(&self) -> bool {
         self.head().all(|atom| atom.is_ground()) && self.literals().all(|lit| lit.is_ground())
+    }
+
+    pub fn is_positive(&self) -> bool {
+        self.body.iter().all(Literal::is_positive)
+    }
+
+    pub fn is_linear(&self) -> bool {
+        self.body.len() == 1
+    }
+
+    pub fn is_guarded(&self) -> bool {
+        let all_variables = self.variables();
+        self.literals().any(|lit| {
+            let lit_variables: HashSet<&Variable> = HashSet::from_iter(lit.variables().into_iter());
+            lit_variables == all_variables
+        })
+    }
+
+    pub fn is_frontier_guarded(&self) -> bool {
+        let frontier_variables: HashSet<&Variable> = self
+            .head_variables()
+            .intersection(&self.variables())
+            .copied()
+            .collect();
+        self.literals().any(|lit| {
+            let lit_variables: HashSet<&Variable> = HashSet::from_iter(lit.variables().into_iter());
+            lit_variables == frontier_variables
+        })
+    }
+
+    pub fn is_non_recursive(&self) -> bool {
+        // TODO: this is only direct recursion, need to check for mutual recursive rules.
+        let head_predicates = self
+            .head()
+            .map(|atom| atom.predicate())
+            .collect::<Vec<&Predicate>>();
+        !self
+            .literals()
+            .filter_map(|lit| {
+                if let LiteralInner::Atom(atom) = lit.inner() {
+                    Some(atom.predicate())
+                } else {
+                    None
+                }
+            })
+            .any(|predicate| head_predicates.contains(&predicate))
     }
 
     // --------------------------------------------------------------------------------------------
@@ -487,15 +545,6 @@ impl Display for Atom {
     }
 }
 
-impl DbValidation for Atom {
-    fn validate(&self, _db: &mut Database) -> Result<()> {
-        // if !db.contains(self.predicate()) {
-        //     db.make_new_relation_from(self.predicate().clone(), )
-        // }
-        Ok(())
-    }
-}
-
 impl Atom {
     pub fn new<T: Into<Vec<Term>>>(predicate: Predicate, terms: T) -> Self {
         let terms = terms.into();
@@ -620,12 +669,6 @@ impl From<Comparison> for Literal {
     }
 }
 
-impl DbValidation for Literal {
-    fn validate(&self, against: &mut Database) -> Result<()> {
-        LiteralInner::validate(self.inner(), against)
-    }
-}
-
 impl Literal {
     pub fn atom(atom: Atom) -> Self {
         Self {
@@ -728,18 +771,6 @@ impl From<Atom> for LiteralInner {
 impl From<Comparison> for LiteralInner {
     fn from(v: Comparison) -> Self {
         Self::Comparison(v)
-    }
-}
-
-impl DbValidation for LiteralInner {
-    fn validate(&self, against: &mut Database) -> Result<()> {
-        match self {
-            LiteralInner::Atom(a) => Atom::validate(a, against),
-            LiteralInner::Comparison(_) => {
-                // TODO: not sure
-                Ok(())
-            }
-        }
     }
 }
 
@@ -964,61 +995,18 @@ impl Term {
 }
 
 // ------------------------------------------------------------------------------------------------
-
-impl Display for Variable {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl FromStr for Variable {
-    type Err = Error;
-
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        if Self::is_valid(s) {
-            Ok(Self(s.to_owned()))
-        } else {
-            Error::InvalidValue(TYPE_NAME_VARIABLE.to_owned(), s.to_owned()).into()
-        }
-    }
-}
-
-impl AsRef<str> for Variable {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-impl From<Variable> for String {
-    fn from(v: Variable) -> Self {
-        v.0
-    }
-}
-
-impl AttributeName for Variable {}
-
-impl Variable {
-    pub fn anonymous() -> Self {
-        Self(VARIABLE_NAME_IGNORE.to_owned())
-    }
-
-    pub fn is_anonymous(&self) -> bool {
-        self.as_ref() == VARIABLE_NAME_IGNORE
-    }
-
-    pub fn is_valid(s: &str) -> bool {
-        let mut chars = s.chars();
-        s == VARIABLE_NAME_IGNORE
-            || (!s.is_empty())
-                && chars.next().map(|c| c.is_uppercase()).unwrap()
-                && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
 // Private Functions
 // ------------------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------------------
 // Modules
 // ------------------------------------------------------------------------------------------------
+
+mod eval;
+pub use eval::{naive::NaiveEvaluator, Evaluator};
+
+mod query;
+use crate::features::{FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
+use crate::parse::SourceLocation;
+use crate::{FeatureSet, Predicate, Relation};
+pub use query::{Query, Row, View};
