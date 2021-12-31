@@ -6,8 +6,8 @@ More detailed description, with
 # Example
 
 ```datalog
-@declare human(string).
-@declare age(name: string, integer).
+@assert human(string).
+@assert age(name: string, integer).
 ```
 
 ```datalog
@@ -24,8 +24,8 @@ use crate::error::{Error, Result};
 use crate::idb::{Atom, Row, View};
 use crate::syntax::{
     CHAR_COLON, CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
-    RESERVED_BOOLEAN_FALSE, RESERVED_BOOLEAN_TRUE, RESERVED_PRAGMA_ASSERT, RESERVED_PRAGMA_INFER,
-    RESERVED_PREFIX, TYPE_NAME_CONST_UNKNOWN, TYPE_NAME_PREDICATE,
+    COLUMN_NAME_UNKNOWN, RESERVED_BOOLEAN_FALSE, RESERVED_BOOLEAN_TRUE, RESERVED_PRAGMA_ASSERT,
+    RESERVED_PRAGMA_INFER, RESERVED_PREFIX, TYPE_NAME_PREDICATE,
 };
 use crate::{Term, Variable};
 use std::collections::{BTreeMap, HashSet};
@@ -118,22 +118,22 @@ pub struct Predicate(String);
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
-impl<T> Display for Schema<T>
-where
-    T: AttributeName + Display,
-{
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            self.attributes
-                .iter()
-                .map(Attribute::to_string)
-                .collect::<Vec<String>>()
-                .join(&format!("{} ", CHAR_COMMA))
-        )
-    }
-}
+// impl<T> Display for Schema<T>
+// where
+//     T: AttributeName + Display,
+// {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+//         write!(
+//             f,
+//             "{}",
+//             self.attributes
+//                 .iter()
+//                 .map(Attribute::to_string)
+//                 .collect::<Vec<String>>()
+//                 .join(&format!("{} ", CHAR_COMMA))
+//         )
+//     }
+// }
 
 impl<T> From<Attribute<T>> for Schema<T>
 where
@@ -260,29 +260,37 @@ where
                 }
             })
     }
+    pub fn to_column_decl(&self, emit_unknown: bool) -> String {
+        format!(
+            "{}",
+            self.attributes
+                .iter()
+                .map(|a| a.to_column_decl(emit_unknown))
+                .collect::<Vec<String>>()
+                .join(&format!("{} ", CHAR_COMMA))
+        )
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 
-impl<T> Display for Attribute<T>
-where
-    T: AttributeName,
-{
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}{}",
-            match &self.name {
-                None => String::new(),
-                Some(v) => format!("{}{} ", v, CHAR_COLON),
-            },
-            match &self.kind {
-                None => TYPE_NAME_CONST_UNKNOWN.to_string(),
-                Some(k) => k.to_string(),
-            }
-        )
-    }
-}
+// impl<T> Display for Attribute<T>
+// where
+//     T: AttributeName,
+// {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+//         write!(
+//             f,
+//             "{}",
+//             match (&self.name, &self.kind) {
+//                 (None, None) => String::new(),
+//                 (Some(n), Some(k)) => format!("{}{} {}", n, CHAR_COLON, k),
+//                 (Some(n), None) => format!("{}", n),
+//                 (None, Some(k)) => format!("{}{} {}", COLUMN_NAME_UNKNOWN, CHAR_COLON, k),
+//             },
+//         )
+//     }
+// }
 
 impl<T> From<AttributeKind> for Attribute<T>
 where
@@ -384,6 +392,21 @@ where
         }
         if let (None, Some(v)) = (self.kind, other.kind) {
             self.kind = Some(v)
+        }
+    }
+
+    pub fn to_column_decl(&self, emit_unknown: bool) -> String {
+        match (&self.name, &self.kind) {
+            (None, None) => String::new(),
+            (Some(n), Some(k)) => format!("{}{} {}", n, CHAR_COLON, k),
+            (Some(n), None) => format!("{}", n),
+            (None, Some(k)) => {
+                if emit_unknown {
+                    format!("{}{} {}", COLUMN_NAME_UNKNOWN, CHAR_COLON, k)
+                } else {
+                    k.to_string()
+                }
+            }
         }
     }
 }
@@ -747,7 +770,7 @@ impl Relation {
 
     // --------------------------------------------------------------------------------------------
 
-    pub(crate) fn to_schema_decl(&self, extensional: bool) -> String {
+    pub(crate) fn to_schema_decl(&self, extensional: bool, emit_unknown: bool) -> String {
         format!(
             "{}{} {}{}{}{}{}",
             RESERVED_PREFIX,
@@ -758,7 +781,7 @@ impl Relation {
             },
             self.name(),
             CHAR_LEFT_PAREN,
-            self.schema().to_string(),
+            self.schema().to_column_decl(emit_unknown),
             CHAR_RIGHT_PAREN,
             CHAR_PERIOD
         )
@@ -1005,7 +1028,7 @@ mod tests {
     #[test]
     fn test_matches() {
         let program = parse_str(
-            r#"#@declare human(string).
+            r#"#@assert human(string).
             
 human("Socrates").
 
@@ -1021,9 +1044,16 @@ mortal(X) <- human(X).
         println!("{}", program.to_string());
 
         let human = Predicate::from_str("human").unwrap();
-        let qterm = Atom::new(human, [Term::Variable(Variable::from_str("X").unwrap())]);
-        let results = program.extensional().matches(&qterm);
 
+        let qterm = Atom::new(
+            human.clone(),
+            [Term::Variable(Variable::from_str("X").unwrap())],
+        );
+        let results = program.extensional().matches(&qterm);
+        println!("{}", results);
+
+        let qterm = Atom::new(human, [Term::Constant(Constant::from("Socrates"))]);
+        let results = program.extensional().matches(&qterm);
         println!("{}", results);
     }
 }

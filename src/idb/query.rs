@@ -121,7 +121,10 @@ impl Display for View {
         table.set_titles(
             self.schema
                 .iter()
-                .map(|c| Cell::new_align(&c.to_string(), Alignment::CENTER).with_style(Attr::Bold))
+                .map(|c| {
+                    Cell::new_align(&c.to_column_decl(false), Alignment::CENTER)
+                        .with_style(Attr::Bold)
+                })
                 .collect(),
         );
 

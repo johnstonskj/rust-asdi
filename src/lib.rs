@@ -10,26 +10,33 @@ programs using the API you may opt out of the [Pest](https://pest.rs) parser and
 # Datalog Defined
 
 Datalog is a logic programming language and a subset of the earlier
-[Prolog](https://en.wikipedia.org/wiki/Prolog).
+[Prolog](https://en.wikipedia.org/wiki/Prolog). Chapter 1 of [Logic Programming and
+Databases](https://link.springer.com/book/10.1007/978-3-642-83952-8) provides a good overview of
+the drawbacks of Prolog and the advantages of Datalog for certain tasks.
 
 When referring to the specifics of the language we will use the common format $\text{\small{Datalog}}$ with
 superscripts that identify specific language extensions; for example, $\small\text{Datalog}^{\lnot}$ is
 the language extended with negation of literals, $\small\text{Datalog}^{\Gamma}$ is the language
 extended with type checking on attributes, and $\small\text{Datalog}^{\lnot,=}$. is the language
 extended with negation of literals _and_ comparison expressions. The order of superscript symbols is
-irrelevant.
+irrelevant. Additionally, text in **bold** indicates a key concept in the language while text in
+_italics_ indicates a forward reference to such a concept.
 
 ## Abstract Syntax
 
 **Rules** $\small R$ are built from a language $\small \mathcal{L}=\( \mathcal{C},\mathcal{P},\mathcal{V}\)$
 that contains the
 
-1. $\small \mathcal{C}$ -- the finite sets of symbols for all constants; e.g. `hello`, `"hi"`
+1. $\small \mathcal{C}$ -- the finite sets of symbols for all constant values; e.g. `hello`, `"hi"`
    `123`,
 2. $\small \mathcal{P}$ -- the finite set of alphanumeric character strings that begin with a
    lowercase character; e.g. `human`, `size`, `a`,
 3. $\small \mathcal{V}$ -- the finite set of alphanumeric character strings that begin with an
    uppercase character; e.g. `X`, `A`, `Var`.
+
+While it would appear that the values from $\small \mathcal{P}$ or $\small \mathcal{V}$ would
+overlap, these values must remain distinct. For example, the value `human` is a valid predicate and
+string constant but they have distinct types in ASDI that ensure they are distinct.
 
 Each rule $\small r \in R$ has the form:
 
@@ -37,20 +44,20 @@ $$\tag{i}\small A_1, \ldots, A_m \leftarrow L_1, \ldots, L_n$$
 
 as well as the following properties:
 
-1. $\small head(r)$ (consequence), returns the set of _atom_ values $\small A_1, \ldots, A_m$ where $\small m \in \mathbb{N}$,
-2. $\small body(r)$ (antecedence), returns the set of _literal_ values $\small L_1, \ldots, L_n$ where $\small n \in \mathbb{N}$,
-1. $\small distinguished(r)$ returns the set of terms in the head of a rule,
+1. $\small head(r)$ (the consequence), returns the set of _atom_ values $\small A_1, \ldots, A_m$ where $\small m \in \mathbb{N}$,
+2. $\small body(r)$ (the antecedence), returns the set of _literal_ values $\small L_1, \ldots, L_n$ where $\small n \in \mathbb{N}$,
+1. $\small distinguished(r)$ returns the set of _terms_ in the head of a rule,
    $$\tag{ii}\small distinguished(r) \leftarrow \lbrace t | t \in \bigcup\lbrace terms(a) | a \in head(r) \rbrace \rbrace$$
-1. $\small non\text{-}distinguished(r)$ returns the set of terms in the body that of a rule that are not in the head,
-   $$\tag{iii}\small non\text{-}distinguished(r) \leftarrow \lbrace t | t \in \( \bigcup\lbrace terms(a) | a \in body(r) \rbrace - distinguished(r) \rbrace\)$$
-3. $\small ground(r)$  returns true if its head _and_ its body are both ground:
+1. $\small non\text{-}distinguished(r)$ returns the set of _terms_ in the body that of a rule that are not in the head,
+   $$\tag{iii}\small non\text{-}distinguished(r) \leftarrow \lbrace t | t \in \( \bigcup\lbrace terms(a) | a \in body(r) \rbrace - distinguished(r) \rbrace\)\rbrace$$
+3. $\small ground(r)$  returns true if its head and its body are both _ground_:
    $$\tag{iv}\small ground\(r\) \leftarrow \(\forall{a}\in head\(r\); ground\(a\)\) \land \(\forall{l}\in body\(r\); ground\(l\)\)$$
-4. $\small positive(r)$ returns true if all body literals are positive:
+4. $\small positive(r)$ returns true if all body _literals_ are _positive_:
    $$\tag{v}\small positive(r) \leftarrow \(\forall{l}\in body\(r\); positive(l\)\)$$
 
 A _pure_ rule is one where there is only a single atom in the head; if the body is true, the head is
-true. A _constraint_ rule, or contradiction, does not allow any consequence to be determined from
-evaluation of its body. A _disjunctive_ rule is one where there is more than one atom, and any one
+true. A **constraint** rule, or contradiction, does not allow any consequence to be determined from
+evaluation of its body. A **disjunctive** rule is one where there is more than one atom, and any one
 may be true if the body is true. The property $\small form(r)$ returns the form of the rule, based
 on the cardinality of the rule's head as follows:
 
@@ -61,25 +68,26 @@ $\small\mathcal{T}=\mathcal{C}\cup\mathcal{V}\cup\bar{t}$ where $\small\bar{t}$ 
 unused or unnamed variable. $\small\bar{t}$ is denoted in the text representation as an underscore
 `"_"`).
 
-With the definition of rules as they stand it is possible to write rules that generate an an
+With the definition of rules so far it is possible to write rules that generate an an
 infinite number of results. To avoid such problems Datalog rules are required to satisfy the
 following **Safety** conditions:
 
-1. Every variable that appears in the head of a clause also appears in a positive literal in the
-   body of the clause.
-   $$\tag{vii}\small \lbrace t | t \in distinguished(r), t \in \mathcal{V} \rbrace - \lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), positive(a) \rbrace, t \in \mathcal{V} \rbrace = \empty$$
+1. Every variable that appears in the head of a clause also appears in a positive relational literal
+   (atom) in the body of the clause.
+   $$\tag{vii}\small \begin{aligned}\lbrace t | t \in distinguished(r), t \in \mathcal{V} \rbrace - \newline \lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), atom(a), positive(a) \rbrace, t \in \mathcal{V} \rbrace = \empty\end{aligned}$$
 2. Every variable appearing in a negative literal in the body of a clause also appears in some
-   positive literal in the body of the clause.
-   $$\tag{viii}\small \begin{aligned}\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), \lnot positive(a) \rbrace, t \in \mathcal{V} \rbrace - \newline \lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), positive(a) \rbrace, t \in \mathcal{V} \rbrace = \empty\end{aligned}$$
+   positive relational literal in the body of the clause.
+   $$\tag{viii}\small \begin{aligned}\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), \lnot positive(a) \rbrace, t \in \mathcal{V} \rbrace - \newline \lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), atom(a), positive(a) \rbrace, t \in \mathcal{V} \rbrace = \empty\end{aligned}$$
 
-**Atoms** are comprised of a label, $\small p$, and a tuple of terms. A set of atoms sharing the same
-label comprise a _relation_ labeled $\small p$. The form of an individual predicate is as follows:
+**Atoms** are comprised of a label, $\small p \in \mathcal{P}$, and a tuple of terms. A set of atoms
+sharing the same label comprise a _relation_ labeled $\small p$. The form of an individual predicate
+is as follows:
 
 $$\tag{ix}\small p\(t_1, \ldots, t_k\)$$
 
 as well as the following properties:
 
-1. a predicate, $\small p \in \mathcal{P}$, that labels the relation,
+1. $\small label(a)$ returns the predicate $\small p$,
 1. $\small terms(a)$ returns the tuple of term values $\small t_1, \ldots, t_k$; where
    $\small t \in \mathcal{T}$ and $\small k \in \mathbb{N}^{+}$,
 1. $\small arity(a)$ returns the cardinality of the relation identified by the predicate;
@@ -104,18 +112,19 @@ of term values.
 | $\small \ldots$ | $\small \ldots$        | $\small \ldots$ | $\small \ldots$        |
 | $\small row_y$  | $\small t_{y_1}$       | $\small \ldots$ | $\small t_{y_k}$       |
 
-**Literals**, present in the body of a rule, represent clauses that are the required to be true
-for the rule to be considered true.
+**Literals** in the body of a rule, represent sub-goals that are the required to be true for the
+rule's head to be considered true.
 
-1. a literal may be an atom or, in $\small\text{Datalog}^{=}$, a conditional expression,
-1. a conditional has the form $\small \langle t_{lhs} \text{ op } t_{rhs} \rangle$, where
+1. A literal may be an atom (termed a relational literal) or, in $\small\text{Datalog}^{=}$, a
+   conditional expression (termed an arithmetic literal),
+1. a an arithmetic literal has the form $\small \langle t_{lhs} \text{ op } t_{rhs} \rangle$, where
    1. $\small \text{op } \in \lbrace =, \neq, <, \leq, >, \geq \rbrace$,
    1. in $\small\text{Datalog}^{\Gamma}$ both $\small t_{lhs}$ and $\small t_{rhs}$ terms have
       corresponding types $\small \tau_{lhs}$ and $\small \tau_{rhs}$,
    1. the types $\small \tau_{lhs}$ and $\small \tau_{rhs}$ **must** be _compatible_, for some
-      system-defined definition of the property $\small compatible(\tau_{lhs}, \tau_{rhs}, \text{op})$,
+      system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_{rhs}, \text{op})$,
 1. in $\small\text{Datalog}^{\lnot}$ a literal may be negated, appearing as $\small \lnot l$,
-1. has the following properties:
+1. and has the following properties:
    1. $\small terms(l)$ returns either the set of terms in either the atom or comparison,
       $$\tag{xi}\small terms(l) = \begin{cases} terms(l), &\text{if } atom(l) \\\\ \lbrace t_{lhs}, t_{rhs} \rbrace, &\text{if } comparison(l) \land \text{Datalog}^{\=}\end{cases}$$
    1. $\small ground(l)$ returns true if its terms are all constants $\small \(\forall{t}\in terms\(l\); t \in \mathcal{C}\)$,
@@ -131,7 +140,7 @@ $$\tag{xii}\small fact(r) \leftarrow \(ground\(r\) \land form\(r\)=pure \land bo
 An atom may be also used as a **Goal** or **Query** clause in that its constant and variable terms
 may be used to match facts from the known facts or those that may be inferred from the set of rules
 introduced. A ground goal is simply determining that any fact exists that matches all of the
-constant values provided and will return true or false $\small existential(q) \leftarrow ground(q)$.
+constant values provided and will return true or false.
 In the case that one or more variables exist a set of facts will be returned that match the
 expressed constants and provide the corresponding values for the variables.
 
@@ -153,9 +162,7 @@ $\small \mathcal{C}_P = \mathcal{C}_E \cup \mathcal{C}_I$ and
 $\small \mathcal{V}_P = \mathcal{V}_E \cup \mathcal{V}_I$.
 
 Datalog does not, in general, allow the rules comprising the intensional database to infer new
-values for predicates that exist in the extensional database. This may be expressed as follows,
-although in the textual representation it is expressed as an error to define a rule with a head
-predicate that exists in the extensional database.
+values for predicates that exist in the extensional database. This may be expressed as follows:
 
 $$\tag{xv}\small \mathcal{P}_E \cap \mathcal{P}_I = \empty$$
 
@@ -177,7 +184,7 @@ comprise the intensional database, and possibly a set of queries to interrogate 
 reasoning performed over the program.
 
 ```abnf
-program         = *[ fact ] *[ rule ] *[ query ]
+program         = *[ pragma ] *[ fact / rule / query ]
 ```
 
 A program consists of a single file containing facts, rules, and queries as well as any additional
@@ -185,8 +192,7 @@ files referenced via _pragmas_.
 
 ### Facts
 
-Facts **must** be expressed in the form of stand-alone ground atoms and **must** appear before any
-rules.
+Facts **must** be expressed in the form of ground atoms.
 
 ```abnf
 fact            = predicate [ constant-list ] "."
@@ -221,7 +227,7 @@ Boolean values may also be represented using `⊤` (down tack `\u{22a4}`) for tr
 
 ### Rules
 
-As facts are treated as separate from rules in the text representation there is no need for empty
+As facts are syntactically distinct from rules in the text representation there is no need for empty
 bodies -- all rules **must** have at least one literal. Material implication may be written using
 the Unicode character `⟵` (long leftwards arrow`\u{27f5}`).
 
@@ -239,6 +245,15 @@ The following rules are all equivalent.
 ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Y) <- parent(X, Y).
 ancestor(X, Y) ⟵ parent(X, Y).
+```
+
+As described in the abstract syntax it is an error to use an extensional relation in the head of
+a rule. The following will generate an error:
+
+```datalog
+parent("Xerces", brooke).
+
+parent(X,Y) :- father(X,Y).
 ```
 
 The language feature `disjunction` corresponds to the language $\small\text{Datalog}^{\lor}$ and
@@ -265,6 +280,16 @@ equivalent.
 :- alive(X) AND dead(X).
 ⊥ ⟵ alive(X) ∧ dead(X).
 ```
+
+ASDI will disallow the addition of rules that are unsafe according to the abstract syntax. The
+following are examples of unsafe rules:
+
+* `a(X) :- b(Y).` -- because `X` appears as distinguished variable but does not appear in a
+  positive relational literal.
+* `a(X) :- b(Y), NOT b(X).` -- because `X` appears in negated literal but does not appear in a
+  positive relational literal.
+* `a(X) :- b(Y), X < Y.` -- Because `X` appears in an arithmetic literal but does not appear in a
+  positive relational literal.
 
 ### Atoms
 
@@ -313,18 +338,19 @@ ancestor(X, Y) ⟵ parent(X, Z) AND ancestor(Z, Y).
 
 The language feature `negation` corresponds to the language $\small\text{Datalog}^{\lnot}$ and
 allows the specification of negated literals. Negation may also be written using the Unicode
-character `￢` (full-width not sign `\u{ffe2}`).
+character `￢` (full-width not sign `\u{ffe2}`). The following rules are equivalent.
 
 ```datalog
 @feature(negation).
 
 alive(X) :- NOT dead(X).
+alive(X) ⟵ ￢dead(X).
 ```
 
 ### Comparisons
 
 The language feature `comparisons` corresponds to the language $\small\text{Datalog}^{=}$ and
-allows the use of comparison expressions. Comparisons take place between two literals and are
+allows the use of arithmetic literals. Comparisons take place between two literals and are
 currently limited to a set of common operators.
 
 ```abnf
@@ -378,7 +404,7 @@ in either the query or the response. For example, in the following query we ask 
 the _model_ attribute in the _car_ relation where the _make_ is "ford", and ignore the age entirely.
 
 ```datalog
-@declare car(make: string, model: string, age: integer).
+@assert car(make: string, model: string, age: integer).
 
 car("ford", Model, _)?
 ```
@@ -386,19 +412,22 @@ car("ford", Model, _)?
 The results of this query would not include the age column:
 
 ```text
++------------+
 | Model      |
-| ---------- |
-| bronco     |
++============+
 | edge       |
-| escape     |
++------------+
 | escort     |
-| expedition |
-| explorer   |
++------------+
 | fiesta     |
++------------+
 | focus      |
++------------+
 | fusion     |
++------------+
 | mustang    |
-| ...        |
++------------+
+     ...
 ```
 
 ### Pragmas
@@ -406,23 +435,30 @@ The results of this query would not include the age column:
 TBD.
 
 ```abnf
-pragma          = declare / include / input / output
+pragma          = assert / infer / input / output
 
-declare         = "@declare" predicate attribute-list "."
+assert          = "@assert" predicate attribute-list "."
+infer           = "@infer" predicate attribute-list "."
 attribute-list  = "(" attribute-decl *[ "," attribute-decl ] ")"
 attribute-decl  = [ predicate ":" ] attribute-type
 attribute-type  = "boolean" / "integer" / "string"
 
-include         = "@include" quoted-string "."
-
-input           = "@input" "(" predicate "," quoted-string [ "," quoted-string ] ")" "."
-
-output          = "@output" "(" predicate "," quoted-string [ "," quoted-string ] ")" "."
+input           = "@input" "(" predicate "," file-name [ "," file-type ] ")" "."
+output          = "@output" "(" predicate "," file-name [ "," file-type ] ")" "."
+file-name       = quoted-string
+file-type       = quoted-string
 ```
 
+* `assert` -- defines an intensional relation.
+* `infer` -- defines an extensional relation.
+* `input` -- input values for an intensional relation from the referenced source file.
+* `output` -- output values from the extensional relation into the referenced source file.
+
 ```datalog
-@declare human(name: string).
+@assert human(name: string).
 @input(human, "data/humans.csv", "csv").
+
+@infer mortal(name: string).
 @output(mortal, "data/mortals.txt", "text").
 ```
 
@@ -483,7 +519,11 @@ doing so will evaluate the necessary rule and derive the relation _mortal_. The 
 boolean value denoting whether the goal is satisfied.
 
 ```text
-@true
++------------+
+| _: boolean |
++============+
+| @true      |
++------------+
 ```
 
 However, if we were to change the final query to replace the constant with a variable, as follows.
@@ -495,9 +535,11 @@ However, if we were to change the final query to replace the constant with a var
 The program will select all matching (in this case all) facts from the _mortal_ relation.
 
 ```text
-| X          |
-| ---------- |
++------------+
+| X: string  |
++============+
 | "Socrates" |
++------------+
 ```
 
 */
@@ -587,14 +629,14 @@ impl Display for Program {
 
         if !self.asserted.is_empty() {
             for relation in self.asserted.iter() {
-                writeln!(f, "{}", relation.to_schema_decl(true))?;
+                writeln!(f, "{}", relation.to_schema_decl(true, false))?;
             }
             writeln!(f)?;
         }
 
         if !self.infer.is_empty() {
             for relation in self.infer.iter() {
-                writeln!(f, "{}", relation.to_schema_decl(false))?;
+                writeln!(f, "{}", relation.to_schema_decl(false, false))?;
             }
             writeln!(f)?;
         }
