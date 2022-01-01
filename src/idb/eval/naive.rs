@@ -1,12 +1,3 @@
-/*!
-One-line description.
-
-More detailed description, with
-
-# Example
-
-*/
-
 use crate::edb::Constant;
 use crate::error::{Error, Result};
 use crate::features::{FEATURE_COMPARISONS, FEATURE_NEGATION};
@@ -18,20 +9,36 @@ use tracing::trace;
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
+///
+/// Provides a very naive implementation of the [`Evaluator`] trait.
+///
+/// # Details
+///
+/// The following is taken from [Datalog -- Logical Rules
+/// Recursion](http://infolab.stanford.edu/~ullman/fcdb/aut07/slides/dlog.pdf).
+///
+/// In a program, predicates can be either:
+///
+/// 1. EDB = Extensional Database = stored table.
+/// 2. IDB = Intensional† Database = relation defined by rules.
+///
+/// The head is true for given values of the distinguished variables if there exist values of
+/// the non-distinguished variables that make all sub-goals of the body true.
+///
+/// Naive Approach: consider all combinations of values of the variables.
+///
+/// * If all sub-goals are true, then evaluate the head.
+/// * The resulting head is a tuple in the result.
+///
+/// Relations are finite sets.
+/// * We want rule evaluations to be finite and lead to finite results.
+/// * “Unsafe” rules like `p(X) :- q(Y)` have infinite results, even if `q` is finite.
+/// * Even `p(X) :- q(Y)` requires examining an infinity of `X`-values.
+///
+/// † -- an _intension_ is any property or quality connoted by a word, phrase, or another symbol.
+///
 #[derive(Debug, Default)]
 pub struct NaiveEvaluator {}
-
-// ------------------------------------------------------------------------------------------------
-// Private Types & Constants
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Private Macros
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Public Functions
-// ------------------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------------------
 // Implementations
@@ -39,30 +46,6 @@ pub struct NaiveEvaluator {}
 
 impl Evaluator for NaiveEvaluator {
     fn inference(&self, program: &Program) -> Result<Relations> {
-        //
-        // The following is taken from [Datalog -- Logical Rules
-        // Recursion](http://infolab.stanford.edu/~ullman/fcdb/aut07/slides/dlog.pdf).
-        //
-        // In a program, predicates can be either:
-        //
-        // 1. EDB = Extensional Database = stored table.
-        // 2. IDB = Intensional† Database = relation defined by rules.
-        //
-        // The head is true for given values of the distinguished variables if there exist values of
-        // the non-distinguished variables that make all sub-goals of the body true.
-        //
-        // Naive Approach: consider all combinations of values of the variables.
-        //
-        // * If all sub-goals are true, then evaluate the head.
-        // * The resulting head is a tuple in the result.
-        //
-        // Relations are finite sets.
-        // * We want rule evaluations to be finite and lead to finite results.
-        // * “Unsafe” rules like `p(X) :- q(Y)` have infinite results, even if `q` is finite.
-        // * Even `p(X) :- q(Y)` requires examining an infinity of `X`-values.
-        //
-        // † -- an _intension_ is any property or quality connoted by a word, phrase, or another symbol.
-        //
         if program.is_positive() {
             let mut new_db = program.intensional().clone_with_schema_only();
             loop {
@@ -140,11 +123,3 @@ impl Evaluator for NaiveEvaluator {
         }
     }
 }
-
-// ------------------------------------------------------------------------------------------------
-// Private Functions
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Modules
-// ------------------------------------------------------------------------------------------------

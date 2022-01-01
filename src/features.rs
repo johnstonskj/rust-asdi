@@ -123,24 +123,40 @@ pub struct Feature {
     mask: u8,
 }
 
+///
+/// Corresponds to `@feature(negation).` and the language $\small\text{Datalog}^{\lnot}$, without
+/// this feature it is an error to add a rule with a non-positive literal.
+///
 pub const FEATURE_NEGATION: Feature = Feature {
     label: PRAGMA_FEATURE_NEGATION,
     symbol: NOT_UNICODE_SYMBOL,
     mask: 1,
 };
 
+///
+/// Corresponds to `@feature(comparisons).` and the language $\small\text{Datalog}^{=}$, without
+/// this feature it is an error to add a rule with an arithmetic literal.
+///
 pub const FEATURE_COMPARISONS: Feature = Feature {
     label: PRAGMA_FEATURE_COMPARISONS,
     symbol: OPERATOR_ASCII_EQUAL,
     mask: 2,
 };
 
+///
+/// Corresponds to `@feature(disjunction).` and the language $\small\text{Datalog}^{\lor}$, without
+/// this feature it is an error to add a rule with a disjunctive head.
+///
 pub const FEATURE_DISJUNCTION: Feature = Feature {
     label: PRAGMA_FEATURE_DISJUNCTION,
     symbol: DISJUNCTION_UNICODE_SYMBOL,
     mask: 4,
 };
 
+///
+/// Corresponds to `@feature(constraints).` and the language $\small\text{Datalog}^{\bot}$, without
+/// this feature it is an error to add a rule without a head.
+///
 pub const FEATURE_CONSTRAINTS: Feature = Feature {
     label: PRAGMA_FEATURE_CONSTRAINTS,
     symbol: FALSE_UNICODE_SYMBOL,
@@ -164,22 +180,20 @@ pub const ALL_FEATURES: &[&Feature] = &[
 const DEFAULT_FEATURE_SET: u8 = 0;
 
 // ------------------------------------------------------------------------------------------------
-// Private Macros
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Public Functions
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
 impl Feature {
+    ///
+    /// Return the label (string used in the feature pragma) for this feature.
+    ///
     pub fn label(&self) -> &'static str {
         self.label
     }
 
+    ///
+    /// Return the symbol (used as a language identifier) for this feature.
+    ///
     pub fn symbol(&self) -> &'static str {
         self.symbol
     }
@@ -242,10 +256,16 @@ impl Display for FeatureSet {
 }
 
 impl FeatureSet {
+    ///
+    /// Returns `true` if this is the default (no language extension features) set, else `false`.
+    ///
     pub fn is_default(&self) -> bool {
         self.0 == DEFAULT_FEATURE_SET
     }
 
+    ///
+    /// Construct a new feature set with all supported features enabled.
+    ///
     pub fn all() -> Self {
         Self::from(vec![
             FEATURE_NEGATION,
@@ -255,20 +275,34 @@ impl FeatureSet {
         ])
     }
 
+    ///
+    /// Returns `true` if this feature set includes the provided feature, else `false`.
+    ///
     pub fn supports(&self, feature: &Feature) -> bool {
         self.0 & feature.mask == feature.mask
     }
 
+    ///
+    /// Add the provided feature to this feature set, and return self so that these calls
+    /// may be chained.
+    ///
     pub fn add_support_for(&mut self, feature: &Feature) -> Self {
         self.0 |= feature.mask;
         *self
     }
 
+    ///
+    /// Remove the provided feature from this feature set, and return self so that these calls
+    /// may be chained.
+    ///
     pub fn remove_support_for(&mut self, feature: &Feature) -> Self {
         self.0 &= !feature.mask;
         *self
     }
 
+    ///
+    /// Returns an iterator over all features supported in this set.
+    ///
     pub fn features(&self) -> impl Iterator<Item = &Feature> {
         ALL_FEATURES
             .iter()
@@ -276,7 +310,10 @@ impl FeatureSet {
             .cloned()
     }
 
-    pub fn label(&self) -> String {
+    ///
+    /// Return a string constructed to identify the language denoted by this feature set.
+    ///
+    pub fn language(&self) -> String {
         if self.is_default() {
             DEFAULT_LANGUAGE_NAME.to_owned()
         } else {
@@ -290,58 +327,5 @@ impl FeatureSet {
                 DEFAULT_LANGUAGE_NAME,
             )
         }
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-// Private Functions
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Modules
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Unit Tests
-// ------------------------------------------------------------------------------------------------
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_to_label() {
-        assert_eq!(FeatureSet::default().label(), "Datalog");
-        assert_eq!(
-            FeatureSet::default()
-                .add_support_for(&FEATURE_NEGATION)
-                .label(),
-            "(￢)Datalog"
-        );
-        assert_eq!(
-            FeatureSet::default()
-                .add_support_for(&FEATURE_NEGATION)
-                .add_support_for(&FEATURE_DISJUNCTION)
-                .label(),
-            "(￢∨)Datalog"
-        );
-    }
-
-    #[test]
-    fn test_to_string() {
-        assert_eq!(FeatureSet::default().to_string(), "");
-        assert_eq!(
-            FeatureSet::default()
-                .add_support_for(&FEATURE_NEGATION)
-                .to_string(),
-            "@feature(negation)."
-        );
-        assert_eq!(
-            FeatureSet::default()
-                .add_support_for(&FEATURE_NEGATION)
-                .add_support_for(&FEATURE_DISJUNCTION)
-                .to_string(),
-            "@feature(negation, disjunction)."
-        );
     }
 }

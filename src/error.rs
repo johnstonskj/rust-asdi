@@ -1,10 +1,9 @@
 /*!
-This module containing the `Error` and `Result` types.
+This module provides the common `Error` and `Result` types for this library.
  */
 
 use crate::edb::Predicate;
 use crate::features::Feature;
-use crate::parse::SourceLocation;
 use std::fmt::{Display, Formatter};
 
 // ------------------------------------------------------------------------------------------------
@@ -12,12 +11,26 @@ use std::fmt::{Display, Formatter};
 // ------------------------------------------------------------------------------------------------
 
 ///
-/// The type for all errors returned from this library.
+/// A line/column location within a source file, used for error reporting.
+///
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SourceLocation {
+    line: usize,
+    column: usize,
+}
+
+///
+/// The type for all errors returned from this library. In the case of `ParserError` the
+/// implementation of display will use the underlying Pest error and so give a nicely
+/// formatted response.
 ///
 #[derive(Debug)]
 pub enum Error {
+    /// A wrapper around an underlying [`std::io::Error`].
     FileIoError(std::io::Error),
+    /// A wrapper around an underlying [`std::fmt::Error`].
     FormatError(std::fmt::Error),
+    /// A wrapper around an underlying [`std::error::Error`] denoting a Pest parser error.
     ParserError(Box<dyn std::error::Error>),
     TypeMismatch(String, String),
     InvalidValue(String, String),
@@ -43,6 +56,35 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 // ------------------------------------------------------------------------------------------------
 // Implementations
+// ------------------------------------------------------------------------------------------------
+
+impl From<(usize, usize)> for SourceLocation {
+    fn from(v: (usize, usize)) -> Self {
+        Self {
+            line: v.0,
+            column: v.1,
+        }
+    }
+}
+
+impl Display for SourceLocation {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[line {}, column {}]", self.line, self.column)
+    }
+}
+
+impl SourceLocation {
+    /// The line number (0-based) at which the error occurred.
+    pub fn line(&self) -> usize {
+        self.line
+    }
+
+    /// The column, or character, offset (0-based) at which the error occurred.
+    pub fn column(&self) -> usize {
+        self.column
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
 
 impl Display for Error {

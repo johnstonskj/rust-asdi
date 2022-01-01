@@ -1,14 +1,63 @@
 /*!
-One-line description.
+This module provides the set of types that primarily describe the Intensional Database (IDB).
 
-More detailed description, with
+Given the following rule:
+
+```datalog
+ancestor(X, Y) :- parent(X, Y).
+```
+
+We can deduce:
+
+1. There exists an intensional [`Relation`] with the [label](../edb/struct.Predicate.html)
+   `ancestor`.
+1. This relation has the following [schema](../edb/struct.Schema.html):
+    1. The arity of this relation is `2`.
+    1. The [types](enum.AttributeKind.html) of the [attributes](struct.Attribute.html) in this
+       relation are as yet unknown.
+
+All head atoms **must** be from an intensional relation , so if `ancestor` were to exist in the EDB
+the rule above would be invalid.
+
+**IFF** any atom in the rule body **is not** in the EDB, **then** we may use the same deduction
+process above to add it to the IDB.
+
+If we were to include an intensional relation declaration in our example, as follows:
+
+```datalog
+@infer ancestor(child: string, parent: string).
+
+ancestor(X, Y) :- parent(X, Y).
+```
+
+We can add the [label](../edb/struct.Predicate.html) and [type](../edb/struct.AttributeKind.html)
+for each attribute of `ancestor` to the relation's schema.
 
 # Example
+
+TBD
+
+The following declares two intensional [relations](struct.Relation.html), `mortal` and `age`.
+
+```datalog
+@assert human(string).
+
+@infer mortal from human.
+@infer age(name: string, integer).
+```
+
+The following are valid [rules](struct.Rule.html).
+
+```datalog
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Y) ⟵ parent(X, Z), ancestor(Z, Y).
+```
 
 */
 
 use crate::edb::{AttributeName, Constant};
-use crate::error::{Error, Result};
+use crate::error::{Error, Result, SourceLocation};
+use crate::features::{FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
 use crate::syntax::{
     CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, CONJUNCTION_UNICODE_SYMBOL,
     DISJUNCTION_UNICODE_SYMBOL, EMPTY_STR, FALSE_UNICODE_SYMBOL, IMPLICATION_UNICODE_ARROW,
@@ -19,6 +68,7 @@ use crate::syntax::{
     OPERATOR_UNICODE_NOT_EQUAL, TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
     VARIABLE_NAME_IGNORE,
 };
+use crate::{FeatureSet, Predicate, Relation};
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -27,40 +77,36 @@ use std::str::FromStr;
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
+///
+/// This is the set of rules that comprise part of the intensional database along with an instance
+/// of [Relations](../edb/struct.Relations.html).
+///
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Rules(HashSet<Rule>);
 
 ///
-/// A rule has a head, and a body where the head and each element of the body is an
-/// [_atom_](struct.Atom.html). All atoms in the body are joined by conjunction, so _atom-1 and
-/// atom-2, ..._. Each Atom has one or more arguments that are [_terms_](enum.Term.html), which
-/// are either constant values or _variables_.
+/// An individual rule consists of a set of head [atoms](Atom) and a set of body [literals](Literal).
 ///
-/// # Examples
+/// The head is a set of atoms, with the cardinality having meaning. In the default  
+/// language $\small\text{Datalog}$ there may only be one head atom; in $\small\text{Datalog}^{\bot}$
+/// the head atom is optional, and in $\small\text{Datalog}^{\lor}$ there may be more than one head
+/// atom.
 ///
-/// Note that predicate identifiers always start with a lowercase character, and constants may be
-/// identifiers, double-quoted string, integer, or boolean values. Variable identifiers always
-/// start with an uppercase character.
-///
-/// ```prolog
-/// ancestor(X, Y) :- parent(X, Y).
-/// ancestor(X, Y) <- parent(X, "Socrates").
-/// ancestor(X, Y) ⟵ parent(X, Y).
-/// ```
-///
-/// A predicate may be an identifier, or a string, as shown in the following.
-///
-/// ```prolog
-/// ancestor(X, Y).
-/// "an ancestor"(X, Y).
-/// ```
-///
+/// Safety...
+///  
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Rule {
     head: Vec<Atom>,
     body: Vec<Literal>,
 }
 
+// ------------------------------------------------------------------------------------------------
+
+///
+/// An Atom comprises an ordered list of [`Term`] values within a [`Relation`]. The arity and
+/// types for the values **must** comply with the relation's schema. The label of a fact **must**
+/// be the same as the label of it's relation.
+///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Atom {
     label: Predicate,
@@ -68,18 +114,33 @@ pub struct Atom {
     src_loc: Option<SourceLocation>,
 }
 
+///
+/// A literal is either an [relational literal](Atom) or if using the language $\small\text{Datalog}^{=}$
+/// an [arithmetic literal](Comparison). Additionally, if using the language $\small\text{Datalog}^{\lnot}$
+/// a literal may be negated.
+///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Literal {
     negative: bool,
     inner: LiteralInner,
 }
 
+///
+/// Contains the actual content of a [`Literal`].
+///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum LiteralInner {
+    /// A relational literal
     Atom(Atom),
+    /// An arithmetic literal, if using the language $\small\text{Datalog}^{=}$.
     Comparison(Comparison),
 }
 
+// ------------------------------------------------------------------------------------------------
+
+///
+/// This describes an arithmetic literal, i.e. a comparison operation between to [`Term`]s.
+///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Comparison {
     lhs: Term,
@@ -87,6 +148,9 @@ pub struct Comparison {
     rhs: Term,
 }
 
+///
+/// The supported set of operations within an arithmetic literal.
+///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ComparisonOperator {
     Equal,
@@ -97,13 +161,27 @@ pub enum ComparisonOperator {
     GreaterThanOrEqual,
 }
 
+// ------------------------------------------------------------------------------------------------
+
+///
+/// A term, $\small t \in \mathcal{T}$, is either a [`Variable`]  or a [`Constant`]  value.
+///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Term {
     // TODO: do we represent anonymous variables (syntax: "_") explicitly?
+    /// a value such that term is $\small \in \mathcal{V}$
     Variable(Variable),
+
+    /// a value such that term is $\small \in \mathcal{C}$
     Constant(Constant),
 }
 
+///
+/// A value from the set $\small \mathcal{V}$.
+///
+/// A variable must start with a Unicode **upper** case letter, followed by any Unicode cased letter or
+/// Unicode decimal digit, or the `'_'` underscore character.
+///
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Variable(String);
 
@@ -1006,7 +1084,4 @@ mod eval;
 pub use eval::{naive::NaiveEvaluator, Evaluator};
 
 mod query;
-use crate::features::{FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
-use crate::parse::SourceLocation;
-use crate::{FeatureSet, Predicate, Relation};
 pub use query::{Query, Row, View};

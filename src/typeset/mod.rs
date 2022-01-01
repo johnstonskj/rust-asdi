@@ -1,9 +1,13 @@
 /*!
-One-line description.
+This module provides the trait [Typesetter](trait.Typesetter.html), and implementation
+[LatexTypesetter](struct.LatexTypesetter.html) to allow more detailed output of a program's
+source according to different documentation tools.
 
-More detailed description, with
+TBD
 
 # Example
+
+TBD
 
 */
 
@@ -20,6 +24,9 @@ use std::fmt::Write;
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
+///
+/// This trait must be implemented by a type that can output formatted values as strings.
+///
 pub trait Typesetter {
     fn program(&self, value: &Program) -> Result<String>;
     fn fact(&self, value: &Fact, inline: bool) -> Result<String>;
@@ -27,6 +34,9 @@ pub trait Typesetter {
     fn query(&self, value: &Query, inline: bool) -> Result<String>;
 }
 
+///
+/// An implementation of the trait [Typesetter](trait.Typesetter.html) that outputs LaTeX
+/// formatted program source.
 ///
 /// # Preamble
 ///
@@ -51,10 +61,10 @@ pub trait Typesetter {
 ///     mathescape
 /// }
 /// \lstMakeShortInline[language=Datalog]|
-/// /// ```
+/// ```
 ///
 #[derive(Debug, Default)]
-pub(crate) struct LatexTypesetter {}
+pub struct LatexTypesetter {}
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants

@@ -1,14 +1,17 @@
 /*!
-One-line description.
+This module provides the type [`Parsed`] that contains a program parsed from the text representation
+as well as the [`parse_file`], [`parse_str`], and [`parse_str_with_features`] functions.
 
-More detailed description, with
+TBD
 
 # Example
+
+TBD
 
 */
 
 use crate::edb::{Attribute, AttributeKind, Constant, Predicate};
-use crate::error::{Error, Result};
+use crate::error::{Error, Result, SourceLocation};
 use crate::features::{
     FeatureSet, FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION,
 };
@@ -20,7 +23,7 @@ use crate::Program;
 use pest::iterators::{Pair, Pairs};
 use pest::{Parser, Span};
 use pest_derive::Parser;
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::Debug;
 use std::fs::read_to_string;
 use std::path::Path;
 use std::str::FromStr;
@@ -29,19 +32,14 @@ use std::str::FromStr;
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
+///
+/// This contains the parsed content from a source, along with any remaining, un-parsed, content.
+/// This allows for parser rules that match and return but have not matched everything.
+///
 #[derive(Clone, Debug)]
-pub struct Parsed<T>
-where
-    T: Clone + Debug,
-{
-    parsed: T,
+pub struct Parsed {
+    parsed: Program,
     rest: Option<String>,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct SourceLocation {
-    line: usize,
-    column: usize,
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -60,15 +58,34 @@ struct Datalog;
 // Public Functions
 // ------------------------------------------------------------------------------------------------
 
-pub fn parse_file<P: AsRef<Path>>(file_path: P) -> Result<Parsed<Program>> {
+///
+/// Parse the file at the provided path.
+///
+pub fn parse_file<P: AsRef<Path>>(file_path: P) -> Result<Parsed> {
     parse_str(&read_to_string(file_path.as_ref())?)
 }
 
-pub fn parse_str(source: &str) -> Result<Parsed<Program>> {
+///
+/// Parse the file at the provided path, but enabled the set of language features first.
+///
+pub fn parse_file_with_features<P: AsRef<Path>>(
+    file_path: P,
+    features: FeatureSet,
+) -> Result<Parsed> {
+    parse_str_with_features(&read_to_string(file_path.as_ref())?, features)
+}
+
+///
+/// Parse the string content provided.
+///
+pub fn parse_str(source: &str) -> Result<Parsed> {
     parse_str_with_features(source, FeatureSet::default())
 }
 
-pub fn parse_str_with_features(source: &str, features: FeatureSet) -> Result<Parsed<Program>> {
+///
+/// Parse the string content provided, but enabled the set of language features first.
+///
+pub fn parse_str_with_features(source: &str, features: FeatureSet) -> Result<Parsed> {
     let mut parsed =
         Datalog::parse(Rule::program, source).map_err(|e| Error::ParserError(Box::new(e)))?;
     let matched_str = parsed.as_str();
@@ -85,15 +102,12 @@ pub fn parse_str_with_features(source: &str, features: FeatureSet) -> Result<Par
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
-impl<T> Parsed<T>
-where
-    T: Clone + Debug,
-{
-    fn new(parsed: T) -> Self {
+impl Parsed {
+    fn new(parsed: Program) -> Self {
         Self { parsed, rest: None }
     }
 
-    fn new_with_more(parsed: T, rest: String) -> Self {
+    fn new_with_more(parsed: Program, rest: String) -> Self {
         if !rest.is_empty() {
             Self {
                 parsed,
@@ -104,11 +118,11 @@ where
         }
     }
 
-    pub fn parsed(&self) -> &T {
+    pub fn parsed(&self) -> &Program {
         &self.parsed
     }
 
-    pub fn into_parsed(self) -> T {
+    pub fn into_parsed(self) -> Program {
         self.parsed
     }
 
@@ -121,33 +135,6 @@ where
             .as_ref()
             .map(|s| !s.is_empty())
             .unwrap_or_default()
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-
-impl From<(usize, usize)> for SourceLocation {
-    fn from(v: (usize, usize)) -> Self {
-        Self {
-            line: v.0,
-            column: v.1,
-        }
-    }
-}
-
-impl Display for SourceLocation {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[line {}, column {}]", self.line, self.column)
-    }
-}
-
-impl SourceLocation {
-    pub fn line(&self) -> usize {
-        self.line
-    }
-
-    pub fn column(&self) -> usize {
-        self.column
     }
 }
 
@@ -221,10 +208,7 @@ macro_rules! pest_error {
 // Private Functions
 // ------------------------------------------------------------------------------------------------
 
-fn make_parsed<T>(parsed: T, original_str: &str, matched_str: &str) -> Parsed<T>
-where
-    T: Clone + Debug,
-{
+fn make_parsed(parsed: Program, original_str: &str, matched_str: &str) -> Parsed {
     let original_len = original_str.len();
     let matched_len = matched_str.len();
     if matched_len < original_len {

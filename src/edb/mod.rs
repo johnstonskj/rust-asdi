@@ -1,22 +1,52 @@
 /*!
-One-line description.
+This module provides the set of types that primarily describe the Extensional Database (EDB).
 
-More detailed description, with
+Given the following fact:
+
+```datalog
+person("Alice", 49, @true).
+```
+
+We can deduce:
+
+1. There exists an extensional [relation](Relation) with the [label](Predicate)
+   `person`.
+1. This relation has the following [schema](Schema):
+    1. The arity of this relation is `3`.
+    1. The [types](enum.AttributeKind.html) of the [attributes](Attribute) in this
+       relation are `(string, integer, boolean)`.
+1. This relation has _at least_ one fact which has the [constant](Constant) values
+   `("Alice", 49, @true)`.
+
+If we were to include an extensional relation declaration in our example, as follows:
+
+```datalog
+@assert person(name: string, age: integer, funny: boolean).
+
+person("Alice", 49, @true).
+```
+
+We can add the [label](Predicate) for each attribute of `person` to the relation's schema.
 
 # Example
+
+The following declares two extensional [relations](Relation), `human` and `age`.
 
 ```datalog
 @assert human(string).
 @assert age(name: string, integer).
 ```
 
+The following are all valid [facts](Fact) expressed in the text representation.
+
 ```datalog
-fact("string").
-fact(1234).
-fact(@true).
-fact(@false).
-fact(shortString).
-fact(str:Short).
+string_fact("string").
+string_fact(shortString).
+string_fact(str:Short).
+integer_fact(1234).
+integer_fact(-4321).
+boolean_fact(@true).
+boolean_fact(@false).
 ```
 */
 
@@ -38,8 +68,35 @@ use tracing::{error, trace};
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
+///
+/// Contains a set of named [`Relation`]s.
+///
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct Relations(BTreeMap<Predicate, Relation>);
+
+///
+/// A Relation comprises a [label](struct.Predicate.html), a [schema](struct.Schema.html) that
+/// describes the attributes of the relation, and a set of [facts](struct.Fact.html).
+///
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Relation {
+    label: Rc<Predicate>,
+    schema: Schema<Predicate>,
+    facts: HashSet<Fact>,
+}
+
+// ------------------------------------------------------------------------------------------------
+
+///
+/// Schema attributes are named, however schema are used in places where the name may be of a
+/// different type. This trait identifies the minimum set of implementations required for an
+/// attribute name.
+///
 pub trait AttributeName: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord {}
 
+///
+/// A schema is an ordered list of [attribute descriptions](Attribute).
+///
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Schema<T>
 where
@@ -49,6 +106,10 @@ where
     label_index: BTreeMap<T, usize>,
 }
 
+///
+/// An Attribute structure provides the label and [type](AttributeKind) of an attribute
+/// within a relation.
+///
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Attribute<T>
 where
@@ -58,6 +119,10 @@ where
     kind: Option<AttributeKind>,
 }
 
+///
+/// This type allows for an attribute in a schema to be looked up either by its index, or attribute
+/// [label](AttributeName).
+///
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum AttributeIndex<T>
 where
@@ -67,6 +132,9 @@ where
     Index(usize),
 }
 
+///
+/// The currently supported set of types for [attributes](Attribute).
+///
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AttributeKind {
     String,
@@ -76,22 +144,20 @@ pub enum AttributeKind {
 
 // ------------------------------------------------------------------------------------------------
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Relations(BTreeMap<Predicate, Relation>);
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Relation {
-    label: Rc<Predicate>,
-    schema: Schema<Predicate>,
-    facts: HashSet<Fact>,
-}
-
+///
+/// A fact is a _ground atom_ and comprises an ordered list of [`Constant`] values within
+/// a [`Relation`]. The arity and types for the values **must** comply with the
+/// relation's schema. The label of a fact **must** be the same as the label of it's relation.
+///  
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Fact {
     label: Rc<Predicate>,
     values: Vec<Constant>,
 }
 
+///
+/// A constant value, with variants matching those in [AttributeKind](AttributeKind).
+///
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Constant {
     String(String),
@@ -99,6 +165,13 @@ pub enum Constant {
     Boolean(bool),
 }
 
+///
+/// A predicate is a value from the set $\small \mathcal{P}$ and labels [relations](struct.Relation.html),
+/// and [atoms](../idb/Atom), and [facts](struct.Fact.html) associated with relations.
+///
+/// A predicate must start with a Unicode **lower** case letter, followed by any Unicode cased letter or
+/// Unicode decimal digit, or the `'_'` underscore character.
+///
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Predicate(String);
 
@@ -166,6 +239,8 @@ where
         }
     }
 
+    // --------------------------------------------------------------------------------------------
+
     pub fn is_empty(&self) -> bool {
         self.attributes.is_empty()
     }
@@ -173,6 +248,8 @@ where
     pub fn arity(&self) -> usize {
         self.attributes.len()
     }
+
+    // --------------------------------------------------------------------------------------------
 
     pub fn iter(&self) -> impl Iterator<Item = &Attribute<T>> {
         self.attributes.iter()
@@ -198,6 +275,8 @@ where
             AttributeIndex::Index(i) => self.attributes.get(i),
         }
     }
+
+    // --------------------------------------------------------------------------------------------
 
     pub fn labels(&self) -> impl Iterator<Item = &T> {
         self.label_index.keys()
@@ -228,6 +307,8 @@ where
     pub fn label_to_index(&self, n: &T) -> Option<usize> {
         self.label_index.get(n).copied()
     }
+
+    // --------------------------------------------------------------------------------------------
 
     pub fn conforms(&mut self, row: &[Constant]) -> bool {
         row.len() == self.arity()

@@ -2,9 +2,31 @@
 
 Another Simplistic Datalog Implementation (in Rust).
 
-TBD
 
-# Examples
+![MIT License](https://img.shields.io/badge/license-mit-118811.svg)
+![Minimum Rust Version](https://img.shields.io/badge/Min%20Rust-1.53-green.svg)
+[![crates.io](https://img.shields.io/crates/v/asdi.svg)](https://crates.io/crates/asdi)
+[![docs.rs](https://docs.rs/asdi/badge.svg)](https://docs.rs/asdi)
+![Build](https://github.com/johnstonskj/rust-asdi/workflows/Rust/badge.svg)
+![Audit](https://github.com/johnstonskj/rust-asdi/workflows/Security%20audit/badge.svg)
+[![GitHub stars](https://img.shields.io/github/stars/johnstonskj/rust-asdi.svg)](https://github.com/johnstonskj/rust-asdi/stargazers)
+
+This package provides a data model to represent [Datalog](https://en.wikipedia.org/wiki/Datalog)
+programs in memory, a parser for the textual representation, and some evaluation implementations.
+
+The text representation parser is a separate feature, so if you only need to construct and evaluate
+programs using the API you may opt out of the [Pest](https://pest.rs) parser and support.
+
+# Status
+
+1. Library **API** mostly stable, but minimal, will try and make the construction API more ergonomic.
+2. Library **Documentation** good top-level documentation but very little else right now.
+3. Library **validation checking** basic checking, but some is done in the parser and needs to be in the library.
+4. **Parser** full support for the core language as well as most pragmas (see next), require more unit tests.
+5. **I/O** nothing implemented, need to build out the input for extensional and output for intensional relations.
+6. **Evaluation** current evaluator is basically top-down brute force and does not support any additional language features.
+
+# Example
 
 ```datalog
 parent(xerces, brooke).
@@ -17,24 +39,33 @@ ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
 ```
 
 ```rust
-{
+use asdi::edb::{Attribute, Predicate};
+use asdi::idb::{Atom, Query, Term, Variable};
+use asdi::Program;
+use std::str::FromStr;
+
+fn ancestor_example() {
+    // See https://en.wikipedia.org/wiki/Datalog
+
     let mut ancestors = Program::default();
 
-    let mut parent = ancestors
-        .make_new_relation(
-            Predicate::from_str("parent").unwrap(),
-            [AttributeKind::String, AttributeKind::String],
-        )
-        .unwrap();
-    parent.add(["xerces".into(), "brooke".into()]);
-    parent.add(["brooke".into(), "damocles".into()]);
+    let parent_predicate = Predicate::from_str("parent").unwrap();
+    {
+        let parent = ancestors
+            .add_new_relation(
+                parent_predicate.clone(),
+                vec![Attribute::string(), Attribute::string()],
+            )
+            .unwrap();
+        parent
+            .add_as_fact(["xerces".into(), "brooke".into()])
+            .unwrap();
+        parent
+            .add_as_fact(["brooke".into(), "damocles".into()])
+            .unwrap();
+    };
 
-    let ancestor = ancestors
-        .make_new_relation(
-            Predicate::from_str("ancestor").unwrap(),
-            [AttributeKind::String, AttributeKind::String],
-        )
-        .unwrap();
+    let ancestor_predicate = Predicate::from_str("ancestor").unwrap();
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
     let var_y: Term = Variable::from_str("Y").unwrap().into();
@@ -42,27 +73,42 @@ ancestor(X, Y) ⟵ parent(X, Z) ⋀ parent(Z, Y).
 
     ancestors
         .add_new_rule(
-            ancestor.predicate().clone(),
+            ancestor_predicate.clone(),
             [var_x.clone(), var_y.clone()],
-            [Atom::new(parent.predicate().clone(), [var_x.clone(), var_y.clone()]).into()],
+            [Atom::new(parent_predicate.clone(), [var_x.clone(), var_y.clone()]).into()],
         )
         .unwrap();
     ancestors
         .add_new_rule(
-            ancestor.predicate().clone(),
+            ancestor_predicate.clone(),
             [var_x.clone(), var_y.clone()],
             [
-                Atom::new(parent.predicate().clone(), [var_x.clone(), var_z.clone()]).into(),
-                Atom::new(ancestor.predicate().clone(), [var_z, var_y]).into(),
+                Atom::new(parent_predicate, [var_x.clone(), var_z.clone()]).into(),
+                Atom::new(ancestor_predicate.clone(), [var_z, var_y]).into(),
             ],
         )
         .unwrap();
 
     ancestors
-        .add_new_query(ancestor.predicate().clone(), ["xerces".into(), var_x])
+        .add_new_query(ancestor_predicate, ["xerces".into(), var_x])
         .unwrap();
 
-    ancestors.add_relation(parent);
-    ancestors.add_relation(ancestor);
+    println!(">{}<", ancestors);
 }
 ```
+
+## Changes
+
+**Version 0.2.0**
+
+* New internal structures and library layout.
+* Less cloning, but still too much.
+* Finished top-level documentation, more to come. 
+
+**Version 0.1.0**
+
+* Not published, used for own verification only.
+
+**Version 0.1.0-dev**
+
+* Initial release, mostly to verify CI infrastructure through to crates.io
