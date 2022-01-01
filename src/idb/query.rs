@@ -1,39 +1,3 @@
-// # Query Forms
-//
-// **Natural join** ($\Join$) is a binary operator that is written as $R \Join S$ where $R$ and $S$ are
-// relations. The result of the natural join is the set of all combinations of tuples in $R$
-// and $S$ that are equal on their common attribute names.
-//
-// **Projection** ($\Pi$) is a unary operation written as
-// $\Pi_{a_{1},\ldots ,a_{n}}(R)$ where $a_{1},\ldots ,a_{n}$ is a set of attribute names. The
-// result of such projection is defined as the set that is obtained when all tuples in $R$ are
-// restricted to the set $\lbrace a_{1},\ldots ,a_{n}\rbrace$.
-//
-// > Note: when implemented in SQL standard the "default projection" returns a multiset instead
-// > of a set, and the $\Pi$ projection to eliminate duplicate data is obtained by the addition
-// > of the `DISTINCT` keyword.
-//
-// **Generalized Selection** ($\sigma$) is a unary operation written as
-// $\sigma_{\varphi}(R)$ where $\varphi$ is a propositional formula that consists
-// of atoms as allowed in the normal selection and the logical operators $\land$ (and), $\lor$
-// (or) and $\lnot$ (negation). This selection selects all those tuples in $R$ for which $\varphi$
-// holds.
-//
-// Although relational algebra seems powerful enough for most practical purposes, there are some
-// simple and natural operators on relations that cannot be expressed by relational algebra.
-// One of them is the transitive closure of a binary relation. Given a domain $D$, let binary
-// relation $R$ be a subset of $D\times D$. The transitive closure $R^{+}$ of $R$ is the smallest
-// subset of $D\times D$ that contains $R$ and satisfies the following condition:
-//
-// $$\forall x\forall y\forall z\left((x,y)\in R^{+}\land (y,z)\in R^{+}\Rightarrow (x,z)\in R^{+}\right)$$
-//
-// In Datalog
-//
-// ```datalog
-// r_plus(X, Z) :- r(X, Y), r_plus(Y, Z).
-// ```
-//
-
 use crate::edb::{Attribute, AttributeIndex, AttributeKind, Constant, Fact, Predicate, Schema};
 use crate::error::Result;
 use crate::idb::Term;

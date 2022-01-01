@@ -53,6 +53,112 @@ ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Y) ⟵ parent(X, Z), ancestor(Z, Y).
 ```
 
+# Datalog and Set Operations
+
+The semantics of $\small\text{Datalog}$ relations are primarily set based we would expect common
+set operations to work in $\small\text{Datalog}$ rules. Given the relations R, $\small r(a,b,d)$,
+and S, $\small s(d,e,f)$, we can easily describe the common set operations.
+
+**Union**, or the operation $\small R \cup S$, can be demonstrated as:
+
+```datalog
+union(X, Y, Z) :- r(X, Y, Z).
+union(X, Y, Z) :- s(X, Y, Z).
+```
+
+**Intersection**, or the operation $\small R \cap S$, can be demonstrated as:
+
+```datalog
+intersection(X,Y,Z) :- r(X,Y,Z) AND s(X,Y,Z).
+```
+
+**Difference**, or the operation $\small R \setminus S$, cannot be implemented in $\small\text{Datalog}$
+as it required negation. In $\small\text{Datalog}^{\lnot}$ it may be demonstrated as:
+
+```datalog
+difference(X,Y,Z) :- r(X,Y,Z) AND NOT s(X,Y,Z).
+```
+
+# Datalog and Relational Queries
+
+Every expression in the _basic_ relational algebra can be expressed as a $\small\text{Datalog}$
+query. However, operations in the extended relational algebra (grouping, aggregation, and sorting)
+have no corresponding capability in $\small\text{Datalog}$. Similarly, $\small\text{Datalog}$ can
+express recursion, which the relational algebra cannot.
+
+The following describes the relational operations and their $\small\text{Datalog}$ equivalent.
+
+**Natural join** ($\small\Join$) is a binary operator that is written as $\small R \Join S$ where $\small R$ and $\small S$ are
+relations. The result of the natural join is the set of all combinations of tuples in $\small R$
+and $\small S$ that are equal on their common attribute names.
+
+For example, the natural join $\small j = R \Join_{r_1=s_1 \land r_2=s_2} S$, a join on the first two
+attributes or R and S, can be expressed in $\small\text{Datalog}$ as follows.
+
+```datalog
+j(X,Y,Z,Q) :- r(X,Y,Z) AND s(X,Y,Q).
+```
+
+**Projection** ($\small\Pi$) is a unary operation written as
+$\small\Pi_{a_{1},\ldots ,a_{n}}(R)$ where $a_{1},\ldots ,a_{n}$ is a set of attribute names. The
+result of such projection is defined as the set that is obtained when all tuples in $R$ are
+restricted to the set $\small\lbrace a_{1},\ldots ,a_{n}\rbrace$.
+
+For example, the projection $\small p = \Pi_{r_1} \(R\)$, a projection of the first attribute in R only,
+can be expressed in $\small\text{Datalog}$ as either of the following equivalent rules.
+
+```datalog
+p(X) :- r(X, Y, Z).
+p(X) :- r(X, _, _).
+```
+
+**Generalized Selection** ($\small\sigma$) is a unary operation written as
+$\small\sigma_{\varphi}(R)$ where $\small\varphi$ is a propositional formula that consists
+of atoms as allowed in the normal selection and the logical operators $\land$ (and), $\lor$
+(or) and $\small\lnot$ (negation). This selection selects all those tuples in $R$ for which $\small\varphi$
+holds.
+
+Generalized selection requires arithmetic literals and therefore the language $\small\text{Datalog}^{=}$.
+In $\small\text{Datalog}^{=}$ the selection $\small\sigma_{r_1>100 \land r_2=‘something’} \(R\)$ can be
+expressed as follows, where both rules are equivalent.
+
+```datalog
+less_than_something(X, Y, Z) :- r(X, Y, Z) AND X > 100 AND Y = something.
+less_than_something(X, Y, Z) :- r(X, Y, something) AND X > 100.
+```
+
+More complex examples can the be made from combining relational operators. The relational
+query $\small a = \Pi_{r_1}\(\sigma_{r_2 = 3} \(R\) \)$ becomes
+
+```datalog
+a(X) :- r(X, 3, _).
+```
+
+Similarly, the relational query $\small a = \Pi_{r_1}\(\sigma_{r_2 = 3} \(R\) \Join_{r_1=s_1 \land r_2=s_2}\sigma_{s_2 = 5} \(S\)\)$
+becomes
+
+```datalog
+a(X) :- r(X, 3, _) AND s(X, 5, _).
+```
+
+Although relational algebra seems powerful enough for most practical purposes, there are some
+simple and natural operators on relations that cannot be expressed by relational algebra.
+One of them is the transitive closure of a binary relation. Given a domain $\small D$, let binary
+relation $\small R$, $\small \text{Datalog } r(x, y)$, be a subset of $\small D\times D$. The transitive closure $\small R^{+}$ of $R$ is the smallest
+subset of $\small D\times D$ that contains $R$ and satisfies the following condition:
+
+$$\small\forall x\forall y\forall z\left((x,y)\in R^{+}\land (y,z)\in R^{+}\Rightarrow (x,z)\in R^{+}\right)$$
+
+In Datalog this form of recursion is naturally expressed, as follows.
+
+```datalog
+r_plus(X, Z) :- r(X, Y), r_plus(Y, Z).
+```
+
+_Acknowledgements_. Examples in this section are taken from [_Introduction to Data Management CSE 344, Lecture 10:
+Datalog_](https://courses.cs.washington.edu/courses/cse344/12au/lectures/lecture10-datalog.pdf),
+Magda Balazinska, Fall 2012. Definitions for the relational algebra are taken from
+[_Relational algebra_](https://en.wikipedia.org/wiki/Relational_algebra), Wikipedia, fetched January 2022.
 */
 
 use crate::edb::{AttributeName, Constant};
