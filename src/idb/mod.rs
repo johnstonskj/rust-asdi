@@ -134,7 +134,7 @@ query $\small a = \Pi_{r_1}\(\sigma_{r_2 = 3} \(R\) \)$ becomes
 a(X) :- r(X, 3, _).
 ```
 
-Similarly, the relational query $\small a = \Pi_{r_1}\(\sigma_{r_2 = 3} \(R\) \Join_{r_1=s_1 \land r_2=s_2}\sigma_{s_2 = 5} \(S\)\)$
+Similarly, the relational query $\small a = \Pi_{r_1}\(\sigma_{r_2 = 3} \(R\) \Join_{r_1=s_1}\sigma_{s_2 = 5} \(S\)\)$
 becomes
 
 ```datalog
@@ -158,7 +158,10 @@ r_plus(X, Z) :- r(X, Y), r_plus(Y, Z).
 _Acknowledgements_. Examples in this section are taken from [_Introduction to Data Management CSE 344, Lecture 10:
 Datalog_](https://courses.cs.washington.edu/courses/cse344/12au/lectures/lecture10-datalog.pdf),
 Magda Balazinska, Fall 2012. Definitions for the relational algebra are taken from
-[_Relational algebra_](https://en.wikipedia.org/wiki/Relational_algebra), Wikipedia, fetched January 2022.
+[_Relational algebra_](https://en.wikipedia.org/wiki/Relational_algebra), Wikipedia, fetched
+January 2022. The [Relational Algebra Query Converter](http://www.grammaticalframework.org/qconv/qconv-a.html)
+is an interesting way to take a SQL query and convert to relational algebra which can then be
+converted to Datalog using the examples above.
 */
 
 use crate::edb::{AttributeName, Constant};
