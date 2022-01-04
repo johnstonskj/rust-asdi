@@ -1,6 +1,7 @@
 use asdi::edb::Predicate;
 use asdi::idb::{Evaluator, NaiveEvaluator, Query, Variable};
 use asdi::parse::parse_str;
+use asdi::Collection;
 use std::str::FromStr;
 
 #[test]
@@ -21,7 +22,7 @@ mortal(X) <- human(X).
     assert_eq!(
         program
             .extensional()
-            .relation(&Predicate::from_str("human").unwrap())
+            .get(&Predicate::from_str("human").unwrap())
             .unwrap()
             .len(),
         2
@@ -29,7 +30,7 @@ mortal(X) <- human(X).
     assert_eq!(
         program
             .intensional()
-            .relation(&Predicate::from_str("mortal").unwrap())
+            .get(&Predicate::from_str("mortal").unwrap())
             .unwrap()
             .len(),
         0
@@ -48,14 +49,14 @@ mortal(X) <- human(X).
     assert_eq!(
         program
             .extensional()
-            .relation(&Predicate::from_str("human").unwrap())
+            .get(&Predicate::from_str("human").unwrap())
             .unwrap()
             .len(),
         2
     );
     assert_eq!(
         new_intensional
-            .relation(&Predicate::from_str("mortal").unwrap())
+            .get(&Predicate::from_str("mortal").unwrap())
             .unwrap()
             .len(),
         2
@@ -67,7 +68,7 @@ mortal(X) <- human(X).
     let query = program.queries().next().unwrap();
 
     let results = new_intensional.matches(query.as_ref()).unwrap();
-    assert_eq!(results.schema().arity(), 1);
+    assert_eq!(results.schema().len(), 1);
     assert_eq!(results.len(), 1);
 
     print!("{} ==>\n{}", query, results);
@@ -79,7 +80,7 @@ mortal(X) <- human(X).
     );
 
     let results = new_intensional.matches(query.as_ref()).unwrap();
-    assert_eq!(results.schema().arity(), 1);
+    assert_eq!(results.schema().len(), 1);
     assert_eq!(results.len(), 2);
 
     print!("{} ==>\n{}", query, results);
@@ -104,7 +105,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
     assert_eq!(
         program
             .extensional()
-            .relation(&Predicate::from_str("parent").unwrap())
+            .get(&Predicate::from_str("parent").unwrap())
             .unwrap()
             .len(),
         2
@@ -112,7 +113,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
     assert_eq!(
         program
             .intensional()
-            .relation(&Predicate::from_str("ancestor").unwrap())
+            .get(&Predicate::from_str("ancestor").unwrap())
             .unwrap()
             .len(),
         0
@@ -130,7 +131,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
     assert_eq!(
         program
             .extensional()
-            .relation(&Predicate::from_str("parent").unwrap())
+            .get(&Predicate::from_str("parent").unwrap())
             .unwrap()
             .len(),
         2
@@ -138,7 +139,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
     assert_eq!(
         program
             .intensional()
-            .relation(&Predicate::from_str("ancestor").unwrap())
+            .get(&Predicate::from_str("ancestor").unwrap())
             .unwrap()
             .len(),
         3
@@ -150,7 +151,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
     let query = program.queries().next().unwrap();
 
     let results = program.intensional().matches(query.as_ref()).unwrap();
-    assert_eq!(results.schema().arity(), 2);
+    assert_eq!(results.schema().len(), 2);
     assert_eq!(results.len(), 2);
 
     print!("{} ==>\n{}", query, results);
@@ -179,7 +180,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
     assert_eq!(
         program
             .extensional()
-            .relation(&Predicate::from_str("edge").unwrap())
+            .get(&Predicate::from_str("edge").unwrap())
             .unwrap()
             .len(),
         4
@@ -187,7 +188,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
     assert_eq!(
         program
             .intensional()
-            .relation(&Predicate::from_str("path").unwrap())
+            .get(&Predicate::from_str("path").unwrap())
             .unwrap()
             .len(),
         0
@@ -203,14 +204,14 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
     assert_eq!(
         program
             .extensional()
-            .relation(&Predicate::from_str("edge").unwrap())
+            .get(&Predicate::from_str("edge").unwrap())
             .unwrap()
             .len(),
         4
     );
     assert_eq!(
         results
-            .relation(&Predicate::from_str("path").unwrap())
+            .get(&Predicate::from_str("path").unwrap())
             .unwrap()
             .len(),
         16
@@ -222,7 +223,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
     let query = program.queries().next().unwrap();
 
     let results = results.matches(query.as_ref()).unwrap();
-    assert_eq!(results.schema().arity(), 2);
+    assert_eq!(results.schema().len(), 2);
     assert_eq!(results.len(), 16);
 
     print!("{} ==>\n{}", query, results);

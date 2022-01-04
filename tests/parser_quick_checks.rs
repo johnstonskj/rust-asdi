@@ -78,12 +78,12 @@ fn test_parse_one_rule_multiples_and() {
 
 #[test]
 fn test_parse_query_prefixed() {
-    quick_parser_check("?- path(X, Y).", None);
+    quick_parser_check("@infer path(string, string). ?- path(X, Y).", None);
 }
 
 #[test]
 fn test_parse_query_suffixed() {
-    quick_parser_check("path(X, Y)?", None);
+    quick_parser_check("@infer path(string, string). path(X, Y)?", None);
 }
 
 #[test]

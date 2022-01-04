@@ -1,5 +1,6 @@
 use asdi::edb::{Constant, Predicate};
 use asdi::idb::Variable;
+use asdi::AttributeName;
 use proptest::proptest;
 use std::str::FromStr;
 

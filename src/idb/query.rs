@@ -3,6 +3,8 @@ use crate::error::Result;
 use crate::idb::Term;
 use crate::idb::{Atom, Variable};
 use crate::syntax::{CHAR_PERIOD, QUERY_PREFIX_ASCII};
+use crate::{Collection, MaybeLabeled};
+use paste::paste;
 use std::collections::HashSet;
 use std::fmt::{Debug, Display, Formatter};
 use tracing::{error, trace};
@@ -185,24 +187,18 @@ impl View {
             AttributeIndex::Index(i) => Some(*i),
         };
         index.map(|index| {
-            assert!(index < self.schema.arity());
+            assert!(index < self.schema.len());
             index
         })
     }
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn is_empty(&self) -> bool {
-        self.facts.is_empty()
-    }
+    delegate!(is_empty, facts -> bool);
 
-    pub fn len(&self) -> usize {
-        self.facts.len()
-    }
+    delegate!(len, facts -> usize);
 
-    pub fn iter(&self) -> impl Iterator<Item = &Row> {
-        self.facts.iter()
-    }
+    delegate!(iter, facts -> impl Iterator<Item = &Row>);
 
     pub fn add(&mut self, row: Row) -> Result<()> {
         self.facts.insert(row);
@@ -218,14 +214,77 @@ impl View {
         Ok(())
     }
 
+    // --------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
+
+    pub fn join_all<V: Into<Vec<View>>>(views: V) -> Result<Self> {
+        let mut views = views.into();
+        assert!(!views.is_empty());
+        if views.len() == 1 {
+            Ok(views.remove(0))
+        } else {
+            let mut views = views.into_iter();
+            let mut result = views.next().unwrap();
+            for next in views {
+                result = result.join(&next)?;
+            }
+            Ok(result)
+        }
+    }
+
+    pub(crate) fn join(&self, other: &Self) -> Result<Self> {
+        let mut new_table: Self = Self::new(
+            self.schema()
+                .label_union(other.schema())
+                .into_iter()
+                .map(Attribute::from)
+                .collect::<Vec<Attribute<Variable>>>(),
+        );
+        let common_variables = self.schema().label_intersection(other.schema());
+
+        // TODO: infer attribute types for new results!
+        for left_row in self.iter() {
+            for right_row in other.filter(
+                common_variables
+                    .iter()
+                    .map(|(_, left_i, right_i)| (left_row.get(*left_i).unwrap().clone(), *right_i))
+                    .collect(),
+            ) {
+                let mut new_row: Vec<Constant> = Vec::with_capacity(new_table.schema().len());
+                for (i, column) in new_table.schema().iter().enumerate() {
+                    if let Some(index) = self.schema().label_to_index(column.label().unwrap()) {
+                        new_row.insert(i, left_row.get(index).unwrap().clone())
+                    } else if let Some(index) =
+                        other.schema().label_to_index(column.label().unwrap())
+                    {
+                        new_row.insert(i, right_row.get(index).unwrap().clone())
+                    } else {
+                        error!(
+                            "The column {:?} ({}) was found in neither table.",
+                            column, i
+                        );
+                        unreachable!()
+                    }
+                }
+                new_table.add(new_row.into())?;
+            }
+        }
+        Ok(new_table)
+    }
+
+    fn filter(&self, values: Vec<(Constant, usize)>) -> impl Iterator<Item = &Row> {
+        self.iter()
+            .filter(move |row| values.iter().all(|(v, i)| row.get(*i).unwrap() == v))
+    }
+
     // pub(crate) fn contains(&self, fact: &[Constant]) -> bool {
     //     self.facts.contains(fact)
     // }
-
+    //
     // --------------------------------------------------------------------------------------------
     // Query
     // --------------------------------------------------------------------------------------------
-
+    //
     // pub(crate) fn matches(&self, atom: &Atom) -> View {
     //     let terms: Vec<&Term> = atom.terms().collect();
     //     self.match_terms(terms)
@@ -271,13 +330,13 @@ impl View {
     //         None
     //     }
     // }
-
+    //
     // --------------------------------------------------------------------------------------------
-
+    //
     // pub(crate) fn select(&self, _comparisons: &[Comparison]) -> Self {
     //     todo!()
     // }
-
+    //
     // pub(crate) fn select_attributes(&self, attributes: HashSet<AttributeIndex<T>>) -> Self {
     //     let selection: Vec<usize> = attributes
     //         .iter()
@@ -291,7 +350,7 @@ impl View {
     //         .collect();
     //     self.select_attributes_by_index(&selection)
     // }
-
+    //
     // pub(crate) fn select_attributes_by_index(&self, attributes: &[usize]) -> Self {
     //     let schema = Schema::new(
     //         self.schema
@@ -327,7 +386,7 @@ impl View {
     //
     //     Self::new_with_facts(schema, facts)
     // }
-
+    //
     // pub(crate) fn select_only_named(&self) -> Self {
     //     let selection: Vec<usize> = self
     //         .schema
@@ -337,7 +396,7 @@ impl View {
     //         .collect();
     //     self.select_attributes_by_index(&selection)
     // }
-
+    //
     // pub(crate) fn project<A: Into<AttributeIndex<T>>>(&self, attributes: Vec<A>) -> Self {
     //     let attributes: HashSet<usize> = HashSet::from_iter(attributes.into_iter().map(|a| {
     //         let a: AttributeIndex<T> = a.into();
@@ -380,61 +439,6 @@ impl View {
     //             .collect(),
     //     }
     // }
-
-    pub fn join_all<V: Into<Vec<View>>>(views: V) -> Result<Self> {
-        let mut views = views.into();
-        assert!(!views.is_empty());
-        if views.len() == 1 {
-            Ok(views.remove(0))
-        } else {
-            let mut views = views.into_iter();
-            let mut result = views.next().unwrap();
-            for next in views {
-                result = result.join(&next)?;
-            }
-            Ok(result)
-        }
-    }
-
-    pub(crate) fn join(&self, other: &Self) -> Result<Self> {
-        let mut new_table: Self = Self::new(
-            self.schema()
-                .label_union(other.schema())
-                .into_iter()
-                .map(Attribute::from)
-                .collect::<Vec<Attribute<Variable>>>(),
-        );
-        let common_variables = self.schema().label_intersection(other.schema());
-
-        // TODO: infer attribute types for new results!
-        for left_row in self.iter() {
-            for right_row in other.filter(
-                common_variables
-                    .iter()
-                    .map(|(_, left_i, right_i)| (left_row.get(*left_i).unwrap().clone(), *right_i))
-                    .collect(),
-            ) {
-                let mut new_row: Vec<Constant> = Vec::with_capacity(new_table.schema().arity());
-                for (i, column) in new_table.schema().iter().enumerate() {
-                    if let Some(index) = self.schema().label_to_index(column.label().unwrap()) {
-                        new_row.insert(i, left_row.get(index).unwrap().clone())
-                    } else if let Some(index) =
-                        other.schema().label_to_index(column.label().unwrap())
-                    {
-                        new_row.insert(i, right_row.get(index).unwrap().clone())
-                    } else {
-                        error!(
-                            "The column {:?} ({}) was found in neither table.",
-                            column, i
-                        );
-                        unreachable!()
-                    }
-                }
-                new_table.add(new_row.into())?;
-            }
-        }
-        Ok(new_table)
-    }
     //
     // fn remove_anonymous_attributes(&mut self) {
     //     let mut remove: Vec<usize> = self
@@ -470,11 +474,6 @@ impl View {
     //             .collect::<Vec<Attribute<T>>>(),
     //     );
     // }
-
-    fn filter(&self, values: Vec<(Constant, usize)>) -> impl Iterator<Item = &Row> {
-        self.iter()
-            .filter(move |row| values.iter().all(|(v, i)| row.get(*i).unwrap() == v))
-    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -504,13 +503,11 @@ impl From<Fact> for Row {
 }
 
 impl Row {
-    pub fn iter(&self) -> impl Iterator<Item = &Constant> {
-        self.0.iter()
-    }
+    delegate!(is_empty -> bool);
 
-    // fn values(&self) -> &Vec<Constant> {
-    //     &self.0
-    // }
+    delegate!(len -> usize);
+
+    delegate!(iter -> impl Iterator<Item = &Constant>);
 
     pub fn get(&self, index: usize) -> Option<&Constant> {
         self.0.get(index)

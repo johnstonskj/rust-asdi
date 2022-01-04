@@ -76,7 +76,7 @@ allow for same-named attributes whereas a looser form allows duplicate names IFF
 types. Because set intersection is defined in terms of set union and set difference, the two
 relations involved in set intersection must also be union-compatible.
 
-Consider the expression $\small U {:=} R \cup S$, which can be expressed as follows:
+Consider the expression $\small U \coloneqq R \cup S$, which can be expressed as follows:
 
 ```datalog
 u(X, Y, Z) :- r(X, Y, Z).
@@ -89,7 +89,7 @@ Difference is a binary operator that is written as $\small R \setminus S$,
 where $\small R$ and $\small S$ are relations. This cannot be
 implemented in $\small\text{Datalog}$ as it required negation.
 
-Consider the expression $\small D {:=} R \setminus S$ which can be expressed in
+Consider the expression $\small D \coloneqq R \setminus S$ which can be expressed in
 $\small\text{Datalog}^{\lnot}$ as follows:
 
 ```datalog
@@ -101,7 +101,7 @@ d(X,Y,Z) :- r(X,Y,Z) AND NOT s(X,Y,Z).
 Intersection is a binary operator that is written as $\small R \cap S$, where
 $\small R$ and $\small S$ are relations.
 
-Consider the expression $\small I {:=} R \cap S$, which can be expressed as follows:
+Consider the expression $\small I \coloneqq R \cap S$, which can be expressed as follows:
 
 ```datalog
 i(X,Y,Z) :- r(X,Y,Z) AND s(X,Y,Z).
@@ -117,7 +117,7 @@ Cartesian Product is a binary operator that is written as $\small R \times S$,
 where $\small R$ and $\small S$ are relations. In relational algebra it is required that the two
 relations involved must have disjoint headers—that is, they must not have a common attribute name.
 
-The following is a valid expression of $\small P {:=} R \times S$:
+The following is a valid expression of $\small P \coloneqq R \times S$:
 
 ```datalog
 p(A, B, C, D, E, F) :- r(A, B, C) AND s(D, E, F).
@@ -131,7 +131,7 @@ result of such projection is defined as the set that is obtained when all tuples
 restricted to the set $\small\lbrace a_{1},\ldots ,a_{n}\rbrace$. In some literature the lower case
 $\small\pi$ is used instead of $\small\Pi$.
 
-For example, the projection $\small P {:=} \Pi_{X} \(R\)$, a projection of the first attribute in R only,
+For example, the projection $\small P \coloneqq \Pi_{X} \(R\)$, a projection of the first attribute in R only,
 can be expressed in $\small\text{Datalog}$ as either of the following equivalent rules.
 
 ```datalog
@@ -163,7 +163,7 @@ $\small\varphi$ is a propositional formula that consists of conditions as allowe
 and the logical operators $\land$ (and), $\lor$ (or) and $\small\lnot$ (negation). This selection
 selects all those tuples in $\small R$ for which $\small\varphi$ holds.
 
-In $\small\text{Datalog}^{=}$ the selection $\small L {:=} \sigma_{X>100 \land Y=‘something’} \(R\)$
+In $\small\text{Datalog}^{=}$ the selection $\small L \coloneqq \sigma_{X>100 \land Y=‘something’} \(R\)$
 can be expressed as follows, where both rules are equivalent.
 
 ```datalog
@@ -194,7 +194,7 @@ $\small\theta$ expands into a propositional formula in the same manner as $\smal
 there is no notational alignment where a generalized theta join might be signified as
 $\small\Join_{\varphi}$
 
-For example, the natural join $\small J {:=} R \Join_{S.X>100} S$, a join conditional join on an attribute
+For example, the natural join $\small J \coloneqq R \Join_{S.X>100} S$, a join conditional join on an attribute
 in S can be expressed in $\small\text{Datalog}^{=}$ as follows.
 
 ```datalog
@@ -230,13 +230,13 @@ common attributes.
 ## Complex Expressions
 
 More complex examples can the be made from combining relational operators. The relational
-query $\small A {:=} \Pi_{X}\(\sigma_{Y = 3} \(R\) \)$ becomes
+query $\small A \coloneqq \Pi_{X}\(\sigma_{Y = 3} \(R\) \)$ becomes
 
 ```datalog
 a(X) :- r(X, 3, _).
 ```
 
-Similarly, the relational query $\small A {:=} \Pi_{X}\(\sigma_{Y = 3} \(R\) \Join_{R.X=S.X}\sigma_{Y = 5} \(S\)\)$
+Similarly, the relational query $\small A \coloneqq \Pi_{X}\(\sigma_{Y = 3} \(R\) \Join_{R.X=S.X}\sigma_{Y = 5} \(S\)\)$
 becomes
 
 ```datalog
@@ -268,7 +268,7 @@ is an interesting way to take a SQL query and convert to relational algebra whic
 converted to Datalog using the examples above.
 */
 
-use crate::edb::{AttributeName, Constant};
+use crate::edb::{AttributeIndex, Constant, Predicate, Relation};
 use crate::error::{Error, Result, SourceLocation};
 use crate::features::{FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
 use crate::syntax::{
@@ -281,7 +281,11 @@ use crate::syntax::{
     OPERATOR_UNICODE_NOT_EQUAL, TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
     VARIABLE_NAME_IGNORE,
 };
-use crate::{FeatureSet, Predicate, Relation};
+use crate::{
+    AttributeName, Collection, FeatureSet, IndexedCollection, Labeled, MaybeAnonymous, MaybeGround,
+    MaybePositive, SyntaxFragments,
+};
+use paste::paste;
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -313,6 +317,13 @@ pub struct Rule {
     body: Vec<Literal>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum RuleForm {
+    Pure,
+    Constraint,
+    Disjunctive,
+}
+
 // ------------------------------------------------------------------------------------------------
 
 ///
@@ -331,6 +342,48 @@ pub struct Atom {
 /// A literal is either an [relational literal](Atom) or if using the language $\small\text{Datalog}^{=}$
 /// an [arithmetic literal](Comparison). Additionally, if using the language $\small\text{Datalog}^{\lnot}$
 /// a literal may be negated.
+///
+/// # Correspondence Relation ($\global\def\correq{\small\overset{\raisebox{-0.75em}{$\tiny\frown$}}{=}}\correq$)
+///
+/// To perform matching of literals it is important to be able to describe not only the equality
+/// between their terms, but a correspondence between literals that defines whether they match.
+/// We use the $\small \correq$ symbol (Unicode ≘, _corresponds to_, `\u{e28998}`) to denote such a
+/// relationship. For example, the relational literal $\small p\(X\)$ is not equal to
+/// $\small p\(Y\)$, however they may correspond in terms of how they match against existing facts;
+/// as such we can assert that $\small p\(X\) \correq p\(Y\)$.
+///
+/// Correspondence between two relational literals asserts that both share the same predicate, they
+/// have the same arity, and that their terms also correspond.
+///
+/// $$\tag{i}\small l \correq r \coloneqq
+///   label\(l\) = label\(r\) \land
+///   arity\(l\) = arity\(r\) \land
+///   \forall{i} \in \lbrace 1, \ldots, arity\(l\)\rbrace \medspace \( t_{l_i}  \correq t_{r_i} \)$$
+///
+/// $$\tag{ii}\small t_l \correq t_r \coloneqq
+/// \begin{cases}
+///   t_l = t_r, &\text{if } constant\(t_l\) \land constant\(t_r\) \\\\
+///   true, &\text{if } variable\(t_l\) \land variable\(t_r\) \\\\
+///   false, &\text{otherwise}
+/// \end{cases}$$
+///
+/// Given the definitions i and ii, it should be clear that:
+///
+/// $$\small
+/// \begin{alignat*}{3}
+/// & p\(12\) = p\(12\)         \quad && \land   \quad && p\(12\) \correq p\(12\)      \\\\
+/// & p\(12\) \not = p\(21\)    \quad && \land   \quad && p\(12\) \not \correq p\(21\) \\\\
+/// & p\(12\) \not = p\(Y\)     \quad && \land   \quad && p\(12\) \not \correq p\(Y\)  \\\\
+/// & p\(X\) \not = p\(Y\)      \quad && \land   \quad && p\(X\) \correq p\(Y\)        \\\\
+/// & p\(X\) = p\(X\)           \quad && \land   \quad && p\(X\) \correq p\(X\)
+/// \end{alignat*}$$
+///
+/// Correspondence between two arithmetic literals is defined in a similar manner, with the addition
+/// that the operators, $\small\theta$ must be the same.
+///
+/// $$\tag{iii}\small l \correq r \coloneqq
+///   \theta_{l} = \theta_{r} \land
+///   t_{l} \correq t_{r} $$
 ///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Literal {
@@ -414,58 +467,6 @@ pub struct Variable(String);
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
-impl Display for Variable {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl FromStr for Variable {
-    type Err = Error;
-
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        if Self::is_valid(s) {
-            Ok(Self(s.to_owned()))
-        } else {
-            Error::InvalidValue(TYPE_NAME_VARIABLE.to_owned(), s.to_owned()).into()
-        }
-    }
-}
-
-impl AsRef<str> for Variable {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-impl From<Variable> for String {
-    fn from(v: Variable) -> Self {
-        v.0
-    }
-}
-
-impl AttributeName for Variable {}
-
-impl Variable {
-    pub fn anonymous() -> Self {
-        Self(VARIABLE_NAME_IGNORE.to_owned())
-    }
-
-    pub fn is_anonymous(&self) -> bool {
-        self.as_ref() == VARIABLE_NAME_IGNORE
-    }
-
-    pub fn is_valid(s: &str) -> bool {
-        let mut chars = s.chars();
-        s == VARIABLE_NAME_IGNORE
-            || (!s.is_empty())
-                && chars.next().map(|c| c.is_uppercase()).unwrap()
-                && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-
 impl Display for Rules {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for rule in self.iter() {
@@ -475,17 +476,75 @@ impl Display for Rules {
     }
 }
 
-impl Rules {
-    pub fn iter(&self) -> impl Iterator<Item = &Rule> {
-        self.0.iter()
+impl Collection<Rule> for Rules {
+    fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 
+    fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    fn iter(&self) -> Box<dyn Iterator<Item = &'_ Rule> + '_> {
+        Box::new(self.0.iter())
+    }
+
+    fn contains(&self, value: &Rule) -> bool {
+        self.0.contains(value)
+    }
+}
+
+impl Rules {
     pub fn add(&mut self, rule: Rule) {
         self.0.insert(rule);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
+
+impl SyntaxFragments for Rule {
+    fn is_linear(&self) -> bool {
+        self.body.len() == 1
+    }
+
+    fn is_guarded(&self) -> bool {
+        let all_variables = self.variables();
+        self.literals().any(|lit| {
+            let lit_variables: HashSet<&Variable> = HashSet::from_iter(lit.variables().into_iter());
+            lit_variables == all_variables
+        })
+    }
+
+    fn is_frontier_guarded(&self) -> bool {
+        let frontier_variables: HashSet<&Variable> = self
+            .head_variables()
+            .intersection(&self.variables())
+            .copied()
+            .collect();
+        self.literals().any(|lit| {
+            let lit_variables: HashSet<&Variable> = HashSet::from_iter(lit.variables().into_iter());
+            lit_variables == frontier_variables
+        })
+    }
+
+    fn is_non_recursive(&self) -> bool {
+        // TODO: this is only direct recursion, need to check for mutual recursive rules.
+        let head_predicates = self
+            .head()
+            .map(|atom| atom.label())
+            .collect::<Vec<&Predicate>>();
+        !self
+            .literals()
+            .filter_map(|lit| {
+                if let LiteralInner::Atom(atom) = lit.as_ref() {
+                    Some(atom.label())
+                } else {
+                    None
+                }
+            })
+            .any(|predicate| head_predicates.contains(&predicate))
+    }
+}
 
 impl Display for Rule {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -521,39 +580,49 @@ impl Display for Rule {
     }
 }
 
+impl MaybeGround for Rule {
+    fn is_ground(&self) -> bool {
+        self.head().all(|atom| atom.is_ground()) && self.literals().all(|lit| lit.is_ground())
+    }
+}
+
+impl MaybePositive for Rule {
+    fn is_positive(&self) -> bool {
+        self.body.iter().all(Literal::is_positive)
+    }
+}
+
 impl Rule {
-    pub fn new<B: Into<Vec<Literal>>>(head: Atom, body: B) -> Self {
-        let body = body.into();
-        assert!(!body.is_empty());
-        Self {
-            head: vec![head],
-            body,
-        }
-    }
-
-    pub fn new_constraint<B: Into<Vec<Literal>>>(body: B) -> Self {
-        let body = body.into();
-        assert!(!body.is_empty());
-        Self {
-            head: Vec::default(),
-            body,
-        }
-    }
-
-    pub fn new_disjunction<A: Into<Vec<Atom>>, B: Into<Vec<Literal>>>(head: A, body: B) -> Self {
-        let head = head.into();
-        assert!(!head.is_empty());
-        let body = body.into();
-        assert!(!body.is_empty());
-        Self { head, body }
-    }
-
-    pub(crate) fn new_inner<A: Into<Vec<Atom>>, B: Into<Vec<Literal>>>(head: A, body: B) -> Self {
+    pub fn new<A: Into<Vec<Atom>>, B: Into<Vec<Literal>>>(head: A, body: B) -> Self {
         let body = body.into();
         assert!(!body.is_empty());
         Self {
             head: head.into(),
             body,
+        }
+    }
+
+    pub fn new_pure<B: Into<Vec<Literal>>>(head: Atom, body: B) -> Self {
+        Self::new(vec![head], body)
+    }
+
+    pub fn new_constraint<B: Into<Vec<Literal>>>(body: B) -> Self {
+        Self::new(Vec::default(), body)
+    }
+
+    pub fn new_disjunction<A: Into<Vec<Atom>>, B: Into<Vec<Literal>>>(head: A, body: B) -> Self {
+        let head = head.into();
+        assert!(head.len() > 1);
+        Self::new(head, body)
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    pub fn form(&self) -> RuleForm {
+        match self.head.len() {
+            0 => RuleForm::Constraint,
+            1 => RuleForm::Pure,
+            _ => RuleForm::Disjunctive,
         }
     }
 
@@ -563,33 +632,19 @@ impl Rule {
         self.head.iter()
     }
 
-    pub fn is_constraint(&self) -> bool {
-        self.head.is_empty()
-    }
-
-    pub fn is_disjunction(&self) -> bool {
-        self.head.len() > 1
-    }
-
     // --------------------------------------------------------------------------------------------
 
     pub fn has_body(&self) -> bool {
         !self.body.is_empty()
     }
 
-    pub fn push<L: Into<Literal>>(&mut self, literal: L) -> &mut Self {
+    pub fn add<L: Into<Literal>>(&mut self, literal: L) -> &mut Self {
         self.body.push(literal.into());
         self
     }
 
     pub fn extend<V: Into<Vec<Literal>>>(&mut self, literals: V) -> &mut Self {
         self.body.append(&mut literals.into());
-        self
-    }
-
-    pub fn remove<L: Into<Literal>>(&mut self, literal: L) -> &mut Self {
-        let literal = literal.into();
-        self.body.retain(move |p| p != &literal);
         self
     }
 
@@ -607,60 +662,8 @@ impl Rule {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn is_ground(&self) -> bool {
-        self.head().all(|atom| atom.is_ground()) && self.literals().all(|lit| lit.is_ground())
-    }
-
-    pub fn is_positive(&self) -> bool {
-        self.body.iter().all(Literal::is_positive)
-    }
-
-    pub fn is_linear(&self) -> bool {
-        self.body.len() == 1
-    }
-
-    pub fn is_guarded(&self) -> bool {
-        let all_variables = self.variables();
-        self.literals().any(|lit| {
-            let lit_variables: HashSet<&Variable> = HashSet::from_iter(lit.variables().into_iter());
-            lit_variables == all_variables
-        })
-    }
-
-    pub fn is_frontier_guarded(&self) -> bool {
-        let frontier_variables: HashSet<&Variable> = self
-            .head_variables()
-            .intersection(&self.variables())
-            .copied()
-            .collect();
-        self.literals().any(|lit| {
-            let lit_variables: HashSet<&Variable> = HashSet::from_iter(lit.variables().into_iter());
-            lit_variables == frontier_variables
-        })
-    }
-
-    pub fn is_non_recursive(&self) -> bool {
-        // TODO: this is only direct recursion, need to check for mutual recursive rules.
-        let head_predicates = self
-            .head()
-            .map(|atom| atom.label())
-            .collect::<Vec<&Predicate>>();
-        !self
-            .literals()
-            .filter_map(|lit| {
-                if let LiteralInner::Atom(atom) = lit.inner() {
-                    Some(atom.label())
-                } else {
-                    None
-                }
-            })
-            .any(|predicate| head_predicates.contains(&predicate))
-    }
-
-    // --------------------------------------------------------------------------------------------
-
     pub fn distinguished_terms(&self) -> HashSet<&Term> {
-        self.head().map(|atom| atom.terms()).flatten().collect()
+        self.head().map(|atom| atom.iter()).flatten().collect()
     }
 
     pub fn non_distinguished_terms(&self) -> HashSet<&Term> {
@@ -741,12 +744,14 @@ impl Rule {
     ///
     /// A rule is well‐formed iff:
     ///
-    /// 1. all variables that appear in the head also appear in a positive literal in
-    ///    the body of the clause.
-    /// 2. all variables that appear in a negative literal in the body of a clause also appears in some
-    ///    positive literal in the body of the clause.
+    /// 1. It complies with any restrictions implied by the passed set of features.
+    /// 2. It meets the rules for safety, define as:
+    ///    1. all variables that appear in the head also appear in a positive literal in
+    ///       the body of the clause, and
+    ///    2. all variables that appear in a negative literal in the body of a clause also appears
+    ///       in some positive literal in the body of the clause.
     ///
-    pub fn check_well_formed(&self, features: &FeatureSet) -> Result<()> {
+    pub fn well_formed_check(&self, features: &FeatureSet) -> Result<()> {
         let (min, max) = if features.supports(&FEATURE_DISJUNCTION) {
             (1, usize::MAX)
         } else if features.supports(&FEATURE_CONSTRAINTS) {
@@ -772,7 +777,7 @@ impl Rule {
 
         for atom in self.head() {
             let missing: Vec<&Term> = atom
-                .terms()
+                .iter()
                 .into_iter()
                 .filter(|term| {
                     if term.is_variable() {
@@ -836,6 +841,36 @@ impl Display for Atom {
     }
 }
 
+impl Labeled for Atom {
+    fn label(&self) -> &Predicate {
+        &self.label
+    }
+}
+
+impl MaybeGround for Atom {
+    fn is_ground(&self) -> bool {
+        self.terms.iter().all(Term::is_constant)
+    }
+}
+
+impl Collection<Term> for Atom {
+    fn is_empty(&self) -> bool {
+        self.terms.is_empty()
+    }
+
+    fn len(&self) -> usize {
+        self.terms.len()
+    }
+
+    fn iter(&self) -> Box<dyn Iterator<Item = &'_ Term> + '_> {
+        Box::new(self.terms.iter())
+    }
+
+    fn contains(&self, value: &Term) -> bool {
+        self.terms.contains(value)
+    }
+}
+
 impl Atom {
     pub fn new<T: Into<Vec<Term>>>(label: Predicate, terms: T) -> Self {
         let terms = terms.into();
@@ -850,12 +885,18 @@ impl Atom {
     pub fn new_from<T: Into<Vec<Term>>>(relation: &Relation, terms: T) -> Result<Self> {
         let terms = terms.into();
         let schema = relation.schema();
-        assert_eq!(terms.len(), schema.arity());
+        assert_eq!(terms.len(), schema.len());
         for (i, t) in terms.iter().enumerate() {
             if let Term::Constant(c) = t {
-                if c.kind() != schema.get(i).unwrap().kind().unwrap() {
+                if c.kind()
+                    != schema
+                        .get(&AttributeIndex::Index(i))
+                        .unwrap()
+                        .kind()
+                        .unwrap()
+                {
                     return Error::FactDoesNotConformToSchema(
-                        relation.name().clone(),
+                        relation.label().clone(),
                         terms
                             .iter()
                             .map(|t| t.to_string())
@@ -867,7 +908,7 @@ impl Atom {
             }
         }
         Ok(Self {
-            label: relation.name().clone(),
+            label: relation.label().clone(),
             terms,
             src_loc: None,
         })
@@ -883,11 +924,9 @@ impl Atom {
         }
     }
 
-    pub fn label(&self) -> &Predicate {
-        &self.label
-    }
+    // --------------------------------------------------------------------------------------------
 
-    pub fn push<V: Into<Term>>(&mut self, argument: V) -> &mut Self {
+    pub fn add<V: Into<Term>>(&mut self, argument: V) -> &mut Self {
         self.terms.push(argument.into());
         self
     }
@@ -897,20 +936,7 @@ impl Atom {
         self
     }
 
-    pub fn remove<V: Into<Term>>(&mut self, argument: V) -> &mut Self {
-        assert!(self.terms.len() > 1);
-        let argument: Term = argument.into();
-        self.terms.retain(move |p| p != &argument);
-        self
-    }
-
-    pub fn terms(&self) -> impl Iterator<Item = &Term> {
-        self.terms.iter()
-    }
-
-    pub fn arity(&self) -> usize {
-        self.terms.len()
-    }
+    // --------------------------------------------------------------------------------------------
 
     pub fn variables(&self) -> impl Iterator<Item = &Variable> {
         self.terms.iter().filter_map(|t| {
@@ -920,10 +946,6 @@ impl Atom {
                 None
             }
         })
-    }
-
-    pub fn is_ground(&self) -> bool {
-        self.terms.iter().all(Term::is_constant)
     }
 
     pub fn source_location(&self) -> Option<&SourceLocation> {
@@ -960,42 +982,60 @@ impl From<Comparison> for Literal {
     }
 }
 
+impl MaybeGround for Literal {
+    fn is_ground(&self) -> bool {
+        self.inner.is_ground()
+    }
+}
+
+impl MaybePositive for Literal {
+    fn is_positive(&self) -> bool {
+        !self.negative
+    }
+}
+
+impl AsRef<LiteralInner> for Literal {
+    fn as_ref(&self) -> &LiteralInner {
+        &self.inner
+    }
+}
+
 impl Literal {
+    pub fn new(negative: bool, inner: LiteralInner) -> Self {
+        Self { negative, inner }
+    }
+
     pub fn atom(atom: Atom) -> Self {
-        Self {
-            negative: false,
-            inner: atom.into(),
-        }
+        Self::new(false, atom.into())
     }
 
     pub fn negative_atom(atom: Atom) -> Self {
-        Self {
-            negative: true,
-            inner: atom.into(),
-        }
+        Self::new(true, atom.into())
     }
 
     pub fn comparison(comparison: Comparison) -> Self {
-        Self {
-            negative: false,
-            inner: comparison.into(),
-        }
+        Self::new(false, comparison.into())
     }
 
     pub fn negative_comparison(comparison: Comparison) -> Self {
-        Self {
-            negative: true,
-            inner: comparison.into(),
-        }
+        Self::new(true, comparison.into())
     }
 
-    pub fn inner(&self) -> &LiteralInner {
-        &self.inner
-    }
+    // --------------------------------------------------------------------------------------------
+
+    delegate!(is_atom, inner -> bool);
+
+    delegate!(as_atom, inner -> Option<&Atom>);
+
+    delegate!(is_comparison, inner -> bool);
+
+    delegate!(as_comparison, inner -> Option<&Comparison>);
+
+    // --------------------------------------------------------------------------------------------
 
     pub fn terms(&self) -> Vec<&Term> {
         match &self.inner {
-            LiteralInner::Atom(v) => v.terms().collect(),
+            LiteralInner::Atom(v) => v.iter().collect(),
             LiteralInner::Comparison(v) => v.terms(),
         }
     }
@@ -1011,30 +1051,6 @@ impl Literal {
                 }
             })
             .collect()
-    }
-
-    pub fn is_atom(&self) -> bool {
-        self.inner.is_atom()
-    }
-
-    pub fn as_atom(&self) -> Option<&Atom> {
-        self.inner.as_atom()
-    }
-
-    pub fn is_comparison(&self) -> bool {
-        self.inner.is_comparison()
-    }
-
-    pub fn as_comparison(&self) -> Option<&Comparison> {
-        self.inner.as_comparison()
-    }
-
-    pub fn is_positive(&self) -> bool {
-        !self.negative
-    }
-
-    pub fn is_ground(&self) -> bool {
-        self.inner.is_ground()
     }
 }
 
@@ -1065,30 +1081,8 @@ impl From<Comparison> for LiteralInner {
     }
 }
 
-impl LiteralInner {
-    pub fn is_atom(&self) -> bool {
-        matches!(self, LiteralInner::Atom(_))
-    }
-
-    pub fn as_atom(&self) -> Option<&Atom> {
-        match self {
-            LiteralInner::Atom(a) => Some(a),
-            _ => None,
-        }
-    }
-
-    pub fn is_comparison(&self) -> bool {
-        matches!(self, LiteralInner::Comparison(_))
-    }
-
-    pub fn as_comparison(&self) -> Option<&Comparison> {
-        match self {
-            LiteralInner::Comparison(c) => Some(c),
-            _ => None,
-        }
-    }
-
-    pub fn is_ground(&self) -> bool {
+impl MaybeGround for LiteralInner {
+    fn is_ground(&self) -> bool {
         match self {
             LiteralInner::Atom(a) => a.is_ground(),
             LiteralInner::Comparison(c) => c.is_ground(),
@@ -1096,11 +1090,22 @@ impl LiteralInner {
     }
 }
 
+impl LiteralInner {
+    self_is_as!(atom, Atom);
+
+    self_is_as!(comparison, Comparison);
+}
+
 // ------------------------------------------------------------------------------------------------
 
 impl Display for Comparison {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {} {}", self.lhs, self.operator, self.rhs,)
+    }
+}
+impl MaybeGround for Comparison {
+    fn is_ground(&self) -> bool {
+        self.lhs.is_constant() && self.rhs.is_constant()
     }
 }
 
@@ -1137,24 +1142,18 @@ impl Comparison {
         Self::new(left, ComparisonOperator::GreaterThanOrEqual, right)
     }
 
-    pub fn lhs(&self) -> &Term {
-        &self.lhs
-    }
+    // --------------------------------------------------------------------------------------------
 
-    pub fn rhs(&self) -> &Term {
-        &self.rhs
-    }
+    get!(lhs -> Term);
 
-    pub fn operator(&self) -> &ComparisonOperator {
-        &self.operator
-    }
+    get!(rhs -> Term);
+
+    get!(operator -> ComparisonOperator);
+
+    // --------------------------------------------------------------------------------------------
 
     pub fn terms(&self) -> Vec<&Term> {
         vec![&self.lhs, &self.rhs]
-    }
-
-    pub fn is_ground(&self) -> bool {
-        self.lhs.is_constant() && self.rhs.is_constant()
     }
 }
 
@@ -1253,35 +1252,81 @@ impl From<bool> for Term {
     }
 }
 
-impl Term {
-    pub fn is_variable(&self) -> bool {
-        matches!(self, Term::Variable(_))
+impl MaybeAnonymous for Term {
+    fn anonymous() -> Self {
+        Self::Variable(Variable::anonymous())
     }
 
-    pub fn as_variable(&self) -> Option<&Variable> {
-        match self {
-            Term::Variable(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    pub fn is_constant(&self) -> bool {
-        matches!(self, Term::Constant(_))
-    }
-
-    pub fn as_constant(&self) -> Option<&Constant> {
-        match self {
-            Term::Constant(c) => Some(c),
-            _ => None,
-        }
-    }
-
-    pub fn is_ignored(&self) -> bool {
+    fn is_anonymous(&self) -> bool {
         if let Term::Variable(v) = self {
             v.is_anonymous()
         } else {
             false
         }
+    }
+}
+
+impl Term {
+    self_is_as!(variable, Variable);
+
+    self_is_as!(constant, Constant);
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for Variable {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl FromStr for Variable {
+    type Err = Error;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        if Self::is_valid(s) {
+            Ok(Self(s.to_owned()))
+        } else {
+            Error::InvalidValue(TYPE_NAME_VARIABLE.to_owned(), s.to_owned()).into()
+        }
+    }
+}
+
+impl AsRef<str> for Variable {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl From<Variable> for String {
+    fn from(v: Variable) -> Self {
+        v.0
+    }
+}
+
+impl AttributeName for Variable {
+    fn is_valid(s: &str) -> bool {
+        let mut chars = s.chars();
+        s == VARIABLE_NAME_IGNORE
+            || (!s.is_empty())
+                && chars.next().map(|c| c.is_uppercase()).unwrap()
+                && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
+    }
+}
+
+impl MaybeAnonymous for Variable {
+    fn anonymous() -> Self {
+        Self(VARIABLE_NAME_IGNORE.to_owned())
+    }
+
+    fn is_anonymous(&self) -> bool {
+        self.as_ref() == VARIABLE_NAME_IGNORE
+    }
+}
+
+impl Variable {
+    pub(crate) fn from_str_unchecked(s: &str) -> Self {
+        Self(s.to_owned())
     }
 }
 
@@ -1294,7 +1339,7 @@ impl Term {
 // ------------------------------------------------------------------------------------------------
 
 mod eval;
-pub use eval::{naive::NaiveEvaluator, Evaluator};
+pub use eval::{naive::NaiveEvaluator, Evaluator, NoopEvaluator};
 
 mod query;
 pub use query::{Query, Row, View};

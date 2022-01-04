@@ -24,7 +24,9 @@ _italics_ indicates a forward reference to such a concept.
 
 ## Abstract Syntax
 
-**Rules** $\small R$ are built from a language $\small \mathcal{L}=\( \mathcal{C},\mathcal{P},\mathcal{V}\)$
+### Rules
+
+Rules $\small R$ are built from a language $\small \mathcal{L}=\( \mathcal{C},\mathcal{P},\mathcal{V}\)$
 that contains the
 
 1. $\small \mathcal{C}$ -- the finite sets of symbols for all constant values; e.g. `hello`, `"hi"`
@@ -47,13 +49,13 @@ as well as the following properties:
 1. $\small head(r)$ (the consequence), returns the set of _atom_ values $\small A_1, \ldots, A_m$ where $\small m \in \mathbb{N}$,
 2. $\small body(r)$ (the antecedence), returns the set of _literal_ values $\small L_1, \ldots, L_n$ where $\small n \in \mathbb{N}$,
 1. $\small distinguished(r)$ returns the set of _terms_ in the head of a rule,
-   $$\tag{ii}\small distinguished(r) \leftarrow \lbrace t | t \in \bigcup\lbrace terms(a) | a \in head(r) \rbrace \rbrace$$
+   $$\tag{ii}\small distinguished(r) \coloneqq \lbrace t | t \in \bigcup\lbrace terms(a) | a \in head(r) \rbrace \rbrace$$
 1. $\small non\text{-}distinguished(r)$ returns the set of _terms_ in the body that of a rule that are not in the head,
-   $$\tag{iii}\small non\text{-}distinguished(r) \leftarrow \lbrace t | t \in \( \bigcup\lbrace terms(a) | a \in body(r) \rbrace - distinguished(r) \rbrace\)\rbrace$$
+   $$\tag{iii}\small non\text{-}distinguished(r) \coloneqq \lbrace t | t \in \( \bigcup\lbrace terms(a) | a \in body(r) \rbrace - distinguished(r) \rbrace\)\rbrace$$
 3. $\small ground(r)$  returns true if its head and its body are both _ground_:
-   $$\tag{iv}\small ground\(r\) \leftarrow \(\forall{a}\in head\(r\); ground\(a\)\) \land \(\forall{l}\in body\(r\); ground\(l\)\)$$
+   $$\tag{iv}\small ground\(r\) \coloneqq \(\forall{a}\in head\(r\); ground\(a\)\) \land \(\forall{l}\in body\(r\); ground\(l\)\)$$
 4. $\small positive(r)$ returns true if all body _literals_ are _positive_:
-   $$\tag{v}\small positive(r) \leftarrow \(\forall{l}\in body\(r\); positive(l\)\)$$
+   $$\tag{v}\small positive(r) \coloneqq \(\forall{l}\in body\(r\); positive(l\)\)$$
 
 A _pure_ rule is one where there is only a single atom in the head; if the body is true, the head is
 true. A **constraint** rule, or contradiction, does not allow any consequence to be determined from
@@ -61,12 +63,26 @@ evaluation of its body. A **disjunctive** rule is one where there is more than o
 may be true if the body is true. The property $\small form(r)$ returns the form of the rule, based
 on the cardinality of the rule's head as follows:
 
-$$\tag{vi}\small form(r) = \begin{cases} pure, &\text{if } |head\(r\)| = 1 \\\\ constraint, &\text{if } |head\(r\)| = 0 \land \text{Datalog}^{\lnot} \\\\ disjunctive, &\text{if } |head\(r\)| > 1  \land \text{Datalog}^{\lor}\end{cases}$$
+$$\tag{vi}\small
+  form(r) \coloneqq
+  \begin{cases}
+    pure, &\text{if } |head\(r\)| = 1 \\\\
+    constraint, &\text{if } |head\(r\)| = 0 \land \text{Datalog}^{\lnot} \\\\
+    disjunctive, &\text{if } |head\(r\)| > 1  \land \text{Datalog}^{\lor}
+  \end{cases}$$
 
-**Terms**, mentioned above, may be constant values or variables such that
+### Terms
+
+Terms, mentioned above, may be constant values or variables such that
 $\small\mathcal{T}=\mathcal{C}\cup\mathcal{V}\cup\bar{t}$ where $\small\bar{t}$ represents an
-unused or unnamed variable. $\small\bar{t}$ is denoted in the text representation as an underscore
+anonymous variable. $\small\bar{t}$ is denoted in the text representation as an underscore
 `"_"`).
+
+Terms have the following properties:
+
+1. $\small constant\(t\)$ returns true if the term argument is a constant value.
+1. $\small variable\(t\)$ returns true if the term argument is a variable.
+1. $\small anonymous\(t\)$ returns true if the term argument is the anonymous variable, $\small\bar{t}$.
 
 With the definition of rules so far it is possible to write rules that generate an an
 infinite number of results. To avoid such problems Datalog rules are required to satisfy the
@@ -74,32 +90,86 @@ following **Safety** conditions:
 
 1. Every variable that appears in the head of a clause also appears in a positive relational literal
    (atom) in the body of the clause.
-   $$\tag{vii}\small \begin{aligned}\lbrace t | t \in distinguished(r), t \in \mathcal{V} \rbrace - \newline \lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), atom(a), positive(a) \rbrace, t \in \mathcal{V} \rbrace = \empty\end{aligned}$$
+   $$\tag{vii}\small
+   \begin{alignat*}{2}
+     safe\text{-}head\(r\) &\coloneqq &&\lbrace t | t \in distinguished(r), t \in \mathcal{V} \rbrace \\\\
+     &- &&\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), atom(a), positive(a) \rbrace, t \in \mathcal{V} \rbrace \\\\
+     &= &&\empty
+     \end{alignat*}$$
 2. Every variable appearing in a negative literal in the body of a clause also appears in some
    positive relational literal in the body of the clause.
-   $$\tag{viii}\small \begin{aligned}\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), \lnot positive(a) \rbrace, t \in \mathcal{V} \rbrace - \newline \lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), atom(a), positive(a) \rbrace, t \in \mathcal{V} \rbrace = \empty\end{aligned}$$
+   $$\tag{viii}\small
+   \begin{alignat*}{2}
+     safe\text{-}negatives\(r\) &\coloneqq &&\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), \lnot positive\(a\) \rbrace, t \in \mathcal{V} \rbrace \\\\
+     &- &&\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), atom(a), positive(a) \rbrace, t \in \mathcal{V} \rbrace \\\\
+     &= &&\empty
+   \end{alignat*}$$
 
-**Atoms** are comprised of a label, $\small p \in \mathcal{P}$, and a tuple of terms. A set of atoms
-sharing the same label comprise a _relation_ labeled $\small p$. The form of an individual predicate
-is as follows:
+### Atoms
+
+Atoms are comprised of a label, $\small p \in \mathcal{P}$, and a tuple of _terms_. A set of atoms
+form a **Relation** if each _conforms to_ the schema of the relation. The form of an
+individual atom is as follows:
 
 $$\tag{ix}\small p\(t_1, \ldots, t_k\)$$
 
 as well as the following properties:
 
-1. $\small label(a)$ returns the predicate $\small p$,
-1. $\small terms(a)$ returns the tuple of term values $\small t_1, \ldots, t_k$; where
+1. $\small label\(a\)$ returns the predicate $\small p$,
+1. $\small terms\(a\)$ returns the tuple of term values $\small t_1, \ldots, t_k$; where
    $\small t \in \mathcal{T}$ and $\small k \in \mathbb{N}^{+}$,
-1. $\small arity(a)$ returns the cardinality of the relation identified by the predicate;
-   $\small arity(a) \equiv |terms(a)| \equiv k$,
+1. $\small arity\(a\)$ returns the cardinality of the relation identified by the predicate;
+   $\small arity\(a\) \equiv |terms(a)| \equiv k$,
 1. in $\small\text{Datalog}^{\Gamma}$:
    1. there exists a type environment $\small \Gamma$ consisting of one or more types $\small \tau$,
    1. each term $\small t_i$ has a corresponding type  $\small \tau_i$ where $\small \tau \in \Gamma$,
-   1. $\small type(t)$ returns the type $\small \tau$ for that term,
-   1. $\small types(a)$ returns a tuple such that;
+   1. $\small type\(t\)$ returns the type $\small \tau$ for that term,
+   1. $\small types\(a\)$ returns a tuple such that;
       $\small \(i \in \{1, \ldots, arity(a)\} | type(t_i)\)$,
-1. $\small ground(r)$ returns true if its terms are all constants:
-   $$\tag{x}\small ground\(a\) \leftarrow \(\forall{t}\in terms\(a\); t \in \mathcal{C}\)$$
+1. $\small ground(a)$ returns true if its terms are all constants:
+   $$\tag{x}\small ground\(a\) \coloneqq \(\forall{t}\in terms\(a\); t \in \mathcal{C}\)$$
+
+### Relations
+
+Every relation $\small r$ has a schema that describes a set of attributes
+$\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$, and each attribute may be named, and may in
+$\small\text{Datalog}^{\Gamma}$ also have a type.
+
+Relations have the following properties:
+
+1. $\small label\(r\)$ returns the predicate $\small p$,
+1. $\small schema\(r\)$ returns the set of attributes $\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$;
+   where $\small k \in \mathbb{N}^{+}$,
+1. $\small arity\(r\)$ returns the number of attributes in the relation's schema, and therefore all
+   atoms within the relation; $\small arity\(r\) \equiv |schema(a)| \equiv j$.
+
+Attributes have the following properties:
+
+1. $\small label\(\alpha\)$ returns either the predicate label of the attribute, or $\small\bot$.
+1. in $\small\text{Datalog}^{\Gamma}$:
+   1. $\small type\(\alpha\)$ returns a type $\small \tau$ for the attribute, where $\small \tau \in \Gamma$, or $\small\bot$.
+
+The following defines a binary function that determines whether an atom $\small a$ conforms to the
+schema of a relationship $\small r$.
+
+$$\tag{xi}\small
+\begin{alignat*}{2}
+  conforms\(a, r\) &\coloneqq &&ground\(a\) \\\\
+  &\land &&label\(a\) = label\(r\) \\\\
+  &\land &&arity\(a\) = arity\(r\) \\\\
+  &\land &&\forall{i} \in \lbrace 1, \ldots, arity\(r\)\rbrace \medspace conforms\( a_{t_i}, r_{\alpha_i} \)
+\end{alignat*}
+$$
+$$\tag{xii}\small
+  conforms\(t, \alpha\) \coloneqq
+  label\(t\) = label\(\alpha\) \land
+  type\(t\) = type\(\alpha\)
+$$
+
+Note that in relational algebra it is more common to use the term domain $\small D$ to denote a possibly
+infinite set of values. Each attribute on a relation has a domain $\small D_i$ such that each ground
+term is a value $\small d_i$ and the equivalent of $\small \tau_i \in \Gamma$ becomes
+$\small d_i \in D_i$.
 
 To visualize a set of facts in a relational form we take may create a table $p$, where each column,
 or attribute, corresponds to a term index $1 \ldots k$. If the facts are typed then each column
@@ -112,30 +182,43 @@ of term values.
 | $\small \ldots$ | $\small \ldots$        | $\small \ldots$ | $\small \ldots$        |
 | $\small row_y$  | $\small t_{y_1}$       | $\small \ldots$ | $\small t_{y_k}$       |
 
-**Literals** in the body of a rule, represent sub-goals that are the required to be true for the
+### Literals
+
+Literals within the body of a rule, represent sub-goals that are the required to be true for the
 rule's head to be considered true.
 
 1. A literal may be an atom (termed a relational literal) or, in $\small\text{Datalog}^{=}$, a
    conditional expression (termed an arithmetic literal),
-1. a an arithmetic literal has the form $\small \langle t_{lhs} \text{ op } t_{rhs} \rangle$, where
-   1. $\small \text{op } \in \lbrace =, \neq, <, \leq, >, \geq \rbrace$,
+1. a an arithmetic literal has the form $\small \langle t_{lhs} \theta t_{rhs} \rangle$, where
+   1. $\small \theta \in \lbrace =, \neq, <, \leq, >, \geq \rbrace$,
    1. in $\small\text{Datalog}^{\Gamma}$ both $\small t_{lhs}$ and $\small t_{rhs}$ terms have
       corresponding types $\small \tau_{lhs}$ and $\small \tau_{rhs}$,
    1. the types $\small \tau_{lhs}$ and $\small \tau_{rhs}$ **must** be _compatible_, for some
-      system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_{rhs}, \text{op})$,
+      system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_{rhs}, \theta)$,
 1. in $\small\text{Datalog}^{\lnot}$ a literal may be negated, appearing as $\small \lnot l$,
 1. and has the following properties:
-   1. $\small terms(l)$ returns either the set of terms in either the atom or comparison,
-      $$\tag{xi}\small terms(l) = \begin{cases} terms(l), &\text{if } atom(l) \\\\ \lbrace t_{lhs}, t_{rhs} \rbrace, &\text{if } comparison(l) \land \text{Datalog}^{\=}\end{cases}$$
-   1. $\small ground(l)$ returns true if its terms are all constants $\small \(\forall{t}\in terms\(l\); t \in \mathcal{C}\)$,
-   1. $\small positive(l)$ in $\small\text{Datalog}^{\lnot}$ returns false if negated,
+   1. $\small relational\(l\)$ returns true if the literal argument is a relational literal.
+   1. $\small arithmetic\(l\)$ returns true if the literal argument is a arithmetic literal.
+   1. $\small terms\(l\)$ returns either the set of terms in either the atom or comparison,
+      $$\tag{xiii}\small
+        terms(l) \coloneqq
+        \begin{cases}
+          terms(l), &\text{if } atom(l) \\\\
+          \lbrace t_{lhs}, t_{rhs} \rbrace, &\text{if } comparison(l) \land \text{Datalog}^{\=}
+        \end{cases}$$
+   1. $\small ground\(l\)$ returns true if its terms are all constants $\small \(\forall{t}\in terms\(l\); t \in \mathcal{C}\)$,
+   1. $\small positive\(l\)$ in $\small\text{Datalog}^{\lnot}$ returns false if negated,
       otherwise it will always return true.
+
+### Facts
 
 Any ground rule where $\small m=1$ and where $\small n=0$ is termed a **Fact** as it is true by
 nature of having an empty body, or alternatively we may consider the body be comprised of the truth
 value $\small\top$.
 
-$$\tag{xii}\small fact(r) \leftarrow \(ground\(r\) \land form\(r\)=pure \land body\(r\)=\empty\)$$
+$$\tag{xiv}\small fact(r) \coloneqq \(ground\(r\) \land form\(r\)=pure \land body\(r\)=\empty\)$$
+
+### Queries
 
 An atom may be also used as a **Goal** or **Query** clause in that its constant and variable terms
 may be used to match facts from the known facts or those that may be inferred from the set of rules
@@ -150,12 +233,12 @@ The set of rules, and any inferred facts, are termed the **Intensional** databas
 A Datalog **Program** $\small P$ is a tuple comprising the extensional database $\small D_{E}$, the
 intensional database $\small D_{I}$, and a set of queries.
 
-$$\tag{xiii}\small P=\( D_E, D_I, Q \)$$
+$$\tag{xv}\small P=\( D_E, D_I, Q \)$$
 
 This implies, at least, that the set of predicates accessible to queries in the program is the union
 of predicates in the extensional and intensional databases.
 
-$$\tag{xiv}\small \mathcal{P}_P = \mathcal{P}_E \cup \mathcal{P}_I$$
+$$\tag{xvi}\small \mathcal{P}_P = \mathcal{P}_E \cup \mathcal{P}_I$$
 
 It should be obvious that the same exists for constants and variables;
 $\small \mathcal{C}_P = \mathcal{C}_E \cup \mathcal{C}_I$ and
@@ -164,7 +247,7 @@ $\small \mathcal{V}_P = \mathcal{V}_E \cup \mathcal{V}_I$.
 Datalog does not, in general, allow the rules comprising the intensional database to infer new
 values for predicates that exist in the extensional database. This may be expressed as follows:
 
-$$\tag{xv}\small \mathcal{P}_E \cap \mathcal{P}_I = \empty$$
+$$\tag{xvii}\small \mathcal{P}_E \cap \mathcal{P}_I = \empty$$
 
 The same restriction is not required for constants in $\small \mathcal{C}_P$ or variables in
 $\small \mathcal{V}_P$ which should be shared.
@@ -364,7 +447,7 @@ The Unicode characters `≠` (not equal to `\u{2260}`), `≤` (less-than or equa
 All comparison operations **must** be between terms of the some type, such that the property
 _compatible_ introduce above is defined as:
 
-$$\tag{xvi}\small compatible(\tau_{lhs}, \tau_{rhs}, \text{op}) \leftarrow \tau_{lhs} = \tau_{rhs}$$
+$$\tag{xvi}\small compatible(\tau_{lhs}, \tau_{rhs}, \theta) \leftarrow \tau_{lhs} = \tau_{rhs}$$
 
 Additionally, some operators are not present for all types, as shown in the table below.
 
@@ -537,14 +620,14 @@ let mut syllogism = Program::default();
 let p_human = Predicate::from_str("human").unwrap();
 
 let human = syllogism
-    .add_new_relation(p_human.clone(), vec![Attribute::string()])
+    .add_new_extensional_relation(p_human.clone(), vec![Attribute::string()])
     .unwrap();
 human.add_as_fact(["Socrates".into()]).unwrap();
 
 let var_x: Term = Variable::from_str("X").unwrap().into();
 
 syllogism
-    .add_new_rule(
+    .add_new_pure_rule(
         Predicate::from_str("mortal").unwrap(),
         [var_x.clone()],
         [Atom::new(p_human, [var_x]).into()],
@@ -629,9 +712,9 @@ The program will select all matching (in this case all) facts from the _mortal_ 
 use crate::edb::{Attribute, Predicate, Relation, Relations, Schema};
 use crate::error::{Error, Result};
 use crate::features::FeatureSet;
-use crate::idb::{Atom, Literal, Query, Rule, Rules, Term, Variable, View};
+use crate::idb::{Atom, Evaluator, Literal, Query, Rule, Rules, Term, Variable, View};
 use std::collections::HashSet;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -648,6 +731,163 @@ pub struct Program {
     infer: Relations,
     rules: Rules,
     queries: HashSet<Query>,
+}
+
+///
+/// All collections of things in the library implement these basic methods.
+///
+pub trait Collection<T> {
+    fn is_empty(&self) -> bool;
+
+    fn len(&self) -> usize;
+
+    fn iter(&self) -> Box<dyn Iterator<Item = &'_ T> + '_>;
+
+    fn contains(&self, value: &T) -> bool;
+}
+
+///
+/// All mutable collections of things in the library implement these basic methods.
+///
+pub trait MutableCollection<T>: Collection<T> {
+    fn iter_mut(&mut self) -> Box<dyn Iterator<Item = &'_ mut T> + '_>;
+
+    fn add(&mut self, new: T) -> Result<()>;
+}
+
+///
+/// All indexed collections of things in the library implement these basic methods.
+///
+pub trait IndexedCollection<K, V>: Collection<V> {
+    fn get(&self, index: &K) -> Option<&V>;
+
+    fn contains_index(&self, index: &K) -> bool;
+}
+
+///
+/// All mutable, indexed, collections of things in the library implement these basic methods.
+///
+pub trait MutableIndexedCollection<K, V>: IndexedCollection<K, V> {
+    fn get_mut<I: Into<K>>(&mut self, index: I) -> Option<&mut V>;
+
+    fn insert<I: Into<K>>(&mut self, index: I, value: V) -> Result<()>;
+}
+
+///
+/// Attributes, the members of [Schema] are named using different types in [Relation]s and [View]s.
+/// This trait identifies the minimum set of implementations required for an attribute name.
+///
+pub trait AttributeName: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord {
+    ///
+    /// Return `true` if the string `s` is a valid value for the implementing type, else `false`.
+    ///
+    fn is_valid(s: &str) -> bool;
+}
+
+///
+/// Implemented by types that have, for sure, a label. This type is mutually exclusive with
+/// [MaybeLabeled].
+///
+pub trait Labeled {
+    ///
+    /// Return the label associated with this value.
+    ///
+    fn label(&self) -> &Predicate;
+}
+
+///
+/// Implemented by types that have the notion of an anonymous value.
+///
+pub trait MaybeAnonymous {
+    ///
+    /// Construct a new anonymous instance.
+    ///
+    fn anonymous() -> Self
+    where
+        Self: Sized;
+
+    ///
+    /// Return `true` if this value is anonymous, else `false`.
+    ///
+    fn is_anonymous(&self) -> bool;
+}
+
+///
+/// Implemented by types that may have a label; note that this infers the existence of an
+/// anonymous value used when an instance has no label.
+///
+pub trait MaybeLabeled<T: AttributeName>: MaybeAnonymous {
+    ///
+    /// Returns this value's label, or `None` if anonymous.
+    ///
+    fn label(&self) -> Option<&T>;
+
+    ///
+    /// Returns `true` if this value has a label, else `false`.
+    ///
+    fn is_labeled(&self) -> bool {
+        !self.is_anonymous()
+    }
+}
+
+///
+/// Implemented by elements of the IDB that need to distinguish between values containing only
+/// constants and those that contain at least one variable.
+///
+pub trait MaybeGround {
+    ///
+    /// Returns `true` if this value is ground; defined as containing only constant values, else
+    /// `false`.
+    ///
+    fn is_ground(&self) -> bool;
+}
+
+///
+/// Implemented by types that need to distinguished between values that may contain negative literals.
+///
+pub trait MaybePositive {
+    ///
+    /// Returns `true` if this value is positive, else `false`.
+    ///
+    fn is_positive(&self) -> bool;
+
+    ///
+    /// Returns `true` if this value is negative, else `false`.
+    ///
+    fn is_negative(&self) -> bool {
+        !self.is_positive()
+    }
+}
+
+///
+/// Commonly used properties of programs and rules.
+///
+pub trait SyntaxFragments {
+    ///
+    /// Linear $\small\text{Datalog}$ is defined where rule bodies must consist of a single atom.
+    ///
+    /// $$\tag{i}\small linear\(r\) \coloneqq |body\(r\)| = 1 \land \forall l \in body\(r\)\medspace \(atom\(l\)\)$$
+    ///
+    fn is_linear(&self) -> bool;
+
+    ///
+    /// Guarded $\small\text{Datalog}$ is defined where for every rule, all the variables that occur
+    /// in the rule bodies must occur together in at least one atom, called a guard atom.
+    ///
+    fn is_guarded(&self) -> bool;
+
+    ///
+    /// Frontier-Guarded $\small\text{Datalog}$ is defined where for every rule, all the variables
+    /// that are shared between the rule body and the rule head (called the frontier variables) must
+    /// all occur together in a guard atom.
+    ///
+    fn is_frontier_guarded(&self) -> bool;
+
+    ///
+    /// Non-Recursive $\small\text{Datalog}$ is defined by disallowing recursion in the definition
+    /// of programs, and therefore rules.
+    ///
+    fn is_non_recursive(&self) -> bool;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -696,6 +936,30 @@ impl Display for Program {
     }
 }
 
+impl MaybePositive for Program {
+    fn is_positive(&self) -> bool {
+        self.rules().iter().all(|rule| rule.is_positive())
+    }
+}
+
+impl SyntaxFragments for Program {
+    fn is_linear(&self) -> bool {
+        self.rules().iter().all(|rule| rule.is_linear())
+    }
+
+    fn is_guarded(&self) -> bool {
+        self.rules().iter().all(|rule| rule.is_guarded())
+    }
+
+    fn is_frontier_guarded(&self) -> bool {
+        self.rules().iter().all(|rule| rule.is_frontier_guarded())
+    }
+
+    fn is_non_recursive(&self) -> bool {
+        self.rules().iter().all(|rule| rule.is_non_recursive())
+    }
+}
+
 impl Program {
     pub fn new_with_features(features: FeatureSet) -> Self {
         Self {
@@ -709,6 +973,9 @@ impl Program {
 
     // --------------------------------------------------------------------------------------------
 
+    ///
+    /// Returns the set of features currently supported by this program.
+    ///
     pub fn features(&self) -> &FeatureSet {
         &self.features
     }
@@ -719,73 +986,117 @@ impl Program {
 
     // --------------------------------------------------------------------------------------------
 
+    ///
+    /// Returns the current set of extensional relations.
+    ///
     pub fn extensional(&self) -> &Relations {
         &self.asserted
     }
 
+    ///
+    /// Returns the current set of extensional relations in a mutable state.
+    ///
     pub fn extensional_mut(&mut self) -> &mut Relations {
         &mut self.asserted
     }
 
-    pub fn add_relation(&mut self, relation: Relation) {
-        self.extensional_mut().add(relation)
-    }
-
-    pub fn add_new_relation<V: Into<Schema<Predicate>>>(
+    ///
+    /// Add a new relation to the extensional database with the given `label` and `schema`.
+    ///
+    pub fn add_new_extensional_relation<V: Into<Schema<Predicate>>>(
         &mut self,
-        predicate: Predicate,
+        label: Predicate,
         schema: V,
     ) -> Result<&mut Relation> {
         self.extensional_mut()
-            .add_new_relation(predicate, schema.into())
+            .add_new_relation(label, schema.into())
+    }
+
+    ///
+    /// Add the provided `relation` to the extensional database.
+    ///
+    pub fn add_extensional_relation(&mut self, relation: Relation) {
+        self.extensional_mut().add(relation)
     }
 
     // --------------------------------------------------------------------------------------------
 
+    ///
+    /// Returns the current set of intensional relations.
+    ///
     pub fn intensional(&self) -> &Relations {
         &self.infer
     }
 
+    ///
+    /// Returns the current set of intensional relations in a mutable state.
+    ///
     pub fn intensional_mut(&mut self) -> &mut Relations {
         &mut self.infer
     }
 
-    /// intensional predicate symbols
+    ///
+    /// Add a new relation to the intensional database with the given `label` and `schema`.
+    ///
+    pub fn add_new_intensional_relation<V: Into<Schema<Predicate>>>(
+        &mut self,
+        label: Predicate,
+        schema: V,
+    ) -> Result<&mut Relation> {
+        self.intensional_mut()
+            .add_new_relation(label, schema.into())
+    }
+
+    ///
+    /// Add the provided `relation` to the intensional database.
+    ///
+    pub fn add_intensional_relation(&mut self, relation: Relation) {
+        self.intensional_mut().add(relation)
+    }
+
+    ///
+    /// Return an iterator over the rules in the intensional database.
+    ///
     pub fn rules(&self) -> &Rules {
         &self.rules
     }
 
-    pub fn make_new_rule<H: Into<Vec<Term>>, B: Into<Vec<Literal>>>(
-        &self,
-        head_predicate: Predicate,
-        head_terms: H,
-        body: B,
-    ) -> Result<Rule> {
-        Ok(Rule::new(Atom::new(head_predicate, head_terms), body))
-    }
+    //
+    // Note: there is no `rules_mut` as we cannot allow clients to add rules without going through
+    // the program so that we can ensure schema updates.
 
-    pub fn add_new_rule<H: Into<Vec<Term>>, B: Into<Vec<Literal>>>(
+    ///
+    /// Add a new _pure_ rule to the intensional database with the given head label and terms as
+    /// well as the list of body literals.
+    ///
+    pub fn add_new_pure_rule<H: Into<Vec<Term>>, B: Into<Vec<Literal>>>(
         &mut self,
-        head_predicate: Predicate,
+        head_label: Predicate,
         head_terms: H,
         body: B,
     ) -> Result<()> {
-        let rule = self.make_new_rule(head_predicate, head_terms, body)?;
+        let rule = Rule::new_pure(Atom::new(head_label, head_terms), body);
         self.add_rule(rule)
     }
 
+    ///
+    /// Add the provided `rule` to the intensional database.
+    ///
     pub fn add_rule(&mut self, rule: Rule) -> Result<()> {
-        rule.check_well_formed(self.features())?;
+        rule.well_formed_check(self.features())?;
 
         for atom in rule.head() {
+            //
+            // Update the database schema based on atoms found in the rule's head.
+            //
             if self.asserted.contains(atom.label()) {
                 return Err(Error::ExtensionalPredicateInRuleHead(
                     atom.label().clone(),
                     atom.source_location().cloned(),
                 ));
             } else if !self.infer.contains(atom.label()) {
-                let mut schema = Vec::with_capacity(atom.arity());
-                for term in atom.terms() {
+                let mut schema = Vec::with_capacity(atom.len());
+                for term in atom.iter() {
                     match term {
                         Term::Variable(v) => schema.push(self.infer_attribute(v, &rule)),
                         Term::Constant(c) => schema.push(Attribute::from(c.kind())),
@@ -796,7 +1107,6 @@ impl Program {
             }
         }
 
-        // TODO: validate?
         self.rules.add(rule);
         Ok(())
     }
@@ -806,7 +1116,7 @@ impl Program {
             .literals()
             .filter_map(Literal::as_atom)
             .filter_map(|a| {
-                a.terms()
+                a.iter()
                     .enumerate()
                     .filter_map(|(i, term)| term.as_variable().map(|var| (i, var)))
                     .find(|(_, var)| var == &variable)
@@ -814,8 +1124,8 @@ impl Program {
             })
             .collect();
         for (predicate, i) in candidates {
-            if let Some(relation) = self.extensional().relation(predicate) {
-                return relation.schema().get(i).unwrap().clone();
+            if let Some(relation) = self.extensional().get(predicate) {
+                return relation.schema().get(&(i.into())).unwrap().clone();
             }
         }
         Attribute::anonymous()
@@ -823,72 +1133,73 @@ impl Program {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn is_positive(&self) -> bool {
-        self.rules().iter().all(|rule| rule.is_positive())
-    }
-
-    pub fn is_linear(&self) -> bool {
-        self.rules().iter().all(|rule| rule.is_linear())
-    }
-
-    pub fn is_guarded(&self) -> bool {
-        self.rules().iter().all(|rule| rule.is_guarded())
-    }
-
-    pub fn is_frontier_guarded(&self) -> bool {
-        self.rules().iter().all(|rule| rule.is_frontier_guarded())
-    }
-
-    pub fn is_non_recursive(&self) -> bool {
-        self.rules().iter().all(|rule| rule.is_non_recursive())
-    }
-
-    // --------------------------------------------------------------------------------------------
-
+    ///
+    /// Return an iterator over the queries in the program.
+    ///
     pub fn queries(&self) -> impl Iterator<Item = &Query> {
         self.queries.iter()
     }
 
-    pub fn make_new_query<T: Into<Vec<Term>>>(
-        &self,
-        predicate: Predicate,
-        terms: T,
-    ) -> Result<Query> {
-        Ok(Query::new(predicate, terms))
-    }
-
+    ///
+    /// Add a new query to the program with the given `label` and `schema`.
+    ///
     pub fn add_new_query<T: Into<Vec<Term>>>(
         &mut self,
-        predicate: Predicate,
+        label: Predicate,
         terms: T,
     ) -> Result<bool> {
-        let query = self.make_new_query(predicate, terms)?;
+        let query = Query::new(label, terms);
         self.add_query(query)
     }
 
+    ///
+    /// Add the provided `query` to the program.
+    ///
     pub fn add_query(&mut self, query: Query) -> Result<bool> {
-        // TODO: validation?
-        Ok(self.queries.insert(query))
+        let predicate = query.as_ref().label();
+        if !self.extensional().contains(predicate) && !self.intensional().contains(predicate) {
+            Err(Error::RelationDoesNotExist(predicate.clone()))
+        } else {
+            Ok(self.queries.insert(query))
+        }
     }
 
+    // --------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
+
+    pub fn run(&mut self, _evaluator: impl Evaluator) -> Result<()> {
+        let new_idb = _evaluator.inference(self)?;
+        println!("{:?}", new_idb);
+        self.intensional_mut().merge(new_idb)?;
+        let results = self.eval_queries();
+        for _result in results {}
+        Ok(())
+    }
+
+    ///
+    /// Evaluate a query against the program's current extensional and intensional databases.
+    ///
     pub fn eval_query(&self, query: &Query) -> Result<Option<View>> {
         Ok(self.extensional().matches(query.as_ref()))
     }
 
+    ///
+    /// Evaluate all the queries in the program against the program's current extensional and
+    /// intensional databases.
+    ///
     pub fn eval_queries(&self) -> Vec<(&Query, Result<Option<View>>)> {
         self.queries().map(|q| (q, self.eval_query(q))).collect()
     }
-
-    // --------------------------------------------------------------------------------------------
-
-    pub fn check_well_formed(&self, _features: &FeatureSet) -> Result<()> {
-        let result: Result<()> = self
-            .rules()
-            .iter()
-            .try_for_each(|r| r.check_well_formed(&self.features));
-        result
-    }
 }
+
+// ------------------------------------------------------------------------------------------------
+// Private Modules
+// ------------------------------------------------------------------------------------------------
+
+#[macro_use]
+mod macros;
+
+mod syntax;
 
 // ------------------------------------------------------------------------------------------------
 // Modules
@@ -911,9 +1222,3 @@ pub mod parse;
 
 #[cfg(feature = "typeset")]
 pub mod typeset;
-
-// ------------------------------------------------------------------------------------------------
-// Private Modules
-// ------------------------------------------------------------------------------------------------
-
-mod syntax;

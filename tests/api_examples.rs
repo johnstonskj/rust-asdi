@@ -15,7 +15,7 @@ fn test_wikipedia_example() {
     let parent_predicate = Predicate::from_str("parent").unwrap();
     {
         let parent = ancestors
-            .add_new_relation(
+            .add_new_extensional_relation(
                 parent_predicate.clone(),
                 vec![Attribute::string(), Attribute::string()],
             )
@@ -35,14 +35,14 @@ fn test_wikipedia_example() {
     let var_z: Term = Variable::from_str("Z").unwrap().into();
 
     ancestors
-        .add_new_rule(
+        .add_new_pure_rule(
             ancestor_predicate.clone(),
             [var_x.clone(), var_y.clone()],
             [Atom::new(parent_predicate.clone(), [var_x.clone(), var_y.clone()]).into()],
         )
         .unwrap();
     ancestors
-        .add_new_rule(
+        .add_new_pure_rule(
             ancestor_predicate.clone(),
             [var_x.clone(), var_y.clone()],
             [
@@ -84,7 +84,7 @@ fn test_sourceforge_example() {
     let edge_predicate = Predicate::from_str("edge").unwrap();
     {
         let edge = graph
-            .add_new_relation(
+            .add_new_extensional_relation(
                 edge_predicate.clone(),
                 vec![Attribute::string(), Attribute::string()],
             )
@@ -102,7 +102,7 @@ fn test_sourceforge_example() {
     let var_z: Term = Variable::from_str("Z").unwrap().into();
 
     graph
-        .add_new_rule(
+        .add_new_pure_rule(
             path_predicate.clone(),
             [var_x.clone(), var_y.clone()],
             [Atom::new(edge_predicate.clone(), [var_x.clone(), var_y.clone()]).into()],
@@ -110,7 +110,7 @@ fn test_sourceforge_example() {
         .unwrap();
 
     graph
-        .add_new_rule(
+        .add_new_pure_rule(
             path_predicate.clone(),
             [var_x.clone(), var_y.clone()],
             [
@@ -152,14 +152,14 @@ fn test_that_syllogism() {
     let p_human = Predicate::from_str("human").unwrap();
 
     let human = syllogism
-        .add_new_relation(p_human.clone(), vec![Attribute::string()])
+        .add_new_extensional_relation(p_human.clone(), vec![Attribute::string()])
         .unwrap();
     human.add_as_fact(["Socrates".into()]).unwrap();
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
 
     syllogism
-        .add_new_rule(
+        .add_new_pure_rule(
             Predicate::from_str("mortal").unwrap(),
             [var_x.clone()],
             [Atom::new(p_human, [var_x]).into()],

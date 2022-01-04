@@ -2,7 +2,7 @@ use crate::edb::Constant;
 use crate::error::{Error, Result};
 use crate::features::{FEATURE_COMPARISONS, FEATURE_NEGATION};
 use crate::idb::{eval::Evaluator, Atom, Term, View};
-use crate::{Program, Relations};
+use crate::{Collection, Labeled, MaybeAnonymous, MaybePositive, Program, Relations};
 use tracing::trace;
 
 // ------------------------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ impl Evaluator for NaiveEvaluator {
         if program.is_positive() {
             let mut new_db = program.intensional().clone_with_schema_only();
             loop {
-                let start = new_db.all_len();
+                let start = new_db.flat_count();
                 for rule in program.rules().iter() {
                     trace!("infer > rule > {}", rule);
 
@@ -90,14 +90,14 @@ impl Evaluator for NaiveEvaluator {
                             let head_predicates = rule.head().collect::<Vec<&Atom>>();
                             assert_eq!(head_predicates.len(), 1);
                             let head = head_predicates.get(0).unwrap();
-                            let relation = new_db.relation_mut(head.label()).unwrap();
+                            let relation = new_db.get_mut(head.label()).unwrap();
                             let new_fact = head
-                                .terms()
+                                .iter()
                                 .map(|term| {
                                     trace!(
                                         "infer > rule > row > joined term {:?} ? {}",
                                         term,
-                                        term.is_ignored()
+                                        term.is_anonymous()
                                     );
                                     match term {
                                         Term::Variable(v) => fact
@@ -112,7 +112,7 @@ impl Evaluator for NaiveEvaluator {
                         }
                     }
                 }
-                if start == new_db.all_len() {
+                if start == new_db.flat_count() {
                     // no more facts were found, so return
                     break;
                 }

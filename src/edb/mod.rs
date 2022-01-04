@@ -57,7 +57,11 @@ use crate::syntax::{
     COLUMN_NAME_UNKNOWN, RESERVED_BOOLEAN_FALSE, RESERVED_BOOLEAN_TRUE, RESERVED_PRAGMA_ASSERT,
     RESERVED_PRAGMA_INFER, RESERVED_PREFIX, TYPE_NAME_PREDICATE,
 };
-use crate::{Term, Variable};
+use crate::{
+    AttributeName, Collection, IndexedCollection, Labeled, MaybeAnonymous, MaybeLabeled, Term,
+    Variable,
+};
+use paste::paste;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
@@ -69,7 +73,7 @@ use tracing::{error, trace};
 // ------------------------------------------------------------------------------------------------
 
 ///
-/// Contains a set of named [`Relation`]s.
+/// A Set-like collection of [`Relation`]s, the collection is indexed by the relation's label.
 ///
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Relations(BTreeMap<Predicate, Relation>);
@@ -86,13 +90,6 @@ pub struct Relation {
 }
 
 // ------------------------------------------------------------------------------------------------
-
-///
-/// Schema attributes are named, however schema are used in places where the name may be of a
-/// different type. This trait identifies the minimum set of implementations required for an
-/// attribute name.
-///
-pub trait AttributeName: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord {}
 
 ///
 /// A schema is an ordered list of [attribute descriptions](Attribute).
@@ -209,6 +206,70 @@ where
     }
 }
 
+impl<T> IntoIterator for Schema<T>
+where
+    T: AttributeName,
+{
+    type Item = Attribute<T>;
+    type IntoIter = std::vec::IntoIter<Attribute<T>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.attributes.into_iter()
+    }
+}
+
+impl<T> FromIterator<Attribute<T>> for Schema<T>
+where
+    T: AttributeName,
+{
+    fn from_iter<I: IntoIterator<Item = Attribute<T>>>(iter: I) -> Self {
+        Self::new(iter.into_iter().collect::<Vec<Attribute<T>>>())
+    }
+}
+
+impl<T> Collection<Attribute<T>> for Schema<T>
+where
+    T: AttributeName,
+{
+    fn is_empty(&self) -> bool {
+        self.attributes.is_empty()
+    }
+
+    fn len(&self) -> usize {
+        self.attributes.len()
+    }
+
+    fn iter(&self) -> Box<dyn Iterator<Item = &'_ Attribute<T>> + '_> {
+        Box::new(self.attributes.iter())
+    }
+
+    fn contains(&self, value: &Attribute<T>) -> bool {
+        self.attributes.contains(value)
+    }
+}
+
+impl<T> IndexedCollection<AttributeIndex<T>, Attribute<T>> for Schema<T>
+where
+    T: AttributeName,
+{
+    fn get(&self, index: &AttributeIndex<T>) -> Option<&Attribute<T>> {
+        match index {
+            AttributeIndex::Label(n) => match self.label_index.get(n) {
+                Some(i) => self.attributes.get(*i),
+                None => None,
+            },
+            AttributeIndex::Index(i) => self.attributes.get(*i),
+        }
+    }
+
+    fn contains_index(&self, index: &AttributeIndex<T>) -> bool {
+        match index {
+            AttributeIndex::Label(n) => self.label_index.get(n).is_some(),
+            AttributeIndex::Index(i) => *i < self.len(),
+        }
+    }
+}
+
 impl<T> Schema<T>
 where
     T: AttributeName,
@@ -241,39 +302,9 @@ where
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn is_empty(&self) -> bool {
-        self.attributes.is_empty()
-    }
-
-    pub fn arity(&self) -> usize {
-        self.attributes.len()
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    pub fn iter(&self) -> impl Iterator<Item = &Attribute<T>> {
-        self.attributes.iter()
-    }
-
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Attribute<T>> {
+    // This does not need to be public at this time.
+    pub(crate) fn iter_mut(&mut self) -> impl Iterator<Item = &mut Attribute<T>> {
         self.attributes.iter_mut()
-    }
-
-    // pub fn contains<I: Into<AttributeIndex<T>>>(&self, index: I) -> bool {
-    //     match index.into() {
-    //         AttributeIndex::Label(n) => self.named_index.contains_key(&n),
-    //         AttributeIndex::Index(i) => i < self.arity(),
-    //     }
-    // }
-
-    pub fn get<I: Into<AttributeIndex<T>>>(&self, index: I) -> Option<&Attribute<T>> {
-        match index.into() {
-            AttributeIndex::Label(n) => match self.label_index.get(&n) {
-                Some(i) => self.attributes.get(*i),
-                None => None,
-            },
-            AttributeIndex::Index(i) => self.attributes.get(i),
-        }
     }
 
     // --------------------------------------------------------------------------------------------
@@ -311,7 +342,7 @@ where
     // --------------------------------------------------------------------------------------------
 
     pub fn conforms(&mut self, row: &[Constant]) -> bool {
-        row.len() == self.arity()
+        row.len() == self.len()
             && row.iter().zip(self.iter()).all(|(v, c)| {
                 if let Some(kind) = c.kind {
                     v.kind() == kind
@@ -349,14 +380,31 @@ where
     }
 }
 
+impl<T> MaybeAnonymous for Attribute<T>
+where
+    T: AttributeName,
+{
+    fn anonymous() -> Self {
+        Self::new_inner(None, None)
+    }
+
+    fn is_anonymous(&self) -> bool {
+        self.label.is_none()
+    }
+}
+impl<T> MaybeLabeled<T> for Attribute<T>
+where
+    T: AttributeName,
+{
+    fn label(&self) -> Option<&T> {
+        self.label.as_ref()
+    }
+}
+
 impl<T> Attribute<T>
 where
     T: AttributeName,
 {
-    pub fn anonymous() -> Self {
-        Self::new_inner(None, None)
-    }
-
     pub fn labeled(name: T) -> Self {
         Self::new_inner(name, None)
     }
@@ -401,14 +449,6 @@ where
             label: name.into(),
             kind: kind.into(),
         }
-    }
-
-    pub fn label(&self) -> Option<&T> {
-        self.label.as_ref()
-    }
-
-    pub fn is_anonymous(&self) -> bool {
-        self.label.is_none()
     }
 
     pub fn kind(&self) -> Option<AttributeKind> {
@@ -474,27 +514,9 @@ impl<T> AttributeIndex<T>
 where
     T: AttributeName,
 {
-    pub fn is_named(&self) -> bool {
-        matches!(self, Self::Label(_))
-    }
+    self_is_as!(named, Label, T);
 
-    pub fn as_name(&self) -> Option<&T> {
-        match self {
-            Self::Label(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    pub fn is_indexed(&self) -> bool {
-        matches!(self, Self::Label(_))
-    }
-
-    pub fn as_index(&self) -> Option<&usize> {
-        match self {
-            Self::Index(v) => Some(v),
-            _ => None,
-        }
-    }
+    self_is_as!(indexed, Index, usize);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -532,33 +554,66 @@ impl From<Constant> for AttributeKind {
     }
 }
 
-impl Relations {
-    pub fn is_empty(&self) -> bool {
+impl<'a> IntoIterator for &'a mut Relations {
+    type Item = (&'a Predicate, &'a mut Relation);
+    type IntoIter = std::collections::btree_map::IterMut<'a, Predicate, Relation>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter_mut()
+    }
+}
+
+impl FromIterator<Relation> for Relations {
+    fn from_iter<T: IntoIterator<Item = Relation>>(iter: T) -> Self {
+        Self(BTreeMap::from_iter(
+            iter.into_iter().map(|r| (r.label().clone(), r)),
+        ))
+    }
+}
+
+impl Collection<Relation> for Relations {
+    fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
-    pub fn len(&self) -> usize {
+    fn len(&self) -> usize {
         self.0.len()
     }
 
-    pub fn all_len(&self) -> usize {
+    fn iter(&self) -> Box<dyn Iterator<Item = &'_ Relation> + '_> {
+        Box::new(self.0.values())
+    }
+
+    fn contains(&self, value: &Relation) -> bool {
+        self.0.values().any(|r| r == value)
+    }
+}
+
+impl IndexedCollection<Predicate, Relation> for Relations {
+    fn get(&self, index: &Predicate) -> Option<&Relation> {
+        self.0.get(index)
+    }
+
+    fn contains_index(&self, index: &Predicate) -> bool {
+        self.0.contains_key(index)
+    }
+}
+
+impl Relations {
+    pub fn flat_count(&self) -> usize {
         self.iter().map(|r| r.len()).sum()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &Relation> {
-        self.0.values()
-    }
-
     pub fn schema(&self) -> impl Iterator<Item = (&Predicate, &Schema<Predicate>)> {
-        self.0.values().map(|r| (r.name(), r.schema()))
+        self.0.values().map(|r| (r.label(), r.schema()))
     }
 
     pub fn add(&mut self, relation: Relation) {
-        if let Some(existing) = self.0.get_mut(relation.name()) {
+        if let Some(existing) = self.0.get_mut(relation.label()) {
             existing.update_schema(&relation);
             existing.extend(relation).unwrap();
         } else {
-            self.0.insert(relation.name().clone(), relation);
+            self.0.insert(relation.label().clone(), relation);
         }
     }
 
@@ -579,7 +634,7 @@ impl Relations {
             let relation = Relation::new(predicate.clone(), schema);
             trace!("add_new_relation < relation: {:?}", relation);
             self.add(relation);
-            Ok(self.relation_mut(&predicate).unwrap())
+            Ok(self.get_mut(&predicate).unwrap())
         }
     }
 
@@ -601,11 +656,11 @@ impl Relations {
         self.0.contains_key(predicate)
     }
 
-    pub fn relation(&self, predicate: &Predicate) -> Option<&Relation> {
+    pub fn get(&self, predicate: &Predicate) -> Option<&Relation> {
         self.0.get(predicate)
     }
 
-    pub fn relation_mut(&mut self, predicate: &Predicate) -> Option<&mut Relation> {
+    pub fn get_mut(&mut self, predicate: &Predicate) -> Option<&mut Relation> {
         self.0.get_mut(predicate)
     }
 
@@ -614,7 +669,7 @@ impl Relations {
             trace!(
                 "matches > predicate: {}, relation: {:?}",
                 atom.label(),
-                relation.name()
+                relation.label()
             );
             let results = relation.matches(atom);
             if atom.variables().count() == 0 {
@@ -655,6 +710,30 @@ impl Relations {
 
 // ------------------------------------------------------------------------------------------------
 
+impl Labeled for Relation {
+    fn label(&self) -> &Predicate {
+        &self.label
+    }
+}
+
+impl Collection<Fact> for Relation {
+    fn is_empty(&self) -> bool {
+        self.facts.is_empty()
+    }
+
+    fn len(&self) -> usize {
+        self.facts.len()
+    }
+
+    fn iter(&self) -> Box<dyn Iterator<Item = &'_ Fact> + '_> {
+        Box::new(self.facts.iter())
+    }
+
+    fn contains(&self, value: &Fact) -> bool {
+        self.facts.contains(value)
+    }
+}
+
 impl Relation {
     pub fn new<V: Into<Schema<Predicate>>>(name: Predicate, schema: V) -> Self {
         Self {
@@ -674,18 +753,12 @@ impl Relation {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn name(&self) -> &Predicate {
-        &self.label
-    }
-
-    // --------------------------------------------------------------------------------------------
-
     pub fn schema(&self) -> &Schema<Predicate> {
         &self.schema
     }
 
     pub(crate) fn update_schema(&mut self, other: &Self) {
-        assert_eq!(self.schema.arity(), other.schema.arity());
+        assert_eq!(self.schema.len(), other.schema.len());
         self.schema
             .iter_mut()
             .zip(other.schema().iter())
@@ -704,18 +777,6 @@ impl Relation {
     }
 
     // --------------------------------------------------------------------------------------------
-
-    pub fn is_empty(&self) -> bool {
-        self.facts.is_empty()
-    }
-
-    pub fn len(&self) -> usize {
-        self.facts.len()
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = &Fact> {
-        self.facts.iter()
-    }
 
     pub fn add_as_fact<V: Into<Vec<Constant>>>(&mut self, values: V) -> Result<()> {
         let values: Vec<Constant> = values.into();
@@ -750,7 +811,7 @@ impl Relation {
     // --------------------------------------------------------------------------------------------
 
     pub(crate) fn matches(&self, atom: &Atom) -> View {
-        let terms: Vec<&Term> = atom.terms().collect();
+        let terms: Vec<&Term> = atom.iter().collect();
         self.match_terms(terms)
     }
 
@@ -768,7 +829,9 @@ impl Relation {
                         Term::Constant(v) => Attribute::typed(v.kind()),
                     };
                     if term.kind().is_none() {
-                        if let Some(kind) = self.schema().get(i).unwrap().kind() {
+                        if let Some(kind) =
+                            self.schema().get(&AttributeIndex::Index(i)).unwrap().kind()
+                        {
                             term.override_kind(kind);
                         }
                     }
@@ -806,7 +869,7 @@ impl Relation {
             } else {
                 RESERVED_PRAGMA_INFER
             },
-            self.name(),
+            self.label(),
             CHAR_LEFT_PAREN,
             self.schema().to_column_decl(emit_unknown),
             CHAR_RIGHT_PAREN,
@@ -840,16 +903,18 @@ impl From<Fact> for Vec<Constant> {
     }
 }
 
+impl Labeled for Fact {
+    fn label(&self) -> &Predicate {
+        &self.label
+    }
+}
+
 impl Fact {
     pub fn new<V: Into<Vec<Constant>>>(name: Rc<Predicate>, values: V) -> Self {
         Self {
             label: name,
             values: values.into(),
         }
-    }
-
-    pub fn name(&self) -> &Predicate {
-        &self.label
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Constant> {
@@ -928,6 +993,10 @@ impl Constant {
         Self::Boolean(false)
     }
 
+    pub fn new_size(v: usize) -> Self {
+        Self::Integer(v as i64)
+    }
+
     pub fn kind(&self) -> AttributeKind {
         match self {
             Self::String(_) => AttributeKind::String,
@@ -988,16 +1057,16 @@ impl From<Predicate> for String {
     }
 }
 
-impl AttributeName for Predicate {}
-
-impl Predicate {
-    pub fn is_valid(s: &str) -> bool {
+impl AttributeName for Predicate {
+    fn is_valid(s: &str) -> bool {
         let mut chars = s.chars();
         (!s.is_empty())
             && chars.next().map(|c| c.is_lowercase()).unwrap()
             && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
+}
 
+impl Predicate {
     pub(crate) fn from_str_unchecked(s: &str) -> Self {
         Self(s.to_owned())
     }
@@ -1012,75 +1081,3 @@ impl Predicate {
 // ------------------------------------------------------------------------------------------------
 
 pub mod io;
-
-// ------------------------------------------------------------------------------------------------
-// Unit Tests
-// ------------------------------------------------------------------------------------------------
-
-#[cfg(test)]
-#[cfg(feature = "parser")]
-mod tests {
-    use crate::edb::Constant;
-    use crate::edb::Predicate;
-    use crate::idb::{Atom, Term, Variable};
-    use crate::parse::parse_str;
-    use std::str::FromStr;
-
-    #[test]
-    fn test_is_identifier() {
-        assert!(Constant::is_identifier("socrates"));
-        assert!(Constant::is_identifier("socrates_and_plato"));
-        assert!(Constant::is_identifier("socrates1"));
-        assert!(Constant::is_identifier("greek:socrates"));
-        assert!(Constant::is_identifier("greek:Socrates"));
-        assert!(Constant::is_identifier("greek:socrates_and_plato"));
-        assert!(Constant::is_identifier("greek:Socrates_and_Plato"));
-        assert!(Constant::is_identifier("greek:socrates1"));
-        assert!(Constant::is_identifier("greek:Socrates1"));
-    }
-
-    #[test]
-    fn test_is_not_identifier() {
-        assert!(!Constant::is_identifier("Socrates"));
-        assert!(!Constant::is_identifier("_and_plato"));
-        assert!(!Constant::is_identifier("1socrates"));
-        assert!(!Constant::is_identifier("Greek:socrates"));
-        assert!(!Constant::is_identifier("_greek:socrates"));
-        assert!(!Constant::is_identifier("greek:_and_plato"));
-        assert!(!Constant::is_identifier("greek:socrates:plato"));
-        assert!(!Constant::is_identifier(":greekSocrates"));
-        assert!(!Constant::is_identifier("greek:"));
-    }
-
-    #[test]
-    fn test_matches() {
-        let program = parse_str(
-            r#"#@assert human(string).
-            
-human("Socrates").
-
-mortal(X) <- human(X).
-
-?- mortal("Socrates").
-"#,
-        )
-        .unwrap()
-        .into_parsed();
-
-        println!("{:#?}", program);
-        println!("{}", program.to_string());
-
-        let human = Predicate::from_str("human").unwrap();
-
-        let qterm = Atom::new(
-            human.clone(),
-            [Term::Variable(Variable::from_str("X").unwrap())],
-        );
-        let results = program.extensional().matches(&qterm).unwrap();
-        println!("{}", results);
-
-        let qterm = Atom::new(human, [Term::Constant(Constant::from("Socrates"))]);
-        let results = program.extensional().matches(&qterm).unwrap();
-        println!("{}", results);
-    }
-}

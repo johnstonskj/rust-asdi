@@ -19,7 +19,7 @@ use crate::idb::{
     Atom, Comparison, ComparisonOperator, Literal, Query, Rule as DlRule, Term, Variable,
 };
 use crate::syntax::{RESERVED_BOOLEAN_TRUE, RESERVED_PREFIX, TYPE_NAME_CONST_INTEGER};
-use crate::Program;
+use crate::{Collection, Program};
 use pest::iterators::{Pair, Pairs};
 use pest::{Parser, Span};
 use pest_derive::Parser;
@@ -262,7 +262,7 @@ fn parse_fact(
     let relation = if !edb.contains(&predicate) {
         edb.add_new_relation_from(predicate.clone(), &attributes)?
     } else {
-        edb.relation_mut(&predicate).unwrap()
+        edb.get_mut(&predicate).unwrap()
     };
 
     relation.add_as_fact(attributes)
@@ -280,8 +280,8 @@ fn parse_rule(
             Rule::rule_head => head = parse_rule_head(inner_pair.into_inner(), program, features)?,
             Rule::rule_body => {
                 let body = parse_rule_body(inner_pair.into_inner(), program, features)?;
-                let rule = DlRule::new_inner(head, body);
-                if let Err(e) = rule.check_well_formed(&features) {
+                let rule = DlRule::new(head, body);
+                if let Err(e) = rule.well_formed_check(&features) {
                     return Err(pest_error!(span, e.to_string()));
                 } else {
                     program.add_rule(rule)?;
@@ -398,7 +398,7 @@ fn parse_decl_inferred_relation(
             }
             Rule::predicate => {
                 let name = Predicate::from_str_unchecked(inner_pair.as_str());
-                if let Some(from) = program.extensional().relation(&name) {
+                if let Some(from) = program.extensional().get(&name) {
                     attributes.extend(from.schema().iter().cloned());
                 } else {
                     return Err(Error::RelationDoesNotExist(name));
@@ -475,7 +475,7 @@ fn parse_decl_input(
         _ => unreachable!(first.as_str()),
     };
 
-    if let None = program.extensional().relation(&predicate) {
+    if let None = program.extensional().get(&predicate) {
         Err(Error::RelationDoesNotExist(predicate))
     } else {
         let next = input_pairs.next().unwrap();
@@ -509,7 +509,7 @@ fn parse_decl_output(
         _ => unreachable!(first.as_str()),
     };
 
-    if let None = program.intensional().relation(&predicate) {
+    if let None = program.intensional().get(&predicate) {
         Err(Error::RelationDoesNotExist(predicate))
     } else {
         let next = input_pairs.next().unwrap();
@@ -719,7 +719,7 @@ fn parse_term(
 ) -> Result<Term> {
     let first = input_pairs.next().unwrap();
     let value = match first.as_rule() {
-        Rule::variable => Variable::from_str(first.as_str())?.into(),
+        Rule::variable => Variable::from_str_unchecked(first.as_str()).into(),
         Rule::constant => Term::Constant(parse_constant(first.into_inner(), program, features)?),
         _ => unreachable!(first.as_str()),
     };

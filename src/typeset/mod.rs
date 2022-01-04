@@ -17,7 +17,7 @@ use crate::idb::{Atom, ComparisonOperator, Literal, LiteralInner, Query, Rule, T
 use crate::syntax::{
     CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DISJUNCTION_UNICODE_SYMBOL,
 };
-use crate::Program;
+use crate::{Collection, Labeled, MaybePositive, Program};
 use std::fmt::Write;
 
 // ------------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ impl Typesetter for LatexTypesetter {
         write!(
             result,
             "{}{}${}${}{}",
-            value.name(),
+            value.label(),
             CHAR_LEFT_PAREN,
             value
                 .iter()
@@ -185,7 +185,7 @@ impl LatexTypesetter {
             value.label(),
             CHAR_LEFT_PAREN,
             value
-                .terms()
+                .iter()
                 .map(Term::to_string)
                 .collect::<Vec<String>>()
                 .join(", "),
@@ -201,7 +201,7 @@ impl LatexTypesetter {
             } else {
                 String::new()
             },
-            match value.inner() {
+            match value.as_ref() {
                 LiteralInner::Atom(a) => self.atom(a)?,
                 LiteralInner::Comparison(c) => format!(
                     "${} {} {}$",
@@ -239,6 +239,7 @@ mod tests {
     use crate::edb::Predicate;
     use crate::parse::parse_str;
     use crate::typeset::{LatexTypesetter, Typesetter};
+    use crate::Collection;
 
     #[test]
     fn test_wikipedia_example() {
@@ -262,7 +263,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
             // Test fact
             let relation = program
                 .extensional()
-                .relation(&Predicate::from_str_unchecked("parent"))
+                .get(&Predicate::from_str_unchecked("parent"))
                 .unwrap();
             let fact = relation.iter().next().unwrap();
             match fact.to_string().as_str() {

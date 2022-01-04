@@ -15,6 +15,25 @@ pub trait Evaluator: Debug {
     fn inference(&self, program: &Program) -> Result<Relations>;
 }
 
+#[derive(Debug)]
+pub struct NoopEvaluator;
+
+// ------------------------------------------------------------------------------------------------
+// Implementations
+// ------------------------------------------------------------------------------------------------
+
+impl Default for NoopEvaluator {
+    fn default() -> Self {
+        NoopEvaluator
+    }
+}
+
+impl Evaluator for NoopEvaluator {
+    fn inference(&self, _: &Program) -> Result<Relations> {
+        Ok(Relations::default())
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
 // Modules
 // ------------------------------------------------------------------------------------------------
