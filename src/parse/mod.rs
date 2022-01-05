@@ -83,6 +83,22 @@ pub fn parse_str(source: &str) -> Result<Parsed> {
 }
 
 ///
+/// Parse the string content provided.
+///
+pub fn parse_str_into(source: &str, program: Program) -> Result<Parsed> {
+    let mut parsed =
+        Datalog::parse(Rule::program, source).map_err(|e| Error::ParserError(Box::new(e)))?;
+    let matched_str = parsed.as_str();
+    let pair = parsed.next().unwrap();
+
+    Ok(make_parsed(
+        parse_program(pair, program.features)?,
+        source,
+        matched_str,
+    ))
+}
+
+///
 /// Parse the string content provided, but enabled the set of language features first.
 ///
 pub fn parse_str_with_features(source: &str, features: FeatureSet) -> Result<Parsed> {
@@ -221,8 +237,16 @@ fn make_parsed(parsed: Program, original_str: &str, matched_str: &str) -> Parsed
 // ------------------------------------------------------------------------------------------------
 
 fn parse_program(input_pair: Pair<'_, Rule>, features: FeatureSet) -> Result<Program> {
-    let mut program: Program = Program::new_with_features(features);
+    let program: Program = Program::new_with_features(features);
 
+    parse_into_program(input_pair, program, features)
+}
+
+fn parse_into_program(
+    input_pair: Pair<'_, Rule>,
+    mut program: Program,
+    features: FeatureSet,
+) -> Result<Program> {
     match_then_any! {
         (input_pair, features) => &mut program ;
         program ;
@@ -245,7 +269,7 @@ fn parse_fact(
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
     let predicate = match first.as_rule() {
-        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
+        Rule::predicate => program.predicates().fetch(first.as_str())?,
         _ => unreachable!(first.as_str()),
     };
 
@@ -358,7 +382,7 @@ fn parse_decl_asserted_relation(
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
     let predicate = match first.as_rule() {
-        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
+        Rule::predicate => program.predicates().fetch(first.as_str())?,
         _ => unreachable!(first.as_str()),
     };
 
@@ -386,7 +410,7 @@ fn parse_decl_inferred_relation(
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
     let predicate = match first.as_rule() {
-        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
+        Rule::predicate => program.predicates().fetch(first.as_str())?,
         _ => unreachable!(first.as_str()),
     };
 
@@ -397,11 +421,11 @@ fn parse_decl_inferred_relation(
                 attributes.push(parse_attribute(inner_pair.into_inner(), program, features)?)
             }
             Rule::predicate => {
-                let name = Predicate::from_str_unchecked(inner_pair.as_str());
+                let name = program.predicates().fetch(inner_pair.as_str())?;
                 if let Some(from) = program.extensional().get(&name) {
                     attributes.extend(from.schema().iter().cloned());
                 } else {
-                    return Err(Error::RelationDoesNotExist(name));
+                    return Err(Error::RelationDoesNotExist(name.as_ref().clone()));
                 }
             }
             _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
@@ -612,7 +636,7 @@ fn parse_atom(
         terms.push(term);
     }
 
-    Ok(Atom::new_at_location(predicate, &terms, location))
+    Ok(Atom::new_at_location(predicate.into(), &terms, location))
 }
 
 fn parse_comparison(

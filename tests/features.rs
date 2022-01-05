@@ -1,5 +1,5 @@
 use crate::common::quick_parser_check;
-use asdi::features::{FeatureSet, FEATURE_DISJUNCTION, FEATURE_NEGATION};
+use asdi::features::{FeatureSet, FEATURE_COMPARISONS, FEATURE_DISJUNCTION, FEATURE_NEGATION};
 
 mod common;
 
@@ -32,8 +32,9 @@ fn test_to_label() {
         FeatureSet::default()
             .add_support_for(&FEATURE_NEGATION)
             .add_support_for(&FEATURE_DISJUNCTION)
+            .add_support_for(&FEATURE_COMPARISONS)
             .language(),
-        "(￢∨)Datalog"
+        "(￢,θ,∨)Datalog"
     );
 }
 
@@ -50,7 +51,8 @@ fn test_to_string() {
         FeatureSet::default()
             .add_support_for(&FEATURE_NEGATION)
             .add_support_for(&FEATURE_DISJUNCTION)
+            .add_support_for(&FEATURE_COMPARISONS)
             .to_string(),
-        "@feature(negation, disjunction)."
+        "@feature(negation, comparisons, disjunction)."
     );
 }

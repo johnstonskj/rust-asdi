@@ -68,7 +68,7 @@ a constraint. The latter signifies that the rule implies falsity (or absurdity).
 ## Comparisons
 
 The feature `comparisons` enables the inclusion of literal terms that use standard comparison
-operators. This language is described herein as $\text{\small{Datalog}}^{=}$.
+operators. This language is described herein as $\text{\small{Datalog}}^{\theta}$.
 
 ```datalog
 @features(comparisons).
@@ -96,9 +96,9 @@ The text representation allows for `";"`, "|"`, `"∨"`, and `"OR"` to be used t
 
 use crate::syntax::{
     CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DEFAULT_LANGUAGE_NAME,
-    DISJUNCTION_UNICODE_SYMBOL, FALSE_UNICODE_SYMBOL, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
-    PRAGMA_FEATURE_COMPARISONS, PRAGMA_FEATURE_CONSTRAINTS, PRAGMA_FEATURE_DISJUNCTION,
-    PRAGMA_FEATURE_NEGATION, RESERVED_PRAGMA_FEATURE, RESERVED_PREFIX,
+    DISJUNCTION_UNICODE_SYMBOL, FEATURE_SYMBOL_BACK_ARROW, FEATURE_SYMBOL_THETA,
+    NOT_UNICODE_SYMBOL, PRAGMA_FEATURE_COMPARISONS, PRAGMA_FEATURE_CONSTRAINTS,
+    PRAGMA_FEATURE_DISJUNCTION, PRAGMA_FEATURE_NEGATION, RESERVED_PRAGMA_FEATURE, RESERVED_PREFIX,
 };
 use std::fmt::{Display, Formatter};
 
@@ -134,12 +134,12 @@ pub const FEATURE_NEGATION: Feature = Feature {
 };
 
 ///
-/// Corresponds to `@feature(comparisons).` and the language $\small\text{Datalog}^{=}$, without
+/// Corresponds to `@feature(comparisons).` and the language $\small\text{Datalog}^{\theta}$, without
 /// this feature it is an error to add a rule with an arithmetic literal.
 ///
 pub const FEATURE_COMPARISONS: Feature = Feature {
     label: PRAGMA_FEATURE_COMPARISONS,
-    symbol: OPERATOR_ASCII_EQUAL,
+    symbol: FEATURE_SYMBOL_THETA,
     mask: 2,
 };
 
@@ -153,14 +153,20 @@ pub const FEATURE_DISJUNCTION: Feature = Feature {
     mask: 4,
 };
 
+// pub const FEATURE_EXCLUSIVE_DISJUNCTION: Feature = Feature {
+//     label: PRAGMA_FEATURE_EXCLUSIVE_DISJUNCTION,
+//     symbol: FEATURE_SYMBOL_CIRCLE_PLUS,
+//     mask: 8,
+// };
+
 ///
-/// Corresponds to `@feature(constraints).` and the language $\small\text{Datalog}^{\bot}$, without
+/// Corresponds to `@feature(constraints).` and the language $\small\text{Datalog}^{\Leftarrow}$, without
 /// this feature it is an error to add a rule without a head.
 ///
 pub const FEATURE_CONSTRAINTS: Feature = Feature {
     label: PRAGMA_FEATURE_CONSTRAINTS,
-    symbol: FALSE_UNICODE_SYMBOL,
-    mask: 8,
+    symbol: FEATURE_SYMBOL_BACK_ARROW,
+    mask: 16,
 };
 
 ///
@@ -322,7 +328,8 @@ impl FeatureSet {
                 CHAR_LEFT_PAREN,
                 self.features()
                     .map(|feat| feat.symbol().to_string())
-                    .collect::<String>(),
+                    .collect::<Vec<String>>()
+                    .join(&format!("{}", CHAR_COMMA)),
                 CHAR_RIGHT_PAREN,
                 DEFAULT_LANGUAGE_NAME,
             )

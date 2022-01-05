@@ -17,7 +17,7 @@ the drawbacks of Prolog and the advantages of Datalog for certain tasks.
 When referring to the specifics of the language we will use the common format $\text{\small{Datalog}}$ with
 superscripts that identify specific language extensions; for example, $\small\text{Datalog}^{\lnot}$ is
 the language extended with negation of literals, $\small\text{Datalog}^{\Gamma}$ is the language
-extended with type checking on attributes, and $\small\text{Datalog}^{\lnot,=}$. is the language
+extended with type checking on attributes, and $\small\text{Datalog}^{\lnot,\theta}$. is the language
 extended with negation of literals _and_ comparison expressions. The order of superscript symbols is
 irrelevant. Additionally, text in **bold** indicates a key concept in the language while text in
 _italics_ indicates a forward reference to such a concept.
@@ -60,7 +60,11 @@ as well as the following properties:
 A _pure_ rule is one where there is only a single atom in the head; if the body is true, the head is
 true. A **constraint** rule, or contradiction, does not allow any consequence to be determined from
 evaluation of its body. A **disjunctive** rule is one where there is more than one atom, and any one
-may be true if the body is true. The property $\small form(r)$ returns the form of the rule, based
+may be true if the body is true. The language $\small\text{Datalog}^{\lor}$ allows for _inclusive_
+disjunction, and while a language, $\small\text{Datalog}^{\oplus}$, exists for _exclusive_ disjunction
+it is not implemented here.
+
+The property $\small form(r)$ returns the form of the rule, based
 on the cardinality of the rule's head as follows:
 
 $$\tag{vi}\small
@@ -71,12 +75,18 @@ $$\tag{vi}\small
     disjunctive, &\text{if } |head\(r\)| > 1  \land \text{Datalog}^{\lor}
   \end{cases}$$
 
+Note that this notation is similar to that of a [_sequent_](https://en.wikipedia.org/wiki/Sequent).
+Taking our definition of a rule, $\small A_1, \ldots, A_m \leftarrow L_1, \ldots, L_n$, and swap the
+order of antecedence and consequence we get $\small L_1, \ldots, L_m \vdash A_1, \ldots, A_n$.
+A pure rule is termed a _simple conditional assertion_, a constraint rule is termed an
+_unconditional assertion_, and a disjunctive rule is termed a _sequent_ (or simply _conditional
+assertion_).
+
 ### Terms
 
 Terms, mentioned above, may be constant values or variables such that
 $\small\mathcal{T}=\mathcal{C}\cup\mathcal{V}\cup\bar{t}$ where $\small\bar{t}$ represents an
-anonymous variable. $\small\bar{t}$ is denoted in the text representation as an underscore
-`"_"`).
+anonymous variable.
 
 Terms have the following properties:
 
@@ -163,7 +173,7 @@ $$
 $$\tag{xii}\small
   conforms\(t, \alpha\) \coloneqq
   label\(t\) = label\(\alpha\) \land
-  type\(t\) = type\(\alpha\)
+  \tau_{t} = \tau{\alpha}
 $$
 
 Note that in relational algebra it is more common to use the term domain $\small D$ to denote a possibly
@@ -187,7 +197,7 @@ of term values.
 Literals within the body of a rule, represent sub-goals that are the required to be true for the
 rule's head to be considered true.
 
-1. A literal may be an atom (termed a relational literal) or, in $\small\text{Datalog}^{=}$, a
+1. A literal may be an atom (termed a relational literal) or, in $\small\text{Datalog}^{\theta}$, a
    conditional expression (termed an arithmetic literal),
 1. a an arithmetic literal has the form $\small \langle t_{lhs} \theta t_{rhs} \rangle$, where
    1. $\small \theta \in \lbrace =, \neq, <, \leq, >, \geq \rbrace$,
@@ -204,7 +214,7 @@ rule's head to be considered true.
         terms(l) \coloneqq
         \begin{cases}
           terms(l), &\text{if } atom(l) \\\\
-          \lbrace t_{lhs}, t_{rhs} \rbrace, &\text{if } comparison(l) \land \text{Datalog}^{\=}
+          \lbrace t_{lhs}, t_{rhs} \rbrace, &\text{if } comparison(l) \land \text{Datalog}^{\theta}
         \end{cases}$$
    1. $\small ground\(l\)$ returns true if its terms are all constants $\small \(\forall{t}\in terms\(l\); t \in \mathcal{C}\)$,
    1. $\small positive\(l\)$ in $\small\text{Datalog}^{\lnot}$ returns false if negated,
@@ -352,7 +362,7 @@ father **or** mother_.
 father(X) ⋁ mother(X) :- parent(X).
 ```
 
-The language feature `constraints` corresponds to the language $\small\text{Datalog}^{\bot}$ and
+The language feature `constraints` corresponds to the language $\small\text{Datalog}^{\Leftarrow}$ and
 allows the specification of rules with no head. In this case the material implication symbol is
 **required**, the falsum value is optional for readability, therefore the following rules are
 equivalent.
@@ -432,7 +442,7 @@ alive(X) ⟵ ￢dead(X).
 
 ### Comparisons
 
-The language feature `comparisons` corresponds to the language $\small\text{Datalog}^{=}$ and
+The language feature `comparisons` corresponds to the language $\small\text{Datalog}^{\theta}$ and
 allows the use of arithmetic literals. Comparisons take place between two literals and are
 currently limited to a set of common operators.
 
@@ -611,13 +621,16 @@ Note in this example we allow the parser to identify the schema for the relation
 The following is the same example constructed via the ASDI library.
 
 ```rust
-use asdi::Program;
+use asdi::{PredicateSet, Program};
 use asdi::edb::{Attribute, Predicate};
 use asdi::idb::{Atom, Term, Variable};
 use std::str::FromStr;
 
 let mut syllogism = Program::default();
-let p_human = Predicate::from_str("human").unwrap();
+
+let predicates = syllogism.predicates();
+let p_human = predicates.fetch("human").unwrap();
+let p_mortal = predicates.fetch("mortal").unwrap();
 
 let human = syllogism
     .add_new_extensional_relation(p_human.clone(), vec![Attribute::string()])
@@ -628,14 +641,14 @@ let var_x: Term = Variable::from_str("X").unwrap().into();
 
 syllogism
     .add_new_pure_rule(
-        Predicate::from_str("mortal").unwrap(),
+        p_mortal.clone(),
         [var_x.clone()],
         [Atom::new(p_human, [var_x]).into()],
     )
     .unwrap();
 
 syllogism
-    .add_new_query(Predicate::from_str("mortal").unwrap(), ["Socrates".into()])
+    .add_new_query(p_mortal, ["Socrates".into()])
     .unwrap();
 ```
 
@@ -709,12 +722,14 @@ The program will select all matching (in this case all) facts from the _mortal_ 
     dyn_drop,
 )]
 
-use crate::edb::{Attribute, Predicate, Relation, Relations, Schema};
+use crate::edb::{Attribute, Predicate, PredicateRef, Relation, Relations, Schema};
 use crate::error::{Error, Result};
-use crate::features::FeatureSet;
-use crate::idb::{Atom, Evaluator, Literal, Query, Rule, Rules, Term, Variable, View};
-use std::collections::HashSet;
+use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
+use crate::idb::{Atom, Evaluator, Literal, Query, Rule, RuleForm, Rules, Term, Variable, View};
+use std::cell::RefCell;
+use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
+use std::str::FromStr;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -727,11 +742,30 @@ use std::fmt::{Debug, Display, Formatter};
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Program {
     features: FeatureSet,
+    predicates: PredicateSet,
     asserted: Relations,
     infer: Relations,
     rules: Rules,
     queries: HashSet<Query>,
 }
+
+///
+/// The predicate set $\small\mathcal{P}$ determines the labels of relations, atoms, and facts. This
+/// type keeps a mapping of strings to [PredicateRef]s to reduce memory duplication.
+///
+/// ```rust
+/// use asdi::Program;
+///
+/// let mut program = Program::default();
+///
+/// let p_human = program.predicates().fetch("human").unwrap();
+/// let p_mortal = program.predicates().fetch("mortal").unwrap();
+///
+/// assert!(program.predicates().fetch("Not A Predicate").is_err());
+/// ```
+///
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct PredicateSet(RefCell<BTreeMap<String, PredicateRef>>);
 
 ///
 /// All collections of things in the library implement these basic methods.
@@ -793,6 +827,8 @@ pub trait Labeled {
     /// Return the label associated with this value.
     ///
     fn label(&self) -> &Predicate;
+
+    fn label_ref(&self) -> PredicateRef;
 }
 
 ///
@@ -964,6 +1000,7 @@ impl Program {
     pub fn new_with_features(features: FeatureSet) -> Self {
         Self {
             features,
+            predicates: Default::default(),
             asserted: Default::default(),
             infer: Default::default(),
             queries: Default::default(),
@@ -971,6 +1008,7 @@ impl Program {
         }
     }
 
+    // TODO: new_with_predicates ?
     // --------------------------------------------------------------------------------------------
 
     ///
@@ -982,6 +1020,12 @@ impl Program {
 
     pub(crate) fn features_mut(&mut self) -> &mut FeatureSet {
         &mut self.features
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    pub fn predicates(&self) -> &PredicateSet {
+        &self.predicates
     }
 
     // --------------------------------------------------------------------------------------------
@@ -1005,9 +1049,10 @@ impl Program {
     ///
     pub fn add_new_extensional_relation<V: Into<Schema<Predicate>>>(
         &mut self,
-        label: Predicate,
+        label: PredicateRef,
         schema: V,
     ) -> Result<&mut Relation> {
+        let label = self.predicates.canonical(label);
         self.extensional_mut()
             .add_new_relation(label, schema.into())
     }
@@ -1040,9 +1085,10 @@ impl Program {
     ///
     pub fn add_new_intensional_relation<V: Into<Schema<Predicate>>>(
         &mut self,
-        label: Predicate,
+        label: PredicateRef,
         schema: V,
     ) -> Result<&mut Relation> {
+        let label = self.predicates.canonical(label);
         self.intensional_mut()
             .add_new_relation(label, schema.into())
     }
@@ -1061,7 +1107,6 @@ impl Program {
         &self.rules
     }
 
-    //
     // Note: there is no `rules_mut` as we cannot allow clients to add rules without going through
     // the program so that we can ensure schema updates.
 
@@ -1071,11 +1116,33 @@ impl Program {
     ///
     pub fn add_new_pure_rule<H: Into<Vec<Term>>, B: Into<Vec<Literal>>>(
         &mut self,
-        head_label: Predicate,
+        head_label: PredicateRef,
         head_terms: H,
         body: B,
     ) -> Result<()> {
+        let head_label = self.predicates.canonical(head_label);
         let rule = Rule::new_pure(Atom::new(head_label, head_terms), body);
+        self.add_rule(rule)
+    }
+
+    ///
+    /// Add a new _constraint_ rule to the intensional database with the given list of body literals.
+    ///
+    pub fn add_new_constraint_rule<B: Into<Vec<Literal>>>(&mut self, body: B) -> Result<()> {
+        let rule = Rule::new_constraint(body);
+        self.add_rule(rule)
+    }
+
+    ///
+    /// Add a new _disjunctive_ rule to the intensional database with the given list of head atoms, as
+    /// well as the list of body literals.
+    ///
+    pub fn add_new_disjunctive_rule<A: Into<Vec<Atom>>, B: Into<Vec<Literal>>>(
+        &mut self,
+        head: A,
+        body: B,
+    ) -> Result<()> {
+        let rule = Rule::new_disjunctive(head, body);
         self.add_rule(rule)
     }
 
@@ -1084,6 +1151,14 @@ impl Program {
     ///
     pub fn add_rule(&mut self, rule: Rule) -> Result<()> {
         rule.well_formed_check(self.features())?;
+
+        if rule.form() == RuleForm::Constraint && !self.features().supports(&FEATURE_CONSTRAINTS) {
+            return Err(Error::LanguageFeatureUnsupported(FEATURE_CONSTRAINTS));
+        }
+
+        if rule.form() == RuleForm::Disjunctive && !self.features().supports(&FEATURE_DISJUNCTION) {
+            return Err(Error::LanguageFeatureUnsupported(FEATURE_DISJUNCTION));
+        }
 
         for atom in rule.head() {
             //
@@ -1103,7 +1178,7 @@ impl Program {
                     }
                 }
                 self.intensional_mut()
-                    .add_new_relation(atom.label().clone(), schema)?;
+                    .add_new_relation(atom.label_ref(), schema)?;
             }
         }
 
@@ -1145,9 +1220,10 @@ impl Program {
     ///
     pub fn add_new_query<T: Into<Vec<Term>>>(
         &mut self,
-        label: Predicate,
+        label: PredicateRef,
         terms: T,
     ) -> Result<bool> {
+        let label = self.predicates.canonical(label);
         let query = Query::new(label, terms);
         self.add_query(query)
     }
@@ -1167,12 +1243,27 @@ impl Program {
     // --------------------------------------------------------------------------------------------
     // --------------------------------------------------------------------------------------------
 
-    pub fn run(&mut self, _evaluator: impl Evaluator) -> Result<()> {
-        let new_idb = _evaluator.inference(self)?;
+    ///
+    /// Running a program performs the following steps:
+    ///
+    /// 1. call the `inference` method on the provided [Evaluator], resulting in a set of new
+    ///    intensional relations,
+    /// 2. display each updated relation in the results from (1),
+    /// 3. merge these new relations into the existing intensional database,
+    /// 4. for each query in the program, evaluate it against the new intensional database and
+    ///    existing extensional database and display any results.
+    ///
+    pub fn run(&mut self, evaluator: impl Evaluator) -> Result<()> {
+        let new_idb = evaluator.inference(self)?;
         println!("{:?}", new_idb);
         self.intensional_mut().merge(new_idb)?;
-        let results = self.eval_queries();
-        for _result in results {}
+        let results = self.eval_queries()?;
+        for (query, view) in results {
+            println!("{}", query);
+            if let Some(view) = view {
+                println!("{}", view);
+            }
+        }
         Ok(())
     }
 
@@ -1180,15 +1271,135 @@ impl Program {
     /// Evaluate a query against the program's current extensional and intensional databases.
     ///
     pub fn eval_query(&self, query: &Query) -> Result<Option<View>> {
-        Ok(self.extensional().matches(query.as_ref()))
+        self.inner_eval_query(query, self.intensional())
+    }
+
+    ///
+    /// Evaluate a query against the program's current extensional and intensional databases.
+    ///
+    pub fn eval_query_with(
+        &self,
+        query: &Query,
+        _evaluator: impl Evaluator,
+    ) -> Result<Option<View>> {
+        let new_idb = _evaluator.inference(self)?;
+        self.inner_eval_query(query, &new_idb)
     }
 
     ///
     /// Evaluate all the queries in the program against the program's current extensional and
     /// intensional databases.
     ///
-    pub fn eval_queries(&self) -> Vec<(&Query, Result<Option<View>>)> {
-        self.queries().map(|q| (q, self.eval_query(q))).collect()
+    pub fn eval_queries(&self) -> Result<Vec<(&Query, Option<View>)>> {
+        let results: Result<Vec<Option<View>>> = self
+            .queries()
+            .map(|q| self.inner_eval_query(q, self.intensional()))
+            .collect();
+        match results {
+            Ok(results) => Ok(self.queries.iter().zip(results.into_iter()).collect()),
+            Err(e) => Err(e),
+        }
+    }
+
+    ///
+    /// Evaluate all the queries in the program against the program's current extensional and
+    /// intensional databases.
+    ///
+    pub fn eval_queries_with(
+        &self,
+        _evaluator: impl Evaluator,
+    ) -> Result<Vec<(&Query, Option<View>)>> {
+        let new_idb = _evaluator.inference(self)?;
+        let results: Result<Vec<Option<View>>> = self
+            .queries()
+            .map(|q| self.inner_eval_query(q, &new_idb))
+            .collect();
+        match results {
+            Ok(results) => Ok(self.queries.iter().zip(results.into_iter()).collect()),
+            Err(e) => Err(e),
+        }
+    }
+
+    fn inner_eval_query(&self, query: &Query, intensional: &Relations) -> Result<Option<View>> {
+        let label = query.as_ref().label();
+        if intensional.contains(label) {
+            Ok(intensional.matches(query.as_ref()))
+        } else if self.extensional().contains(label) {
+            Ok(self.extensional().matches(query.as_ref()))
+        } else {
+            Err(Error::RelationDoesNotExist(label.clone()))
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl PredicateSet {
+    ///
+    /// Add the value `s` as a predicate in this set.
+    ///
+    /// This will fail if the value provided in `s` does not the check [Predicate::is_valid].
+    ///
+    pub fn add<S: AsRef<str>>(&self, s: S) -> Result<()> {
+        self.fetch(s.as_ref()).map(|_| ())
+    }
+
+    ///
+    /// Add all the values in `all` as predicates in this set.
+    ///
+    /// This will fail if any value provided in `all` does not the check [Predicate::is_valid].
+    ///
+    pub fn add_all<S: AsRef<str>>(&self, all: impl Iterator<Item = S>) -> Result<()> {
+        for s in all {
+            self.fetch(s.as_ref()).map(|_| ())?;
+        }
+        Ok(())
+    }
+
+    ///
+    /// Returns `true` if there is a predicate in the set with the string representation `s`, else
+    /// `false`.
+    ///
+    pub fn contains<S: AsRef<str>>(&self, s: S) -> bool {
+        self.0.borrow().contains_key(s.as_ref())
+    }
+
+    ///
+    /// Fetch will return a predicate from the set if one exists, else it will create a new
+    /// predicate from `s` and add to the set and finally return this new value.
+    ///
+    /// This will fail if the value provided in `s` does not the check [Predicate::is_valid].
+    ///
+    pub fn fetch<S: Into<String>>(&self, s: S) -> Result<PredicateRef> {
+        let s = s.into();
+        let found = { self.0.borrow().get(&s).cloned() };
+        match found {
+            None => {
+                let predicate: PredicateRef = Predicate::from_str(&s)?.into();
+                let _ = self.0.borrow_mut().insert(s, predicate.clone());
+                Ok(predicate)
+            }
+            Some(p) => Ok(p),
+        }
+    }
+
+    ///
+    /// This will return the canonical predicate reference where canonical implies the first
+    /// instance added to the set.
+    ///
+    /// Thus, if the predicate is in the set the existing one is returned, else the provided `p`
+    /// is added to the set and returned.
+    ///
+    #[inline]
+    pub fn canonical(&self, p: PredicateRef) -> PredicateRef {
+        let found = { self.0.borrow().get(p.as_ref().as_ref()).cloned() };
+        match found {
+            None => {
+                let _ = self.0.borrow_mut().insert(p.to_string(), p.clone());
+                p
+            }
+            Some(p) => p,
+        }
     }
 }
 
@@ -1212,6 +1423,9 @@ pub mod features;
 pub mod edb;
 
 pub mod idb;
+
+#[cfg(feature = "io")]
+pub mod io;
 
 // ------------------------------------------------------------------------------------------------
 // Feature-gated Modules

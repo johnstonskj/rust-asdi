@@ -1,6 +1,7 @@
 use asdi::edb::{Constant, Predicate};
 use asdi::idb::{Atom, Term, Variable};
 use asdi::parse::parse_str;
+use std::rc::Rc;
 use std::str::FromStr;
 
 #[test]
@@ -21,16 +22,16 @@ mortal(X) <- human(X).
     println!("{:#?}", program);
     println!("{}", program.to_string());
 
-    let human = Predicate::from_str("human").unwrap();
+    let human = Rc::new(Predicate::from_str("human").unwrap());
 
-    let qterm = Atom::new(
+    let query_term = Atom::new(
         human.clone(),
         [Term::Variable(Variable::from_str("X").unwrap())],
     );
-    let results = program.extensional().matches(&qterm).unwrap();
+    let results = program.extensional().matches(&query_term).unwrap();
     println!("{}", results);
 
-    let qterm = Atom::new(human, [Term::Constant(Constant::from("Socrates"))]);
-    let results = program.extensional().matches(&qterm).unwrap();
+    let query_term = Atom::new(human, [Term::Constant(Constant::from("Socrates"))]);
+    let results = program.extensional().matches(&query_term).unwrap();
     println!("{}", results);
 }

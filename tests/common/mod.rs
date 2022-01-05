@@ -8,7 +8,8 @@ More detailed description, with
 */
 
 use asdi::features::FeatureSet;
-use asdi::parse::parse_str_with_features;
+use asdi::idb::{Evaluator, NaiveEvaluator};
+use asdi::parse::{parse_str, parse_str_with_features};
 use asdi::Program;
 use pretty_assertions::assert_eq;
 
@@ -27,6 +28,35 @@ use pretty_assertions::assert_eq;
 // ------------------------------------------------------------------------------------------------
 // Public Functions
 // ------------------------------------------------------------------------------------------------
+
+#[allow(dead_code)]
+pub fn make_ancestors() -> Program {
+    parse_str(
+        r#"parent(xerces, brooke).
+parent(brooke, damocles).
+
+ancestor(X, Y) ⟵ parent(X, Y).
+ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
+
+?- ancestor(xerces, X).
+"#,
+    )
+    .unwrap()
+    .into_parsed()
+}
+
+#[allow(dead_code)]
+pub fn make_and_evaluate_ancestors() -> Program {
+    let mut program = make_ancestors();
+
+    let evaluator = NaiveEvaluator::default();
+
+    let new_intensional = evaluator.inference(&program).unwrap();
+
+    program.intensional_mut().merge(new_intensional).unwrap();
+
+    program
+}
 
 #[allow(dead_code)]
 pub fn assert_eq_by_line(given: &str, expected: &str) {

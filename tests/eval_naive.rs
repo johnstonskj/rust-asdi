@@ -19,6 +19,9 @@ mortal(X) <- human(X).
 
     let program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
 
+    let p_human = program.predicates().fetch("human").unwrap();
+    let p_mortal = program.predicates().fetch("mortal").unwrap();
+
     assert_eq!(
         program
             .extensional()
@@ -44,23 +47,8 @@ mortal(X) <- human(X).
 
     let new_intensional = evaluator.inference(&program).unwrap();
 
-    println!("RESULT: {:#?}", new_intensional);
-
-    assert_eq!(
-        program
-            .extensional()
-            .get(&Predicate::from_str("human").unwrap())
-            .unwrap()
-            .len(),
-        2
-    );
-    assert_eq!(
-        new_intensional
-            .get(&Predicate::from_str("mortal").unwrap())
-            .unwrap()
-            .len(),
-        2
-    );
+    assert_eq!(program.extensional().get(&p_human).unwrap().len(), 2);
+    assert_eq!(new_intensional.get(&p_mortal).unwrap().len(), 2);
 
     print!("{}", program);
     println!("-------------------------------------------------------------------------------");
@@ -74,10 +62,7 @@ mortal(X) <- human(X).
     print!("{} ==>\n{}", query, results);
     println!("-------------------------------------------------------------------------------");
 
-    let query = Query::new(
-        Predicate::from_str("mortal").unwrap(),
-        [Variable::from_str("X").unwrap().into()],
-    );
+    let query = Query::new(p_mortal, [Variable::from_str("X").unwrap().into()]);
 
     let results = new_intensional.matches(query.as_ref()).unwrap();
     assert_eq!(results.schema().len(), 1);
@@ -102,22 +87,11 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
     let mut program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
 
-    assert_eq!(
-        program
-            .extensional()
-            .get(&Predicate::from_str("parent").unwrap())
-            .unwrap()
-            .len(),
-        2
-    );
-    assert_eq!(
-        program
-            .intensional()
-            .get(&Predicate::from_str("ancestor").unwrap())
-            .unwrap()
-            .len(),
-        0
-    );
+    let p_parent = program.predicates().fetch("parent").unwrap();
+    let p_ancestor = program.predicates().fetch("ancestor").unwrap();
+
+    assert_eq!(program.extensional().get(&p_parent).unwrap().len(), 2);
+    assert_eq!(program.intensional().get(&p_ancestor).unwrap().len(), 0);
 
     print!("{}", program);
     println!("-------------------------------------------------------------------------------");
@@ -128,22 +102,8 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
     program.intensional_mut().merge(results.unwrap()).unwrap();
 
-    assert_eq!(
-        program
-            .extensional()
-            .get(&Predicate::from_str("parent").unwrap())
-            .unwrap()
-            .len(),
-        2
-    );
-    assert_eq!(
-        program
-            .intensional()
-            .get(&Predicate::from_str("ancestor").unwrap())
-            .unwrap()
-            .len(),
-        3
-    );
+    assert_eq!(program.extensional().get(&p_parent).unwrap().len(), 2);
+    assert_eq!(program.intensional().get(&p_ancestor).unwrap().len(), 3);
 
     print!("{}", program);
     println!("-------------------------------------------------------------------------------");
@@ -177,22 +137,11 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
 
     let program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
 
-    assert_eq!(
-        program
-            .extensional()
-            .get(&Predicate::from_str("edge").unwrap())
-            .unwrap()
-            .len(),
-        4
-    );
-    assert_eq!(
-        program
-            .intensional()
-            .get(&Predicate::from_str("path").unwrap())
-            .unwrap()
-            .len(),
-        0
-    );
+    let p_edge = program.predicates().fetch("edge").unwrap();
+    let p_path = program.predicates().fetch("path").unwrap();
+
+    assert_eq!(program.extensional().get(&p_edge).unwrap().len(), 4);
+    assert_eq!(program.intensional().get(&p_path).unwrap().len(), 0);
 
     print!("{}", program);
     println!("-------------------------------------------------------------------------------");
@@ -201,21 +150,8 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
 
     let results = evaluator.inference(&program).unwrap();
 
-    assert_eq!(
-        program
-            .extensional()
-            .get(&Predicate::from_str("edge").unwrap())
-            .unwrap()
-            .len(),
-        4
-    );
-    assert_eq!(
-        results
-            .get(&Predicate::from_str("path").unwrap())
-            .unwrap()
-            .len(),
-        16
-    );
+    assert_eq!(program.extensional().get(&p_edge).unwrap().len(), 4);
+    assert_eq!(results.get(&p_path).unwrap().len(), 16);
 
     print!("{}", program);
     println!("-------------------------------------------------------------------------------");

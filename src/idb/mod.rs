@@ -155,15 +155,15 @@ holds between the $\small a$ and the $\small b$ attribute.
 The selection $\small\sigma_{a\theta v}(R)$ denotes all tuples in $\small R$ for which $\small\theta$
 holds between the $\small a$ attribute and the value $\small v$.
 
-Selection requires arithmetic literals and therefore the languages $\small\text{Datalog}^{=}$,
-and $\small\text{Datalog}^{\lnot}$, for negation.
+Selection requires arithmetic literals and therefore the languages $\small\text{Datalog}^{\theta}$
+and $\small\text{Datalog}^{\lnot}$ for negation.
 
 **Generalized Selection** is a unary operation written as $\small\sigma_{\varphi}(R)$ where
 $\small\varphi$ is a propositional formula that consists of conditions as allowed in the normal selection
-and the logical operators $\land$ (and), $\lor$ (or) and $\small\lnot$ (negation). This selection
+and the logical operators $\small\land$ (and), $\small\lor$ (or) and $\small\lnot$ (negation). This selection
 selects all those tuples in $\small R$ for which $\small\varphi$ holds.
 
-In $\small\text{Datalog}^{=}$ the selection $\small L \coloneqq \sigma_{X>100 \land Y=‘something’} \(R\)$
+In $\small\text{Datalog}^{\theta}$ the selection $\small L \coloneqq \sigma_{X>100 \land Y=‘something’} \(R\)$
 can be expressed as follows, where both rules are equivalent.
 
 ```datalog
@@ -195,7 +195,7 @@ there is no notational alignment where a generalized theta join might be signifi
 $\small\Join_{\varphi}$
 
 For example, the natural join $\small J \coloneqq R \Join_{S.X>100} S$, a join conditional join on an attribute
-in S can be expressed in $\small\text{Datalog}^{=}$ as follows.
+in S can be expressed in $\small\text{Datalog}^{\theta}$ as follows.
 
 ```datalog
 j(X,Y,Z) :- r(X,Y,Z) AND s(Xs,Y,Z) AND Xs > 100.
@@ -288,6 +288,7 @@ use crate::{
 use paste::paste;
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
+use std::rc::Rc;
 use std::str::FromStr;
 
 // ------------------------------------------------------------------------------------------------
@@ -305,7 +306,7 @@ pub struct Rules(HashSet<Rule>);
 /// An individual rule consists of a set of head [atoms](Atom) and a set of body [literals](Literal).
 ///
 /// The head is a set of atoms, with the cardinality having meaning. In the default  
-/// language $\small\text{Datalog}$ there may only be one head atom; in $\small\text{Datalog}^{\bot}$
+/// language $\small\text{Datalog}$ there may only be one head atom; in $\small\text{Datalog}^{\Leftarrow}$
 /// the head atom is optional, and in $\small\text{Datalog}^{\lor}$ there may be more than one head
 /// atom.
 ///
@@ -333,13 +334,13 @@ pub enum RuleForm {
 ///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Atom {
-    label: Predicate,
+    label: Rc<Predicate>,
     terms: Vec<Term>,
     src_loc: Option<SourceLocation>,
 }
 
 ///
-/// A literal is either an [relational literal](Atom) or if using the language $\small\text{Datalog}^{=}$
+/// A literal is either an [relational literal](Atom) or if using the language $\small\text{Datalog}^{\theta}$
 /// an [arithmetic literal](Comparison). Additionally, if using the language $\small\text{Datalog}^{\lnot}$
 /// a literal may be negated.
 ///
@@ -398,7 +399,7 @@ pub struct Literal {
 pub enum LiteralInner {
     /// A relational literal
     Atom(Atom),
-    /// An arithmetic literal, if using the language $\small\text{Datalog}^{=}$.
+    /// An arithmetic literal, if using the language $\small\text{Datalog}^{\theta}$.
     Comparison(Comparison),
 }
 
@@ -610,7 +611,7 @@ impl Rule {
         Self::new(Vec::default(), body)
     }
 
-    pub fn new_disjunction<A: Into<Vec<Atom>>, B: Into<Vec<Literal>>>(head: A, body: B) -> Self {
+    pub fn new_disjunctive<A: Into<Vec<Atom>>, B: Into<Vec<Literal>>>(head: A, body: B) -> Self {
         let head = head.into();
         assert!(head.len() > 1);
         Self::new(head, body)
@@ -845,6 +846,10 @@ impl Labeled for Atom {
     fn label(&self) -> &Predicate {
         &self.label
     }
+
+    fn label_ref(&self) -> Rc<Predicate> {
+        self.label.clone()
+    }
 }
 
 impl MaybeGround for Atom {
@@ -872,7 +877,7 @@ impl Collection<Term> for Atom {
 }
 
 impl Atom {
-    pub fn new<T: Into<Vec<Term>>>(label: Predicate, terms: T) -> Self {
+    pub fn new<T: Into<Vec<Term>>>(label: Rc<Predicate>, terms: T) -> Self {
         let terms = terms.into();
         assert!(!terms.is_empty());
         Self {
@@ -908,13 +913,13 @@ impl Atom {
             }
         }
         Ok(Self {
-            label: relation.label().clone(),
+            label: relation.label_ref(),
             terms,
             src_loc: None,
         })
     }
 
-    pub fn new_at_location(label: Predicate, terms: &[Term], location: SourceLocation) -> Self {
+    pub fn new_at_location(label: Rc<Predicate>, terms: &[Term], location: SourceLocation) -> Self {
         let terms: Vec<Term> = terms.into();
         assert!(!terms.is_empty());
         Self {

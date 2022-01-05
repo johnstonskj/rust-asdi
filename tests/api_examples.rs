@@ -1,6 +1,7 @@
 use asdi::edb::{Attribute, Predicate};
 use asdi::idb::{Atom, Query, Term, Variable};
 use asdi::Program;
+use std::rc::Rc;
 use std::str::FromStr;
 
 pub mod common;
@@ -12,7 +13,7 @@ fn test_wikipedia_example() {
 
     let mut ancestors = Program::default();
 
-    let parent_predicate = Predicate::from_str("parent").unwrap();
+    let parent_predicate = Rc::new(Predicate::from_str("parent").unwrap());
     {
         let parent = ancestors
             .add_new_extensional_relation(
@@ -28,7 +29,7 @@ fn test_wikipedia_example() {
             .unwrap();
     };
 
-    let ancestor_predicate = Predicate::from_str("ancestor").unwrap();
+    let ancestor_predicate = Rc::new(Predicate::from_str("ancestor").unwrap());
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
     let var_y: Term = Variable::from_str("Y").unwrap().into();
@@ -81,7 +82,7 @@ fn test_sourceforge_example() {
 
     let mut graph = Program::default();
 
-    let edge_predicate = Predicate::from_str("edge").unwrap();
+    let edge_predicate = graph.predicates().fetch("edge").unwrap();
     {
         let edge = graph
             .add_new_extensional_relation(
@@ -95,7 +96,7 @@ fn test_sourceforge_example() {
         edge.add_as_fact(["d".into(), "a".into()]).unwrap();
     }
 
-    let path_predicate = Predicate::from_str("path").unwrap();
+    let path_predicate = graph.predicates().fetch("path").unwrap();
 
     let var_x: Term = Variable::from_str("X").unwrap().into();
     let var_y: Term = Variable::from_str("Y").unwrap().into();
@@ -149,7 +150,7 @@ fn test_that_syllogism() {
     // See https://en.wikipedia.org/wiki/Syllogism
 
     let mut syllogism = Program::default();
-    let p_human = Predicate::from_str("human").unwrap();
+    let p_human = syllogism.predicates().fetch("human").unwrap();
 
     let human = syllogism
         .add_new_extensional_relation(p_human.clone(), vec![Attribute::string()])
@@ -160,14 +161,17 @@ fn test_that_syllogism() {
 
     syllogism
         .add_new_pure_rule(
-            Predicate::from_str("mortal").unwrap(),
+            syllogism.predicates().fetch("mortal").unwrap(),
             [var_x.clone()],
             [Atom::new(p_human, [var_x]).into()],
         )
         .unwrap();
 
     syllogism
-        .add_new_query(Predicate::from_str("mortal").unwrap(), ["Socrates".into()])
+        .add_new_query(
+            syllogism.predicates().fetch("mortal").unwrap(),
+            ["Socrates".into()],
+        )
         .unwrap();
 
     println!("{}", syllogism);

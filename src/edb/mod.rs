@@ -172,6 +172,8 @@ pub enum Constant {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Predicate(String);
 
+pub type PredicateRef = Rc<Predicate>;
+
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
 // ------------------------------------------------------------------------------------------------
@@ -619,7 +621,7 @@ impl Relations {
 
     pub fn add_new_relation<V: Into<Schema<Predicate>> + Debug>(
         &mut self,
-        predicate: Predicate,
+        predicate: PredicateRef,
         schema: V,
     ) -> Result<&mut Relation> {
         trace!(
@@ -629,7 +631,7 @@ impl Relations {
         );
         let predicate = predicate;
         if self.0.contains_key(&predicate) {
-            Error::RelationExists(predicate).into()
+            Error::RelationExists(predicate.as_ref().clone()).into()
         } else {
             let relation = Relation::new(predicate.clone(), schema);
             trace!("add_new_relation < relation: {:?}", relation);
@@ -640,7 +642,7 @@ impl Relations {
 
     pub fn add_new_relation_from(
         &mut self,
-        predicate: Predicate,
+        predicate: PredicateRef,
         attributes: &[Constant],
     ) -> Result<&mut Relation> {
         self.add_new_relation(
@@ -714,6 +716,10 @@ impl Labeled for Relation {
     fn label(&self) -> &Predicate {
         &self.label
     }
+
+    fn label_ref(&self) -> Rc<Predicate> {
+        self.label.clone()
+    }
 }
 
 impl Collection<Fact> for Relation {
@@ -735,9 +741,9 @@ impl Collection<Fact> for Relation {
 }
 
 impl Relation {
-    pub fn new<V: Into<Schema<Predicate>>>(name: Predicate, schema: V) -> Self {
+    pub fn new<V: Into<Schema<Predicate>>>(name: Rc<Predicate>, schema: V) -> Self {
         Self {
-            label: Rc::from(name),
+            label: name,
             schema: schema.into(),
             facts: Default::default(),
         }
@@ -907,6 +913,10 @@ impl Labeled for Fact {
     fn label(&self) -> &Predicate {
         &self.label
     }
+
+    fn label_ref(&self) -> Rc<Predicate> {
+        self.label.clone()
+    }
 }
 
 impl Fact {
@@ -915,6 +925,10 @@ impl Fact {
             label: name,
             values: values.into(),
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.values.len()
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Constant> {
@@ -1071,13 +1085,3 @@ impl Predicate {
         Self(s.to_owned())
     }
 }
-
-// ------------------------------------------------------------------------------------------------
-// Private Functions
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Modules
-// ------------------------------------------------------------------------------------------------
-
-pub mod io;

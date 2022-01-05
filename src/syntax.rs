@@ -42,6 +42,11 @@ pub(crate) const PRAGMA_FEATURE_NEGATION: &str = "negation";
 pub(crate) const PRAGMA_FEATURE_COMPARISONS: &str = "comparisons";
 pub(crate) const PRAGMA_FEATURE_CONSTRAINTS: &str = "constraints";
 pub(crate) const PRAGMA_FEATURE_DISJUNCTION: &str = "disjunction";
+pub(crate) const PRAGMA_FEATURE_EXCLUSIVE_DISJUNCTION: &str = "exclusive-disjunction";
+
+pub(crate) const FEATURE_SYMBOL_THETA: &str = "θ";
+pub(crate) const FEATURE_SYMBOL_BACK_ARROW: &str = "⇐";
+pub(crate) const FEATURE_SYMBOL_CIRCLE_PLUS: &str = "⊕";
 
 // ------------------------------------------------------------------------------------------------
 

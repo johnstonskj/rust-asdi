@@ -226,8 +226,17 @@ conjunction = _{
 }
 
 disjunction = _{
+    inclusive_disjunction
+}
+
+inclusive_disjunction = _{
     SEMI_COLON | UC_LOGICAL_OR | VERTICAL_BAR | "OR"
 }
+
+// ----- For future use -----
+// exclusive_disjunction = _{
+//     UC_LOGICAL_XOR | "XOR"
+// }
 
 query_prefix = _{
     "?-"
@@ -252,6 +261,8 @@ not_equal = _{
 UC_LOGICAL_AND = _{ "∧" }
 
 UC_LOGICAL_OR = _{ "∨" }
+
+UC_LOGICAL_XOR = _{ "⊕" }
 
 UC_LOGICAL_NOT_FW = _{ "￢" }
 

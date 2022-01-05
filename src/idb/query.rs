@@ -7,6 +7,7 @@ use crate::{Collection, MaybeLabeled};
 use paste::paste;
 use std::collections::HashSet;
 use std::fmt::{Debug, Display, Formatter};
+use std::rc::Rc;
 use tracing::{error, trace};
 
 // ------------------------------------------------------------------------------------------------
@@ -75,7 +76,7 @@ impl AsRef<Atom> for Query {
 }
 
 impl Query {
-    pub fn new<T: Into<Vec<Term>>>(predicate: Predicate, terms: T) -> Self {
+    pub fn new<T: Into<Vec<Term>>>(predicate: Rc<Predicate>, terms: T) -> Self {
         Self(Atom::new(predicate, terms))
     }
 }
