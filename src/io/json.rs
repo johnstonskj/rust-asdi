@@ -8,13 +8,14 @@ More detailed description, with
 */
 
 use crate::edb::{AttributeKind, Constant, Fact};
+use crate::error::Error;
 use crate::error::Result;
 use crate::io::{Reader, Writer};
 use crate::{Collection, Labeled, Relation};
 use serde_json::{from_reader, Number, Value};
 use std::fs::File;
 use std::io::BufReader;
-use std::path::PathBuf;
+use std::path::Path;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -27,6 +28,10 @@ pub struct Options {
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Json {}
+
+pub const PRAGMA_ID: &str = "json";
+
+pub const DISPLAY_LABEL: &str = "JSON";
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
@@ -61,13 +66,13 @@ impl Reader for Json {
 
     fn read_from_with_options(
         &self,
-        file_name: PathBuf,
+        file_name: &Path,
         as_relation: &Relation,
-        _: Self::Options,
+        _: &Self::Options,
     ) -> Result<Relation> {
         let file = File::open(file_name)?;
         let reader = BufReader::new(file);
-        let value: Value = from_reader(reader).unwrap();
+        let value: Value = from_reader(reader).map_err(|e| Error::Serialization(Box::new(e)))?;
 
         let mut new_relation = as_relation.clone_with_schema_only();
 
@@ -104,9 +109,9 @@ impl Writer for Json {
 
     fn write_to_with_options(
         &self,
-        file_name: PathBuf,
+        file_name: &Path,
         relation: &Relation,
-        options: Self::Options,
+        options: &Self::Options,
     ) -> Result<()> {
         let mut file = File::create(file_name)?;
         let value: Value = relation_to_json(relation);
@@ -118,7 +123,7 @@ impl Writer for Json {
         Ok(())
     }
 
-    fn print_with_options(&self, relation: &Relation, options: Self::Options) -> Result<()> {
+    fn print_with_options(&self, relation: &Relation, options: &Self::Options) -> Result<()> {
         let value: Value = relation_to_json(relation);
         if options.pretty_out {
             serde_json::to_writer_pretty(&mut std::io::stdout(), &value).unwrap();

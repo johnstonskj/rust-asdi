@@ -52,6 +52,7 @@ boolean_fact(@false).
 
 use crate::error::{Error, Result};
 use crate::idb::{Atom, Row, View};
+use crate::io::{read_relation, write_relation, FilePragma};
 use crate::syntax::{
     CHAR_COLON, CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
     COLUMN_NAME_UNKNOWN, RESERVED_BOOLEAN_FALSE, RESERVED_BOOLEAN_TRUE, RESERVED_PRAGMA_ASSERT,
@@ -87,6 +88,7 @@ pub struct Relation {
     label: Rc<Predicate>,
     schema: Schema<Predicate>,
     facts: HashSet<Fact>,
+    pragma: Option<FilePragma>,
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -654,6 +656,10 @@ impl Relations {
         )
     }
 
+    pub fn iter_mut(&mut self) -> Box<dyn Iterator<Item = &'_ mut Relation> + '_> {
+        Box::new(self.0.values_mut())
+    }
+
     pub fn contains(&self, predicate: &Predicate) -> bool {
         self.0.contains_key(predicate)
     }
@@ -746,6 +752,7 @@ impl Relation {
             label: name,
             schema: schema.into(),
             facts: Default::default(),
+            pragma: None,
         }
     }
 
@@ -754,6 +761,7 @@ impl Relation {
             label: self.label.clone(),
             schema: self.schema.clone(),
             facts: Default::default(),
+            pragma: None,
         }
     }
 
@@ -866,6 +874,37 @@ impl Relation {
 
     // --------------------------------------------------------------------------------------------
 
+    pub fn has_file_pragma(&self) -> bool {
+        self.pragma.is_some()
+    }
+
+    pub fn file_pragma(&self) -> Option<&FilePragma> {
+        self.pragma.as_ref()
+    }
+
+    pub fn set_file_pragma(&mut self, pragma: FilePragma) {
+        self.pragma = Some(pragma)
+    }
+
+    pub fn load_from_file(&mut self) -> Result<()> {
+        if let Some(pragma) = &self.pragma {
+            let new_facts = read_relation(self, pragma)?;
+            self.extend(new_facts)
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn store_to_file(&mut self) -> Result<()> {
+        if let Some(pragma) = &self.pragma {
+            write_relation(self, pragma)
+        } else {
+            Ok(())
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     pub(crate) fn to_schema_decl(&self, extensional: bool, emit_unknown: bool) -> String {
         format!(
             "{}{} {}{}{}{}{}",
@@ -919,6 +958,34 @@ impl Labeled for Fact {
     }
 }
 
+impl Collection<Constant> for Fact {
+    fn is_empty(&self) -> bool {
+        self.values.is_empty()
+    }
+
+    fn len(&self) -> usize {
+        self.values.len()
+    }
+
+    fn iter(&self) -> Box<dyn Iterator<Item = &'_ Constant> + '_> {
+        Box::new(self.values.iter())
+    }
+
+    fn contains(&self, value: &Constant) -> bool {
+        self.values.contains(value)
+    }
+}
+
+impl IndexedCollection<usize, Constant> for Fact {
+    fn get(&self, index: &usize) -> Option<&Constant> {
+        self.values.get(*index)
+    }
+
+    fn contains_index(&self, index: &usize) -> bool {
+        *index < self.len()
+    }
+}
+
 impl Fact {
     pub fn new<V: Into<Vec<Constant>>>(name: Rc<Predicate>, values: V) -> Self {
         Self {
@@ -927,20 +994,8 @@ impl Fact {
         }
     }
 
-    pub fn len(&self) -> usize {
-        self.values.len()
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = &Constant> {
-        self.values.iter()
-    }
-
     fn values(&self) -> &Vec<Constant> {
         &self.values
-    }
-
-    pub fn get(&self, index: usize) -> Option<&Constant> {
-        self.values.get(index)
     }
 }
 // ------------------------------------------------------------------------------------------------

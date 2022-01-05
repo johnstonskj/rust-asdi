@@ -32,6 +32,9 @@ pub enum Error {
     FormatError(std::fmt::Error),
     /// A wrapper around an underlying [`std::error::Error`] denoting a Pest parser error.
     ParserError(Box<dyn std::error::Error>),
+    /// A wrapper around an underlying [`std::fmt::Error`].
+    Serialization(Box<dyn std::error::Error>),
+    UnknownSerialization(String),
     TypeMismatch(String, String),
     InvalidValue(String, String),
     InvalidPragmaName(String),
@@ -155,6 +158,8 @@ impl Display for Error {
                 Error::RelationExists(predicate) => format!("The relation '{}' already exists in the extensional database.", predicate),
                 Error::RelationDoesNotExist(predicate) => format!("The relation '{}' does not exist in the selected database.", predicate),
                 Error::FactDoesNotConformToSchema(predicate, terms) => format!("The fact values ({}) do not meet the schema requirements for relation '{}'", terms, predicate),
+                Error::Serialization(e) => format!("An error occured either serializing or deserializing a relation: {}", e),
+                Error::UnknownSerialization(serialization) => format!("'{}' is not a supported serialization format.", serialization),
             }
         )
     }

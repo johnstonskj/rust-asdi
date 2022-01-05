@@ -22,8 +22,9 @@ programs using the API you may opt out of the [Pest](https://pest.rs) parser and
 1. Library **API** mostly stable, but minimal, will try and make the construction API more ergonomic.
 2. Library **Documentation** good top-level documentation but very little else right now.
 3. Library **validation checking** basic checking, but some is done in the parser and needs to be in the library.
-4. **Parser** full support for the core language as well as most pragmas (see next), require more unit tests.
-5. **I/O** nothing implemented, need to build out the input for extensional and output for intensional relations.
+4. **Parser** full support for the core language as well as pragmas, require more unit tests.
+5. **I/O** relations are now connected to the file input/output pragmas, the `io` module includes traits for 
+   reading/writing relations as well as basic JSON and CSV support.
 6. **Evaluation** current evaluator is basically top-down brute force and does not support any additional language features.
 
 # Example

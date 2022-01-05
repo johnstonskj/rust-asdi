@@ -12,7 +12,7 @@ use crate::io::Writer;
 use crate::{Collection, Relation};
 use std::fs::File;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::Path;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -23,6 +23,10 @@ pub struct Options {}
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct TextTables {}
+
+pub const PRAGMA_ID: &str = "text";
+
+pub const DISPLAY_LABEL: &str = "Text";
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
@@ -45,15 +49,15 @@ impl Writer for TextTables {
 
     fn write_to_with_options(
         &self,
-        file_name: PathBuf,
+        file_name: &Path,
         relation: &Relation,
-        _: Self::Options,
+        _: &Self::Options,
     ) -> Result<()> {
         let mut file = File::create(file_name)?;
         write(&mut file, relation)
     }
 
-    fn print_with_options(&self, relation: &Relation, _: Self::Options) -> Result<()> {
+    fn print_with_options(&self, relation: &Relation, _: &Self::Options) -> Result<()> {
         write(&mut std::io::stdout(), relation)
     }
 }

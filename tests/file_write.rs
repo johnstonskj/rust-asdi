@@ -19,8 +19,7 @@ fn test_write_as_csv() {
     for relation in program.intensional().iter() {
         write_relation(
             relation,
-            FilePragma::output(
-                relation,
+            &FilePragma::new(
                 out_file.clone(),
                 Format::DelimitedLines(CsvOptions::comma_separated()),
             ),
@@ -37,11 +36,7 @@ fn test_write_as_text() {
     println!("{:?}", out_file);
 
     for relation in program.intensional().iter() {
-        write_relation(
-            relation,
-            FilePragma::output(relation, out_file.clone(), Format::Text),
-        )
-        .unwrap();
+        write_relation(relation, &FilePragma::new(out_file.clone(), Format::Text)).unwrap();
     }
 }
 
@@ -55,11 +50,7 @@ fn test_write_as_json() {
     for relation in program.intensional().iter() {
         write_relation(
             relation,
-            FilePragma::output(
-                relation,
-                out_file.clone(),
-                Format::Json(JsonOptions::plain_output()),
-            ),
+            &FilePragma::new(out_file.clone(), Format::Json(JsonOptions::plain_output())),
         )
         .unwrap();
     }
@@ -75,8 +66,7 @@ fn test_write_as_pretty_json() {
     for relation in program.intensional().iter() {
         write_relation(
             relation,
-            FilePragma::output(
-                relation,
+            &FilePragma::new(
                 out_file.clone(),
                 Format::Json(JsonOptions::pretty_printed()),
             ),

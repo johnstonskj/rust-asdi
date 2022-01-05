@@ -1241,22 +1241,43 @@ impl Program {
     }
 
     // --------------------------------------------------------------------------------------------
+
+    pub fn load_extensional_data(&mut self) -> Result<()> {
+        for relation in self.extensional_mut().iter_mut() {
+            relation.load_from_file()?;
+        }
+        Ok(())
+    }
+
+    pub fn store_intensional_data(&mut self) -> Result<()> {
+        for relation in self.intensional_mut().iter_mut() {
+            relation.store_to_file()?;
+        }
+        Ok(())
+    }
+
+    // --------------------------------------------------------------------------------------------
     // --------------------------------------------------------------------------------------------
 
     ///
     /// Running a program performs the following steps:
     ///
-    /// 1. call the `inference` method on the provided [Evaluator], resulting in a set of new
+    /// 1. load external files into the extensional database,
+    /// 2. call the `inference` method on the provided [Evaluator], resulting in a set of new
     ///    intensional relations,
-    /// 2. display each updated relation in the results from (1),
     /// 3. merge these new relations into the existing intensional database,
-    /// 4. for each query in the program, evaluate it against the new intensional database and
+    /// 4. store intensional database to external files,
+    /// 5. for each query in the program, evaluate it against the new intensional database and
     ///    existing extensional database and display any results.
     ///
-    pub fn run(&mut self, evaluator: impl Evaluator) -> Result<()> {
+    pub fn run(&mut self, evaluator: impl Evaluator, load_extensional: bool) -> Result<()> {
+        if load_extensional {
+            self.load_extensional_data()?;
+        }
         let new_idb = evaluator.inference(self)?;
         println!("{:?}", new_idb);
         self.intensional_mut().merge(new_idb)?;
+        self.store_intensional_data()?;
         let results = self.eval_queries()?;
         for (query, view) in results {
             println!("{}", query);
@@ -1424,7 +1445,6 @@ pub mod edb;
 
 pub mod idb;
 
-#[cfg(feature = "io")]
 pub mod io;
 
 // ------------------------------------------------------------------------------------------------

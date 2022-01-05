@@ -7,12 +7,13 @@ repository = "https://github.com/johnstonskj/rust-asdi"
 license-file = "LICENSE"
 
 [features]
-default = ["parser", "io", "tabular"]
+default = ["parser", "tabular", "io"]
 parser = ["pest", "pest_derive"]
 tabular = ["prettytable-rs"]
-io = ["io_csv", "io_json"]
-io_json = ["serde_json"]
+io = ["io_csv", "io_json", "io_text"]
 io_csv = ["csv"]
+io_json = ["serde_json"]
+io_text = ["tabular"]
 
 typeset = []
 

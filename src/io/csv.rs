@@ -8,14 +8,14 @@ More detailed description, with
 */
 
 use crate::edb::{AttributeKind, Constant, Fact};
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::io::{Reader, Writer};
 use crate::syntax::COLUMN_NAME_UNKNOWN;
 use crate::{Collection, Labeled, MaybeLabeled, Relation};
 use csv::{ReaderBuilder, Trim, WriterBuilder};
 use std::fs::File;
 use std::io::{BufReader, Write};
-use std::path::PathBuf;
+use std::path::Path;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -29,6 +29,10 @@ pub struct Options {
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct DelimitedLines {}
+
+pub const PRAGMA_ID: &str = "csv";
+
+pub const DISPLAY_LABEL: &str = "CSV";
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
@@ -97,9 +101,9 @@ impl Reader for DelimitedLines {
 
     fn read_from_with_options(
         &self,
-        file_name: PathBuf,
+        file_name: &Path,
         as_relation: &Relation,
-        options: Self::Options,
+        options: &Self::Options,
     ) -> Result<Relation> {
         let file = File::open(file_name)?;
         let reader = BufReader::new(file);
@@ -126,7 +130,7 @@ impl Reader for DelimitedLines {
 
         for result in reader.records() {
             // TODO: propagate error
-            let record = result.unwrap();
+            let record = result.map_err(|e| Error::Serialization(Box::new(e)))?;
             assert_eq!(record.len(), arity);
             let values: Vec<Constant> = record
                 .iter()
@@ -150,9 +154,9 @@ impl Writer for DelimitedLines {
 
     fn write_to_with_options(
         &self,
-        file_name: PathBuf,
+        file_name: &Path,
         from_relation: &Relation,
-        options: Self::Options,
+        options: &Self::Options,
     ) -> Result<()> {
         let file = File::create(file_name)?;
         let mut writer = WriterBuilder::new()
@@ -162,7 +166,7 @@ impl Writer for DelimitedLines {
         write(&mut writer, from_relation, options.has_headers)
     }
 
-    fn print_with_options(&self, relation: &Relation, options: Self::Options) -> Result<()> {
+    fn print_with_options(&self, relation: &Relation, options: &Self::Options) -> Result<()> {
         let mut writer = WriterBuilder::new()
             .delimiter(options.delimiter)
             .has_headers(options.has_headers)
@@ -186,11 +190,13 @@ fn write<W: Write>(w: &mut csv::Writer<W>, relation: &Relation, has_headers: boo
                     .unwrap_or_else(|| COLUMN_NAME_UNKNOWN.to_string())
             })
             .collect();
-        w.write_record(&headers).unwrap();
+        w.write_record(&headers)
+            .map_err(|e| Error::Serialization(Box::new(e)))?;
     }
     for fact in relation.iter() {
         let record: Vec<String> = fact.iter().map(|c| c.to_string()).collect();
-        w.write_record(&record).unwrap();
+        w.write_record(&record)
+            .map_err(|e| Error::Serialization(Box::new(e)))?;
     }
     Ok(())
 }

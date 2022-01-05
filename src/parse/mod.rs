@@ -18,6 +18,7 @@ use crate::features::{
 use crate::idb::{
     Atom, Comparison, ComparisonOperator, Literal, Query, Rule as DlRule, Term, Variable,
 };
+use crate::io::{string_to_format, FilePragma, Format};
 use crate::syntax::{RESERVED_BOOLEAN_TRUE, RESERVED_PREFIX, TYPE_NAME_CONST_INTEGER};
 use crate::{Collection, Program};
 use pest::iterators::{Pair, Pairs};
@@ -25,7 +26,7 @@ use pest::{Parser, Span};
 use pest_derive::Parser;
 use std::fmt::Debug;
 use std::fs::read_to_string;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 // ------------------------------------------------------------------------------------------------
@@ -489,43 +490,26 @@ fn parse_decl_feature(
 }
 
 fn parse_decl_input(
-    mut input_pairs: Pairs<'_, Rule>,
+    input_pairs: Pairs<'_, Rule>,
     program: &mut Program,
-    _: FeatureSet,
+    features: FeatureSet,
 ) -> Result<()> {
-    let first = input_pairs.next().unwrap();
-    let predicate = match first.as_rule() {
-        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
-        _ => unreachable!(first.as_str()),
-    };
-
-    if let None = program.extensional().get(&predicate) {
-        Err(Error::RelationDoesNotExist(predicate))
-    } else {
-        let next = input_pairs.next().unwrap();
-        let file_name = match next.as_rule() {
-            Rule::string => next.as_str().to_string(),
-            _ => unreachable!(next.as_str()),
-        };
-
-        if input_pairs.next().is_some() {
-            unreachable!(input_pairs.as_str());
-        } else {
-            println!(
-                "Unimplemented: input data for `{}` relation from `{}`",
-                predicate, file_name
-            );
-            // TODO: input data for `predicate` relation from `file_name`
-        }
-
-        Ok(())
-    }
+    parse_decl_file_io(input_pairs, program, features, true)
 }
 
 fn parse_decl_output(
+    input_pairs: Pairs<'_, Rule>,
+    program: &mut Program,
+    features: FeatureSet,
+) -> Result<()> {
+    parse_decl_file_io(input_pairs, program, features, false)
+}
+
+fn parse_decl_file_io(
     mut input_pairs: Pairs<'_, Rule>,
     program: &mut Program,
     _: FeatureSet,
+    input: bool,
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
     let predicate = match first.as_rule() {
@@ -533,26 +517,34 @@ fn parse_decl_output(
         _ => unreachable!(first.as_str()),
     };
 
-    if let None = program.intensional().get(&predicate) {
-        Err(Error::RelationDoesNotExist(predicate))
+    let relations = if input {
+        program.extensional_mut()
     } else {
+        program.intensional_mut()
+    };
+
+    if let Some(relation) = relations.get_mut(&predicate) {
         let next = input_pairs.next().unwrap();
         let file_name = match next.as_rule() {
             Rule::string => next.as_str().to_string(),
             _ => unreachable!(next.as_str()),
         };
+        let file_name = &file_name[1..file_name.len() - 1];
 
-        if input_pairs.next().is_some() {
-            unreachable!(input_pairs.as_str());
+        let pragma = if let Some(format) = input_pairs.next() {
+            let format = format.as_str();
+            let format = &format[1..format.len() - 1];
+            FilePragma::new(PathBuf::from(file_name), string_to_format(format)?)
         } else {
-            println!(
-                "Unimplemented: output data for `{}` relation into `{}`",
-                predicate, file_name
-            );
-            // TODO: output data for `predicate` relation into `file_name`
-        }
-
+            FilePragma::new(
+                PathBuf::from(file_name),
+                Format::DelimitedLines(Default::default()),
+            )
+        };
+        relation.set_file_pragma(pragma);
         Ok(())
+    } else {
+        Err(Error::RelationDoesNotExist(predicate))
     }
 }
 

@@ -13,7 +13,7 @@ fn test_print_as_csv() {
     for relation in program.intensional().iter() {
         print_relation(
             relation,
-            Format::DelimitedLines(CsvOptions::comma_separated().no_headers()),
+            &Format::DelimitedLines(CsvOptions::comma_separated().no_headers()),
         )
         .unwrap();
     }
@@ -24,7 +24,7 @@ fn test_print_as_json() {
     let program = make_and_evaluate_ancestors();
 
     for relation in program.intensional().iter() {
-        print_relation(relation, Format::Json(JsonOptions::pretty_printed())).unwrap();
+        print_relation(relation, &Format::Json(JsonOptions::pretty_printed())).unwrap();
     }
 }
 
@@ -33,6 +33,6 @@ fn test_print_as_text() {
     let program = make_and_evaluate_ancestors();
 
     for relation in program.intensional().iter() {
-        print_relation(relation, Format::Text).unwrap();
+        print_relation(relation, &Format::Text).unwrap();
     }
 }

@@ -14,17 +14,19 @@ fn read_parents_from_csv_file() {
     let label = program.predicates().fetch("parent").unwrap();
     let relation = program.extensional_mut().get_mut(&label).unwrap();
 
-    let new_facts = read_relation(FilePragma::input(
+    let new_facts = read_relation(
         relation,
-        PathBuf::from("tests/data/parents.csv"),
-        Format::DelimitedLines(CsvOptions::comma_separated()),
-    ))
+        &FilePragma::new(
+            PathBuf::from("tests/data/parents.csv"),
+            Format::DelimitedLines(CsvOptions::comma_separated()),
+        ),
+    )
     .unwrap();
 
     relation.extend(new_facts).unwrap();
     assert_eq!(relation.len(), 8);
 
-    print_relation(relation, Format::Text).unwrap();
+    print_relation(relation, &Format::Text).unwrap();
 }
 
 #[test]
@@ -34,15 +36,17 @@ fn read_parents_from_csv_file_with_headers() {
     let label = program.predicates().fetch("parent").unwrap();
     let relation = program.extensional().get(&label).unwrap();
 
-    let relation = read_relation(FilePragma::input(
+    let relation = read_relation(
         relation,
-        PathBuf::from("tests/data/parents_headered.csv"),
-        Format::DelimitedLines(CsvOptions::comma_separated().has_headers()),
-    ))
+        &FilePragma::new(
+            PathBuf::from("tests/data/parents_headered.csv"),
+            Format::DelimitedLines(CsvOptions::comma_separated().has_headers()),
+        ),
+    )
     .unwrap();
     assert_eq!(relation.len(), 6);
 
-    print_relation(&relation, Format::Text).unwrap();
+    print_relation(&relation, &Format::Text).unwrap();
 }
 
 #[test]
@@ -52,15 +56,17 @@ fn read_parents_from_json_file() {
     let label = program.predicates().fetch("parent").unwrap();
     let relation = program.extensional_mut().get_mut(&label).unwrap();
 
-    let new_facts = read_relation(FilePragma::input(
+    let new_facts = read_relation(
         relation,
-        PathBuf::from("tests/data/parents.json"),
-        Format::Json(JsonOptions::default()),
-    ))
+        &FilePragma::new(
+            PathBuf::from("tests/data/parents.json"),
+            Format::Json(JsonOptions::default()),
+        ),
+    )
     .unwrap();
 
     relation.extend(new_facts).unwrap();
     assert_eq!(relation.len(), 8);
 
-    print_relation(relation, Format::Text).unwrap();
+    print_relation(relation, &Format::Text).unwrap();
 }
