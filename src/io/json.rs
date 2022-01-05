@@ -1,11 +1,6 @@
 /*!
-One-line description.
-
-More detailed description, with
-
-# Example
-
-*/
+This module provides the both a [Reader] and [Writer] implementation for JSON files.
+ */
 
 use crate::edb::{AttributeKind, Constant, Fact};
 use crate::error::Error;
@@ -29,9 +24,8 @@ pub struct Options {
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Json {}
 
+/// The string used in the `@input` and `@output` pragmas to identify this format.
 pub const PRAGMA_ID: &str = "json";
-
-pub const DISPLAY_LABEL: &str = "JSON";
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants

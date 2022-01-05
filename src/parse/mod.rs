@@ -11,7 +11,7 @@ TBD
 */
 
 use crate::edb::{Attribute, AttributeKind, Constant, Predicate};
-use crate::error::{Error, Result, SourceLocation};
+use crate::error::{invalid_value, language_feature_disabled, Error, Result, SourceLocation};
 use crate::features::{
     FeatureSet, FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION,
 };
@@ -20,7 +20,7 @@ use crate::idb::{
 };
 use crate::io::{string_to_format, FilePragma, Format};
 use crate::syntax::{RESERVED_BOOLEAN_TRUE, RESERVED_PREFIX, TYPE_NAME_CONST_INTEGER};
-use crate::{Collection, Program};
+use crate::{relation_does_not_exist, Collection, Program};
 use pest::iterators::{Pair, Pairs};
 use pest::{Parser, Span};
 use pest_derive::Parser;
@@ -333,9 +333,9 @@ fn parse_rule_head(
         body.push(one);
     }
     if body.is_empty() && !features.supports(&FEATURE_CONSTRAINTS) {
-        Err(Error::LanguageFeatureDisabled(FEATURE_CONSTRAINTS))
+        Err(language_feature_disabled(FEATURE_CONSTRAINTS))
     } else if body.len() > 1 && !features.supports(&FEATURE_DISJUNCTION) {
-        Err(Error::LanguageFeatureDisabled(FEATURE_DISJUNCTION))
+        Err(language_feature_disabled(FEATURE_DISJUNCTION))
     } else {
         Ok(body)
     }
@@ -426,7 +426,7 @@ fn parse_decl_inferred_relation(
                 if let Some(from) = program.extensional().get(&name) {
                     attributes.extend(from.schema().iter().cloned());
                 } else {
-                    return Err(Error::RelationDoesNotExist(name.as_ref().clone()));
+                    return Err(relation_does_not_exist(name.as_ref().clone()));
                 }
             }
             _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
@@ -544,7 +544,7 @@ fn parse_decl_file_io(
         relation.set_file_pragma(pragma);
         Ok(())
     } else {
-        Err(Error::RelationDoesNotExist(predicate))
+        Err(relation_does_not_exist(predicate))
     }
 }
 
@@ -580,7 +580,7 @@ fn parse_literal(
     if negative && !features.supports(&FEATURE_NEGATION) {
         return Err(pest_error!(
             next.as_span(),
-            Error::LanguageFeatureDisabled(FEATURE_NEGATION).to_string()
+            language_feature_disabled(FEATURE_NEGATION).to_string()
         ));
     } else if negative {
         next = input_pairs.next().unwrap();
@@ -639,7 +639,7 @@ fn parse_comparison(
     if !_features.supports(&FEATURE_COMPARISONS) {
         Err(pest_error!(
             input_pairs.into_iter().next().unwrap().as_span(),
-            Error::LanguageFeatureDisabled(FEATURE_COMPARISONS).to_string()
+            language_feature_disabled(FEATURE_COMPARISONS).to_string()
         ))
     } else {
         let next = input_pairs.next().unwrap();
@@ -707,7 +707,7 @@ fn parse_constant(
             // } else {
             i64::from_str(first.as_str())
                 .map_err(|e| {
-                    Error::InvalidValue(
+                    invalid_value(
                         TYPE_NAME_CONST_INTEGER.to_string(),
                         format!("{} ({})", first.as_str(), e),
                     )

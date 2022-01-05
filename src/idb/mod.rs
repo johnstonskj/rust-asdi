@@ -269,7 +269,10 @@ converted to Datalog using the examples above.
 */
 
 use crate::edb::{AttributeIndex, Constant, Predicate, Relation};
-use crate::error::{Error, Result, SourceLocation};
+use crate::error::{
+    fact_does_not_correspond_to_schema, head_variables_missing_in_body, invalid_head_atom_count,
+    invalid_value, negative_variables_not_also_positive, Error, Result, SourceLocation,
+};
 use crate::features::{FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
 use crate::syntax::{
     CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, CONJUNCTION_UNICODE_SYMBOL,
@@ -763,7 +766,7 @@ impl Rule {
         let head_len = self.head.len();
         if head_len < min || head_len > max {
             println!("HC: {:#?}", self);
-            return Err(Error::InvalidHeadCount(
+            return Err(invalid_head_atom_count(
                 head_len,
                 min,
                 max,
@@ -789,13 +792,13 @@ impl Rule {
                 })
                 .collect();
             if !missing.is_empty() {
-                return Err(Error::HeadVariablesMissingInBody(
-                    atom.label().to_string(),
-                    atom.source_location().cloned(),
+                return Err(head_variables_missing_in_body(
+                    atom.label().clone(),
                     missing
                         .iter()
                         .map(|t| t.to_string())
                         .collect::<Vec<String>>(),
+                    atom.source_location().cloned(),
                 ));
             }
 
@@ -805,13 +808,13 @@ impl Rule {
                 .filter(|term| !body_positive_terms.contains(term))
                 .collect();
             if !missing.is_empty() {
-                return Err(Error::NegativeVariablesNotPositive(
-                    atom.label().to_string(),
-                    atom.source_location().cloned(),
+                return Err(negative_variables_not_also_positive(
+                    atom.label().clone(),
                     missing
                         .iter()
                         .map(|t| t.to_string())
                         .collect::<Vec<String>>(),
+                    atom.source_location().cloned(),
                 ));
             }
         }
@@ -900,15 +903,14 @@ impl Atom {
                         .kind()
                         .unwrap()
                 {
-                    return Error::FactDoesNotConformToSchema(
+                    return Err(fact_does_not_correspond_to_schema(
                         relation.label().clone(),
                         terms
                             .iter()
                             .map(|t| t.to_string())
                             .collect::<Vec<String>>()
                             .join(", "),
-                    )
-                    .into();
+                    ));
                 }
             }
         }
@@ -1198,10 +1200,7 @@ impl FromStr for ComparisonOperator {
             OPERATOR_ASCII_GREATER_THAN_OR_EQUAL | OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL => {
                 Ok(Self::GreaterThanOrEqual)
             }
-            _ => Err(Error::InvalidValue(
-                TYPE_NAME_COMPARISON_OPERATOR.to_string(),
-                s.to_string(),
-            )),
+            _ => Err(invalid_value(TYPE_NAME_COMPARISON_OPERATOR, s)),
         }
     }
 }
@@ -1292,7 +1291,7 @@ impl FromStr for Variable {
         if Self::is_valid(s) {
             Ok(Self(s.to_owned()))
         } else {
-            Error::InvalidValue(TYPE_NAME_VARIABLE.to_owned(), s.to_owned()).into()
+            invalid_value(TYPE_NAME_VARIABLE, s).into()
         }
     }
 }

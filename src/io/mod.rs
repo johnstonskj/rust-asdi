@@ -1,25 +1,32 @@
 /*!
-One-line description.
-
-More detailed description, with
-
-# Example
-
+This module provides the set of types that are used to implement formatted input/output operations
+for [Relation]s.
 */
 
-use crate::error::{Error, Result};
+use crate::error;
+use crate::error::{serialization_operation_unsupported, Result};
 use crate::Relation;
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
+///
+/// Identifies the file format to read or write, along with any options the implementation
+/// chooses to make available.
+///
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Format {
+    ///
+    /// This represents _Comma Separated Variable_ (CSV) files, although as the _comma_ part is
+    /// only one choice the name has been generalized.
+    ///
+    #[cfg(feature = "io_csv")]
     DelimitedLines(csv::Options),
+    #[cfg(feature = "io_json")]
     Json(json::Options),
+    #[cfg(feature = "io_text")]
     Text,
 }
 
@@ -80,37 +87,54 @@ pub trait Writer: Default {
 
 pub(crate) fn string_to_format(s: &str) -> Result<Format> {
     match s {
+        #[cfg(feature = "io_csv")]
         csv::PRAGMA_ID => Ok(Format::DelimitedLines(Default::default())),
+        #[cfg(feature = "io_json")]
         json::PRAGMA_ID => Ok(Format::Json(Default::default())),
+        #[cfg(feature = "io_text")]
         text::PRAGMA_ID => Ok(Format::Text),
-        _ => Err(Error::UnknownSerialization(s.to_string())),
+        _ => Err(error::serialization_format_unknown(s)),
     }
 }
 
+///
+/// Load data from the file identified by `pragma`, using any schema in `relation`, and returning
+/// a new [Relation] containing the loaded data.
+///
 pub fn read_relation(relation: &Relation, pragma: &FilePragma) -> Result<Relation> {
     match &pragma.file_format {
+        #[cfg(feature = "io_csv")]
         Format::DelimitedLines(options) => {
             let reader = csv::DelimitedLines::default();
             reader.read_from_with_options(&pragma.file_name, relation, options)
         }
+        #[cfg(feature = "io_json")]
         Format::Json(options) => {
             let reader = json::Json::default();
             reader.read_from_with_options(&pragma.file_name, relation, options)
         }
-        _ => panic!("Format does not support reading"),
+        _ => Err(serialization_operation_unsupported(
+            pragma.file_format.label(),
+        )),
     }
 }
 
+///
+/// Store data from `relation` into the file identified by `pragma`.
+///
 pub fn write_relation(relation: &Relation, pragma: &FilePragma) -> Result<()> {
     match &pragma.file_format {
+        #[cfg(feature = "io_csv")]
         Format::DelimitedLines(options) => {
             let writer = csv::DelimitedLines::default();
             writer.write_to_with_options(&pragma.file_name, relation, options)
         }
+        #[cfg(feature = "io_json")]
         Format::Json(options) => {
             let writer = json::Json::default();
             writer.write_to_with_options(&pragma.file_name, relation, options)
         }
+        #[cfg(feature = "io_text")]
         Format::Text => {
             let writer = text::TextTables::default();
             writer.write_to(&pragma.file_name, relation)
@@ -118,16 +142,22 @@ pub fn write_relation(relation: &Relation, pragma: &FilePragma) -> Result<()> {
     }
 }
 
+///
+/// Print data from `relation` to standard output in the provided [Format].
+///
 pub fn print_relation(relation: &Relation, file_format: &Format) -> Result<()> {
     match &file_format {
+        #[cfg(feature = "io_csv")]
         Format::DelimitedLines(options) => {
             let writer = csv::DelimitedLines::default();
             writer.print_with_options(relation, options)
         }
+        #[cfg(feature = "io_json")]
         Format::Json(options) => {
             let writer = json::Json::default();
             writer.print_with_options(relation, options)
         }
+        #[cfg(feature = "io_text")]
         Format::Text => {
             let writer = text::TextTables::default();
             writer.print(relation)
@@ -137,6 +167,20 @@ pub fn print_relation(relation: &Relation, file_format: &Format) -> Result<()> {
 
 // ------------------------------------------------------------------------------------------------
 // Implementations
+// ------------------------------------------------------------------------------------------------
+
+impl Format {
+    pub fn label(&self) -> &'static str {
+        match self {
+            #[cfg(feature = "io_csv")]
+            Format::DelimitedLines(_) => csv::PRAGMA_ID,
+            #[cfg(feature = "io_json")]
+            Format::Json(_) => json::PRAGMA_ID,
+            #[cfg(feature = "io_text")]
+            Format::Text => text::PRAGMA_ID,
+        }
+    }
+}
 // ------------------------------------------------------------------------------------------------
 
 impl FilePragma {

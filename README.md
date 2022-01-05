@@ -100,6 +100,13 @@ fn ancestor_example() {
 
 ## Changes
 
+**Version 0.2.1**
+
+* Added traits for consistency across types.
+* Added a predicate cache to reduce duplication.
+* Finished the file input and output for relations.
+* Cleaned up the error module and added functions for error construction.
+
 **Version 0.2.0**
 
 * New internal structures and library layout.

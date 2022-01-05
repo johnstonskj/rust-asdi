@@ -50,7 +50,7 @@ boolean_fact(@false).
 ```
 */
 
-use crate::error::{Error, Result};
+use crate::error::{invalid_value, relation_exists, Error, Result};
 use crate::idb::{Atom, Row, View};
 use crate::io::{read_relation, write_relation, FilePragma};
 use crate::syntax::{
@@ -547,7 +547,7 @@ impl FromStr for AttributeKind {
             "str" | "string" => Ok(Self::String),
             "int" | "integer" => Ok(Self::Integer),
             "bool" | "boolean" => Ok(Self::Boolean),
-            _ => Error::InvalidValue("ConstantKind".to_string(), s.to_string()).into(),
+            _ => invalid_value("ConstantKind", s).into(),
         }
     }
 }
@@ -633,7 +633,7 @@ impl Relations {
         );
         let predicate = predicate;
         if self.0.contains_key(&predicate) {
-            Error::RelationExists(predicate.as_ref().clone()).into()
+            Err(relation_exists(predicate.as_ref().clone()))
         } else {
             let relation = Relation::new(predicate.clone(), schema);
             trace!("add_new_relation < relation: {:?}", relation);
@@ -874,18 +874,31 @@ impl Relation {
 
     // --------------------------------------------------------------------------------------------
 
+    ///
+    /// Returns `true` if a [FilePragma] (`@input` or `@output`) is attached to this relation.
+    ///
     pub fn has_file_pragma(&self) -> bool {
         self.pragma.is_some()
     }
 
+    ///
+    /// Returns a [FilePragma] if one is attached to this relation, else `None`.
+    ///
     pub fn file_pragma(&self) -> Option<&FilePragma> {
         self.pragma.as_ref()
     }
 
+    ///
+    /// Attach a [FilePragma] to this relation, if one exists already it is overwritten.
+    ///
     pub fn set_file_pragma(&mut self, pragma: FilePragma) {
         self.pragma = Some(pragma)
     }
 
+    ///
+    /// If a [FilePragma] is attached to this relation then read data from the file into this
+    /// relation's set of facts.
+    ///
     pub fn load_from_file(&mut self) -> Result<()> {
         if let Some(pragma) = &self.pragma {
             let new_facts = read_relation(self, pragma)?;
@@ -895,6 +908,10 @@ impl Relation {
         }
     }
 
+    ///
+    /// If a file pragma is attached to this relation then store this relation's set of facts
+    /// into the file.
+    ///
     pub fn store_to_file(&mut self) -> Result<()> {
         if let Some(pragma) = &self.pragma {
             write_relation(self, pragma)
@@ -1109,7 +1126,7 @@ impl FromStr for Predicate {
         if Self::is_valid(s) {
             Ok(Self(s.to_owned()))
         } else {
-            Error::InvalidValue(TYPE_NAME_PREDICATE.to_owned(), s.to_owned()).into()
+            invalid_value(TYPE_NAME_PREDICATE, s).into()
         }
     }
 }

@@ -1,11 +1,6 @@
 /*!
-One-line description.
-
-More detailed description, with
-
-# Example
-
-*/
+This module provides the both a [Reader] and [Writer] implementation for CSV files.
+ */
 
 use crate::edb::{AttributeKind, Constant, Fact};
 use crate::error::{Error, Result};
@@ -30,9 +25,8 @@ pub struct Options {
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct DelimitedLines {}
 
+/// The string used in the `@input` and `@output` pragmas to identify this format.
 pub const PRAGMA_ID: &str = "csv";
-
-pub const DISPLAY_LABEL: &str = "CSV";
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants

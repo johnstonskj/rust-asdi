@@ -1,8 +1,10 @@
 use crate::edb::Constant;
-use crate::error::{Error, Result};
+use crate::error::{language_feature_disabled, Result};
 use crate::features::{FEATURE_COMPARISONS, FEATURE_NEGATION};
 use crate::idb::{eval::Evaluator, Atom, Term, View};
-use crate::{Collection, Labeled, MaybeAnonymous, MaybePositive, Program, Relations};
+use crate::{
+    relation_does_not_exist, Collection, Labeled, MaybeAnonymous, MaybePositive, Program, Relations,
+};
 use tracing::trace;
 
 // ------------------------------------------------------------------------------------------------
@@ -73,10 +75,10 @@ impl Evaluator for NaiveEvaluator {
                                     }
                                     Ok(view)
                                 } else {
-                                    Err(Error::RelationDoesNotExist(atom.label().clone()))
+                                    Err(relation_does_not_exist(atom.label().clone()))
                                 }
                             } else {
-                                Err(Error::LanguageFeatureDisabled(FEATURE_COMPARISONS))
+                                Err(language_feature_disabled(FEATURE_COMPARISONS))
                             }
                         })
                         .collect();
@@ -119,7 +121,7 @@ impl Evaluator for NaiveEvaluator {
             }
             Ok(new_db)
         } else {
-            Err(Error::LanguageFeatureDisabled(FEATURE_NEGATION))
+            Err(language_feature_disabled(FEATURE_NEGATION))
         }
     }
 }

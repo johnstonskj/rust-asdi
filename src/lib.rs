@@ -723,7 +723,10 @@ The program will select all matching (in this case all) facts from the _mortal_ 
 )]
 
 use crate::edb::{Attribute, Predicate, PredicateRef, Relation, Relations, Schema};
-use crate::error::{Error, Result};
+use crate::error::{
+    extensional_predicate_in_rule_head, language_feature_unsupported, relation_does_not_exist,
+    Result,
+};
 use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
 use crate::idb::{Atom, Evaluator, Literal, Query, Rule, RuleForm, Rules, Term, Variable, View};
 use std::cell::RefCell;
@@ -1153,11 +1156,11 @@ impl Program {
         rule.well_formed_check(self.features())?;
 
         if rule.form() == RuleForm::Constraint && !self.features().supports(&FEATURE_CONSTRAINTS) {
-            return Err(Error::LanguageFeatureUnsupported(FEATURE_CONSTRAINTS));
+            return Err(language_feature_unsupported(FEATURE_CONSTRAINTS));
         }
 
         if rule.form() == RuleForm::Disjunctive && !self.features().supports(&FEATURE_DISJUNCTION) {
-            return Err(Error::LanguageFeatureUnsupported(FEATURE_DISJUNCTION));
+            return Err(language_feature_unsupported(FEATURE_DISJUNCTION));
         }
 
         for atom in rule.head() {
@@ -1165,7 +1168,7 @@ impl Program {
             // Update the database schema based on atoms found in the rule's head.
             //
             if self.asserted.contains(atom.label()) {
-                return Err(Error::ExtensionalPredicateInRuleHead(
+                return Err(extensional_predicate_in_rule_head(
                     atom.label().clone(),
                     atom.source_location().cloned(),
                 ));
@@ -1234,7 +1237,7 @@ impl Program {
     pub fn add_query(&mut self, query: Query) -> Result<bool> {
         let predicate = query.as_ref().label();
         if !self.extensional().contains(predicate) && !self.intensional().contains(predicate) {
-            Err(Error::RelationDoesNotExist(predicate.clone()))
+            Err(relation_does_not_exist(predicate.clone()))
         } else {
             Ok(self.queries.insert(query))
         }
@@ -1242,6 +1245,10 @@ impl Program {
 
     // --------------------------------------------------------------------------------------------
 
+    ///
+    /// Load any data required from external files. For each relation any attached a [FilePragma](io/struct.FilePragma.html)
+    /// is used to load data into that relation.
+    ///
     pub fn load_extensional_data(&mut self) -> Result<()> {
         for relation in self.extensional_mut().iter_mut() {
             relation.load_from_file()?;
@@ -1249,6 +1256,10 @@ impl Program {
         Ok(())
     }
 
+    ///
+    /// Store any data required to external files. For each relation any attached a [FilePragma](io/struct.FilePragma.html)
+    /// is used to store the relation's facts into a file.
+    ///
     pub fn store_intensional_data(&mut self) -> Result<()> {
         for relation in self.intensional_mut().iter_mut() {
             relation.store_to_file()?;
@@ -1262,7 +1273,7 @@ impl Program {
     ///
     /// Running a program performs the following steps:
     ///
-    /// 1. load external files into the extensional database,
+    /// 1. load external files into the extensional database (if required),
     /// 2. call the `inference` method on the provided [Evaluator], resulting in a set of new
     ///    intensional relations,
     /// 3. merge these new relations into the existing intensional database,
@@ -1348,7 +1359,7 @@ impl Program {
         } else if self.extensional().contains(label) {
             Ok(self.extensional().matches(query.as_ref()))
         } else {
-            Err(Error::RelationDoesNotExist(label.clone()))
+            Err(relation_does_not_exist(label.clone()))
         }
     }
 }

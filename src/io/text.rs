@@ -1,11 +1,6 @@
 /*!
-One-line description.
-
-More detailed description, with
-
-# Example
-
-*/
+This module provides the both a [Writer] implementation for tabular text files.
+ */
 
 use crate::error::Result;
 use crate::io::Writer;
@@ -24,9 +19,8 @@ pub struct Options {}
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct TextTables {}
 
+/// The string used in the `@input` and `@output` pragmas to identify this format.
 pub const PRAGMA_ID: &str = "text";
-
-pub const DISPLAY_LABEL: &str = "Text";
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
