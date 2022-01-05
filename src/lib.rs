@@ -1011,7 +1011,8 @@ impl Program {
         }
     }
 
-    // TODO: new_with_predicates ?
+    // MAYBE: new_with_predicates
+
     // --------------------------------------------------------------------------------------------
 
     ///
@@ -1169,13 +1170,14 @@ impl Program {
             //
             if self.asserted.contains(atom.label()) {
                 return Err(extensional_predicate_in_rule_head(
-                    atom.label().clone(),
+                    atom.label_ref().clone(),
                     atom.source_location().cloned(),
                 ));
             } else if !self.infer.contains(atom.label()) {
                 let mut schema = Vec::with_capacity(atom.len());
                 for term in atom.iter() {
                     match term {
+                        Term::Anonymous => {}
                         Term::Variable(v) => schema.push(self.infer_attribute(v, &rule)),
                         Term::Constant(c) => schema.push(Attribute::from(c.kind())),
                     }
@@ -1235,9 +1237,9 @@ impl Program {
     /// Add the provided `query` to the program.
     ///
     pub fn add_query(&mut self, query: Query) -> Result<bool> {
-        let predicate = query.as_ref().label();
-        if !self.extensional().contains(predicate) && !self.intensional().contains(predicate) {
-            Err(relation_does_not_exist(predicate.clone()))
+        let predicate = query.as_ref().label_ref();
+        if !self.extensional().contains(&predicate) && !self.intensional().contains(&predicate) {
+            Err(relation_does_not_exist(predicate))
         } else {
             Ok(self.queries.insert(query))
         }
@@ -1353,10 +1355,10 @@ impl Program {
     }
 
     fn inner_eval_query(&self, query: &Query, intensional: &Relations) -> Result<Option<View>> {
-        let label = query.as_ref().label();
-        if intensional.contains(label) {
+        let label = query.as_ref().label_ref();
+        if intensional.contains(&label) {
             Ok(intensional.matches(query.as_ref()))
-        } else if self.extensional().contains(label) {
+        } else if self.extensional().contains(&label) {
             Ok(self.extensional().matches(query.as_ref()))
         } else {
             Err(relation_does_not_exist(label.clone()))

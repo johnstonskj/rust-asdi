@@ -2,7 +2,7 @@
 This module provides the common `Error` and `Result` types for this library.
  */
 
-use crate::edb::Predicate;
+use crate::edb::PredicateRef;
 use crate::features::Feature;
 use std::fmt::{Display, Formatter};
 
@@ -67,12 +67,12 @@ pub enum Error {
     },
 
     FactDoesNotConformToSchema {
-        label: Predicate,
+        label: PredicateRef,
         terms: String,
     },
 
     ExtensionalPredicateInRuleHead {
-        label: Predicate,
+        label: PredicateRef,
         location: Option<SourceLocation>,
     },
 
@@ -84,23 +84,23 @@ pub enum Error {
     },
 
     HeadVariablesMissingInBody {
-        atom: Predicate,
+        atom: PredicateRef,
         variables: Vec<String>,
         location: Option<SourceLocation>,
     },
 
     NegativeVariablesNotAlsoPositive {
-        atom: Predicate,
+        atom: PredicateRef,
         variables: Vec<String>,
         location: Option<SourceLocation>,
     },
 
     RelationExists {
-        label: Predicate,
+        label: PredicateRef,
     },
 
     RelationDoesNotExist {
-        label: Predicate,
+        label: PredicateRef,
     },
 }
 
@@ -146,7 +146,7 @@ pub fn invalid_value<S: Into<String>>(expecting_type: S, given_value: S) -> Erro
 }
 
 #[inline]
-pub fn fact_does_not_correspond_to_schema<S: Into<String>>(label: Predicate, terms: S) -> Error {
+pub fn fact_does_not_correspond_to_schema<S: Into<String>>(label: PredicateRef, terms: S) -> Error {
     Error::FactDoesNotConformToSchema {
         label,
         terms: terms.into(),
@@ -155,7 +155,7 @@ pub fn fact_does_not_correspond_to_schema<S: Into<String>>(label: Predicate, ter
 
 #[inline]
 pub fn extensional_predicate_in_rule_head(
-    label: Predicate,
+    label: PredicateRef,
     location: Option<SourceLocation>,
 ) -> Error {
     Error::ExtensionalPredicateInRuleHead { label, location }
@@ -178,7 +178,7 @@ pub fn invalid_head_atom_count(
 
 #[inline]
 pub fn head_variables_missing_in_body(
-    atom: Predicate,
+    atom: PredicateRef,
     variables: Vec<String>,
     location: Option<SourceLocation>,
 ) -> Error {
@@ -191,7 +191,7 @@ pub fn head_variables_missing_in_body(
 
 #[inline]
 pub fn negative_variables_not_also_positive(
-    atom: Predicate,
+    atom: PredicateRef,
     variables: Vec<String>,
     location: Option<SourceLocation>,
 ) -> Error {
@@ -203,12 +203,12 @@ pub fn negative_variables_not_also_positive(
 }
 
 #[inline]
-pub fn relation_exists(label: Predicate) -> Error {
+pub fn relation_exists(label: PredicateRef) -> Error {
     Error::RelationExists { label }
 }
 
 #[inline]
-pub fn relation_does_not_exist(label: Predicate) -> Error {
+pub fn relation_does_not_exist(label: PredicateRef) -> Error {
     Error::RelationDoesNotExist { label }
 }
 

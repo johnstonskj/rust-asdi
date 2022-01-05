@@ -3,9 +3,9 @@ This module provides the both a [Reader] and [Writer] implementation for CSV fil
  */
 
 use crate::edb::{AttributeKind, Constant, Fact};
-use crate::error::{Error, Result};
+use crate::error::{fact_does_not_correspond_to_schema, Error, Result};
 use crate::io::{Reader, Writer};
-use crate::syntax::COLUMN_NAME_UNKNOWN;
+use crate::syntax::{CHAR_COMMA, COLUMN_NAME_UNKNOWN};
 use crate::{Collection, Labeled, MaybeLabeled, Relation};
 use csv::{ReaderBuilder, Trim, WriterBuilder};
 use std::fs::File;
@@ -116,7 +116,7 @@ impl Reader for DelimitedLines {
             .collect();
         let arity = attribute_types.len();
 
-        // TODO: could extend this to do name matching, right now it assumes a positional match
+        // MAYBE: could extend this to do name matching, right now it assumes a positional match
 
         // if reader.has_headers() {
         //     let headers = reader.headers();
@@ -125,18 +125,28 @@ impl Reader for DelimitedLines {
         for result in reader.records() {
             // TODO: propagate error
             let record = result.map_err(|e| Error::Serialization(Box::new(e)))?;
-            assert_eq!(record.len(), arity);
-            let values: Vec<Constant> = record
-                .iter()
-                .enumerate()
-                .map(|(i, s)| match attribute_types.get(i) {
-                    Some(AttributeKind::String) => Constant::String(s.to_string()),
-                    Some(AttributeKind::Integer) => Constant::String(s.to_string()),
-                    Some(AttributeKind::Boolean) => Constant::String(s.to_string()),
-                    _ => unreachable!(),
-                })
-                .collect();
-            new_relation.add(Fact::new(new_relation.label_ref(), values))?;
+            if record.len() == arity {
+                let values: Vec<Constant> = record
+                    .iter()
+                    .enumerate()
+                    .map(|(i, s)| match attribute_types.get(i) {
+                        Some(AttributeKind::String) => Constant::String(s.to_string()),
+                        Some(AttributeKind::Integer) => Constant::String(s.to_string()),
+                        Some(AttributeKind::Boolean) => Constant::String(s.to_string()),
+                        _ => unreachable!(),
+                    })
+                    .collect();
+                new_relation.add(Fact::new(new_relation.label_ref(), values))?;
+            } else {
+                return Err(fact_does_not_correspond_to_schema(
+                    new_relation.label_ref(),
+                    record
+                        .iter()
+                        .map(str::to_string)
+                        .collect::<Vec<String>>()
+                        .join(&format!("{} ", CHAR_COMMA)),
+                ));
+            }
         }
 
         Ok(new_relation)

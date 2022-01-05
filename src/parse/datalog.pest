@@ -73,8 +73,16 @@ predicate = @{
     LOWERCASE_LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
 }
 
-variable = @{
-    UNDERSCORE | ( UPPERCASE_LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )* )
+variable = _{
+    anonymous_variable | named_variable
+}
+
+anonymous_variable = {
+    UNDERSCORE
+}
+
+named_variable = @{
+    UPPERCASE_LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
 }
 
 identifier = @{

@@ -426,7 +426,7 @@ fn parse_decl_inferred_relation(
                 if let Some(from) = program.extensional().get(&name) {
                     attributes.extend(from.schema().iter().cloned());
                 } else {
-                    return Err(relation_does_not_exist(name.as_ref().clone()));
+                    return Err(relation_does_not_exist(name));
                 }
             }
             _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
@@ -513,7 +513,7 @@ fn parse_decl_file_io(
 ) -> Result<()> {
     let first = input_pairs.next().unwrap();
     let predicate = match first.as_rule() {
-        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
+        Rule::predicate => program.predicates().fetch(first.as_str())?,
         _ => unreachable!(first.as_str()),
     };
 
@@ -735,7 +735,8 @@ fn parse_term(
 ) -> Result<Term> {
     let first = input_pairs.next().unwrap();
     let value = match first.as_rule() {
-        Rule::variable => Variable::from_str_unchecked(first.as_str()).into(),
+        Rule::anonymous_variable => Term::Anonymous,
+        Rule::named_variable => Variable::from_str_unchecked(first.as_str()).into(),
         Rule::constant => Term::Constant(parse_constant(first.into_inner(), program, features)?),
         _ => unreachable!(first.as_str()),
     };

@@ -275,23 +275,21 @@ use crate::error::{
 };
 use crate::features::{FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
 use crate::syntax::{
-    CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, CONJUNCTION_UNICODE_SYMBOL,
-    DISJUNCTION_UNICODE_SYMBOL, EMPTY_STR, FALSE_UNICODE_SYMBOL, IMPLICATION_UNICODE_ARROW,
-    NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL, OPERATOR_ASCII_GREATER_THAN,
-    OPERATOR_ASCII_GREATER_THAN_OR_EQUAL, OPERATOR_ASCII_LESS_THAN,
+    ANONYMOUS_TERM, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
+    CONJUNCTION_UNICODE_SYMBOL, DISJUNCTION_UNICODE_SYMBOL, EMPTY_STR, FALSE_UNICODE_SYMBOL,
+    IMPLICATION_UNICODE_ARROW, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
+    OPERATOR_ASCII_GREATER_THAN, OPERATOR_ASCII_GREATER_THAN_OR_EQUAL, OPERATOR_ASCII_LESS_THAN,
     OPERATOR_ASCII_LESS_THAN_OR_EQUAL, OPERATOR_ASCII_NOT_EQUAL, OPERATOR_ASCII_NOT_EQUAL_ALT,
     OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL, OPERATOR_UNICODE_LESS_THAN_OR_EQUAL,
     OPERATOR_UNICODE_NOT_EQUAL, TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
-    VARIABLE_NAME_IGNORE,
 };
 use crate::{
     AttributeName, Collection, FeatureSet, IndexedCollection, Labeled, MaybeAnonymous, MaybeGround,
-    MaybePositive, SyntaxFragments,
+    MaybePositive, PredicateRef, SyntaxFragments,
 };
 use paste::paste;
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
-use std::rc::Rc;
 use std::str::FromStr;
 
 // ------------------------------------------------------------------------------------------------
@@ -337,7 +335,7 @@ pub enum RuleForm {
 ///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Atom {
-    label: Rc<Predicate>,
+    label: PredicateRef,
     terms: Vec<Term>,
     src_loc: Option<SourceLocation>,
 }
@@ -438,7 +436,8 @@ pub enum ComparisonOperator {
 ///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Term {
-    // TODO: do we represent anonymous variables (syntax: "_") explicitly?
+    /// denoted with the character `_` in a literal.
+    Anonymous,
     /// a value such that term is $\small \in \mathcal{V}$
     Variable(Variable),
 
@@ -793,7 +792,7 @@ impl Rule {
                 .collect();
             if !missing.is_empty() {
                 return Err(head_variables_missing_in_body(
-                    atom.label().clone(),
+                    atom.label_ref().clone(),
                     missing
                         .iter()
                         .map(|t| t.to_string())
@@ -809,7 +808,7 @@ impl Rule {
                 .collect();
             if !missing.is_empty() {
                 return Err(negative_variables_not_also_positive(
-                    atom.label().clone(),
+                    atom.label_ref().clone(),
                     missing
                         .iter()
                         .map(|t| t.to_string())
@@ -850,7 +849,7 @@ impl Labeled for Atom {
         &self.label
     }
 
-    fn label_ref(&self) -> Rc<Predicate> {
+    fn label_ref(&self) -> PredicateRef {
         self.label.clone()
     }
 }
@@ -880,7 +879,7 @@ impl Collection<Term> for Atom {
 }
 
 impl Atom {
-    pub fn new<T: Into<Vec<Term>>>(label: Rc<Predicate>, terms: T) -> Self {
+    pub fn new<T: Into<Vec<Term>>>(label: PredicateRef, terms: T) -> Self {
         let terms = terms.into();
         assert!(!terms.is_empty());
         Self {
@@ -904,7 +903,7 @@ impl Atom {
                         .unwrap()
                 {
                     return Err(fact_does_not_correspond_to_schema(
-                        relation.label().clone(),
+                        relation.label_ref().clone(),
                         terms
                             .iter()
                             .map(|t| t.to_string())
@@ -921,7 +920,7 @@ impl Atom {
         })
     }
 
-    pub fn new_at_location(label: Rc<Predicate>, terms: &[Term], location: SourceLocation) -> Self {
+    pub fn new_at_location(label: PredicateRef, terms: &[Term], location: SourceLocation) -> Self {
         let terms: Vec<Term> = terms.into();
         assert!(!terms.is_empty());
         Self {
@@ -1213,6 +1212,7 @@ impl Display for Term {
             f,
             "{}",
             match self {
+                Term::Anonymous => ANONYMOUS_TERM.to_string(),
                 Term::Variable(v) => v.to_string(),
                 Term::Constant(v) => v.to_string(),
             }
@@ -1258,15 +1258,11 @@ impl From<bool> for Term {
 
 impl MaybeAnonymous for Term {
     fn anonymous() -> Self {
-        Self::Variable(Variable::anonymous())
+        Self::Anonymous
     }
 
     fn is_anonymous(&self) -> bool {
-        if let Term::Variable(v) = self {
-            v.is_anonymous()
-        } else {
-            false
-        }
+        matches!(self, Self::Anonymous)
     }
 }
 
@@ -1311,20 +1307,10 @@ impl From<Variable> for String {
 impl AttributeName for Variable {
     fn is_valid(s: &str) -> bool {
         let mut chars = s.chars();
-        s == VARIABLE_NAME_IGNORE
-            || (!s.is_empty())
-                && chars.next().map(|c| c.is_uppercase()).unwrap()
-                && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
-    }
-}
-
-impl MaybeAnonymous for Variable {
-    fn anonymous() -> Self {
-        Self(VARIABLE_NAME_IGNORE.to_owned())
-    }
-
-    fn is_anonymous(&self) -> bool {
-        self.as_ref() == VARIABLE_NAME_IGNORE
+        s != ANONYMOUS_TERM
+            && !s.is_empty()
+            && chars.next().map(|c| c.is_uppercase()).unwrap()
+            && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
 }
 

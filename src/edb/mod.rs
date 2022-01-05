@@ -50,7 +50,9 @@ boolean_fact(@false).
 ```
 */
 
-use crate::error::{invalid_value, relation_exists, Error, Result};
+use crate::error::{
+    fact_does_not_correspond_to_schema, invalid_value, relation_exists, Error, Result,
+};
 use crate::idb::{Atom, Row, View};
 use crate::io::{read_relation, write_relation, FilePragma};
 use crate::syntax::{
@@ -67,7 +69,7 @@ use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
 use std::str::FromStr;
-use tracing::{error, trace};
+use tracing::trace;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -85,7 +87,7 @@ pub struct Relations(BTreeMap<Predicate, Relation>);
 ///
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Relation {
-    label: Rc<Predicate>,
+    label: PredicateRef,
     schema: Schema<Predicate>,
     facts: HashSet<Fact>,
     pragma: Option<FilePragma>,
@@ -150,7 +152,7 @@ pub enum AttributeKind {
 ///  
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Fact {
-    label: Rc<Predicate>,
+    label: PredicateRef,
     values: Vec<Constant>,
 }
 
@@ -287,6 +289,7 @@ where
             .collect();
         let pre_hash_len = named.len();
 
+        // BUG: This removes duplicate unnamed variables!!!
         let named = BTreeMap::from_iter(named);
 
         assert_eq!(named.len(), pre_hash_len);
@@ -633,7 +636,7 @@ impl Relations {
         );
         let predicate = predicate;
         if self.0.contains_key(&predicate) {
-            Err(relation_exists(predicate.as_ref().clone()))
+            Err(relation_exists(predicate))
         } else {
             let relation = Relation::new(predicate.clone(), schema);
             trace!("add_new_relation < relation: {:?}", relation);
@@ -723,7 +726,7 @@ impl Labeled for Relation {
         &self.label
     }
 
-    fn label_ref(&self) -> Rc<Predicate> {
+    fn label_ref(&self) -> PredicateRef {
         self.label.clone()
     }
 }
@@ -747,7 +750,7 @@ impl Collection<Fact> for Relation {
 }
 
 impl Relation {
-    pub fn new<V: Into<Schema<Predicate>>>(name: Rc<Predicate>, schema: V) -> Self {
+    pub fn new<V: Into<Schema<Predicate>>>(name: PredicateRef, schema: V) -> Self {
         Self {
             label: name,
             schema: schema.into(),
@@ -796,30 +799,46 @@ impl Relation {
         let values: Vec<Constant> = values.into();
         if self.schema.conforms(&values) {
             self.add(Fact::new(self.label.clone(), values))?;
+            Ok(())
         } else {
-            error!("Provided row does not conform to schema.");
-            // TODO: propagate errors
-            panic!();
+            Err(fact_does_not_correspond_to_schema(
+                self.label_ref(),
+                values
+                    .iter()
+                    .map(Constant::to_string)
+                    .collect::<Vec<String>>()
+                    .join(&format!("{} ", CHAR_COMMA)),
+            ))
         }
-        Ok(())
     }
 
     pub fn add(&mut self, fact: Fact) -> Result<()> {
-        // TODO: propagate errors
-        assert_eq!(fact.label, self.label);
-        self.facts.insert(fact);
-        Ok(())
+        if fact.label() == self.label() {
+            let fact_str = fact.to_string();
+            if !self.facts.insert(fact) {
+                trace!("Fact {} discarded, already present in relation.", fact_str);
+            }
+            Ok(())
+        } else {
+            Err(fact_does_not_correspond_to_schema(
+                fact.label_ref(),
+                fact.iter()
+                    .map(Constant::to_string)
+                    .collect::<Vec<String>>()
+                    .join(&format!("{} ", CHAR_COMMA)),
+            ))
+        }
     }
 
     pub fn extend(&mut self, other: Self) -> Result<()> {
-        trace!("extend > name {:?} == {:?}", self.label, other.label);
-        assert_eq!(self.label, other.label);
-        trace!("extend > schema {:?} == {:?}", self.schema, other.schema);
-        assert_eq!(self.schema, other.schema);
-        for fact in other.facts.into_iter() {
-            self.add(fact)?;
+        if self.label() == other.label() && self.schema() == other.schema() {
+            for fact in other.facts.into_iter() {
+                self.add(fact)?;
+            }
+            Ok(())
+        } else {
+            panic!()
         }
-        Ok(())
     }
 
     // --------------------------------------------------------------------------------------------
@@ -839,6 +858,7 @@ impl Relation {
                 .enumerate()
                 .map(|(i, term)| {
                     let mut term = match term {
+                        Term::Anonymous => Attribute::anonymous(),
                         Term::Variable(v) => Attribute::from(v.clone()),
                         Term::Constant(v) => Attribute::typed(v.kind()),
                     };
@@ -970,7 +990,7 @@ impl Labeled for Fact {
         &self.label
     }
 
-    fn label_ref(&self) -> Rc<Predicate> {
+    fn label_ref(&self) -> PredicateRef {
         self.label.clone()
     }
 }
@@ -1004,7 +1024,7 @@ impl IndexedCollection<usize, Constant> for Fact {
 }
 
 impl Fact {
-    pub fn new<V: Into<Vec<Constant>>>(name: Rc<Predicate>, values: V) -> Self {
+    pub fn new<V: Into<Vec<Constant>>>(name: PredicateRef, values: V) -> Self {
         Self {
             label: name,
             values: values.into(),

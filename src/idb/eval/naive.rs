@@ -3,7 +3,8 @@ use crate::error::{language_feature_disabled, Result};
 use crate::features::{FEATURE_COMPARISONS, FEATURE_NEGATION};
 use crate::idb::{eval::Evaluator, Atom, Term, View};
 use crate::{
-    relation_does_not_exist, Collection, Labeled, MaybeAnonymous, MaybePositive, Program, Relations,
+    relation_does_not_exist, Collection, Labeled, MaybePositive, Program, Relations, RuleForm,
+    FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION,
 };
 use tracing::trace;
 
@@ -51,8 +52,19 @@ impl Evaluator for NaiveEvaluator {
         if program.is_positive() {
             let mut new_db = program.intensional().clone_with_schema_only();
             loop {
+                trace!(
+                    "Starting inference pass with {} facts so far",
+                    new_db.flat_count()
+                );
                 let start = new_db.flat_count();
                 for rule in program.rules().iter() {
+                    match rule.form() {
+                        RuleForm::Pure => Ok(()),
+                        RuleForm::Constraint => Err(language_feature_disabled(FEATURE_CONSTRAINTS)),
+                        RuleForm::Disjunctive => {
+                            Err(language_feature_disabled(FEATURE_DISJUNCTION))
+                        }
+                    }?;
                     trace!("infer > rule > {}", rule);
 
                     let matches: Result<Vec<View>> = rule
@@ -60,22 +72,19 @@ impl Evaluator for NaiveEvaluator {
                         .map(|l| {
                             if let Some(atom) = l.as_atom() {
                                 if let Some(view) = program.extensional().matches(atom) {
-                                    trace!("infer > extensional matches > view > {}\n{}", l, view);
+                                    trace!("First matches from an extensional relation");
                                     Ok(view)
                                 } else if let Some(mut view) = program.intensional().matches(atom) {
-                                    trace!("infer > intensional matches > view > {}\n{}", l, view);
+                                    trace!("First matches from an intensional relation");
                                     if let Some(previous_matches) = new_db.matches(atom) {
                                         trace!(
-                                            "infer > matches > previous > {}\n{}",
-                                            l,
-                                            previous_matches
+                                            "Adding in any matches from the in-progress relation"
                                         );
                                         view.extend(previous_matches)?;
-                                        trace!("infer > matches > view (extended) >\n{}", view);
                                     }
                                     Ok(view)
                                 } else {
-                                    Err(relation_does_not_exist(atom.label().clone()))
+                                    Err(relation_does_not_exist(atom.label_ref()))
                                 }
                             } else {
                                 Err(language_feature_disabled(FEATURE_COMPARISONS))
@@ -86,27 +95,20 @@ impl Evaluator for NaiveEvaluator {
                     let matches = matches?;
 
                     if matches.iter().all(|result| !result.is_empty()) {
+                        trace!("Joining all ({}) result views", matches.len());
                         let results = View::join_all(matches)?;
-                        trace!("infer > rule > joined table >\n{}", results);
                         for fact in results.iter() {
                             let head_predicates = rule.head().collect::<Vec<&Atom>>();
-                            assert_eq!(head_predicates.len(), 1);
                             let head = head_predicates.get(0).unwrap();
                             let relation = new_db.get_mut(head.label()).unwrap();
                             let new_fact = head
                                 .iter()
-                                .map(|term| {
-                                    trace!(
-                                        "infer > rule > row > joined term {:?} ? {}",
-                                        term,
-                                        term.is_anonymous()
-                                    );
-                                    match term {
-                                        Term::Variable(v) => fact
-                                            .get(results.attribute_index(v.clone().into()).unwrap())
-                                            .unwrap(),
-                                        Term::Constant(c) => c,
-                                    }
+                                .map(|term| match term {
+                                    Term::Anonymous => unreachable!(),
+                                    Term::Variable(v) => fact
+                                        .get(results.attribute_index(v.clone().into()).unwrap())
+                                        .unwrap(),
+                                    Term::Constant(c) => c,
                                 })
                                 .cloned()
                                 .collect::<Vec<Constant>>();
@@ -115,7 +117,7 @@ impl Evaluator for NaiveEvaluator {
                     }
                 }
                 if start == new_db.flat_count() {
-                    // no more facts were found, so return
+                    trace!("No more facts were found, so done");
                     break;
                 }
             }

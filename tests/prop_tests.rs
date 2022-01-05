@@ -17,7 +17,7 @@ proptest! {
     }
 
     #[test]
-    fn variable_from_str(s in r"_|\p{Lu}[\p{Ll}\p{Lu}\p{Nd}_]*") {
+    fn variable_from_str(s in r"\p{Lu}[\p{Ll}\p{Lu}\p{Nd}_]*") {
         println!("variable_from_str: {:?}", s);
         assert!(Variable::is_valid(&s));
         assert!(Variable::from_str(&s).is_ok());

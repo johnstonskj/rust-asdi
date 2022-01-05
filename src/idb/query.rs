@@ -1,13 +1,12 @@
-use crate::edb::{Attribute, AttributeIndex, AttributeKind, Constant, Fact, Predicate, Schema};
+use crate::edb::{Attribute, AttributeIndex, AttributeKind, Constant, Fact, Schema};
 use crate::error::Result;
 use crate::idb::Term;
 use crate::idb::{Atom, Variable};
 use crate::syntax::{CHAR_PERIOD, QUERY_PREFIX_ASCII};
-use crate::{Collection, MaybeLabeled};
+use crate::{Collection, MaybeLabeled, PredicateRef};
 use paste::paste;
 use std::collections::HashSet;
 use std::fmt::{Debug, Display, Formatter};
-use std::rc::Rc;
 use tracing::{error, trace};
 
 // ------------------------------------------------------------------------------------------------
@@ -76,7 +75,7 @@ impl AsRef<Atom> for Query {
 }
 
 impl Query {
-    pub fn new<T: Into<Vec<Term>>>(predicate: Rc<Predicate>, terms: T) -> Self {
+    pub fn new<T: Into<Vec<Term>>>(predicate: PredicateRef, terms: T) -> Self {
         Self(Atom::new(predicate, terms))
     }
 }

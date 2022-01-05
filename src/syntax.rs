@@ -52,7 +52,7 @@ pub(crate) const FEATURE_SYMBOL_CIRCLE_PLUS: &str = "⊕";
 
 pub(crate) const COLUMN_NAME_UNKNOWN: &str = "_";
 
-pub(crate) const VARIABLE_NAME_IGNORE: &str = "_";
+pub(crate) const ANONYMOUS_TERM: &str = "_";
 
 // ------------------------------------------------------------------------------------------------
 
