@@ -598,7 +598,7 @@ fn parse_literal(
         Rule::comparison => {
             let comparison = parse_comparison(next.into_inner(), program, features)?;
             if negative {
-                Literal::negative_comparison(comparison)
+                Literal::negative_arithmetic(comparison)
             } else {
                 Literal::arithmetic(comparison)
             }

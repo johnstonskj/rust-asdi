@@ -18,7 +18,7 @@ When referring to the specifics of the language we will use the common format $\
 superscripts that identify specific language extensions; for example, $\small\text{Datalog}^{\lnot}$ is
 the language extended with negation of literals, $\small\text{Datalog}^{\Gamma}$ is the language
 extended with type checking on attributes, and $\small\text{Datalog}^{\lnot,\theta}$. is the language
-extended with negation of literals _and_ comparison expressions. The order of superscript symbols is
+extended with negation of literals _and_ arithmetic literals. The order of superscript symbols is
 irrelevant. Additionally, text in **bold** indicates a key concept in the language while text in
 _italics_ indicates a forward reference to such a concept.
 
@@ -209,12 +209,12 @@ rule's head to be considered true.
 1. and has the following properties:
    1. $\small relational\(l\)$ returns true if the literal argument is a relational literal.
    1. $\small arithmetic\(l\)$ returns true if the literal argument is a arithmetic literal.
-   1. $\small terms\(l\)$ returns either the set of terms in either the atom or comparison,
+   1. $\small terms\(l\)$ returns either the set of terms in a literal,
       $$\tag{xiii}\small
         terms(l) \coloneqq
         \begin{cases}
-          terms(l), &\text{if } atom(l) \\\\
-          \lbrace t_{lhs}, t_{rhs} \rbrace, &\text{if } comparison(l) \land \text{Datalog}^{\theta}
+          terms(l), &\text{if } relational(l) \\\\
+          \lbrace t_{lhs}, t_{rhs} \rbrace, &\text{if } arithmetic(l) \land \text{Datalog}^{\theta}
         \end{cases}$$
    1. $\small ground\(l\)$ returns true if its terms are all constants $\small \(\forall{t}\in terms\(l\); t \in \mathcal{C}\)$,
    1. $\small positive\(l\)$ in $\small\text{Datalog}^{\lnot}$ returns false if negated,
@@ -476,7 +476,7 @@ Additionally, some operators are not present for all types, as shown in the tabl
 | Integer  | Yes        | Yes                | No  |
 | Boolean  | Yes        | No                 | No  |
 
-The following is an example using comparisons against the _car_ relation.
+The following is an example using arithmetic literals and the _car_ relation.
 
 ```datalog
 .feature(comparisons).

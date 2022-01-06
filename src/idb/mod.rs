@@ -1025,7 +1025,7 @@ impl Literal {
         Self::new(false, comparison.into())
     }
 
-    pub fn negative_comparison(comparison: Comparison) -> Self {
+    pub fn negative_arithmetic(comparison: Comparison) -> Self {
         Self::new(true, comparison.into())
     }
 
