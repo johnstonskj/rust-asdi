@@ -1,10 +1,11 @@
 [package]
 name = "asdi"
 description = "Another Simplistic Datalog Implementation (in Rust)"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 repository = "https://github.com/johnstonskj/rust-asdi"
 license-file = "LICENSE"
+readme = "README.md"
 
 [features]
 default = ["parser", "tabular", "io"]
