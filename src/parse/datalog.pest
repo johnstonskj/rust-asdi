@@ -62,7 +62,7 @@ term_list = _{
 }
 
 constant = {
-    boolean | identifier | string | number
+    boolean | unquoted_string | quoted_string | number
 }
 
 constant_list = _{
@@ -83,10 +83,6 @@ anonymous_variable = {
 
 named_variable = @{
     UPPERCASE_LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
-}
-
-identifier = @{
-    predicate ~ ( COLON ~ identifier_relaxed )?
 }
 
 identifier_relaxed = @{
@@ -130,11 +126,11 @@ feature_id = _{
 }
 
 pragma_input = {
-    keyword_input ~ LEFT_PAREN ~ predicate ~ COMMA ~ string ~ ( COMMA ~ string )? ~ RIGHT_PAREN
+    keyword_input ~ LEFT_PAREN ~ predicate ~ COMMA ~ quoted_string ~ ( COMMA ~ quoted_string )? ~ RIGHT_PAREN
 }
 
 pragma_output = {
-    keyword_output ~ LEFT_PAREN ~ predicate ~ COMMA ~ string ~ ( COMMA ~ string )? ~ RIGHT_PAREN
+    keyword_output ~ LEFT_PAREN ~ predicate ~ COMMA ~ quoted_string ~ ( COMMA ~ quoted_string )? ~ RIGHT_PAREN
 }
 
 keyword_assert = _{
@@ -193,11 +189,15 @@ feature_id_disjunction = {
 // Constant definitions
 // ------------------------------------------------------------------------------------------------
 
-string = ${
-    QUOTE ~ string_inner ~ QUOTE
+quoted_string = _{
+    QUOTE ~ string ~ QUOTE
 }
 
-string_inner = @{
+unquoted_string = @{
+    predicate ~ ( COLON ~ identifier_relaxed )?
+}
+
+string = @{
     string_char*
 }
 

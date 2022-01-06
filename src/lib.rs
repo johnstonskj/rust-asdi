@@ -638,7 +638,7 @@ Note in this example we allow the parser to identify the schema for the relation
 The following is the same example constructed via the ASDI library.
 
 ```rust
-use asdi::{PredicateSet, Program};
+use asdi::{NameReferenceSet, Program};
 use asdi::edb::{Attribute, Predicate};
 use asdi::idb::{Atom, Term, Variable};
 use std::str::FromStr;
@@ -654,7 +654,8 @@ let human = syllogism
     .unwrap();
 human.add_as_fact(["Socrates".into()]).unwrap();
 
-let var_x: Term = Variable::from_str("X").unwrap().into();
+let variables = syllogism.variables();
+let var_x: Term = variables.fetch("X").unwrap().into();
 
 syllogism
     .add_new_pure_rule(
@@ -739,16 +740,17 @@ The program will select all matching (in this case all) facts from the _mortal_ 
     dyn_drop,
 )]
 
-use crate::edb::{Attribute, Predicate, PredicateRef, Relation, Relations, Schema};
+use crate::edb::{Attribute, Predicate, PredicateRef, Relation, RelationSet, Schema};
 use crate::error::{
     extensional_predicate_in_rule_head, language_feature_unsupported, relation_does_not_exist,
     Result,
 };
 use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
-use crate::idb::{Atom, Evaluator, Literal, Query, Rule, RuleForm, Rules, Term, Variable, View};
+use crate::idb::{Atom, Evaluator, Literal, Query, Rule, RuleForm, RuleSet, Term, Variable, View};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
+use std::rc::Rc;
 use std::str::FromStr;
 
 // ------------------------------------------------------------------------------------------------
@@ -762,10 +764,11 @@ use std::str::FromStr;
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Program {
     features: FeatureSet,
-    predicates: PredicateSet,
-    asserted: Relations,
-    infer: Relations,
-    rules: Rules,
+    predicates: NameReferenceSet<Predicate>,
+    variables: NameReferenceSet<Variable>,
+    asserted: RelationSet,
+    infer: RelationSet,
+    rules: RuleSet,
     queries: HashSet<Query>,
 }
 
@@ -784,8 +787,34 @@ pub struct Program {
 /// assert!(program.predicates().fetch("Not A Predicate").is_err());
 /// ```
 ///
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct PredicateSet(RefCell<BTreeMap<String, PredicateRef>>);
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct NameReferenceSet<T>(RefCell<BTreeMap<String, AttributeNameRef<T>>>)
+where
+    T: AttributeName;
+
+///
+/// Attributes, the members of [Schema] are named using different types in [Relation]s and [View]s.
+/// This trait identifies the minimum set of implementations required for an attribute name.
+///
+pub trait AttributeName:
+    AsRef<str> + Clone + Debug + Display + FromStr + PartialEq + Eq + PartialOrd + Ord
+{
+    ///
+    /// Return `true` if the string `s` is a valid value for the implementing type, else `false`.
+    ///
+    fn is_valid(s: &str) -> bool;
+
+    ///
+    /// Return the type identifier for the implementation, used in format errors.
+    ///
+    fn type_name() -> &'static str;
+}
+
+///
+/// A reference type for attribute names.
+///
+#[allow(type_alias_bounds)]
+pub type AttributeNameRef<T: AttributeName> = Rc<T>;
 
 ///
 /// All collections of things in the library implement these basic methods.
@@ -828,17 +857,6 @@ pub trait MutableIndexedCollection<K, V>: IndexedCollection<K, V> {
 }
 
 ///
-/// Attributes, the members of [Schema] are named using different types in [Relation]s and [View]s.
-/// This trait identifies the minimum set of implementations required for an attribute name.
-///
-pub trait AttributeName: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord {
-    ///
-    /// Return `true` if the string `s` is a valid value for the implementing type, else `false`.
-    ///
-    fn is_valid(s: &str) -> bool;
-}
-
-///
 /// Implemented by types that have, for sure, a label. This type is mutually exclusive with
 /// [MaybeLabeled].
 ///
@@ -876,7 +894,7 @@ pub trait MaybeLabeled<T: AttributeName>: MaybeAnonymous {
     ///
     /// Returns this value's label, or `None` if anonymous.
     ///
-    fn label(&self) -> Option<&T>;
+    fn label(&self) -> Option<&AttributeNameRef<T>>;
 
     ///
     /// Returns `true` if this value has a label, else `false`.
@@ -1021,6 +1039,7 @@ impl Program {
         Self {
             features,
             predicates: Default::default(),
+            variables: Default::default(),
             asserted: Default::default(),
             infer: Default::default(),
             queries: Default::default(),
@@ -1045,8 +1064,12 @@ impl Program {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn predicates(&self) -> &PredicateSet {
+    pub fn predicates(&self) -> &NameReferenceSet<Predicate> {
         &self.predicates
+    }
+
+    pub fn variables(&self) -> &NameReferenceSet<Variable> {
+        &self.variables
     }
 
     // --------------------------------------------------------------------------------------------
@@ -1054,14 +1077,14 @@ impl Program {
     ///
     /// Returns the current set of extensional relations.
     ///
-    pub fn extensional(&self) -> &Relations {
+    pub fn extensional(&self) -> &RelationSet {
         &self.asserted
     }
 
     ///
     /// Returns the current set of extensional relations in a mutable state.
     ///
-    pub fn extensional_mut(&mut self) -> &mut Relations {
+    pub fn extensional_mut(&mut self) -> &mut RelationSet {
         &mut self.asserted
     }
 
@@ -1090,14 +1113,14 @@ impl Program {
     ///
     /// Returns the current set of intensional relations.
     ///
-    pub fn intensional(&self) -> &Relations {
+    pub fn intensional(&self) -> &RelationSet {
         &self.infer
     }
 
     ///
     /// Returns the current set of intensional relations in a mutable state.
     ///
-    pub fn intensional_mut(&mut self) -> &mut Relations {
+    pub fn intensional_mut(&mut self) -> &mut RelationSet {
         &mut self.infer
     }
 
@@ -1124,7 +1147,7 @@ impl Program {
     ///
     /// Return an iterator over the rules in the intensional database.
     ///
-    pub fn rules(&self) -> &Rules {
+    pub fn rules(&self) -> &RuleSet {
         &self.rules
     }
 
@@ -1371,7 +1394,7 @@ impl Program {
         }
     }
 
-    fn inner_eval_query(&self, query: &Query, intensional: &Relations) -> Result<Option<View>> {
+    fn inner_eval_query(&self, query: &Query, intensional: &RelationSet) -> Result<Option<View>> {
         let label = query.as_ref().label_ref();
         if intensional.contains(&label) {
             Ok(intensional.matches(query.as_ref()))
@@ -1385,7 +1408,19 @@ impl Program {
 
 // ------------------------------------------------------------------------------------------------
 
-impl PredicateSet {
+impl<T> Default for NameReferenceSet<T>
+where
+    T: AttributeName,
+{
+    fn default() -> Self {
+        Self(Default::default())
+    }
+}
+
+impl<T> NameReferenceSet<T>
+where
+    T: AttributeName,
+{
     ///
     /// Add the value `s` as a predicate in this set.
     ///
@@ -1421,12 +1456,14 @@ impl PredicateSet {
     ///
     /// This will fail if the value provided in `s` does not the check [Predicate::is_valid].
     ///
-    pub fn fetch<S: Into<String>>(&self, s: S) -> Result<PredicateRef> {
+    pub fn fetch<S: Into<String>>(&self, s: S) -> Result<AttributeNameRef<T>> {
         let s = s.into();
         let found = { self.0.borrow().get(&s).cloned() };
         match found {
             None => {
-                let predicate: PredicateRef = Predicate::from_str(&s)?.into();
+                let predicate: AttributeNameRef<T> = T::from_str(&s)
+                    .map_err(|_| error::invalid_value(T::type_name(), &s))?
+                    .into();
                 let _ = self.0.borrow_mut().insert(s, predicate.clone());
                 Ok(predicate)
             }
@@ -1442,8 +1479,9 @@ impl PredicateSet {
     /// is added to the set and returned.
     ///
     #[inline]
-    pub fn canonical(&self, p: PredicateRef) -> PredicateRef {
-        let found = { self.0.borrow().get(p.as_ref().as_ref()).cloned() };
+    pub fn canonical(&self, p: AttributeNameRef<T>) -> AttributeNameRef<T> {
+        let s: &str = p.as_ref().as_ref();
+        let found = { self.0.borrow().get(s).cloned() };
         match found {
             None => {
                 let _ = self.0.borrow_mut().insert(p.to_string(), p.clone());

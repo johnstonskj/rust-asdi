@@ -1,5 +1,5 @@
 use asdi::edb::Predicate;
-use asdi::idb::{Evaluator, NaiveEvaluator, Query, Variable};
+use asdi::idb::{Evaluator, NaiveEvaluator, Query};
 use asdi::parse::parse_str;
 use asdi::Collection;
 use std::str::FromStr;
@@ -62,7 +62,7 @@ mortal(X) <- human(X).
     print!("{} ==>\n{}", query, results);
     println!("-------------------------------------------------------------------------------");
 
-    let query = Query::new(p_mortal, [Variable::from_str("X").unwrap().into()]);
+    let query = Query::new(p_mortal, [program.variables().fetch("X").unwrap().into()]);
 
     let results = new_intensional.matches(query.as_ref()).unwrap();
     assert_eq!(results.schema().len(), 1);

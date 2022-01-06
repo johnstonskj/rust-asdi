@@ -18,7 +18,8 @@ We can deduce:
 1. This relation has _at least_ one fact which has the [constant](Constant) values
    `("Alice", 49, true)`.
 
-If we were to include an extensional relation declaration in our example, as follows:
+If we were to include an extensional relation declaration, using the `assert` pragma, in our
+example from above:
 
 ```datalog
 .assert person(name: string, age: integer, funny: boolean).
@@ -26,15 +27,56 @@ If we were to include an extensional relation declaration in our example, as fol
 person("Alice", 49, true).
 ```
 
-We can add the [label](Predicate) for each attribute of `person` to the relation's schema.
+we may now add the [label](Predicate) for each attribute of `person` to the relation's schema.
 
-# Example
+Sometimes, where the set of facts for an extensional relation comes from an external source, _or_
+is somewhat large it is useful to place the data in an external file. The `input` pragma allows
+us to reference a single file that contains data for a relation.
+
+```datalog
+.assert person(name: string, age: integer, funny: boolean).
+.input(person, "data/people.csv", "csv").
+```
+
+Note that any use of `input` requires that the relation exists in the extensional database, either
+by means of the `assert` pragma, or by having previously asserted facts for this relation.
+
+# Examples
 
 The following declares two extensional [relations](Relation), `human` and `age`.
 
 ```datalog
 .assert human(string).
 .assert age(name: string, integer).
+```
+
+The following is the API equivalent of the Datalog program above.
+
+```rust
+use asdi::edb::{Attribute, Predicate, Relation, RelationSet};
+use std::str::FromStr;
+use asdi::{NameReferenceSet, Program};
+
+let mut program = Program::default();
+
+let human = program.predicates().fetch("human").unwrap();
+program.extensional_mut().add_new_relation(
+    human,
+    vec![Attribute::string()]);
+
+let relation = Relation::new(
+    program
+        .predicates()
+        .fetch("age")
+        .unwrap(),
+    vec![
+        Attribute::string_labeled(program
+            .predicates()
+            .fetch("name")
+            .unwrap()),
+        Attribute::integer()
+    ]);
+program.extensional_mut().add(relation);
 ```
 
 The following are all valid [facts](Fact) expressed in the text representation.
@@ -61,8 +103,8 @@ use crate::syntax::{
     RESERVED_PRAGMA_INFER, RESERVED_PREFIX, TYPE_NAME_PREDICATE,
 };
 use crate::{
-    AttributeName, Collection, IndexedCollection, Labeled, MaybeAnonymous, MaybeLabeled, Term,
-    Variable,
+    AttributeName, AttributeNameRef, Collection, IndexedCollection, Labeled, MaybeAnonymous,
+    MaybeLabeled, Term, Variable,
 };
 use paste::paste;
 use std::collections::{BTreeMap, HashSet};
@@ -79,7 +121,7 @@ use tracing::trace;
 /// A Set-like collection of [`Relation`]s, the collection is indexed by the relation's label.
 ///
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Relations(BTreeMap<Predicate, Relation>);
+pub struct RelationSet(BTreeMap<Predicate, Relation>);
 
 ///
 /// A Relation comprises a [label](struct.Predicate.html), a [schema](struct.Schema.html) that
@@ -104,7 +146,7 @@ where
     T: AttributeName,
 {
     attributes: Vec<Attribute<T>>,
-    label_index: BTreeMap<T, usize>,
+    label_index: BTreeMap<AttributeNameRef<T>, usize>,
 }
 
 ///
@@ -116,7 +158,7 @@ pub struct Attribute<T>
 where
     T: AttributeName,
 {
-    label: Option<T>,
+    label: Option<AttributeNameRef<T>>,
     kind: Option<AttributeKind>,
 }
 
@@ -129,7 +171,7 @@ pub enum AttributeIndex<T>
 where
     T: AttributeName,
 {
-    Label(T),
+    Label(AttributeNameRef<T>),
     Index(usize),
 }
 
@@ -176,6 +218,14 @@ pub enum Constant {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Predicate(String);
 
+///
+/// We use a reference-counted type for predicates to try and reduce the number of instances of a
+/// commonly used value.
+///
+/// The type [PredicateSet](../struct.PredicateSet.html), and the program's
+/// shared set via [predicates](../struct.PredicateSet.html#method.predicates) allows for common
+/// memory usage within a program.
+///
 pub type PredicateRef = Rc<Predicate>;
 
 // ------------------------------------------------------------------------------------------------
@@ -282,7 +332,7 @@ where
 {
     pub fn new<V: Into<Vec<Attribute<T>>>>(attributes: V) -> Self {
         let attributes = attributes.into();
-        let named: Vec<(T, usize)> = attributes
+        let named: Vec<(AttributeNameRef<T>, usize)> = attributes
             .iter()
             .enumerate()
             .filter_map(|(i, c)| c.label().map(|var| (var.clone(), i)))
@@ -316,11 +366,11 @@ where
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn labels(&self) -> impl Iterator<Item = &T> {
+    pub fn labels(&self) -> impl Iterator<Item = &AttributeNameRef<T>> {
         self.label_index.keys()
     }
 
-    pub fn label_intersection(&self, other: &Self) -> Vec<(&T, usize, usize)> {
+    pub fn label_intersection(&self, other: &Self) -> Vec<(&AttributeNameRef<T>, usize, usize)> {
         self.label_index
             .iter()
             .filter_map(|(var, i)| {
@@ -332,8 +382,8 @@ where
             .collect()
     }
 
-    pub fn label_union(&self, other: &Self) -> Vec<T> {
-        let mut all: Vec<T> = self.labels().cloned().collect();
+    pub fn label_union(&self, other: &Self) -> Vec<AttributeNameRef<T>> {
+        let mut all: Vec<AttributeNameRef<T>> = self.labels().cloned().collect();
         for var in other.labels() {
             if !all.contains(var) {
                 all.push(var.clone());
@@ -378,12 +428,12 @@ where
     }
 }
 
-impl<T> From<T> for Attribute<T>
+impl<T> From<AttributeNameRef<T>> for Attribute<T>
 where
     T: AttributeName,
 {
-    fn from(name: T) -> Self {
-        Self::labeled(name)
+    fn from(label: AttributeNameRef<T>) -> Self {
+        Self::labeled(label)
     }
 }
 
@@ -403,7 +453,7 @@ impl<T> MaybeLabeled<T> for Attribute<T>
 where
     T: AttributeName,
 {
-    fn label(&self) -> Option<&T> {
+    fn label(&self) -> Option<&AttributeNameRef<T>> {
         self.label.as_ref()
     }
 }
@@ -412,7 +462,7 @@ impl<T> Attribute<T>
 where
     T: AttributeName,
 {
-    pub fn labeled(name: T) -> Self {
+    pub fn labeled(name: AttributeNameRef<T>) -> Self {
         Self::new_inner(name, None)
     }
 
@@ -424,7 +474,7 @@ where
         Self::new_inner(None, AttributeKind::String)
     }
 
-    pub fn string_labeled(name: T) -> Self {
+    pub fn string_labeled(name: AttributeNameRef<T>) -> Self {
         Self::new_inner(name, AttributeKind::String)
     }
 
@@ -432,7 +482,7 @@ where
         Self::new_inner(None, AttributeKind::Integer)
     }
 
-    pub fn integer_labeled(name: T) -> Self {
+    pub fn integer_labeled(name: AttributeNameRef<T>) -> Self {
         Self::new_inner(name, AttributeKind::Integer)
     }
 
@@ -440,15 +490,18 @@ where
         Self::new_inner(None, AttributeKind::Boolean)
     }
 
-    pub fn boolean_labeled(name: T) -> Self {
+    pub fn boolean_labeled(name: AttributeNameRef<T>) -> Self {
         Self::new_inner(name, AttributeKind::Boolean)
     }
 
-    pub fn new(name: T, kind: AttributeKind) -> Self {
+    pub fn new(name: AttributeNameRef<T>, kind: AttributeKind) -> Self {
         Self::new_inner(name, kind)
     }
 
-    pub(crate) fn new_inner<P: Into<Option<T>>, K: Into<Option<AttributeKind>>>(
+    pub(crate) fn new_inner<
+        P: Into<Option<AttributeNameRef<T>>>,
+        K: Into<Option<AttributeKind>>,
+    >(
         name: P,
         kind: K,
     ) -> Self {
@@ -508,11 +561,11 @@ where
     }
 }
 
-impl<T> From<T> for AttributeIndex<T>
+impl<T> From<AttributeNameRef<T>> for AttributeIndex<T>
 where
     T: AttributeName,
 {
-    fn from(v: T) -> Self {
+    fn from(v: AttributeNameRef<T>) -> Self {
         Self::Label(v)
     }
 }
@@ -561,7 +614,9 @@ impl From<Constant> for AttributeKind {
     }
 }
 
-impl<'a> IntoIterator for &'a mut Relations {
+// ------------------------------------------------------------------------------------------------
+
+impl<'a> IntoIterator for &'a mut RelationSet {
     type Item = (&'a Predicate, &'a mut Relation);
     type IntoIter = std::collections::btree_map::IterMut<'a, Predicate, Relation>;
 
@@ -570,7 +625,7 @@ impl<'a> IntoIterator for &'a mut Relations {
     }
 }
 
-impl FromIterator<Relation> for Relations {
+impl FromIterator<Relation> for RelationSet {
     fn from_iter<T: IntoIterator<Item = Relation>>(iter: T) -> Self {
         Self(BTreeMap::from_iter(
             iter.into_iter().map(|r| (r.label().clone(), r)),
@@ -578,7 +633,7 @@ impl FromIterator<Relation> for Relations {
     }
 }
 
-impl Collection<Relation> for Relations {
+impl Collection<Relation> for RelationSet {
     fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
@@ -596,7 +651,7 @@ impl Collection<Relation> for Relations {
     }
 }
 
-impl IndexedCollection<Predicate, Relation> for Relations {
+impl IndexedCollection<Predicate, Relation> for RelationSet {
     fn get(&self, index: &Predicate) -> Option<&Relation> {
         self.0.get(index)
     }
@@ -606,7 +661,7 @@ impl IndexedCollection<Predicate, Relation> for Relations {
     }
 }
 
-impl Relations {
+impl RelationSet {
     pub fn flat_count(&self) -> usize {
         self.iter().map(|r| r.len()).sum()
     }
@@ -1170,10 +1225,8 @@ impl AttributeName for Predicate {
             && chars.next().map(|c| c.is_lowercase()).unwrap()
             && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
-}
 
-impl Predicate {
-    pub(crate) fn from_str_unchecked(s: &str) -> Self {
-        Self(s.to_owned())
+    fn type_name() -> &'static str {
+        TYPE_NAME_PREDICATE
     }
 }

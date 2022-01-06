@@ -15,9 +15,7 @@ use crate::error::{invalid_value, language_feature_disabled, Error, Result, Sour
 use crate::features::{
     FeatureSet, FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION,
 };
-use crate::idb::{
-    Atom, Comparison, ComparisonOperator, Literal, Query, Rule as DlRule, Term, Variable,
-};
+use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Query, Rule as DlRule, Term};
 use crate::io::{string_to_format, FilePragma, Format};
 use crate::syntax::{TYPE_NAME_CONST_BOOLEAN, TYPE_NAME_CONST_INTEGER};
 use crate::{error, relation_does_not_exist, Collection, Program};
@@ -172,7 +170,7 @@ macro_rules! match_then_any {
                         ; $EOI
                     )?
                 ),
-            _ => unreachable!($input_pair.as_str()),
+            _ => unexpected_rule!($input_pair),
         }
     };
 }
@@ -202,12 +200,74 @@ macro_rules! match_one {
             $(
                 Rule::$EOI => {}
             )?
-            _ => unreachable!($input_pair.as_str()),
+            _ => unexpected_rule!($input_pair),
         }
     };
 }
 
-#[allow(unused_macros)]
+macro_rules! if_match {
+    ($pairs:expr, $rule:ident => ($call:expr, $program:expr, $features:expr)) => {{
+        let next = $pairs.next().unwrap();
+        if_match_inner!(next, $rule => ($call, $program, $features))
+    }};
+}
+
+macro_rules! if_match_inner {
+    ($pair:expr, $rule:ident => ($call:expr, $program:expr, $features:expr)) => {{
+        if $pair.as_rule() == Rule::$rule {
+            $call($pair.into_inner(), $program, $features)?
+        } else {
+            unexpected_rule!($pair)
+        }
+    }};
+}
+
+macro_rules! if_match_str {
+    ($pairs:expr, $rule:ident => $call:expr) => {{
+        let next = $pairs.next().unwrap();
+        if_match_str_inner!(next, $rule => $call)
+    }};
+}
+
+macro_rules! if_match_str_inner {
+    ($pair:expr, $rule:ident => $call:expr) => {{
+        if $pair.as_rule() == Rule::$rule {
+            $call($pair.as_str())?
+        } else {
+            unexpected_rule!($pair)
+        }
+    }};
+}
+
+macro_rules! if_match_string {
+    ($pairs:expr, $rule:ident) => {{
+        let next = $pairs.next().unwrap();
+        if next.as_rule() == Rule::$rule {
+            next.as_str().to_string()
+        } else {
+            unexpected_rule!(next)
+        }
+    }};
+}
+
+macro_rules! unexpected_rule {
+    ($pair:expr) => {
+        unreachable!(
+            "Unexpected rule {:?} at '{}'.",
+            $pair.as_rule(),
+            $pair.as_str()
+        )
+    };
+}
+
+macro_rules! not_expecting_more {
+    ($pairs:expr) => {
+        if let Some(unexpected) = $pairs.next() {
+            unexpected_rule!(unexpected)
+        }
+    };
+}
+
 macro_rules! pest_error {
     ($span:expr, $message:expr) => {{
         let e: pest::error::Error<Rule> = pest::error::Error::new_from_span(
@@ -268,18 +328,11 @@ fn parse_fact(
     program: &mut Program,
     features: FeatureSet,
 ) -> Result<()> {
-    let first = input_pairs.next().unwrap();
-    let predicate = match first.as_rule() {
-        Rule::predicate => program.predicates().fetch(first.as_str())?,
-        _ => unreachable!(first.as_str()),
-    };
+    let predicate = if_match_str!(input_pairs, predicate => |s:&str|program.predicates().fetch(s));
 
     let mut attributes = Vec::new();
     for inner_pair in input_pairs {
-        let constant = match inner_pair.as_rule() {
-            Rule::constant => parse_constant(inner_pair.into_inner(), program, features)?,
-            _ => unreachable!(inner_pair.as_str()),
-        };
+        let constant = if_match_inner!(inner_pair, constant => (parse_constant, program, features));
         attributes.push(constant);
     }
 
@@ -313,7 +366,7 @@ fn parse_rule(
                     break;
                 }
             }
-            _ => unreachable!(inner_pair.as_str()),
+            _ => unexpected_rule!(inner_pair),
         }
     }
     Ok(())
@@ -326,11 +379,8 @@ fn parse_rule_head(
 ) -> Result<Vec<Atom>> {
     let mut body: Vec<Atom> = Default::default();
     for inner_pair in input_pairs {
-        let one = match inner_pair.as_rule() {
-            Rule::atom => parse_atom(inner_pair.into_inner(), program, features)?,
-            _ => unreachable!(inner_pair.as_str()),
-        };
-        body.push(one);
+        let atom = if_match_inner!(inner_pair, atom => (parse_atom, program, features));
+        body.push(atom);
     }
     if body.is_empty() && !features.supports(&FEATURE_CONSTRAINTS) {
         Err(language_feature_disabled(FEATURE_CONSTRAINTS))
@@ -348,11 +398,8 @@ fn parse_rule_body(
 ) -> Result<Vec<Literal>> {
     let mut body: Vec<Literal> = Default::default();
     for inner_pair in input_pairs {
-        let one = match inner_pair.as_rule() {
-            Rule::literal => parse_literal(inner_pair.into_inner(), program, features)?,
-            _ => unreachable!(inner_pair.as_str()),
-        };
-        body.push(one);
+        let literal = if_match_inner!(inner_pair, literal => (parse_literal, program, features));
+        body.push(literal);
     }
     Ok(body)
 }
@@ -381,20 +428,12 @@ fn parse_decl_asserted_relation(
     program: &mut Program,
     features: FeatureSet,
 ) -> Result<()> {
-    let first = input_pairs.next().unwrap();
-    let predicate = match first.as_rule() {
-        Rule::predicate => program.predicates().fetch(first.as_str())?,
-        _ => unreachable!(first.as_str()),
-    };
+    let predicate = if_match_str!(input_pairs, predicate => |s:&str|program.predicates().fetch(s));
 
     let mut attributes: Vec<Attribute<Predicate>> = Default::default();
     for inner_pair in input_pairs {
-        match inner_pair.as_rule() {
-            Rule::attribute_declaration => {
-                attributes.push(parse_attribute(inner_pair.into_inner(), program, features)?)
-            }
-            _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
-        }
+        let attribute = if_match_inner!(inner_pair, attribute_declaration => (parse_attribute, program, features));
+        attributes.push(attribute);
     }
 
     let _ = program
@@ -409,11 +448,8 @@ fn parse_decl_inferred_relation(
     program: &mut Program,
     features: FeatureSet,
 ) -> Result<()> {
-    let first = input_pairs.next().unwrap();
-    let predicate = match first.as_rule() {
-        Rule::predicate => program.predicates().fetch(first.as_str())?,
-        _ => unreachable!(first.as_str()),
-    };
+    let relation_label =
+        if_match_str!(input_pairs, predicate => |s:&str|program.predicates().fetch(s));
 
     let mut attributes: Vec<Attribute<Predicate>> = Default::default();
     for inner_pair in input_pairs {
@@ -422,20 +458,21 @@ fn parse_decl_inferred_relation(
                 attributes.push(parse_attribute(inner_pair.into_inner(), program, features)?)
             }
             Rule::predicate => {
-                let name = program.predicates().fetch(inner_pair.as_str())?;
-                if let Some(from) = program.extensional().get(&name) {
+                // .infer <foo> from <bar>.
+                let other_relation_label = program.predicates().fetch(inner_pair.as_str())?;
+                if let Some(from) = program.extensional().get(&other_relation_label) {
                     attributes.extend(from.schema().iter().cloned());
                 } else {
-                    return Err(relation_does_not_exist(name));
+                    return Err(relation_does_not_exist(other_relation_label));
                 }
             }
-            _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
+            _ => unexpected_rule!(inner_pair),
         }
     }
 
     let _ = program
         .intensional_mut()
-        .add_new_relation(predicate, attributes)?;
+        .add_new_relation(relation_label, attributes)?;
 
     Ok(())
 }
@@ -443,26 +480,26 @@ fn parse_decl_inferred_relation(
 #[allow(unused_assignments)]
 fn parse_attribute(
     input_pairs: Pairs<'_, Rule>,
-    _program: &mut Program,
+    program: &mut Program,
     _: FeatureSet,
 ) -> Result<Attribute<Predicate>> {
-    let mut name = None;
+    let mut label = None;
     for inner_pair in input_pairs {
         match inner_pair.as_rule() {
-            Rule::predicate => name = Some(Predicate::from_str_unchecked(inner_pair.as_str())),
+            Rule::predicate => label = Some(program.predicates().fetch(inner_pair.as_str())?),
             Rule::type_id_string => {
-                return Ok(Attribute::new_inner(name, AttributeKind::String));
+                return Ok(Attribute::new_inner(label, AttributeKind::String));
             }
             Rule::type_id_integer => {
-                return Ok(Attribute::new_inner(name, AttributeKind::Integer));
+                return Ok(Attribute::new_inner(label, AttributeKind::Integer));
             }
             Rule::type_id_boolean => {
-                return Ok(Attribute::new_inner(name, AttributeKind::Boolean));
+                return Ok(Attribute::new_inner(label, AttributeKind::Boolean));
             }
-            _ => unreachable!("{:?}: {}", inner_pair.as_rule(), inner_pair.as_str()),
+            _ => unexpected_rule!(inner_pair),
         }
     }
-    unreachable!()
+    unreachable!("Expecting an attribute type.")
 }
 
 fn parse_decl_feature(
@@ -482,7 +519,7 @@ fn parse_decl_feature(
             Rule::feature_id_constraints => {
                 program.features_mut().add_support_for(&FEATURE_CONSTRAINTS)
             }
-            _ => unreachable!(inner_pair.as_str()),
+            _ => unexpected_rule!(inner_pair),
         };
     }
 
@@ -511,11 +548,8 @@ fn parse_decl_file_io(
     _: FeatureSet,
     input: bool,
 ) -> Result<()> {
-    let first = input_pairs.next().unwrap();
-    let predicate = match first.as_rule() {
-        Rule::predicate => program.predicates().fetch(first.as_str())?,
-        _ => unreachable!(first.as_str()),
-    };
+    let relation_label =
+        if_match_str!(input_pairs, predicate => |s:&str|program.predicates().fetch(s));
 
     let relations = if input {
         program.extensional_mut()
@@ -523,18 +557,14 @@ fn parse_decl_file_io(
         program.intensional_mut()
     };
 
-    if let Some(relation) = relations.get_mut(&predicate) {
-        let next = input_pairs.next().unwrap();
-        let file_name = match next.as_rule() {
-            Rule::string => next.as_str().to_string(),
-            _ => unreachable!(next.as_str()),
-        };
-        let file_name = &file_name[1..file_name.len() - 1];
+    if let Some(relation) = relations.get_mut(&relation_label) {
+        let file_name = if_match_string!(input_pairs, string);
 
         let pragma = if let Some(format) = input_pairs.next() {
-            let format = format.as_str();
-            let format = &format[1..format.len() - 1];
-            FilePragma::new(PathBuf::from(file_name), string_to_format(format)?)
+            FilePragma::new(
+                PathBuf::from(&file_name),
+                string_to_format(format.as_str())?,
+            )
         } else {
             FilePragma::new(
                 PathBuf::from(file_name),
@@ -544,7 +574,7 @@ fn parse_decl_file_io(
         relation.set_file_pragma(pragma);
         Ok(())
     } else {
-        Err(relation_does_not_exist(predicate))
+        Err(relation_does_not_exist(relation_label))
     }
 }
 
@@ -553,19 +583,11 @@ fn parse_query(
     program: &mut Program,
     features: FeatureSet,
 ) -> Result<()> {
-    let first = input_pairs.next().unwrap();
-    let atom = match first.as_rule() {
-        Rule::atom => parse_atom(first.into_inner(), program, features)?,
-        _ => unreachable!(first.as_str()),
-    };
+    let atom = if_match!(input_pairs, atom => (parse_atom, program, features));
 
-    if input_pairs.next().is_some() {
-        unreachable!(input_pairs.as_str());
-    } else {
-        program.add_query(Query::from(atom))?;
-    }
+    not_expecting_more!(input_pairs);
 
-    Ok(())
+    program.add_query(Query::from(atom)).map(|_| ())
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -603,7 +625,7 @@ fn parse_literal(
                 Literal::arithmetic(comparison)
             }
         }
-        _ => unreachable!(next.as_str()),
+        _ => unexpected_rule!(next),
     })
 }
 
@@ -614,21 +636,15 @@ fn parse_atom(
 ) -> Result<Atom> {
     let first = input_pairs.next().unwrap();
     let location = pair_to_src_location(&first);
-    let predicate = match first.as_rule() {
-        Rule::predicate => Predicate::from_str_unchecked(first.as_str()),
-        _ => unreachable!(first.as_str()),
-    };
+    let atom_label = if_match_str_inner!(first, predicate => |s:&str|program.predicates().fetch(s));
 
     let mut terms: Vec<Term> = Default::default();
     for inner_pair in input_pairs {
-        let term = match inner_pair.as_rule() {
-            Rule::term => parse_term(inner_pair.into_inner(), program, features)?,
-            _ => unreachable!(inner_pair.as_str()),
-        };
+        let term = if_match_inner!(inner_pair, term => (parse_term, program, features));
         terms.push(term);
     }
 
-    Ok(Atom::new_at_location(predicate.into(), &terms, location))
+    Ok(Atom::new_at_location(atom_label.into(), &terms, location))
 }
 
 fn parse_comparison(
@@ -642,45 +658,15 @@ fn parse_comparison(
             language_feature_disabled(FEATURE_COMPARISONS).to_string()
         ))
     } else {
-        let next = input_pairs.next().unwrap();
-        let term = match next.as_rule() {
-            Rule::term => parse_term(next.into_inner(), program, _features)?,
-            _ => unreachable!(next.as_str()),
-        };
+        let left = if_match!(input_pairs, term => (parse_term, program, _features));
 
-        let next = input_pairs.next().unwrap();
-        let op = match next.as_rule() {
-            Rule::comparison_operator => ComparisonOperator::from_str(next.as_str())?,
-            _ => unreachable!(next.as_str()),
-        };
+        let op = if_match_str!(input_pairs, comparison_operator => |s:&str| ComparisonOperator::from_str(s));
 
-        let next = input_pairs.next().unwrap();
-        let right: Term = match next.as_rule() {
-            Rule::term => parse_term(next.into_inner(), program, _features)?,
-            _ => unreachable!(next.as_str()),
-        };
+        let right = if_match!(input_pairs, term => (parse_term, program, _features));
 
-        Ok(Comparison::new(term, op, right))
+        Ok(Comparison::new(left, op, right))
     }
 }
-//
-// fn parse_predicate(
-//     mut input_pairs: Pairs<'_, Rule>,
-//     _program: &mut Program,
-//     _features: FeatureSet,
-// ) -> Result<Predicate> {
-//     let first = input_pairs.next().unwrap();
-//     let value = match first.as_rule() {
-//         Rule::predicate => Predicate::from_str(first.as_str())?,
-//         _ => unreachable!(first.as_str()),
-//     };
-//
-//     if input_pairs.next().is_some() {
-//         unreachable!(input_pairs.as_str())
-//     }
-//
-//     Ok(value)
-// }
 
 fn parse_constant(
     mut input_pairs: Pairs<'_, Rule>,
@@ -689,41 +675,23 @@ fn parse_constant(
 ) -> Result<Constant> {
     let first = input_pairs.next().unwrap();
     let value = match first.as_rule() {
-        Rule::identifier => Constant::String(first.as_str().to_string()),
-        Rule::string => {
-            let string = first.as_str();
-            Constant::String(string[1..string.len() - 1].to_string())
-        }
-        Rule::number => {
-            // if first.as_str().contains('.') {
-            //     f64::from_str(first.as_str())
-            //         .map_err(|e| {
-            //             Error::InvalidValue(
-            //                 TYPE_NAME_CONST_FLOAT.to_string(),
-            //                 format!("{} ({})", first.as_str(), e),
-            //             )
-            //         })?
-            //         .into()
-            // } else {
-            i64::from_str(first.as_str())
-                .map_err(|e| {
-                    invalid_value(
-                        TYPE_NAME_CONST_INTEGER.to_string(),
-                        format!("{} ({})", first.as_str(), e),
-                    )
-                })?
-                .into()
-            // }
-        }
+        Rule::unquoted_string => Constant::String(first.as_str().to_string()),
+        Rule::string => Constant::String(first.as_str().to_owned()),
+        Rule::number => i64::from_str(first.as_str())
+            .map_err(|e| {
+                invalid_value(
+                    TYPE_NAME_CONST_INTEGER.to_string(),
+                    format!("{} ({})", first.as_str(), e),
+                )
+            })?
+            .into(),
         Rule::boolean => bool::from_str(first.as_str())
             .map_err(|_| error::invalid_value(TYPE_NAME_CONST_BOOLEAN, first.as_str()))?
             .into(),
-        _ => unreachable!(first.as_str()),
+        _ => unexpected_rule!(first),
     };
 
-    if input_pairs.next().is_some() {
-        unreachable!(input_pairs.as_str())
-    }
+    not_expecting_more!(input_pairs);
 
     Ok(value)
 }
@@ -736,14 +704,12 @@ fn parse_term(
     let first = input_pairs.next().unwrap();
     let value = match first.as_rule() {
         Rule::anonymous_variable => Term::Anonymous,
-        Rule::named_variable => Variable::from_str_unchecked(first.as_str()).into(),
+        Rule::named_variable => program.variables().fetch(first.as_str())?.into(),
         Rule::constant => Term::Constant(parse_constant(first.into_inner(), program, features)?),
-        _ => unreachable!(first.as_str()),
+        _ => unexpected_rule!(first),
     };
 
-    if input_pairs.next().is_some() {
-        unreachable!(input_pairs.as_str())
-    }
+    not_expecting_more!(input_pairs);
 
     Ok(value)
 }

@@ -3,7 +3,7 @@ use crate::error::{language_feature_disabled, Result};
 use crate::features::{FEATURE_COMPARISONS, FEATURE_NEGATION};
 use crate::idb::{eval::Evaluator, Atom, Term, View};
 use crate::{
-    relation_does_not_exist, Collection, Labeled, MaybePositive, Program, Relations, RuleForm,
+    relation_does_not_exist, Collection, Labeled, MaybePositive, Program, RelationSet, RuleForm,
     FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION,
 };
 use tracing::trace;
@@ -48,7 +48,7 @@ pub struct NaiveEvaluator {}
 // ------------------------------------------------------------------------------------------------
 
 impl Evaluator for NaiveEvaluator {
-    fn inference(&self, program: &Program) -> Result<Relations> {
+    fn inference(&self, program: &Program) -> Result<RelationSet> {
         if program.is_positive() {
             let mut new_db = program.intensional().clone_with_schema_only();
             loop {

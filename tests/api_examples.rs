@@ -1,8 +1,6 @@
-use asdi::edb::{Attribute, Predicate};
-use asdi::idb::{Atom, Query, Term, Variable};
+use asdi::edb::Attribute;
+use asdi::idb::{Atom, Query, Term};
 use asdi::Program;
-use std::rc::Rc;
-use std::str::FromStr;
 
 pub mod common;
 use common::assert_eq_by_line;
@@ -13,7 +11,7 @@ fn test_wikipedia_example() {
 
     let mut ancestors = Program::default();
 
-    let parent_predicate = Rc::new(Predicate::from_str("parent").unwrap());
+    let parent_predicate = ancestors.predicates().fetch("parent").unwrap();
     {
         let parent = ancestors
             .add_new_extensional_relation(
@@ -29,11 +27,11 @@ fn test_wikipedia_example() {
             .unwrap();
     };
 
-    let ancestor_predicate = Rc::new(Predicate::from_str("ancestor").unwrap());
+    let ancestor_predicate = ancestors.predicates().fetch("ancestor").unwrap();
 
-    let var_x: Term = Variable::from_str("X").unwrap().into();
-    let var_y: Term = Variable::from_str("Y").unwrap().into();
-    let var_z: Term = Variable::from_str("Z").unwrap().into();
+    let var_x: Term = ancestors.variables().fetch("X").unwrap().into();
+    let var_y: Term = ancestors.variables().fetch("Y").unwrap().into();
+    let var_z: Term = ancestors.variables().fetch("Z").unwrap().into();
 
     ancestors
         .add_new_pure_rule(
@@ -98,9 +96,9 @@ fn test_sourceforge_example() {
 
     let path_predicate = graph.predicates().fetch("path").unwrap();
 
-    let var_x: Term = Variable::from_str("X").unwrap().into();
-    let var_y: Term = Variable::from_str("Y").unwrap().into();
-    let var_z: Term = Variable::from_str("Z").unwrap().into();
+    let var_x: Term = graph.variables().fetch("X").unwrap().into();
+    let var_y: Term = graph.variables().fetch("Y").unwrap().into();
+    let var_z: Term = graph.variables().fetch("Z").unwrap().into();
 
     graph
         .add_new_pure_rule(
@@ -157,7 +155,7 @@ fn test_that_syllogism() {
         .unwrap();
     human.add_as_fact(["Socrates".into()]).unwrap();
 
-    let var_x: Term = Variable::from_str("X").unwrap().into();
+    let var_x: Term = syllogism.variables().fetch("X").unwrap().into();
 
     syllogism
         .add_new_pure_rule(

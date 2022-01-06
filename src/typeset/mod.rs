@@ -237,7 +237,6 @@ impl LatexTypesetter {
 #[cfg(feature = "parser")]
 #[cfg(test)]
 mod tests {
-    use crate::edb::Predicate;
     use crate::parse::parse_str;
     use crate::typeset::{LatexTypesetter, Typesetter};
     use crate::Collection;
@@ -264,7 +263,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
             // Test fact
             let relation = program
                 .extensional()
-                .get(&Predicate::from_str_unchecked("parent"))
+                .get(&program.predicates().fetch("parent").unwrap())
                 .unwrap();
             let fact = relation.iter().next().unwrap();
             match fact.to_string().as_str() {

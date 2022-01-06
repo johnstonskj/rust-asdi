@@ -100,6 +100,17 @@ fn ancestor_example() {
 
 ## Changes
 
+**Version 0.2.3**
+
+* Added new "*=" operator for regular expressions
+* Renamed the variants of `LiteralInner`/`Literal` to be `Relational` and `Arithmetic` to convey meaning, not just type.
+* Renamed `Relations` to `RelationSet` and `Rules` to `RuleSet`.
+* Renamed `PredicateSet` to `NameReferenceSet` and used for variables also; this also added
+  `AttributeNameRef` type for clarity.
+* Updated the highlight.js datalog language definition for comment and operator changes.
+* Replaced more uses of the term "comparison (operator)?" with arithmetic literal
+* Fixed more Clippy warnings.
+
 **Version 0.2.2**
 
 * Made changes to syntax to align more closely with traditional Datalog, as well as [Soufflé](https://souffle-lang.github.io/):

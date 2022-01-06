@@ -291,6 +291,7 @@ use crate::{
 use paste::paste;
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
+use std::rc::Rc;
 use std::str::FromStr;
 
 // ------------------------------------------------------------------------------------------------
@@ -302,7 +303,7 @@ use std::str::FromStr;
 /// of [Relations](../edb/struct.Relations.html).
 ///
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Rules(HashSet<Rule>);
+pub struct RuleSet(HashSet<Rule>);
 
 ///
 /// An individual rule consists of a set of head [atoms](Atom) and a set of body [literals](Literal).
@@ -441,7 +442,7 @@ pub enum Term {
     /// denoted with the character `_` in a literal.
     Anonymous,
     /// a value such that term is $\small \in \mathcal{V}$
-    Variable(Variable),
+    Variable(VariableRef),
 
     /// a value such that term is $\small \in \mathcal{C}$
     Constant(Constant),
@@ -455,6 +456,16 @@ pub enum Term {
 ///
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Variable(String);
+
+///
+/// We use a reference-counted type for predicates to try and reduce the number of instances of a
+/// commonly used value.
+///
+// The type [PredicateSet](../struct.PredicateSet.html), and the program's
+// shared set via [predicates](../struct.PredicateSet.html#method.predicates) allows for common
+// memory usage within a program.
+//
+pub type VariableRef = Rc<Variable>;
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
@@ -472,7 +483,7 @@ pub struct Variable(String);
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
-impl Display for Rules {
+impl Display for RuleSet {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for rule in self.iter() {
             writeln!(f, "{}", rule)?;
@@ -481,7 +492,7 @@ impl Display for Rules {
     }
 }
 
-impl Collection<Rule> for Rules {
+impl Collection<Rule> for RuleSet {
     fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
@@ -499,7 +510,7 @@ impl Collection<Rule> for Rules {
     }
 }
 
-impl Rules {
+impl RuleSet {
     pub fn add(&mut self, rule: Rule) {
         self.0.insert(rule);
     }
@@ -515,19 +526,21 @@ impl SyntaxFragments for Rule {
     fn is_guarded(&self) -> bool {
         let all_variables = self.variables();
         self.literals().any(|lit| {
-            let lit_variables: HashSet<&Variable> = HashSet::from_iter(lit.variables().into_iter());
+            let lit_variables: HashSet<&VariableRef> =
+                HashSet::from_iter(lit.variables().into_iter());
             lit_variables == all_variables
         })
     }
 
     fn is_frontier_guarded(&self) -> bool {
-        let frontier_variables: HashSet<&Variable> = self
+        let frontier_variables: HashSet<&VariableRef> = self
             .head_variables()
             .intersection(&self.variables())
             .copied()
             .collect();
         self.literals().any(|lit| {
-            let lit_variables: HashSet<&Variable> = HashSet::from_iter(lit.variables().into_iter());
+            let lit_variables: HashSet<&VariableRef> =
+                HashSet::from_iter(lit.variables().into_iter());
             lit_variables == frontier_variables
         })
     }
@@ -710,11 +723,11 @@ impl Rule {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn head_variables(&self) -> HashSet<&Variable> {
+    pub fn head_variables(&self) -> HashSet<&VariableRef> {
         self.head().map(|atom| atom.variables()).flatten().collect()
     }
 
-    pub fn variables(&self) -> HashSet<&Variable> {
+    pub fn variables(&self) -> HashSet<&VariableRef> {
         self.body
             .iter()
             .map(|lit| lit.variables())
@@ -722,7 +735,7 @@ impl Rule {
             .collect()
     }
 
-    pub fn positive_variables(&self) -> HashSet<&Variable> {
+    pub fn positive_variables(&self) -> HashSet<&VariableRef> {
         self.body
             .iter()
             .filter(|lit| lit.is_positive())
@@ -731,7 +744,7 @@ impl Rule {
             .collect()
     }
 
-    pub fn negative_variables(&self) -> HashSet<&Variable> {
+    pub fn negative_variables(&self) -> HashSet<&VariableRef> {
         self.body
             .iter()
             .filter(|lit| !lit.is_positive())
@@ -946,7 +959,7 @@ impl Atom {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn variables(&self) -> impl Iterator<Item = &Variable> {
+    pub fn variables(&self) -> impl Iterator<Item = &VariableRef> {
         self.terms.iter().filter_map(|t| {
             if let Term::Variable(v) = t {
                 Some(v)
@@ -1048,7 +1061,7 @@ impl Literal {
         }
     }
 
-    pub fn variables(&self) -> Vec<&Variable> {
+    pub fn variables(&self) -> Vec<&VariableRef> {
         self.terms()
             .iter()
             .filter_map(|t| {
@@ -1226,8 +1239,8 @@ impl Display for Term {
     }
 }
 
-impl From<Variable> for Term {
-    fn from(v: Variable) -> Self {
+impl From<VariableRef> for Term {
+    fn from(v: VariableRef) -> Self {
         Self::Variable(v)
     }
 }
@@ -1318,11 +1331,9 @@ impl AttributeName for Variable {
             && chars.next().map(|c| c.is_uppercase()).unwrap()
             && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
     }
-}
 
-impl Variable {
-    pub(crate) fn from_str_unchecked(s: &str) -> Self {
-        Self(s.to_owned())
+    fn type_name() -> &'static str {
+        TYPE_NAME_VARIABLE
     }
 }
 

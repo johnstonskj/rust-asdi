@@ -1,5 +1,5 @@
 use asdi::edb::{Constant, Predicate};
-use asdi::idb::{Atom, Term, Variable};
+use asdi::idb::{Atom, Term};
 use asdi::parse::parse_str;
 use std::rc::Rc;
 use std::str::FromStr;
@@ -26,7 +26,7 @@ mortal(X) <- human(X).
 
     let query_term = Atom::new(
         human.clone(),
-        [Term::Variable(Variable::from_str("X").unwrap())],
+        [Term::Variable(program.variables().fetch("X").unwrap())],
     );
     let results = program.extensional().matches(&query_term).unwrap();
     println!("{}", results);

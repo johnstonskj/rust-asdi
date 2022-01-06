@@ -1,4 +1,4 @@
-use crate::edb::Relations;
+use crate::edb::RelationSet;
 use crate::error::Result;
 use crate::Program;
 use std::fmt::Debug;
@@ -17,7 +17,7 @@ pub trait Evaluator: Debug {
     /// as the rules defined and return a new copy of the intensional relations with any new facts
     /// added.
     ///
-    fn inference(&self, program: &Program) -> Result<Relations>;
+    fn inference(&self, program: &Program) -> Result<RelationSet>;
 }
 
 ///
@@ -41,7 +41,7 @@ impl Default for NoopEvaluator {
 }
 
 impl Evaluator for NoopEvaluator {
-    fn inference(&self, program: &Program) -> Result<Relations> {
+    fn inference(&self, program: &Program) -> Result<RelationSet> {
         Ok(program.intensional().clone_with_schema_only())
     }
 }
