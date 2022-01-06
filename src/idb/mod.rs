@@ -280,8 +280,9 @@ use crate::syntax::{
     IMPLICATION_UNICODE_ARROW, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
     OPERATOR_ASCII_GREATER_THAN, OPERATOR_ASCII_GREATER_THAN_OR_EQUAL, OPERATOR_ASCII_LESS_THAN,
     OPERATOR_ASCII_LESS_THAN_OR_EQUAL, OPERATOR_ASCII_NOT_EQUAL, OPERATOR_ASCII_NOT_EQUAL_ALT,
-    OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL, OPERATOR_UNICODE_LESS_THAN_OR_EQUAL,
-    OPERATOR_UNICODE_NOT_EQUAL, TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
+    OPERATOR_ASCII_STAR_EQUAL, OPERATOR_ASCII_WORD_MATCHES, OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL,
+    OPERATOR_UNICODE_LESS_THAN_OR_EQUAL, OPERATOR_UNICODE_NOT_EQUAL, OPERATOR_UNICODE_STAR_EQUAL,
+    TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
 };
 use crate::{
     AttributeName, Collection, FeatureSet, IndexedCollection, Labeled, MaybeAnonymous, MaybeGround,
@@ -399,9 +400,9 @@ pub struct Literal {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum LiteralInner {
     /// A relational literal
-    Atom(Atom),
+    Relational(Atom),
     /// An arithmetic literal, if using the language $\small\text{Datalog}^{\theta}$.
-    Comparison(Comparison),
+    Arithmetic(Comparison),
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -427,6 +428,7 @@ pub enum ComparisonOperator {
     LessThanOrEqual,
     GreaterThan,
     GreaterThanOrEqual,
+    StringMatch,
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -539,7 +541,7 @@ impl SyntaxFragments for Rule {
         !self
             .literals()
             .filter_map(|lit| {
-                if let LiteralInner::Atom(atom) = lit.as_ref() {
+                if let LiteralInner::Relational(atom) = lit.as_ref() {
                     Some(atom.label())
                 } else {
                     None
@@ -792,7 +794,7 @@ impl Rule {
                 .collect();
             if !missing.is_empty() {
                 return Err(head_variables_missing_in_body(
-                    atom.label_ref().clone(),
+                    atom.label_ref(),
                     missing
                         .iter()
                         .map(|t| t.to_string())
@@ -808,7 +810,7 @@ impl Rule {
                 .collect();
             if !missing.is_empty() {
                 return Err(negative_variables_not_also_positive(
-                    atom.label_ref().clone(),
+                    atom.label_ref(),
                     missing
                         .iter()
                         .map(|t| t.to_string())
@@ -903,7 +905,7 @@ impl Atom {
                         .unwrap()
                 {
                     return Err(fact_does_not_correspond_to_schema(
-                        relation.label_ref().clone(),
+                        relation.label_ref(),
                         terms
                             .iter()
                             .map(|t| t.to_string())
@@ -978,13 +980,13 @@ impl Display for Literal {
 
 impl From<Atom> for Literal {
     fn from(v: Atom) -> Self {
-        Self::atom(v)
+        Self::relational(v)
     }
 }
 
 impl From<Comparison> for Literal {
     fn from(v: Comparison) -> Self {
-        Self::comparison(v)
+        Self::arithmetic(v)
     }
 }
 
@@ -1011,15 +1013,15 @@ impl Literal {
         Self { negative, inner }
     }
 
-    pub fn atom(atom: Atom) -> Self {
+    pub fn relational(atom: Atom) -> Self {
         Self::new(false, atom.into())
     }
 
-    pub fn negative_atom(atom: Atom) -> Self {
+    pub fn negative_relational(atom: Atom) -> Self {
         Self::new(true, atom.into())
     }
 
-    pub fn comparison(comparison: Comparison) -> Self {
+    pub fn arithmetic(comparison: Comparison) -> Self {
         Self::new(false, comparison.into())
     }
 
@@ -1029,20 +1031,20 @@ impl Literal {
 
     // --------------------------------------------------------------------------------------------
 
-    delegate!(is_atom, inner -> bool);
+    delegate!(is_relational, inner -> bool);
 
-    delegate!(as_atom, inner -> Option<&Atom>);
+    delegate!(as_relational, inner -> Option<&Atom>);
 
-    delegate!(is_comparison, inner -> bool);
+    delegate!(is_arithmetic, inner -> bool);
 
-    delegate!(as_comparison, inner -> Option<&Comparison>);
+    delegate!(as_arithmetic, inner -> Option<&Comparison>);
 
     // --------------------------------------------------------------------------------------------
 
     pub fn terms(&self) -> Vec<&Term> {
         match &self.inner {
-            LiteralInner::Atom(v) => v.iter().collect(),
-            LiteralInner::Comparison(v) => v.terms(),
+            LiteralInner::Relational(v) => v.iter().collect(),
+            LiteralInner::Arithmetic(v) => v.terms(),
         }
     }
 
@@ -1068,8 +1070,8 @@ impl Display for LiteralInner {
             f,
             "{}",
             match self {
-                Self::Atom(v) => v.to_string(),
-                Self::Comparison(v) => v.to_string(),
+                Self::Relational(v) => v.to_string(),
+                Self::Arithmetic(v) => v.to_string(),
             }
         )
     }
@@ -1077,29 +1079,29 @@ impl Display for LiteralInner {
 
 impl From<Atom> for LiteralInner {
     fn from(v: Atom) -> Self {
-        Self::Atom(v)
+        Self::Relational(v)
     }
 }
 
 impl From<Comparison> for LiteralInner {
     fn from(v: Comparison) -> Self {
-        Self::Comparison(v)
+        Self::Arithmetic(v)
     }
 }
 
 impl MaybeGround for LiteralInner {
     fn is_ground(&self) -> bool {
         match self {
-            LiteralInner::Atom(a) => a.is_ground(),
-            LiteralInner::Comparison(c) => c.is_ground(),
+            LiteralInner::Relational(a) => a.is_ground(),
+            LiteralInner::Arithmetic(c) => c.is_ground(),
         }
     }
 }
 
 impl LiteralInner {
-    self_is_as!(atom, Atom);
+    self_is_as!(relational, Relational, Atom);
 
-    self_is_as!(comparison, Comparison);
+    self_is_as!(arithmetic, Arithmetic, Comparison);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1177,6 +1179,7 @@ impl Display for ComparisonOperator {
                 Self::LessThanOrEqual => OPERATOR_ASCII_LESS_THAN_OR_EQUAL,
                 Self::GreaterThan => OPERATOR_ASCII_GREATER_THAN,
                 Self::GreaterThanOrEqual => OPERATOR_ASCII_GREATER_THAN_OR_EQUAL,
+                Self::StringMatch => OPERATOR_ASCII_STAR_EQUAL,
             }
         )
     }
@@ -1199,6 +1202,9 @@ impl FromStr for ComparisonOperator {
             OPERATOR_ASCII_GREATER_THAN_OR_EQUAL | OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL => {
                 Ok(Self::GreaterThanOrEqual)
             }
+            OPERATOR_ASCII_STAR_EQUAL
+            | OPERATOR_UNICODE_STAR_EQUAL
+            | OPERATOR_ASCII_WORD_MATCHES => Ok(Self::StringMatch),
             _ => Err(invalid_value(TYPE_NAME_COMPARISON_OPERATOR, s)),
         }
     }

@@ -70,7 +70,7 @@ impl Evaluator for NaiveEvaluator {
                     let matches: Result<Vec<View>> = rule
                         .literals()
                         .map(|l| {
-                            if let Some(atom) = l.as_atom() {
+                            if let Some(atom) = l.as_relational() {
                                 if let Some(view) = program.extensional().matches(atom) {
                                     trace!("First matches from an extensional relation");
                                     Ok(view)

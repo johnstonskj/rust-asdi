@@ -126,9 +126,18 @@ fn test_parse_rule_expression_negated_term() {
 }
 
 #[test]
-fn test_parse_rule_with_comparisons() {
+fn test_parse_rule_with_comparison() {
     quick_parser_check_with_options(
         "old(X) :- human(X), X > 50.",
+        FeatureSet::default().add_support_for(&FEATURE_COMPARISONS),
+        None,
+    );
+}
+
+#[test]
+fn test_parse_rule_with_unicode_comparison() {
+    quick_parser_check_with_options(
+        r#"old(X) :- human(X), X ≛ "$xerc.*"."#,
         FeatureSet::default().add_support_for(&FEATURE_COMPARISONS),
         None,
     );

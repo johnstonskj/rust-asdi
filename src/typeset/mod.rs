@@ -202,8 +202,8 @@ impl LatexTypesetter {
                 String::new()
             },
             match value.as_ref() {
-                LiteralInner::Atom(a) => self.atom(a)?,
-                LiteralInner::Comparison(c) => format!(
+                LiteralInner::Relational(a) => self.atom(a)?,
+                LiteralInner::Arithmetic(c) => format!(
                     "${} {} {}$",
                     c.lhs(),
                     match c.operator() {
@@ -213,6 +213,8 @@ impl LatexTypesetter {
                         ComparisonOperator::LessThanOrEqual => "\\leq",
                         ComparisonOperator::GreaterThan => ">",
                         ComparisonOperator::GreaterThanOrEqual => "\\geq",
+                        ComparisonOperator::StringMatch =>
+                            r"\overset{\raisebox{-0.75em}{$\tiny\star}}{=}}",
                     },
                     c.rhs()
                 ),

@@ -590,9 +590,9 @@ fn parse_literal(
         Rule::atom => {
             let atom = parse_atom(next.into_inner(), program, features)?;
             if negative {
-                Literal::negative_atom(atom)
+                Literal::negative_relational(atom)
             } else {
-                Literal::atom(atom)
+                Literal::relational(atom)
             }
         }
         Rule::comparison => {
@@ -600,7 +600,7 @@ fn parse_literal(
             if negative {
                 Literal::negative_comparison(comparison)
             } else {
-                Literal::comparison(comparison)
+                Literal::arithmetic(comparison)
             }
         }
         _ => unreachable!(next.as_str()),

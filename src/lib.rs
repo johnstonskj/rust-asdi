@@ -444,11 +444,19 @@ alive(X) ⟵ ￢dead(X).
 
 The language feature `comparisons` corresponds to the language $\small\text{Datalog}^{\theta}$ and
 allows the use of arithmetic literals. Comparisons take place between two literals and are
-currently limited to a set of common operators.
+currently limited to a set of common operators. Note the addition of a string match operator, this
+is similar to the Per `=~` and requires a string value/variable on the left and a string value or
+variable on the right that compiles to a valid Rust regular expression.
 
 ```abnf
 comparison      = term operator term
-operator        = "=" / "!=" / "/=" / "≠" / "<" / "<=" / "≤" / ">" / ">=" / "≥"
+operator        = "="
+                / "!=" /"/=" / "≠"
+                / "<"
+                / "<=" / "≤"
+                / ">"
+                / ">=" / "≥"
+                / "*=" / "≛" / "MATCHES"
 ```
 
 The Unicode characters `≠` (not equal to `\u{2260}`), `≤` (less-than or equal to `\u{2264}`), and
@@ -461,11 +469,11 @@ $$\tag{xvi}\small compatible(\tau_{lhs}, \tau_{rhs}, \theta) \leftarrow \tau_{lh
 
 Additionally, some operators are not present for all types, as shown in the table below.
 
-| Type     | `=`, `≠`   | `<`, `≤`, `>`, `≥` |
-| -------- | ---------- | ------------------ |
-| String   | Yes        | Yes - lexical      |
-| Integer  | Yes        | Yes                |
-| Boolean  | Yes        | No                 |
+| Type     | `=`, `≠`   | `<`, `≤`, `>`, `≥` | `≛` |
+| -------- | ---------- | ------------------ | --- |
+| String   | Yes        | Yes - lexical      | Yes |
+| Integer  | Yes        | Yes                | No  |
+| Boolean  | Yes        | No                 | No  |
 
 The following is an example using comparison of some numeric attribute of the _car_ relation.
 
@@ -1198,7 +1206,7 @@ impl Program {
     fn infer_attribute(&self, variable: &Variable, rule: &Rule) -> Attribute<Predicate> {
         let candidates: Vec<(&Predicate, usize)> = rule
             .literals()
-            .filter_map(Literal::as_atom)
+            .filter_map(Literal::as_relational)
             .filter_map(|a| {
                 a.iter()
                     .enumerate()

@@ -257,7 +257,7 @@ query_prefix = _{
 }
 
 comparison_operator = {
-    LESS_THAN | less_or_equal | GREATER_THAN | greater_or_equal | EQUALS | not_equal
+    LESS_THAN | less_or_equal | GREATER_THAN | greater_or_equal | EQUALS | not_equal | string_match
 }
 
 less_or_equal = _{
@@ -270,6 +270,10 @@ greater_or_equal = _{
 
 not_equal = _{
     "!=" | "/=" | UC_NOT_EQUAL
+}
+
+string_match = _{
+    "*=" | UC_STAR_EQUAL | "MATCHES"
 }
 
 UC_LOGICAL_AND = _{ "∧" }
@@ -291,6 +295,8 @@ UC_LTE = _{ "≤" }
 UC_GTE = _{ "≥" }
 
 UC_NOT_EQUAL = _{ "≠" }
+
+UC_STAR_EQUAL = _{ "≛" }
 
 LEFT_PAREN = _{ "(" }
 

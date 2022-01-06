@@ -80,10 +80,13 @@ pub(crate) const OPERATOR_ASCII_LESS_THAN: &str = "<";
 pub(crate) const OPERATOR_ASCII_LESS_THAN_OR_EQUAL: &str = "<=";
 pub(crate) const OPERATOR_ASCII_GREATER_THAN: &str = ">";
 pub(crate) const OPERATOR_ASCII_GREATER_THAN_OR_EQUAL: &str = ">=";
+pub(crate) const OPERATOR_ASCII_STAR_EQUAL: &str = "*=";
+pub(crate) const OPERATOR_ASCII_WORD_MATCHES: &str = "MATCHES";
 
 pub(crate) const OPERATOR_UNICODE_NOT_EQUAL: &str = "≠";
 pub(crate) const OPERATOR_UNICODE_LESS_THAN_OR_EQUAL: &str = "≤";
 pub(crate) const OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL: &str = "≥";
+pub(crate) const OPERATOR_UNICODE_STAR_EQUAL: &str = "≛";
 
 pub(crate) const IMPLICATION_ASCII_TURNSTILE: &str = ":-";
 pub(crate) const IMPLICATION_ASCII_ARROW: &str = "<-";
