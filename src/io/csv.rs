@@ -104,6 +104,9 @@ impl Reader for DelimitedLines {
         let mut reader = ReaderBuilder::new()
             .delimiter(options.delimiter)
             .has_headers(options.has_headers)
+            .comment(b'#'.into())
+            .double_quote(true)
+            .quoting(true)
             .trim(Trim::All)
             .from_reader(reader);
 
@@ -166,6 +169,7 @@ impl Writer for DelimitedLines {
         let mut writer = WriterBuilder::new()
             .delimiter(options.delimiter)
             .has_headers(options.has_headers)
+            .double_quote(true)
             .from_writer(file);
         write(&mut writer, from_relation, options.has_headers)
     }

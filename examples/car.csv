@@ -2,4 +2,4 @@ ex:Car, rdfs:subClassOf, ex:Vehicle
 ex:name, rdfs:subPropertyOf, rdfs:label
 ex:name, rdfs:domain, ex:Car
 ex:name, rdfs:range, xsd:string
-ex:my_car, ex:name, "the clown car"
+ex:my_car, ex:name, the clown car

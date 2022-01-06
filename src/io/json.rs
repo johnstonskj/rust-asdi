@@ -6,7 +6,8 @@ use crate::edb::{AttributeKind, Constant, Fact};
 use crate::error::Error;
 use crate::error::Result;
 use crate::io::{Reader, Writer};
-use crate::{Collection, Labeled, Relation};
+use crate::syntax::{TYPE_NAME_CONST_BOOLEAN, TYPE_NAME_CONST_INTEGER, TYPE_NAME_CONST_STRING};
+use crate::{error, Collection, Labeled, Relation};
 use serde_json::{from_reader, Number, Value};
 use std::fs::File;
 use std::io::BufReader;
@@ -79,19 +80,20 @@ impl Reader for Json {
 
         let facts = value.as_array().unwrap();
         for fact in facts {
-            let values = fact.as_array().unwrap();
+            let values: &Vec<Value> = fact.as_array().unwrap();
             assert_eq!(values.len(), arity);
-            let values: Vec<Constant> = values
+            println!("{:?}", values);
+            let constants: Result<Vec<Constant>> = values
                 .iter()
                 .enumerate()
-                .map(|(i, s)| match attribute_types.get(i) {
-                    Some(AttributeKind::String) => Constant::String(s.to_string()),
-                    Some(AttributeKind::Integer) => Constant::String(s.to_string()),
-                    Some(AttributeKind::Boolean) => Constant::String(s.to_string()),
+                .map(|(i, v)| match attribute_types.get(i) {
+                    Some(AttributeKind::String) => json_value_to_string(v),
+                    Some(AttributeKind::Integer) => json_value_to_integer(v),
+                    Some(AttributeKind::Boolean) => json_value_to_boolean(v),
                     _ => unreachable!(),
                 })
                 .collect();
-            new_relation.add(Fact::new(new_relation.label_ref(), values))?;
+            new_relation.add(Fact::new(new_relation.label_ref(), constants?))?;
         }
 
         Ok(new_relation)
@@ -153,6 +155,33 @@ fn fact_to_json(fact: &Fact) -> Value {
         });
     }
     Value::Array(array)
+}
+
+#[inline]
+fn json_value_to_string(v: &Value) -> Result<Constant> {
+    let v2: String = v
+        .as_str()
+        .ok_or_else(|| error::invalid_value(TYPE_NAME_CONST_STRING, &v.to_string()))?
+        .to_owned();
+    Ok(Constant::String(v2))
+}
+
+#[inline]
+fn json_value_to_integer(v: &Value) -> Result<Constant> {
+    let v2: i64 = v
+        .as_i64()
+        .ok_or_else(|| error::invalid_value(TYPE_NAME_CONST_INTEGER, &v.to_string()))?
+        .to_owned();
+    Ok(Constant::Integer(v2))
+}
+
+#[inline]
+fn json_value_to_boolean(v: &Value) -> Result<Constant> {
+    let v2: bool = v
+        .as_bool()
+        .ok_or_else(|| error::invalid_value(TYPE_NAME_CONST_BOOLEAN, &v.to_string()))?
+        .to_owned();
+    Ok(Constant::Boolean(v2))
 }
 
 // ------------------------------------------------------------------------------------------------
