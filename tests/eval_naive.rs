@@ -119,7 +119,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
 #[test]
 fn test_sourceforge_example() {
-    const PROGRAM_SOURCE: &str = r#"@assert edge(string, string).
+    const PROGRAM_SOURCE: &str = r#".assert edge(string, string).
 
 edge(a, b).
 edge(c, d).

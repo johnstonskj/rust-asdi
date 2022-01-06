@@ -4,7 +4,7 @@ This module provides the set of types that primarily describe the Extensional Da
 Given the following fact:
 
 ```datalog
-person("Alice", 49, @true).
+person("Alice", 49, true).
 ```
 
 We can deduce:
@@ -16,14 +16,14 @@ We can deduce:
     1. The [types](enum.AttributeKind.html) of the [attributes](Attribute) in this
        relation are `(string, integer, boolean)`.
 1. This relation has _at least_ one fact which has the [constant](Constant) values
-   `("Alice", 49, @true)`.
+   `("Alice", 49, true)`.
 
 If we were to include an extensional relation declaration in our example, as follows:
 
 ```datalog
-@assert person(name: string, age: integer, funny: boolean).
+.assert person(name: string, age: integer, funny: boolean).
 
-person("Alice", 49, @true).
+person("Alice", 49, true).
 ```
 
 We can add the [label](Predicate) for each attribute of `person` to the relation's schema.
@@ -33,8 +33,8 @@ We can add the [label](Predicate) for each attribute of `person` to the relation
 The following declares two extensional [relations](Relation), `human` and `age`.
 
 ```datalog
-@assert human(string).
-@assert age(name: string, integer).
+.assert human(string).
+.assert age(name: string, integer).
 ```
 
 The following are all valid [facts](Fact) expressed in the text representation.
@@ -45,8 +45,8 @@ string_fact(shortString).
 string_fact(str:Short).
 integer_fact(1234).
 integer_fact(-4321).
-boolean_fact(@true).
-boolean_fact(@false).
+boolean_fact(true).
+boolean_fact(false).
 ```
 */
 
@@ -895,7 +895,7 @@ impl Relation {
     // --------------------------------------------------------------------------------------------
 
     ///
-    /// Returns `true` if a [FilePragma] (`@input` or `@output`) is attached to this relation.
+    /// Returns `true` if a [FilePragma] (`.input` or `.output`) is attached to this relation.
     ///
     pub fn has_file_pragma(&self) -> bool {
         self.pragma.is_some()

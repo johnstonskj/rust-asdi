@@ -100,6 +100,18 @@ fn ancestor_example() {
 
 ## Changes
 
+**Version 0.2.2**
+
+Made changes to syntax to align more closely with traditional Datalog, as well as [Soufflé](https://souffle-lang.github.io/):
+
+* using `%` instead of `#` for line comments,
+* added `/*` and `*/` for block comments,
+* removed the need for a `@` prefix on the boolean constants `true` and `false`,
+* using `.` instead of `@` for pragmas.
+
+ASDI still uses separate `assert` and `infer` pragmas rather than Soufflé's single `decl`. Also, to keep pragmas regular
+with other statements they end in a `.` whereas in Soufflé they do not.
+
 **Version 0.2.1**
 
 * Added traits for consistency across types.

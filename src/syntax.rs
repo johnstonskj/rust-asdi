@@ -26,7 +26,7 @@ pub(crate) const TYPE_NAME_CONST_UNKNOWN: &str = "?";
 
 // ------------------------------------------------------------------------------------------------
 
-pub(crate) const RESERVED_PREFIX: &str = "@";
+pub(crate) const RESERVED_PREFIX: &str = ".";
 
 pub(crate) const RESERVED_BOOLEAN_TRUE: &str = "true";
 pub(crate) const RESERVED_BOOLEAN_FALSE: &str = "false";

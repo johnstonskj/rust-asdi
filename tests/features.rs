@@ -5,18 +5,18 @@ mod common;
 
 #[test]
 fn parse_feature() {
-    quick_parser_check("@feature(constraints).", None)
+    quick_parser_check(".feature(constraints).", None)
 }
 
 #[test]
 fn parse_more_feature() {
-    quick_parser_check("@feature(constraints, disjunction).", None)
+    quick_parser_check(".feature(constraints, disjunction).", None)
 }
 
 #[test]
 #[should_panic]
 fn parse_unknown_feature() {
-    quick_parser_check("@feature(no_empty_promises).", None)
+    quick_parser_check(".feature(no_empty_promises).", None)
 }
 
 #[test]
@@ -45,7 +45,7 @@ fn test_to_string() {
         FeatureSet::default()
             .add_support_for(&FEATURE_NEGATION)
             .to_string(),
-        "@feature(negation)."
+        ".feature(negation)."
     );
     assert_eq!(
         FeatureSet::default()
@@ -53,6 +53,6 @@ fn test_to_string() {
             .add_support_for(&FEATURE_DISJUNCTION)
             .add_support_for(&FEATURE_COMPARISONS)
             .to_string(),
-        "@feature(negation, comparisons, disjunction)."
+        ".feature(negation, comparisons, disjunction)."
     );
 }

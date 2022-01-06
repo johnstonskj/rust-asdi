@@ -20,7 +20,7 @@ use tracing::{error, trace};
 /// # Examples
 ///
 /// ```datalog
-/// @assert car(make: string, model: string, year: integer).
+/// .assert car(make: string, model: string, year: integer).
 ///
 /// ## Is there a car model Fiesta, from Ford, with a model year 2010?
 /// car(ford, focus, 2010)?

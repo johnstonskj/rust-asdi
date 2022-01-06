@@ -39,7 +39,7 @@ datalog = function(hljs) {
 
   const BOOLEAN = {
     scope: 'literal',
-    begin: /@(true|false)/
+    begin: /(true|false)/
   };
 
   const SYMBOL_STRING = {
@@ -83,7 +83,7 @@ datalog = function(hljs) {
 
   const PRAGMA = {
     beginScope: 'meta',
-    begin: /@[a-z]+/,
+    begin: /\.[a-z]+/,
     end: /\./,
     contains: [
       INFER_FROM,

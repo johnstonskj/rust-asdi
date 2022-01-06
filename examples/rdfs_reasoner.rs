@@ -18,5 +18,4 @@ fn main() {
         println!("{}", relation.label_ref());
         print_relation(relation, &Format::Text).unwrap();
     }
-    //print!("{}", program);
 }

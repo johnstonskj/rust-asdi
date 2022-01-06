@@ -312,7 +312,7 @@ string          = short-string / quoted-string
 short-string    = predicate [ ":" ALPHA *[ ALPHA / DIGIT / "_" ] ]
 quoted-string   = DQUOTE ... DQUOTE
 integer         = +DIGIT
-boolean         = "@true" / "⊤" / "@false" / "⊥"
+boolean         = "true" / "⊤" / "false" / "⊥"
 ```
 
 Boolean values may also be represented using `⊤` (down tack `\u{22a4}`) for true, and `⊥` (up tack
@@ -357,7 +357,7 @@ For example, the following describes the rule that _if X is a parent then X is *
 father **or** mother_.
 
 ```datalog
-@feature(disjunction).
+.feature(disjunction).
 
 father(X) ⋁ mother(X) :- parent(X).
 ```
@@ -368,7 +368,7 @@ allows the specification of rules with no head. In this case the material implic
 equivalent.
 
 ```datalog
-@feature(constraints).
+.feature(constraints).
 
 :- alive(X) AND dead(X).
 ⊥ ⟵ alive(X) ∧ dead(X).
@@ -434,7 +434,7 @@ allows the specification of negated literals. Negation may also be written using
 character `￢` (full-width not sign `\u{ffe2}`). The following rules are equivalent.
 
 ```datalog
-@feature(negation).
+.feature(negation).
 
 alive(X) :- NOT dead(X).
 alive(X) ⟵ ￢dead(X).
@@ -470,7 +470,7 @@ Additionally, some operators are not present for all types, as shown in the tabl
 The following is an example using comparison of some numeric attribute of the _car_ relation.
 
 ```datalog
-@feature(comparisons).
+.feature(comparisons).
 
 antique(X) :- car(X, Y) AND Y > 50.
 ```
@@ -497,7 +497,7 @@ in either the query or the response. For example, in the following query we ask 
 the _model_ attribute in the _car_ relation where the _make_ is "ford", and ignore the age entirely.
 
 ```datalog
-@assert car(make: string, model: string, age: integer).
+.assert car(make: string, model: string, age: integer).
 
 car("ford", Model, _)?
 ```
@@ -530,19 +530,19 @@ TBD.
 ```abnf
 pragma          = feature / assert / infer / input / output
 
-feature         = "@feature" feature-list "."
+feature         = ".feature" feature-list "."
 feature-list    = "(" feature-id *[ "," feature-id ] ")"
 feature-id      = "comparisons" / "constraints" / "disjunction" / "negation"
 
-assert          = "@assert" predicate attribute-list "."
-infer           = "@infer" ( predicate attribute-list / infer_from ) "."
+assert          = ".assert" predicate attribute-list "."
+infer           = ".infer" ( predicate attribute-list / infer_from ) "."
 attribute-list  = "(" attribute-decl *[ "," attribute-decl ] ")"
 attribute-decl  = [ predicate ":" ] attribute-type
 attribute-type  = "boolean" / "integer" / "string"
 infer_from      = "from" predicate
 
-input           = "@input" io-details "."
-output          = "@output" io-details "."
+input           = ".input" io-details "."
+output          = ".output" io-details "."
 io-details      = "(" predicate "," file-name [ "," file-type ] ")"
 file-name       = quoted-string
 file-type       = quoted-string
@@ -552,8 +552,8 @@ The `feature` pragma determines which Datalog language is in use. Use of syntax 
 selected language feature will result in errors.
 
 ```datalog
-@feature(negation).
-@feature(comparisons, disjunction).
+.feature(negation).
+.feature(comparisons, disjunction).
 ```
 
 The `assert` pragma describes a new relation in the extensional database. The parser can determine
@@ -561,7 +561,7 @@ the schema for facts from their types in the database. The use of this pragma is
 but recommended.
 
 ```datalog
-@assert human(name: string).
+.assert human(name: string).
 ```
 
 The `infer` pragma describes a new relation in the intensional database. Typically the parser
@@ -570,10 +570,10 @@ is therefore optional, but recommended. The alternate form is more explicit in t
 an intensional relation in terms of a previously defined extensional relation.
 
 ```datalog
-@infer mortal(name: string).
+.infer mortal(name: string).
 ## alternatively ...
-@assert human(name: string).
-@infer mortal from human.
+.assert human(name: string).
+.infer mortal from human.
 ```
 
 The `input` pragma instructs the parser to load facts for the named extensional relation from an
@@ -581,8 +581,8 @@ external file. This pragma **requires** that the relation be previously defined 
 pragma.
 
 ```datalog
-@assert human(name: string).
-@input(human, "data/humans.csv", "csv").
+.assert human(name: string).
+.input(human, "data/humans.csv", "csv").
 ```
 
 The `output` pragma instructs the parser to write facts from the named intensional relation to an
@@ -590,17 +590,21 @@ external file. This pragma **requires** that the relation be previously defined 
 pragma.
 
 ```datalog
-@infer mortal(name: string).
-@output(mortal, "data/mortals.txt").
+.infer mortal(name: string).
+.output(mortal, "data/mortals.txt").
 ```
 
 ### Comments
 
-Comments in Datalog are identified by the `#` character and continue to the end of the line.
+Comments in Datalog are either
+
+1. the `%` character and continue to the end of the line, or
+2. C-style with `/*` to start and `*/` to end.
 
 ```datalog
-## Here's a comment
-?- ancestor(xerces, X). # and another
+% Here's a comment
+?- ancestor(xerces, X). % and another
+?- ancestor(brooke /* and one inline */, X). % and another
 ```
 
 # Example
@@ -660,7 +664,7 @@ boolean value denoting whether the goal is satisfied.
 +------------+
 | _: boolean |
 +============+
-| @true      |
+| true      |
 +------------+
 ```
 

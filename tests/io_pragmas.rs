@@ -5,8 +5,8 @@ use std::path::PathBuf;
 #[test]
 fn test_input_success_default() {
     let program = parse_str(
-        r#"@assert human(string).
-@input(human, "file-name")."#,
+        r#".assert human(string).
+.input(human, "file-name")."#,
     )
     .unwrap()
     .into_parsed();
@@ -27,8 +27,8 @@ fn test_input_success_default() {
 #[test]
 fn test_input_success_json() {
     let program = parse_str(
-        r#"@assert human(string).
-@input(human, "file-name", "json")."#,
+        r#".assert human(string).
+.input(human, "file-name", "json")."#,
     )
     .unwrap()
     .into_parsed();
@@ -46,8 +46,8 @@ fn test_input_success_json() {
 #[test]
 fn test_output_success_default() {
     let program = parse_str(
-        r#"@infer mortal(string).
-@output(mortal, "file-name")."#,
+        r#".infer mortal(string).
+.output(mortal, "file-name")."#,
     )
     .unwrap()
     .into_parsed();
@@ -68,8 +68,8 @@ fn test_output_success_default() {
 #[test]
 fn test_output_success_json() {
     let program = parse_str(
-        r#"@infer mortal(string).
-@output(mortal, "file-name", "json")."#,
+        r#".infer mortal(string).
+.output(mortal, "file-name", "json")."#,
     )
     .unwrap()
     .into_parsed();
@@ -87,8 +87,8 @@ fn test_output_success_json() {
 #[test]
 fn test_invalid_format() {
     let program = parse_str(
-        r#"@assert human(string).
-@input(human, "file-name", "arrow")."#,
+        r#".assert human(string).
+.input(human, "file-name", "arrow")."#,
     );
 
     assert!(program.is_err());

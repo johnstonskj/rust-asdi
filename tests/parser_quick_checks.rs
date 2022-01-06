@@ -11,6 +11,17 @@ use common::{quick_parser_check, quick_parser_check_with_options};
 // ------------------------------------------------------------------------------------------------
 
 #[test]
+fn test_parse_comments() {
+    quick_parser_check(
+        r#".infer ancestor(string,string).
+% Here's a comment
+?- ancestor(xerces, X). % and another
+"#,
+        None,
+    );
+}
+
+#[test]
 fn test_parse_nothing() {
     quick_parser_check("", Program::default());
 }
@@ -26,8 +37,13 @@ fn test_parse_number_fact() {
 }
 
 #[test]
-fn test_parse_boolean_fact() {
-    quick_parser_check("deceased(socrates, @true).", None);
+fn test_parse_boolean_fact_t() {
+    quick_parser_check("deceased(socrates, true).", None);
+}
+
+#[test]
+fn test_parse_boolean_fact_f() {
+    quick_parser_check("deceased(socrates, false).", None);
 }
 
 #[test]
@@ -78,22 +94,22 @@ fn test_parse_one_rule_multiples_and() {
 
 #[test]
 fn test_parse_query_prefixed() {
-    quick_parser_check("@infer path(string, string). ?- path(X, Y).", None);
+    quick_parser_check(".infer path(string, string). ?- path(X, Y).", None);
 }
 
 #[test]
 fn test_parse_query_suffixed() {
-    quick_parser_check("@infer path(string, string). path(X, Y)?", None);
+    quick_parser_check(".infer path(string, string). path(X, Y)?", None);
 }
 
 #[test]
 fn test_parse_pragma_assert() {
-    quick_parser_check(r#"@assert human(string)."#, None);
+    quick_parser_check(r#".assert human(string)."#, None);
 }
 
 #[test]
 fn test_parse_pragma_assert_named() {
-    quick_parser_check(r#"@assert human(name: string)."#, None);
+    quick_parser_check(r#".assert human(name: string)."#, None);
 }
 
 // ------------------------------------------------------------------------------------------------

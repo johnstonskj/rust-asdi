@@ -19,7 +19,7 @@ pub struct Options {}
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct TextTables {}
 
-/// The string used in the `@input` and `@output` pragmas to identify this format.
+/// The string used in the `.input` and `.output` pragmas to identify this format.
 pub const PRAGMA_ID: &str = "text";
 
 // ------------------------------------------------------------------------------------------------

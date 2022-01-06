@@ -25,7 +25,7 @@ process above to add it to the IDB.
 If we were to include an intensional relation declaration in our example, as follows:
 
 ```datalog
-@infer ancestor(child: string, parent: string).
+.infer ancestor(child: string, parent: string).
 
 ancestor(X, Y) :- parent(X, Y).
 ```
@@ -40,10 +40,10 @@ TBD
 The following declares two intensional [relations](struct.Relation.html), `mortal` and `age`.
 
 ```datalog
-@assert human(string).
+.assert human(string).
 
-@infer mortal from human.
-@infer age(name: string, integer).
+.infer mortal from human.
+.infer age(name: string, integer).
 ```
 
 The following are valid [rules](struct.Rule.html).

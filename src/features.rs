@@ -6,7 +6,7 @@ By default the language supported by this library is sometimes termed _Pure Data
 allows for positive literals only, and allow for recursion. It does support additional features
 with feature sets applied to programs. Without a feature specified certain types will fail
 well-formedness rules, the parser will report errors, and some tools will not execute. However,
-the enabling of features is relatively simple in both the text representation using the `@feature`
+the enabling of features is relatively simple in both the text representation using the `.feature`
 pragma, and using `FeatureSet`s in the API.
 
 # Example
@@ -14,7 +14,7 @@ pragma, and using `FeatureSet`s in the API.
 The following demonstrates the text representation support for enabling features.
 
 ```datalog
-@features(negation, comparisons, disjunction).
+.features(negation, comparisons, disjunction).
 ```
 
 Similarly, the following API example shows how to create a feature set that may be added to a
@@ -30,7 +30,7 @@ let features = FeatureSet::from(vec![FEATURE_NEGATION, FEATURE_DISJUNCTION]);
 assert!(features.supports(&FEATURE_NEGATION));
 assert!(!features.supports(&FEATURE_COMPARISONS));
 
-assert_eq!(features.to_string(), "@feature(negation, disjunction).");
+assert_eq!(features.to_string(), ".feature(negation, disjunction).");
 ```
 
 # Supported Features
@@ -43,7 +43,7 @@ The feature `negation` enables the negation of individual literals in the body o
 language is often described as $\text{\small{Datalog}}^{\lnot}$.
 
 ```datalog
-@features(negation).
+.features(negation).
 alive(X) :- person(X) AND NOT dead(X).
 alive(X) :- person(X) ∧ ￢dead(X).
 ```
@@ -57,7 +57,7 @@ specifies a rule that _may never_ be true. This language is described herein as
 $\text{\small{Datalog}}^{\bot}$.
 
 ```datalog
-@features(constraints).
+.features(constraints).
 ⊥ :- dead(X) AND alive(X).
 :- dead(X) AND alive(X).
 ```
@@ -71,7 +71,7 @@ The feature `comparisons` enables the inclusion of literal terms that use standa
 operators. This language is described herein as $\text{\small{Datalog}}^{\theta}$.
 
 ```datalog
-@features(comparisons).
+.features(comparisons).
 old(X) :- age(X, Y) ∧ Y > 75.
 ```
 
@@ -85,7 +85,7 @@ The feature `disjunction` enables the negation of individual literals in the bod
 language is often described as $\text{\small{Datalog}}^{\lor}$.
 
 ```datalog
-@features(disjunction).
+.features(disjunction).
 mother(X, Y) OR father(X, Y) :- parent(X, Y).
 mother(X, Y) ∨ father(X, Y) :- parent(X, Y).
 ```
@@ -124,7 +124,7 @@ pub struct Feature {
 }
 
 ///
-/// Corresponds to `@feature(negation).` and the language $\small\text{Datalog}^{\lnot}$, without
+/// Corresponds to `.feature(negation).` and the language $\small\text{Datalog}^{\lnot}$, without
 /// this feature it is an error to add a rule with a non-positive literal.
 ///
 pub const FEATURE_NEGATION: Feature = Feature {
@@ -134,7 +134,7 @@ pub const FEATURE_NEGATION: Feature = Feature {
 };
 
 ///
-/// Corresponds to `@feature(comparisons).` and the language $\small\text{Datalog}^{\theta}$, without
+/// Corresponds to `.feature(comparisons).` and the language $\small\text{Datalog}^{\theta}$, without
 /// this feature it is an error to add a rule with an arithmetic literal.
 ///
 pub const FEATURE_COMPARISONS: Feature = Feature {
@@ -144,7 +144,7 @@ pub const FEATURE_COMPARISONS: Feature = Feature {
 };
 
 ///
-/// Corresponds to `@feature(disjunction).` and the language $\small\text{Datalog}^{\lor}$, without
+/// Corresponds to `.feature(disjunction).` and the language $\small\text{Datalog}^{\lor}$, without
 /// this feature it is an error to add a rule with a disjunctive head.
 ///
 pub const FEATURE_DISJUNCTION: Feature = Feature {
@@ -160,7 +160,7 @@ pub const FEATURE_DISJUNCTION: Feature = Feature {
 // };
 
 ///
-/// Corresponds to `@feature(constraints).` and the language $\small\text{Datalog}^{\Leftarrow}$, without
+/// Corresponds to `.feature(constraints).` and the language $\small\text{Datalog}^{\Leftarrow}$, without
 /// this feature it is an error to add a rule without a head.
 ///
 pub const FEATURE_CONSTRAINTS: Feature = Feature {

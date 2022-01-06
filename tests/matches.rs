@@ -7,7 +7,7 @@ use std::str::FromStr;
 #[test]
 fn test_matches() {
     let program = parse_str(
-        r#"#@assert human(string).
+        r#"% --> .assert human(string).
             
 human("Socrates").
 

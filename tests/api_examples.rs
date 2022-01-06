@@ -61,9 +61,9 @@ fn test_wikipedia_example() {
 
     assert_eq_by_line(
         &ancestors.to_string(),
-        r#"@assert parent(string, string).
+        r#".assert parent(string, string).
 
-@infer ancestor(string, string).
+.infer ancestor(string, string).
 
 parent(xerces, brooke).
 parent(brooke, damocles).
@@ -128,9 +128,9 @@ fn test_sourceforge_example() {
 
     assert_eq_by_line(
         &graph.to_string(),
-        r#"@assert edge(string, string).
+        r#".assert edge(string, string).
 
-@infer path(string, string).
+.infer path(string, string).
 
 edge(a, b).
 edge(c, d).
@@ -178,9 +178,9 @@ fn test_that_syllogism() {
 
     assert_eq_by_line(
         &syllogism.to_string(),
-        r#"@assert human(string).
+        r#".assert human(string).
 
-@infer mortal(string).
+.infer mortal(string).
 
 human("Socrates").
 

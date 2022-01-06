@@ -38,7 +38,7 @@ pub enum Error {
     /// A wrapper around any underlying serialization error.
     Serialization(Box<dyn std::error::Error>),
 
-    /// A serialization string in an `@input` or `@output` pragma is not a supported
+    /// A serialization string in an `.input` or `.output` pragma is not a supported
     /// serialization format.
     SerializationFormatUnknown {
         format: String,

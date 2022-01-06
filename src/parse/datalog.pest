@@ -62,7 +62,7 @@ term_list = _{
 }
 
 constant = {
-    identifier | string | number | boolean
+    boolean | identifier | string | number
 }
 
 constant_list = _{
@@ -98,7 +98,7 @@ identifier_relaxed = @{
 // ------------------------------------------------------------------------------------------------
 
 pragma = {
-    AT_SIGN ~ (pragma_assert | pragma_infer | pragma_feature | pragma_input | pragma_output) ~ DOT
+    DOT ~ (pragma_assert | pragma_infer | pragma_feature | pragma_input | pragma_output) ~ DOT
 }
 
 pragma_assert = {
@@ -211,11 +211,17 @@ number = @{
     ( "+" | "-" )? ~ ASCII_DIGIT+ ~ ( DOT ~ ASCII_DIGIT+ )?
 }
 
-boolean = @{
-    AT_SIGN ~ ( "true" | "false" )
+boolean = {
+    boolean_true | boolean_false
 }
 
+boolean_true = _{
+	"true"
+}
 
+boolean_false = _{
+	"false"
+}
 
 // ------------------------------------------------------------------------------------------------
 // Terminal definitions
@@ -320,8 +326,6 @@ COMMA = _{ "," }
 
 QMARK = _{ "?" }
 
-AT_SIGN = _{ "@" }
-
 COLON = _{ ":" }
 
 SEMI_COLON = _{ ";" }
@@ -330,6 +334,10 @@ SEMI_COLON = _{ ";" }
 // Built-in rules
 // ------------------------------------------------------------------------------------------------
 
-COMMENT = _{ "#" ~ ( !NEWLINE ~ ANY )* }
+COMMENT = _{ block_comment | line_comment }
+
+line_comment = _{ "%" ~ ( !NEWLINE ~ ANY )* }
+
+block_comment = { "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 
 WHITESPACE = _{ " " | "\t" | NEWLINE }

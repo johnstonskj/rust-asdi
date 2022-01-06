@@ -19,8 +19,8 @@ use crate::idb::{
     Atom, Comparison, ComparisonOperator, Literal, Query, Rule as DlRule, Term, Variable,
 };
 use crate::io::{string_to_format, FilePragma, Format};
-use crate::syntax::{RESERVED_BOOLEAN_TRUE, RESERVED_PREFIX, TYPE_NAME_CONST_INTEGER};
-use crate::{relation_does_not_exist, Collection, Program};
+use crate::syntax::{TYPE_NAME_CONST_BOOLEAN, TYPE_NAME_CONST_INTEGER};
+use crate::{error, relation_does_not_exist, Collection, Program};
 use pest::iterators::{Pair, Pairs};
 use pest::{Parser, Span};
 use pest_derive::Parser;
@@ -715,9 +715,9 @@ fn parse_constant(
                 .into()
             // }
         }
-        Rule::boolean => (first.as_str()
-            == format!("{}{}", RESERVED_PREFIX, RESERVED_BOOLEAN_TRUE).as_str())
-        .into(),
+        Rule::boolean => bool::from_str(first.as_str())
+            .map_err(|_| error::invalid_value(TYPE_NAME_CONST_BOOLEAN, first.as_str()))?
+            .into(),
         _ => unreachable!(first.as_str()),
     };
 
