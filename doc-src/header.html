@@ -18,6 +18,12 @@
 <script>
 datalog = function(hljs) {
 
+  const PROLOG_LINE_COMMENT = {
+    scope: 'comment',
+    begin: '%',
+    end: '$',
+  };
+
   const PREDICATE = {
     scope: 'title.function.invoke',
     begin: /[a-z][A-Za-z0-9_]*/,
@@ -45,7 +51,6 @@ datalog = function(hljs) {
   const SYMBOL_STRING = {
     scope: 'string',
     begin: /[a-z][A-Za-z0-9_]*(:[A-Za-z][A-Za-z0-9_]*)?/,
-    contains: [ hljs.BACKSLASH_ESCAPE ],
     relevance: 0
   };
 
@@ -72,6 +77,8 @@ datalog = function(hljs) {
     end: /\)/,
     relevance: 0,
     contains: [
+      PROLOG_LINE_COMMENT,
+      hljs.C_BLOCK_COMMENT_MODE,
       REL_TYPES,
       REL_SEPARATOR,
       BOOLEAN,
@@ -86,6 +93,8 @@ datalog = function(hljs) {
     begin: /\.[a-z]+/,
     end: /\./,
     contains: [
+      PROLOG_LINE_COMMENT,
+      hljs.C_BLOCK_COMMENT_MODE,
       INFER_FROM,
       PREDICATE,
       PRAGMA_LIST,
@@ -100,6 +109,8 @@ datalog = function(hljs) {
     end: /\)/,
     relevance: 0,
     contains: [
+      PROLOG_LINE_COMMENT,
+      hljs.C_BLOCK_COMMENT_MODE,
       VAR,
       BOOLEAN,
       SYMBOL_STRING,
@@ -131,6 +142,8 @@ datalog = function(hljs) {
   return {
     name: 'Datalog',
     contains: [
+      PROLOG_LINE_COMMENT,
+      hljs.C_BLOCK_COMMENT_MODE,
       PRAGMA,
       PREDICATE,
       TERM_LIST,
@@ -138,7 +151,6 @@ datalog = function(hljs) {
       CONNECTIVE,
       COMPARISON_OP,
       LINE_TERMINATOR,
-      hljs.HASH_COMMENT_MODE,
       VAR,
       BOOLEAN,
       SYMBOL_STRING,
