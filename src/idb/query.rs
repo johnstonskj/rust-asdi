@@ -334,7 +334,7 @@ impl View {
     // --------------------------------------------------------------------------------------------
     //
     // pub(crate) fn select(&self, _comparisons: &[Comparison]) -> Self {
-    //     todo!()
+    //     unimplemented!()
     // }
     //
     // pub(crate) fn select_attributes(&self, attributes: HashSet<AttributeIndex<T>>) -> Self {

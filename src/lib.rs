@@ -461,9 +461,9 @@ operator        = "="
 
 The Unicode characters `≠` (not equal to `\u{2260}`), `≤` (less-than or equal to `\u{2264}`),
 `≥` (greater-than or equal to `\u{2265}`, and star equals `\u{e2899b}`) may be substituted for the
-common comparison operators.
+common arithmetic and string operators.
 
-All comparison operations **must** be between terms of the some type, such that the property
+All arithmetic operations **must** be between terms of the some type, such that the property
 _compatible_ introduce above is defined as:
 
 $$\tag{xvi}\small compatible(\tau_{lhs}, \tau_{rhs}, \theta) \leftarrow \tau_{lhs} = \tau_{rhs}$$
@@ -476,7 +476,7 @@ Additionally, some operators are not present for all types, as shown in the tabl
 | Integer  | Yes        | Yes                | No  |
 | Boolean  | Yes        | No                 | No  |
 
-The following is an example using comparison against the _car_ relation.
+The following is an example using comparisons against the _car_ relation.
 
 ```datalog
 .feature(comparisons).
@@ -1186,7 +1186,7 @@ impl Program {
             //
             if self.asserted.contains(atom.label()) {
                 return Err(extensional_predicate_in_rule_head(
-                    atom.label_ref().clone(),
+                    atom.label_ref(),
                     atom.source_location().cloned(),
                 ));
             } else if !self.infer.contains(atom.label()) {
@@ -1377,7 +1377,7 @@ impl Program {
         } else if self.extensional().contains(&label) {
             Ok(self.extensional().matches(query.as_ref()))
         } else {
-            Err(relation_does_not_exist(label.clone()))
+            Err(relation_does_not_exist(label))
         }
     }
 }
