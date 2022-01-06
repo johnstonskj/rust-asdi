@@ -537,7 +537,8 @@ The results of this query would not include the age column:
 
 ### Pragmas
 
-TBD.
+Pragmas are declarative statements meant for the parser and runtime tooling, they do not affect
+the meaning of the program itself.
 
 ```abnf
 pragma          = feature / assert / infer / input / output
