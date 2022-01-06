@@ -145,7 +145,7 @@ As defined by Codd, selection is written as $\small \sigma_{a\theta b}(R)$ or
 $\small \sigma_{a\theta v}(R)$ where:
 
 * $\small a$ and $\small b$ are attribute names,
-* $\small\theta$ is a binary operation in the set $\small\lbrace =, \neq, <, \leq, >, \geq \rbrace$,
+* $\small\theta$ is a binary operation, where $\small\theta\in\lbrace =, \neq, <, \leq, >, \geq, \overset{\star}{=} \rbrace$,
 * $\small v$ is a constant value,
 * $\small R$ is a relation,
 

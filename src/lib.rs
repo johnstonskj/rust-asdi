@@ -409,8 +409,8 @@ emperor(X, rome).
 
 ### Literals
 
-Any valid atom is also a valid _positive_ literal. The syntax below also allows for _negative_
-literals as well as comparison expressions as literals. Conjunction may be written with the Unicode
+Any valid atom is also a valid _positive relational_ literal. The syntax below also allows for _negative_
+literals as well as arithmetic expressions as literals. Conjunction may be written with the Unicode
 character `∧` (logical and `\u{2227}`).
 
 ```abnf
@@ -440,7 +440,7 @@ alive(X) :- NOT dead(X).
 alive(X) ⟵ ￢dead(X).
 ```
 
-### Comparisons
+### Arithmetic Literals
 
 The language feature `comparisons` corresponds to the language $\small\text{Datalog}^{\theta}$ and
 allows the use of arithmetic literals. Comparisons take place between two literals and are
@@ -459,8 +459,9 @@ operator        = "="
                 / "*=" / "≛" / "MATCHES"
 ```
 
-The Unicode characters `≠` (not equal to `\u{2260}`), `≤` (less-than or equal to `\u{2264}`), and
-`≥` (greater-than or equal to `\u{2265}`) may be substituted for the common comparison operators.
+The Unicode characters `≠` (not equal to `\u{2260}`), `≤` (less-than or equal to `\u{2264}`),
+`≥` (greater-than or equal to `\u{2265}`, and star equals `\u{e2899b}`) may be substituted for the
+common comparison operators.
 
 All comparison operations **must** be between terms of the some type, such that the property
 _compatible_ introduce above is defined as:
@@ -475,12 +476,15 @@ Additionally, some operators are not present for all types, as shown in the tabl
 | Integer  | Yes        | Yes                | No  |
 | Boolean  | Yes        | No                 | No  |
 
-The following is an example using comparison of some numeric attribute of the _car_ relation.
+The following is an example using comparison against the _car_ relation.
 
 ```datalog
 .feature(comparisons).
+.assert car(make: string, model: string, age: integer).
 
-antique(X) :- car(X, Y) AND Y > 50.
+antique(X, Y) :- car(X, Y, _) AND X *= "[dD]uesenberg".
+antique(X, Y) :- car(X, Y, _) AND Y = "model t".
+antique(X, Y) :- car(X, Y, Z) AND Z > 50.
 ```
 
 ### Queries
@@ -507,14 +511,14 @@ the _model_ attribute in the _car_ relation where the _make_ is "ford", and igno
 ```datalog
 .assert car(make: string, model: string, age: integer).
 
-car("ford", Model, _)?
+car("ford", X, _)?
 ```
 
 The results of this query would not include the age column:
 
 ```text
 +------------+
-| Model      |
+| model      |
 +============+
 | edge       |
 +------------+

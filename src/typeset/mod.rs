@@ -91,7 +91,7 @@ impl Typesetter for LatexTypesetter {
 
         for relation in value.extensional().iter() {
             for fact in relation.iter() {
-                writeln!(result, "{}", self.fact(&fact, false)?)?;
+                writeln!(result, "{}", self.fact(fact, false)?)?;
             }
         }
 
@@ -213,8 +213,7 @@ impl LatexTypesetter {
                         ComparisonOperator::LessThanOrEqual => "\\leq",
                         ComparisonOperator::GreaterThan => ">",
                         ComparisonOperator::GreaterThanOrEqual => "\\geq",
-                        ComparisonOperator::StringMatch =>
-                            r"\overset{\raisebox{-0.75em}{$\tiny\star}}{=}}",
+                        ComparisonOperator::StringMatch => r"\overset{\star}{=}",
                     },
                     c.rhs()
                 ),
@@ -270,11 +269,11 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
             let fact = relation.iter().next().unwrap();
             match fact.to_string().as_str() {
                 "parent(xerces, brooke)." => assert_eq!(
-                    typesetter.fact(&fact, true).unwrap(),
+                    typesetter.fact(fact, true).unwrap(),
                     String::from(r"|parent($xerces, brooke$).|")
                 ),
                 "parent(brooke, damocles)." => assert_eq!(
-                    typesetter.fact(&fact, true).unwrap(),
+                    typesetter.fact(fact, true).unwrap(),
                     String::from(r"|parent($brooke, damocles$).|")
                 ),
                 s => panic!("not expecting fact: {}", s),
@@ -291,7 +290,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
                     String::from(r"|ancestor($X, Y$) $\leftarrow$ parent($X, Y$).|")
                 ),
                 "ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y)." => assert_eq!(
-                    typesetter.rule(&rule, true).unwrap(),
+                    typesetter.rule(rule, true).unwrap(),
                     String::from(
                         r"|ancestor($X, Y$) $\leftarrow$ parent($X, Z$) $\land$ parent($Z, Y$).|"
                     )
