@@ -8,7 +8,7 @@ More detailed description, with
 */
 
 use asdi::features::FeatureSet;
-use asdi::idb::{Evaluator, NaiveEvaluator};
+use asdi::idb::eval::{Evaluator, NaiveEvaluator};
 use asdi::parse::{parse_str, parse_str_with_features};
 use asdi::Program;
 use pretty_assertions::assert_eq;

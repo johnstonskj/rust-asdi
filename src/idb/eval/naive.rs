@@ -1,7 +1,7 @@
 use crate::edb::Constant;
 use crate::error::{language_feature_disabled, Result};
 use crate::features::{FEATURE_COMPARISONS, FEATURE_NEGATION};
-use crate::idb::{eval::Evaluator, Atom, Term, View};
+use crate::idb::{eval::Evaluator, query::View, Atom, Term};
 use crate::{
     relation_does_not_exist, Collection, Labeled, MaybePositive, Program, RelationSet, RuleForm,
     FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION,

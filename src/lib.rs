@@ -746,7 +746,10 @@ use crate::error::{
     Result,
 };
 use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
-use crate::idb::{Atom, Evaluator, Literal, Query, Rule, RuleForm, RuleSet, Term, Variable, View};
+use crate::idb::{
+    eval::Evaluator, query::Query, query::View, Atom, Literal, Rule, RuleForm, RuleSet, Term,
+    Variable,
+};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};

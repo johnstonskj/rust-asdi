@@ -13,7 +13,7 @@ TBD
 
 use crate::edb::{Constant, Fact};
 use crate::error::Result;
-use crate::idb::{Atom, ComparisonOperator, Literal, LiteralInner, Query, Rule, Term};
+use crate::idb::{query::Query, Atom, ComparisonOperator, Literal, LiteralInner, Rule, Term};
 use crate::syntax::{
     CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DISJUNCTION_UNICODE_SYMBOL,
 };

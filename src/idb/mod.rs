@@ -1345,8 +1345,6 @@ impl AttributeName for Variable {
 // Modules
 // ------------------------------------------------------------------------------------------------
 
-mod eval;
-pub use eval::{naive::NaiveEvaluator, Evaluator, NoopEvaluator};
+pub mod eval;
 
-mod query;
-pub use query::{Query, Row, View};
+pub mod query;

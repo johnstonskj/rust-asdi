@@ -1,5 +1,6 @@
 use asdi::edb::Predicate;
-use asdi::idb::{Evaluator, NaiveEvaluator, Query};
+use asdi::idb::eval::{Evaluator, NaiveEvaluator};
+use asdi::idb::query::Query;
 use asdi::parse::parse_str;
 use asdi::Collection;
 use std::str::FromStr;

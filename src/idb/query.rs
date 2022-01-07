@@ -1,3 +1,8 @@
+/*!
+This module provides the [Query] type that represents a query goal as well as the [View] and [Row].
+types used to return query results.
+*/
+
 use crate::edb::{Attribute, AttributeIndex, AttributeKind, Constant, Fact, Schema};
 use crate::error::Result;
 use crate::idb::Term;

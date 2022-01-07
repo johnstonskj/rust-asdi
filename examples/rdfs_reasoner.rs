@@ -1,4 +1,4 @@
-use asdi::idb::{Evaluator, NaiveEvaluator};
+use asdi::idb::eval::{Evaluator, NaiveEvaluator};
 use asdi::io::{print_relation, Format};
 use asdi::parse::parse_file;
 use asdi::{Collection, Labeled};

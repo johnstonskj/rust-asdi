@@ -1,5 +1,5 @@
 use asdi::edb::Attribute;
-use asdi::idb::{Atom, Query, Term};
+use asdi::idb::{query::Query, Atom, Term};
 use asdi::Program;
 
 pub mod common;

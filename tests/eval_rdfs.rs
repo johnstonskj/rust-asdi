@@ -1,4 +1,4 @@
-use asdi::idb::{Evaluator, NaiveEvaluator};
+use asdi::idb::eval::{Evaluator, NaiveEvaluator};
 use asdi::parse::parse_str;
 
 #[test]

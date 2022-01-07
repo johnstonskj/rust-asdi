@@ -95,7 +95,7 @@ boolean_fact(false).
 use crate::error::{
     fact_does_not_correspond_to_schema, invalid_value, relation_exists, Error, Result,
 };
-use crate::idb::{Atom, Row, View};
+use crate::idb::{query::Row, query::View, Atom};
 use crate::io::{read_relation, write_relation, FilePragma};
 use crate::syntax::{
     CHAR_COLON, CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,

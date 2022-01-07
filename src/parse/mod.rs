@@ -15,7 +15,9 @@ use crate::error::{invalid_value, language_feature_disabled, Error, Result, Sour
 use crate::features::{
     FeatureSet, FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION,
 };
-use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Query, Rule as DlRule, Term};
+use crate::idb::{
+    query::Query, Atom, Comparison, ComparisonOperator, Literal, Rule as DlRule, Term,
+};
 use crate::io::{string_to_format, FilePragma, Format};
 use crate::syntax::{TYPE_NAME_CONST_BOOLEAN, TYPE_NAME_CONST_INTEGER};
 use crate::{error, relation_does_not_exist, Collection, Program};
