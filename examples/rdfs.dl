@@ -1,6 +1,6 @@
 .assert triple(subject: string, predicate: string, object: string).
 
-.input(triple, "examples/car.csv", "csv").
+.input(triple, "car.csv", "csv").
 
 .infer class(class:string).
 .infer subClass(child:string, parent:string).
@@ -12,6 +12,8 @@
 
 .infer domain(property:string, class:string).
 .infer range(property:string, class:string).
+
+% ----------------------------------------------------------------------------------------
 
 % Section 2.1: Resource
 triple(rdfs:Resource, rdf:type, rdfs:Class).
@@ -43,9 +45,9 @@ triple(rdf:XMLLiteral, rdfs:subClassOf, rdfs:Literal).
 triple(rdf:Property, rdf:type, rdfs:Class).
 
 % Section 3.1: range
-triple(rdfs:range, rdfs:type, rdfs:Property).
-triple(rdfs:range, rdfs:domain, rdfs:Property).
-triple(rdfs:range, rdfs:range, rdfs:Class).
+triple(rdfs:range, rdf:type, rdfs:Property).
+triple(rdfs:range, rdf:domain, rdfs:Property).
+triple(rdfs:range, rdf:range, rdfs:Class).
 
 % Section 3.2: domain
 triple(rdfs:domain, rdf:type, rdfs:Property).
@@ -54,8 +56,8 @@ triple(rdfs:domain, rdfs:range, rdfs:Class).
 
 % Section 3.3: type
 triple(rdf:type, rdf:type, rdfs:Property).
-triple(rdfs:type, rdfs:domain, rdfs:Resource).
-triple(rdfs:type, rdfs:range, rdfs:Class).
+triple(rdf:type, rdfs:domain, rdfs:Resource).
+triple(rdf:type, rdfs:range, rdfs:Class).
 
 % Section 3.4: subClassOf
 triple(rdfs:subClassOf, rdf:type, rdfs:Property).
@@ -77,7 +79,74 @@ triple(rdfs:comment, rdf:type, rdfs:Property).
 triple(rdfs:comment, rdfs:domain, rdf:Resource).
 triple(rdfs:comment, rdfs:range, rdfs:Literal).
 
-% Section: 2.1: Resource -- basically uninteresing as all things are resources.
+% Section 5.1.1: Container
+triple(rdfs:Container, rdf:type, rdfs:Class).
+
+% Section 5.1.2: Bag
+triple(rdfs:Bag, rdfs:subClassOf, rdfs:Container).
+
+% Section 5.1.3: Seq
+triple(rdfs:Seq, rdfs:subClassOf, rdfs:Container).
+
+% Section 5.1.4: Alt
+triple(rdfs:Alt, rdfs:subClassOf, rdfs:Container).
+
+% Section 5.1.5: ContainerMembershipProperty
+triple(rdfs:Alt, rdfs:subClassOf, rdfs:Container).
+
+% Section 5.1.6: member
+triple(rdfs:member, rdf:type, rdfs:Property).
+triple(rdfs:member, rdfs:domain, rdf:Resource).
+triple(rdfs:member, rdfs:range, rdfs:Resource).
+
+% Section 5.2.1: List
+triple(rdfs:List, rdf:type, rdfs:Class).
+
+% Section 5.2.2: first
+triple(rdfs:first, rdf:type, rdfs:Property).
+
+% Section 5.2.3: rest
+triple(rdfs:rest, rdf:type, rdfs:Property).
+
+% Section 5.2.4: nil
+triple(rdfs:nil, rdf:type, rdfs:Property).
+
+% Section 5.3.1: Statement
+triple(rdfs:Statement, rdf:type, rdfs:Class).
+
+% Section 5.3.1: subject
+triple(rdfs:subject, rdf:type, rdfs:Property).
+triple(rdfs:subject, rdfs:domain, rdf:Statement).
+triple(rdfs:subject, rdfs:range, rdfs:Resource).
+
+% Section 5.3.1: predicate
+triple(rdfs:predicate, rdf:type, rdfs:Property).
+triple(rdfs:predicate, rdfs:domain, rdf:Statement).
+triple(rdfs:predicate, rdfs:range, rdfs:Resource).
+
+% Section 5.3.1: object
+triple(rdfs:object, rdf:type, rdfs:Property).
+triple(rdfs:object, rdfs:domain, rdf:Statement).
+triple(rdfs:object, rdfs:range, rdfs:Resource).
+
+% Section 5.4.1: seeAlso
+triple(rdfs:seeAlso, rdf:type, rdfs:Property).
+triple(rdfs:seeAlso, rdfs:domain, rdf:Resource).
+triple(rdfs:seeAlso, rdfs:range, rdfs:Resource).
+
+% Section 5.4.2: isDefinedBy
+triple(rdfs:isDefinedBy, rdf:type, rdfs:Property).
+triple(rdfs:isDefinedBy, rdfs:domain, rdf:Resource).
+triple(rdfs:isDefinedBy, rdfs:range, rdfs:Resource).
+
+% Section 5.4.3: value
+triple(rdfs:value, rdf:type, rdfs:Property).
+triple(rdfs:value, rdfs:domain, rdf:Resource).
+triple(rdfs:value, rdfs:range, rdfs:Resource).
+
+% ----------------------------------------------------------------------------------------
+
+% Section: 2.1: Resource -- basically uninteresting as all things are resources.
 % resource(R) :- triple(R, _, _).
 % resource(R) :- triple(_, R, _).
 % resource(R) :- triple(_, _, R).
@@ -94,9 +163,13 @@ property(P) :- triple(P, rdf:type, rdfs:Property).
 
 % Section 3.1: range
 range(P, C) :- triple(P, rdfs:range, C).
+instanceOf(R, C) :- triple(_, P, R), range(P, C).
+range(P2, R) :- range(P, R), subProperty(P2, P).
 
 % Section 3.2: domain
 domain(P, C) :- triple(P, rdfs:domain, C).
+instanceOf(R, C) :- triple(R, P, _), domain(P, C).
+domain(P2, R) :- domain(P, R), subProperty(P2, P).
 
 % Section 3.3: rdf:type
 instanceOf(R, C) :- triple(R, rdf:type, C).
@@ -107,12 +180,15 @@ instanceOf(R, C) :- triple(_, P, R), triple(P, rdfs:range, C).
 subClass(C, P) :- triple(C, rdfs:subClassOf, P).
 class(C) :- subClass(C, _).
 class(C) :- subClass(_, C).
-% ----- NEGATION: subClass(C, rdfs:Class) :- class(C) AND NOT class(rdfs:Class).
 instanceOf(C, C2) :- instanceOf(C, C1), subClass(C1, C2).
+% ----- NEGATION: subClass(C, rdfs:Class) :- class(C) AND NOT class(rdfs:Class).
 
 % Section 3.5: subPropertyOf
 subProperty(C, P) :- triple(C, rdfs:subPropertyOf, P).
 property(P) :- subProperty(P, _).
 property(P) :- subProperty(_, P).
+instanceOf(P, P2) :- instanceOf(P, P1), subProperty(P1, P2).
 % ----- NEGATION: subProperty(P, rdfs:Property) :- property(P) AND NOT property(rdfs:Property).
-instanceOf(P, C2) :- instanceOf(P, C1), subProperty(C1, C2).
+
+% Section 5.1.5: ContainerMembershipProperty
+subProperty(P, rdfs:member) :- instanceOf(P, rdfs:ContainerMembershipProperty).

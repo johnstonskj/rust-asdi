@@ -4,7 +4,7 @@ use asdi::parse::parse_file;
 use asdi::{Collection, Labeled};
 
 fn main() {
-    let mut program = parse_file("examples/reasoning.dl").unwrap().into_parsed();
+    let mut program = parse_file("examples/rdfs.dl").unwrap().into_parsed();
 
     program.load_extensional_data().unwrap();
 
