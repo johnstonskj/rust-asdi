@@ -984,7 +984,7 @@ impl Relation {
     }
 
     ///
-    /// If a file pragma is attached to this relation then store this relation's set of facts
+    /// If a [FilePragma] is attached to this relation then store this relation's set of facts
     /// into the file.
     ///
     pub fn store_to_file(&mut self) -> Result<()> {
