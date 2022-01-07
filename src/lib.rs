@@ -750,6 +750,7 @@ use crate::idb::{Atom, Evaluator, Literal, Query, Rule, RuleForm, RuleSet, Term,
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
+use std::path::PathBuf;
 use std::rc::Rc;
 use std::str::FromStr;
 
@@ -763,6 +764,7 @@ use std::str::FromStr;
 ///  
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Program {
+    from_file: Option<PathBuf>,
     features: FeatureSet,
     predicates: NameReferenceSet<Predicate>,
     variables: NameReferenceSet<Variable>,
@@ -1037,6 +1039,7 @@ impl SyntaxFragments for Program {
 impl Program {
     pub fn new_with_features(features: FeatureSet) -> Self {
         Self {
+            from_file: None,
             features,
             predicates: Default::default(),
             variables: Default::default(),
@@ -1048,6 +1051,20 @@ impl Program {
     }
 
     // MAYBE: new_with_predicates
+
+    // --------------------------------------------------------------------------------------------
+
+    ///
+    /// If this program were read from a source file, this will return the path to the file that
+    /// was read, else `None`.
+    ///
+    pub fn source_file_path(&self) -> Option<&PathBuf> {
+        self.from_file.as_ref()
+    }
+
+    pub(crate) fn set_source_file_path(&mut self, file_name: PathBuf) {
+        self.from_file = Some(file_name);
+    }
 
     // --------------------------------------------------------------------------------------------
 
@@ -1291,6 +1308,9 @@ impl Program {
     /// Load any data required from external files. For each relation any attached a [FilePragma](io/struct.FilePragma.html)
     /// is used to load data into that relation.
     ///
+    /// All files will be loaded either relative to the current working directory, or if the program
+    /// was loaded from a source file relative to that same source file.
+    ///
     pub fn load_extensional_data(&mut self) -> Result<()> {
         for relation in self.extensional_mut().iter_mut() {
             relation.load_from_file()?;
@@ -1301,6 +1321,9 @@ impl Program {
     ///
     /// Store any data required to external files. For each relation any attached a [FilePragma](io/struct.FilePragma.html)
     /// is used to store the relation's facts into a file.
+    ///
+    /// All files will be stored either relative to the current working directory, or if the program
+    /// was loaded from a source file relative to that same source file.
     ///
     pub fn store_intensional_data(&mut self) -> Result<()> {
         for relation in self.intensional_mut().iter_mut() {

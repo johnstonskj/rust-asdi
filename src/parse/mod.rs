@@ -61,7 +61,7 @@ struct Datalog;
 /// Parse the file at the provided path.
 ///
 pub fn parse_file<P: AsRef<Path>>(file_path: P) -> Result<Parsed> {
-    parse_str(&read_to_string(file_path.as_ref())?)
+    parse_file_with_features(file_path, FeatureSet::default())
 }
 
 ///
@@ -71,7 +71,11 @@ pub fn parse_file_with_features<P: AsRef<Path>>(
     file_path: P,
     features: FeatureSet,
 ) -> Result<Parsed> {
-    parse_str_with_features(&read_to_string(file_path.as_ref())?, features)
+    parse_wrapper(
+        &read_to_string(file_path.as_ref())?,
+        features,
+        Some(PathBuf::from(file_path.as_ref())),
+    )
 }
 
 ///
@@ -84,30 +88,40 @@ pub fn parse_str(source: &str) -> Result<Parsed> {
 ///
 /// Parse the string content provided.
 ///
-pub fn parse_str_into(source: &str, program: Program) -> Result<Parsed> {
-    let mut parsed =
-        Datalog::parse(Rule::program, source).map_err(|e| Error::ParserError(Box::new(e)))?;
-    let matched_str = parsed.as_str();
-    let pair = parsed.next().unwrap();
-
-    Ok(make_parsed(
-        parse_program(pair, program.features)?,
-        source,
-        matched_str,
-    ))
-}
+// pub fn parse_str_into(source: &str, program: Program) -> Result<Parsed> {
+//     let mut parsed =
+//         Datalog::parse(Rule::program, source).map_err(|e| Error::ParserError(Box::new(e)))?;
+//     let matched_str = parsed.as_str();
+//     let pair = parsed.next().unwrap();
+//
+//     Ok(make_parsed(
+//         parse_program(pair, program.features)?,
+//         source,
+//         matched_str,
+//     ))
+// }
 
 ///
 /// Parse the string content provided, but enabled the set of language features first.
 ///
 pub fn parse_str_with_features(source: &str, features: FeatureSet) -> Result<Parsed> {
+    parse_wrapper(source, features, None)
+}
+
+fn parse_wrapper(source: &str, features: FeatureSet, from_file: Option<PathBuf>) -> Result<Parsed> {
     let mut parsed =
         Datalog::parse(Rule::program, source).map_err(|e| Error::ParserError(Box::new(e)))?;
     let matched_str = parsed.as_str();
     let pair = parsed.next().unwrap();
 
+    let mut program: Program = Program::new_with_features(features);
+
+    if let Some(file_path) = from_file {
+        program.set_source_file_path(file_path);
+    }
+
     Ok(make_parsed(
-        parse_program(pair, features)?,
+        parse_into_program(pair, program, features)?,
         source,
         matched_str,
     ))
@@ -135,6 +149,10 @@ impl Parsed {
 
     pub fn parsed(&self) -> &Program {
         &self.parsed
+    }
+
+    pub fn parsed_mut(&mut self) -> &mut Program {
+        &mut self.parsed
     }
 
     pub fn into_parsed(self) -> Program {
@@ -296,12 +314,6 @@ fn make_parsed(parsed: Program, original_str: &str, matched_str: &str) -> Parsed
 }
 
 // ------------------------------------------------------------------------------------------------
-
-fn parse_program(input_pair: Pair<'_, Rule>, features: FeatureSet) -> Result<Program> {
-    let program: Program = Program::new_with_features(features);
-
-    parse_into_program(input_pair, program, features)
-}
 
 fn parse_into_program(
     input_pair: Pair<'_, Rule>,
@@ -551,6 +563,8 @@ fn parse_decl_file_io(
     let relation_label =
         if_match_str!(input_pairs, predicate => |s:&str|program.predicates().fetch(s));
 
+    let base_path = program.source_file_path().cloned();
+
     let relations = if input {
         program.extensional_mut()
     } else {
@@ -558,18 +572,21 @@ fn parse_decl_file_io(
     };
 
     if let Some(relation) = relations.get_mut(&relation_label) {
-        let file_name = if_match_string!(input_pairs, string);
+        //
+        // Resolve input/output files from source if present, or current.
+        //
+        let root = std::env::current_dir()?;
+        let file_path = if_match_string!(input_pairs, string);
+        let file_path = if let Some(base_path) = base_path {
+            base_path.parent().unwrap_or(&root).join(file_path)
+        } else {
+            PathBuf::from(file_path)
+        };
 
         let pragma = if let Some(format) = input_pairs.next() {
-            FilePragma::new(
-                PathBuf::from(&file_name),
-                string_to_format(format.as_str())?,
-            )
+            FilePragma::new(file_path, string_to_format(format.as_str())?)
         } else {
-            FilePragma::new(
-                PathBuf::from(file_name),
-                Format::DelimitedLines(Default::default()),
-            )
+            FilePragma::new(file_path, Format::DelimitedLines(Default::default()))
         };
         relation.set_file_pragma(pragma);
         Ok(())
