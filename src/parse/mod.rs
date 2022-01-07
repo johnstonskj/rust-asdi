@@ -86,22 +86,6 @@ pub fn parse_str(source: &str) -> Result<Parsed> {
 }
 
 ///
-/// Parse the string content provided.
-///
-// pub fn parse_str_into(source: &str, program: Program) -> Result<Parsed> {
-//     let mut parsed =
-//         Datalog::parse(Rule::program, source).map_err(|e| Error::ParserError(Box::new(e)))?;
-//     let matched_str = parsed.as_str();
-//     let pair = parsed.next().unwrap();
-//
-//     Ok(make_parsed(
-//         parse_program(pair, program.features)?,
-//         source,
-//         matched_str,
-//     ))
-// }
-
-///
 /// Parse the string content provided, but enabled the set of language features first.
 ///
 pub fn parse_str_with_features(source: &str, features: FeatureSet) -> Result<Parsed> {
