@@ -79,13 +79,13 @@ fn is_non_frontier_guarded() {
 #[test]
 fn is_non_recursive() {
     quick_program_check("foo(X, Y) :- bar(X, Y).", |p| {
-        assert!(p.is_non_recursive());
+        assert!(!p.is_recursive());
     })
 }
 
 #[test]
 fn is_recursive() {
     quick_program_check("foo(X, Y) :- bar(X, Z), foo(Z, Y).", |p| {
-        assert!(!p.is_non_recursive());
+        assert!(p.is_recursive());
     })
 }

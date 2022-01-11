@@ -248,7 +248,7 @@ fn parse_rule(input_pairs: Pairs<'_, Rule>, program: &mut Program) -> Result<()>
             Rule::rule_body => {
                 let body = parse_rule_body(inner_pair.into_inner(), program)?;
                 let rule = DlRule::new(head, body);
-                if let Err(e) = rule.well_formed_check(&program.features()) {
+                if let Err(e) = rule.safety_check(&program.features()) {
                     return Err(pest_error!(span, e.to_string()));
                 } else {
                     program.add_rule(rule)?;
@@ -479,7 +479,7 @@ fn parse_literal(mut input_pairs: Pairs<'_, Rule>, program: &mut Program) -> Res
             if !program.features().supports(&FEATURE_COMPARISONS) {
                 return Err(pest_error!(
                     next.as_span(),
-                    language_feature_disabled(FEATURE_NEGATION).to_string()
+                    language_feature_disabled(FEATURE_COMPARISONS).to_string()
                 ));
             }
             let comparison = parse_comparison(next.into_inner(), program)?;

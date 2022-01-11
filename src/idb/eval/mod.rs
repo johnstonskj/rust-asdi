@@ -10,7 +10,7 @@ This module also provides the following implementations of the [Evaluator] trait
 
 use crate::edb::RelationSet;
 use crate::error::Result;
-use crate::{Program, Rule, RuleSet};
+use crate::Program;
 use std::fmt::Debug;
 
 // ------------------------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ pub trait Evaluator: Debug {
 /// This implementation of [Evaluator] does nothing. This allows for testing and cases where you
 /// may wish to test that other operations have no side-effects.
 ///
-/// Specifically this implementation will return an empty [Relations] instance with the same
+/// Specifically this implementation will return an empty [RelationSet] instance with the same
 /// schema as the intensional relations in the program.
 ///
 #[derive(Debug)]
@@ -51,10 +51,6 @@ pub struct NoopEvaluator;
 // ------------------------------------------------------------------------------------------------
 // Public Functions
 // ------------------------------------------------------------------------------------------------
-
-pub fn stratify(rules: &RuleSet) -> Result<Vec<Vec<&Rule>>> {
-    unimplemented!()
-}
 
 // ------------------------------------------------------------------------------------------------
 // Implementations
@@ -82,3 +78,6 @@ impl Evaluator for NoopEvaluator {
 
 mod naive;
 pub use naive::NaiveEvaluator;
+
+mod strata;
+pub use strata::{PrecedenceGraph, PrecedenceNode, StratifiedRules};

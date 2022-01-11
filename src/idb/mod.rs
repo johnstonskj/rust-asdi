@@ -286,7 +286,7 @@ use crate::syntax::{
 };
 use crate::{
     AttributeName, Collection, FeatureSet, IndexedCollection, Labeled, MaybeAnonymous, MaybeGround,
-    MaybePositive, PredicateRef, SyntaxFragments,
+    MaybePositive, PredicateRef,
 };
 use paste::paste;
 use std::collections::HashSet;
@@ -321,10 +321,30 @@ pub struct Rule {
     body: Vec<Literal>,
 }
 
+///
+/// This enumeration represents the three forms a rule can take. This is defined by the predicate
+/// $\small form(r)$ in the description of [rules](../index.html#rules), formula (vi).
+///
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum RuleForm {
+    ///
+    /// A pure rule is one where there is only a single atom in the head, regardless of the body and
+    /// is the only form allowed in the strict language $\small\text{Datalog}$.
+    /// $$\small |head\(r\)| = 1$$
+    ///
     Pure,
+    ///
+    /// A constraint rule, or contradiction, does not allow any consequence to be determined
+    /// from evaluation of its body, it is only available in the language $\small\text{Datalog}^{\lnot}$.
+    /// $$\small |head\(r\)| = 0 \land \text{Datalog}^{\lnot}$$
+    ///
     Constraint,
+    ///
+    /// A disjunctive rule is one where there is more than one atom, and any one (inclusive
+    /// disjunction) may be true if the body is true, it is only available in the language
+    /// $\small\text{Datalog}^{\lor}$.
+    /// $$\small |head\(r\)| > 1  \land \text{Datalog}^{\lor}$$
+    ///
     Disjunctive,
 }
 
@@ -518,52 +538,6 @@ impl RuleSet {
 
 // ------------------------------------------------------------------------------------------------
 
-impl SyntaxFragments for Rule {
-    fn is_linear(&self) -> bool {
-        self.body.len() == 1
-    }
-
-    fn is_guarded(&self) -> bool {
-        let all_variables = self.variables();
-        self.literals().any(|lit| {
-            let lit_variables: HashSet<&VariableRef> =
-                HashSet::from_iter(lit.variables().into_iter());
-            lit_variables == all_variables
-        })
-    }
-
-    fn is_frontier_guarded(&self) -> bool {
-        let frontier_variables: HashSet<&VariableRef> = self
-            .head_variables()
-            .intersection(&self.variables())
-            .copied()
-            .collect();
-        self.literals().any(|lit| {
-            let lit_variables: HashSet<&VariableRef> =
-                HashSet::from_iter(lit.variables().into_iter());
-            lit_variables == frontier_variables
-        })
-    }
-
-    fn is_non_recursive(&self) -> bool {
-        // TODO: this is only direct recursion, need to check for mutual recursive rules.
-        let head_predicates = self
-            .head()
-            .map(|atom| atom.label())
-            .collect::<Vec<&Predicate>>();
-        !self
-            .literals()
-            .filter_map(|lit| {
-                if let LiteralInner::Relational(atom) = lit.as_ref() {
-                    Some(atom.label())
-                } else {
-                    None
-                }
-            })
-            .any(|predicate| head_predicates.contains(&predicate))
-    }
-}
-
 impl Display for Rule {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -756,7 +730,40 @@ impl Rule {
     // --------------------------------------------------------------------------------------------
 
     ///
-    /// # Well-formedness
+    /// Guarded $\small\text{Datalog}$ is defined where for every rule, all the variables that occur
+    /// in the rule bodies must occur together in at least one atom, called a guard atom.
+    ///
+    pub fn is_guarded(&self) -> bool {
+        let all_variables = self.variables();
+        self.literals().any(|lit| {
+            let lit_variables: HashSet<&VariableRef> =
+                HashSet::from_iter(lit.variables().into_iter());
+            lit_variables == all_variables
+        })
+    }
+
+    ///
+    /// Frontier-Guarded $\small\text{Datalog}$ is defined where for every rule, all the variables
+    /// that are shared between the rule body and the rule head (called the frontier variables) must
+    /// all occur together in a guard atom.
+    ///
+    pub fn is_frontier_guarded(&self) -> bool {
+        let frontier_variables: HashSet<&VariableRef> = self
+            .head_variables()
+            .intersection(&self.variables())
+            .copied()
+            .collect();
+        self.literals().any(|lit| {
+            let lit_variables: HashSet<&VariableRef> =
+                HashSet::from_iter(lit.variables().into_iter());
+            lit_variables == frontier_variables
+        })
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    ///
+    /// # Rules Safety
     ///
     /// A Datalog program is well‐formed if all of its rules are well‐formed.
     ///
@@ -769,7 +776,14 @@ impl Rule {
     ///    2. all variables that appear in a negative literal in the body of a clause also appears
     ///       in some positive literal in the body of the clause.
     ///
-    pub fn well_formed_check(&self, features: &FeatureSet) -> Result<()> {
+    /// # Example unsafe rules
+    ///
+    /// ```datalog
+    /// [1]  invalid(X, Y) :- movie(X, Y, "1940"), Y > "1910".
+    /// [2]  invalid(X)    :- movie(X, Y, "1940"), NOT cast(U, X).
+    /// ```
+    ///
+    pub fn safety_check(&self, features: &FeatureSet) -> Result<()> {
         let (min, max) = if features.supports(&FEATURE_DISJUNCTION) {
             (1, usize::MAX)
         } else if features.supports(&FEATURE_CONSTRAINTS) {
@@ -819,7 +833,13 @@ impl Rule {
             let missing: Vec<&Term> = self
                 .negative_terms()
                 .into_iter()
-                .filter(|term| !body_positive_terms.contains(term))
+                .filter(|term| {
+                    if term.is_variable() {
+                        !body_positive_terms.contains(term)
+                    } else {
+                        false
+                    }
+                })
                 .collect();
             if !missing.is_empty() {
                 return Err(negative_variables_not_also_positive(

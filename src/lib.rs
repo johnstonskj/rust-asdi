@@ -82,6 +82,13 @@ A pure rule is termed a _simple conditional assertion_, a constraint rule is ter
 _unconditional assertion_, and a disjunctive rule is termed a _sequent_ (or simply _conditional
 assertion_).
 
+Alternatively, some literature defines a rule in the following form:
+
+$$\tag{ia}\small C_1 | C_2 | \ldots | C_n \leftarrow A_1, \ldots, A_m, \lnot B_1, \ldots, \lnot B_k$$
+
+Where this form shows the expanded head structure according to $\small\text{Datalog}^{\lor}$, and the
+set of negated literals according to $\small\text{Datalog}^{\lnot}$.
+
 ### Terms
 
 Terms, mentioned above, may be constant values or variables such that
@@ -745,7 +752,8 @@ use crate::error::{
     extensional_predicate_in_rule_head, language_feature_unsupported, relation_does_not_exist,
     Result,
 };
-use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
+use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION};
+use crate::idb::eval::PrecedenceGraph;
 use crate::idb::{
     eval::Evaluator, query::Query, query::View, Atom, Literal, Rule, RuleForm, RuleSet, Term,
     Variable,
@@ -762,8 +770,8 @@ use std::str::FromStr;
 // ------------------------------------------------------------------------------------------------
 
 ///
-/// A program consists of a set of extensional [`Relations`], a set of intensional
-/// [`Relations`], a set of [`Rules`], and a set of [queries](Query).
+/// A program consists of a set of extensional [`RelationSet`], a set of intensional
+/// [`RelationSet`], a set of [`RuleSet`], and a set of [queries](Query).
 ///  
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Program {
@@ -938,37 +946,6 @@ pub trait MaybePositive {
     }
 }
 
-///
-/// Commonly used properties of programs and rules.
-///
-pub trait SyntaxFragments {
-    ///
-    /// Linear $\small\text{Datalog}$ is defined where rule bodies must consist of a single atom.
-    ///
-    /// $$\tag{i}\small linear\(r\) \coloneqq |body\(r\)| = 1 \land \forall l \in body\(r\)\medspace \(atom\(l\)\)$$
-    ///
-    fn is_linear(&self) -> bool;
-
-    ///
-    /// Guarded $\small\text{Datalog}$ is defined where for every rule, all the variables that occur
-    /// in the rule bodies must occur together in at least one atom, called a guard atom.
-    ///
-    fn is_guarded(&self) -> bool;
-
-    ///
-    /// Frontier-Guarded $\small\text{Datalog}$ is defined where for every rule, all the variables
-    /// that are shared between the rule body and the rule head (called the frontier variables) must
-    /// all occur together in a guard atom.
-    ///
-    fn is_frontier_guarded(&self) -> bool;
-
-    ///
-    /// Non-Recursive $\small\text{Datalog}$ is defined by disallowing recursion in the definition
-    /// of programs, and therefore rules.
-    ///
-    fn is_non_recursive(&self) -> bool;
-}
-
 // ------------------------------------------------------------------------------------------------
 // Implementations
 // ------------------------------------------------------------------------------------------------
@@ -1018,24 +995,6 @@ impl Display for Program {
 impl MaybePositive for Program {
     fn is_positive(&self) -> bool {
         self.rules().iter().all(|rule| rule.is_positive())
-    }
-}
-
-impl SyntaxFragments for Program {
-    fn is_linear(&self) -> bool {
-        self.rules().iter().all(|rule| rule.is_linear())
-    }
-
-    fn is_guarded(&self) -> bool {
-        self.rules().iter().all(|rule| rule.is_guarded())
-    }
-
-    fn is_frontier_guarded(&self) -> bool {
-        self.rules().iter().all(|rule| rule.is_frontier_guarded())
-    }
-
-    fn is_non_recursive(&self) -> bool {
-        self.rules().iter().all(|rule| rule.is_non_recursive())
     }
 }
 
@@ -1214,7 +1173,7 @@ impl Program {
     /// Add the provided `rule` to the intensional database.
     ///
     pub fn add_rule(&mut self, rule: Rule) -> Result<()> {
-        rule.well_formed_check(self.features())?;
+        rule.safety_check(self.features())?;
 
         if rule.form() == RuleForm::Constraint && !self.features().supports(&FEATURE_CONSTRAINTS) {
             return Err(language_feature_unsupported(FEATURE_CONSTRAINTS));
@@ -1269,6 +1228,57 @@ impl Program {
             }
         }
         Attribute::anonymous()
+    }
+
+    ///
+    /// A recursive $\small\text{Datalog}$ program has rules that directly, or indirectly recurse.
+    ///
+    pub fn is_recursive(&self) -> bool {
+        PrecedenceGraph::from(self).is_recursive()
+    }
+
+    ///
+    /// In $\small\text{Datalog}^{\lnot}$ a program is _semi-positive_ **iff** the only literals that
+    /// are negated are EDB relations.
+    ///
+    pub fn is_semi_positive(&self) -> bool {
+        if self.features().supports(&FEATURE_NEGATION) {
+            PrecedenceGraph::from(self).is_semi_positive()
+        } else {
+            false
+        }
+    }
+
+    ///
+    /// Linear $\small\text{Datalog}$ is defined where rule bodies have **at most** one IDB relation.
+    ///
+    /// $$\tag{i}\small linear\(r\) \coloneqq \ldots$$
+    ///
+    pub fn is_linear(&self) -> bool {
+        self.rules().iter().all(|rule| {
+            rule.literals()
+                .filter_map(|literal| literal.as_relational())
+                .filter(|atom| self.intensional().contains(atom.label()))
+                .count()
+                == 1
+        })
+    }
+
+    ///
+    /// Guarded $\small\text{Datalog}$ is defined where for every rule, all the variables that occur
+    /// in the rule bodies must occur together in at least one atom, called a guard atom.
+    ///
+    pub fn is_guarded(&self) -> bool {
+        self.rules().iter().all(|rule| rule.is_guarded())
+    }
+
+    ///
+    /// Frontier-Guarded $\small\text{Datalog}$ is defined where for every rule, all the variables
+    /// that are shared between the rule body and the rule head (called the frontier variables) must
+    /// all occur together in a guard atom.
+    ///
+    pub fn is_frontier_guarded(&self) -> bool {
+        self.rules().iter().all(|rule| rule.is_frontier_guarded())
     }
 
     // --------------------------------------------------------------------------------------------

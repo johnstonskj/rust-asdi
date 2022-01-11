@@ -1,0 +1,3 @@
+odd(X, Y)  :- e(X, Y).
+odd(X, Y)  :- e(X, Z), even(Z, Y).
+even(X, Y) :- e(X, Z), odd(Z, Y).

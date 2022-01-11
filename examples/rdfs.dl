@@ -1,3 +1,5 @@
+%%%%% .feature(comparisons).
+
 .assert triple(subject: string, predicate: string, object: string).
 
 .input(triple, "car.csv", "csv").
@@ -181,14 +183,14 @@ subClass(C, P) :- triple(C, rdfs:subClassOf, P).
 class(C) :- subClass(C, _).
 class(C) :- subClass(_, C).
 instanceOf(C, C2) :- instanceOf(C, C1), subClass(C1, C2).
-% ----- NEGATION: subClass(C, rdfs:Class) :- class(C) AND NOT class(rdfs:Class).
+%%%%% subClass(C, rdfs:Class) :- class(C) AND C /= rdfs:Class.
 
 % Section 3.5: subPropertyOf
 subProperty(C, P) :- triple(C, rdfs:subPropertyOf, P).
 property(P) :- subProperty(P, _).
 property(P) :- subProperty(_, P).
 instanceOf(P, P2) :- instanceOf(P, P1), subProperty(P1, P2).
-% ----- NEGATION: subProperty(P, rdfs:Property) :- property(P) AND NOT property(rdfs:Property).
+subProperty(P, rdfs:Property) :- property(P) AND P /= rdfs:Property.
 
 % Section 5.1.5: ContainerMembershipProperty
-subProperty(P, rdfs:member) :- instanceOf(P, rdfs:ContainerMembershipProperty).
+%%%%% subProperty(P, rdfs:member) :- instanceOf(P, rdfs:ContainerMembershipProperty).

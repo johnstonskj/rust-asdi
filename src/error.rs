@@ -102,6 +102,8 @@ pub enum Error {
     RelationDoesNotExist {
         label: PredicateRef,
     },
+
+    NotStratifiable,
 }
 
 ///
@@ -212,6 +214,11 @@ pub fn relation_does_not_exist(label: PredicateRef) -> Error {
     Error::RelationDoesNotExist { label }
 }
 
+#[inline]
+pub fn program_not_stratifiable() -> Error {
+    Error::NotStratifiable
+}
+
 // ------------------------------------------------------------------------------------------------
 // Implementations
 // ------------------------------------------------------------------------------------------------
@@ -301,6 +308,7 @@ impl Display for Error {
                 Error::Serialization(e) => format!("An error occured either serializing or deserializing a relation: {}", e),
                 Error::SerializationFormatUnknown { format: serialization } => format!("'{}' is not a supported serialization format.", serialization),
                 Error::SerializationOperationUnsupported{ format: serialization } => format!("The requested I/O operation is not supported by the serialization format '{}'", serialization),
+                Error::NotStratifiable => format!("The program cannot be evaluated as it includes negation but cannot be stratified."),
             }
         )
     }
