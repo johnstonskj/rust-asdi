@@ -93,9 +93,11 @@ boolean_fact(false).
 */
 
 use crate::error::{
-    fact_does_not_correspond_to_schema, invalid_value, relation_exists, Error, Result,
+    fact_does_not_correspond_to_schema, invalid_value, nullary_facts_not_allowed, relation_exists,
+    Error, Result,
 };
-use crate::idb::{query::Row, query::View, Atom};
+use crate::idb::query::{FactOps, Projection, Queryable, Row, Selection, View};
+use crate::idb::Atom;
 use crate::io::{read_relation, write_relation, FilePragma};
 use crate::syntax::{
     CHAR_COLON, CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
@@ -207,6 +209,8 @@ pub enum Constant {
     Integer(i64),
     Boolean(bool),
 }
+
+// ------------------------------------------------------------------------------------------------
 
 ///
 /// A predicate is a value from the set $\small \mathcal{P}$ and labels [relations](struct.Relation.html),
@@ -633,6 +637,16 @@ impl FromIterator<Relation> for RelationSet {
     }
 }
 
+impl Queryable for RelationSet {
+    fn query_atom(&self, query: &Atom) -> Result<Option<View>> {
+        if let Some(relation) = self.0.get(query.label()) {
+            relation.query_atom(query)
+        } else {
+            Ok(None)
+        }
+    }
+}
+
 impl Collection<Relation> for RelationSet {
     fn is_empty(&self) -> bool {
         self.0.is_empty()
@@ -730,29 +744,6 @@ impl RelationSet {
         self.0.get_mut(predicate)
     }
 
-    pub fn matches(&self, atom: &Atom) -> Option<View> {
-        if let Some(relation) = self.0.get(atom.label()) {
-            trace!(
-                "matches > predicate: {}, relation: {:?}",
-                atom.label(),
-                relation.label()
-            );
-            let results = relation.matches(atom);
-            if atom.variables().count() == 0 {
-                // if all attributes are constant it is a presence query, not a selection.
-                if results.is_empty() {
-                    Some(View::new_false())
-                } else {
-                    Some(View::new_true())
-                }
-            } else {
-                Some(results)
-            }
-        } else {
-            None
-        }
-    }
-
     pub fn clone_with_schema_only(&self) -> Self {
         Self(
             self.0
@@ -801,6 +792,49 @@ impl Collection<Fact> for Relation {
 
     fn contains(&self, value: &Fact) -> bool {
         self.facts.contains(value)
+    }
+}
+
+impl Queryable for Relation {
+    fn query_atom(&self, query: &Atom) -> Result<Option<View>> {
+        let schema = self.make_view_schema(&query.iter().collect::<Vec<&Term>>());
+
+        let view = if query.is_universal() {
+            // all terms are variables, so all facts match
+            View::new_with_facts(
+                schema,
+                self.facts
+                    .iter()
+                    .map(|fact| Row::from(fact.values().clone()))
+                    .collect::<Vec<Row>>(),
+            )
+        } else if query.is_existential() {
+            // all terms are constants, so only one term should match
+            let fact = Fact::new(
+                query.label_ref(),
+                query.constants().cloned().collect::<Vec<Constant>>(),
+            )?;
+            if self.contains(&fact) {
+                View::new_true()
+            } else {
+                View::new_false()
+            }
+        } else {
+            let selection = Selection::try_from(query)?;
+            // let projection = Projection::try_from(query)?;
+            let rows: Result<Vec<Row>> = self
+                .iter()
+                .filter_map(|fact| fact.clone().select(&selection).transpose())
+                // TODO: Need to update the view join logic
+                // .map(|fact| match fact {
+                //     Ok(fact) => fact.project(&projection),
+                //     Err(e) => Err(e),
+                // })
+                .collect();
+            View::new_with_facts(schema, rows?)
+        };
+
+        Ok(Some(view))
     }
 }
 
@@ -853,7 +887,7 @@ impl Relation {
     pub fn add_as_fact<V: Into<Vec<Constant>>>(&mut self, values: V) -> Result<()> {
         let values: Vec<Constant> = values.into();
         if self.schema.conforms(&values) {
-            self.add(Fact::new(self.label.clone(), values))?;
+            self.add(Fact::new(self.label.clone(), values)?)?;
             Ok(())
         } else {
             Err(fact_does_not_correspond_to_schema(
@@ -898,53 +932,25 @@ impl Relation {
 
     // --------------------------------------------------------------------------------------------
 
-    pub(crate) fn matches(&self, atom: &Atom) -> View {
-        let terms: Vec<&Term> = atom.iter().collect();
-        self.match_terms(terms)
-    }
-
-    #[allow(single_use_lifetimes)]
-    fn match_terms<'a, V: Into<Vec<&'a Term>>>(&self, terms: V) -> View {
-        let terms = terms.into();
-
-        View::new_with_facts(
-            terms
-                .iter()
-                .enumerate()
-                .map(|(i, term)| {
-                    let mut term = match term {
-                        Term::Anonymous => Attribute::anonymous(),
-                        Term::Variable(v) => Attribute::from(v.clone()),
-                        Term::Constant(v) => Attribute::typed(v.kind()),
-                    };
-                    if term.kind().is_none() {
-                        if let Some(kind) =
-                            self.schema().get(&AttributeIndex::Index(i)).unwrap().kind()
-                        {
-                            term.override_kind(kind);
-                        }
-                    }
-                    term
-                })
-                .collect::<Vec<Attribute<Variable>>>(),
-            self.facts
-                .iter()
-                .filter_map(|fact| self.match_terms_inner(&terms, fact.values()))
-                .collect::<Vec<Row>>(),
-        )
-    }
-
-    fn match_terms_inner(&self, terms: &[&Term], fact: &[Constant]) -> Option<Row> {
-        if terms
+    fn make_view_schema(&self, terms: &[&Term]) -> Vec<Attribute<Variable>> {
+        terms
             .iter()
             .enumerate()
-            .filter(|(_, term)| term.is_constant())
-            .all(|(i, term)| term.as_constant().unwrap() == fact.get(i).unwrap())
-        {
-            Some(Row::from(fact.to_vec()))
-        } else {
-            None
-        }
+            .map(|(i, term)| {
+                let mut term = match term {
+                    Term::Anonymous => Attribute::anonymous(),
+                    Term::Variable(v) => Attribute::from(v.clone()),
+                    Term::Constant(v) => Attribute::typed(v.kind()),
+                };
+                if term.kind().is_none() {
+                    if let Some(kind) = self.schema().get(&AttributeIndex::Index(i)).unwrap().kind()
+                    {
+                        term.override_kind(kind);
+                    }
+                }
+                term
+            })
+            .collect()
     }
 
     // --------------------------------------------------------------------------------------------
@@ -1052,6 +1058,7 @@ impl Labeled for Fact {
 
 impl Collection<Constant> for Fact {
     fn is_empty(&self) -> bool {
+        // Note: this should NEVER be true
         self.values.is_empty()
     }
 
@@ -1078,18 +1085,51 @@ impl IndexedCollection<usize, Constant> for Fact {
     }
 }
 
+impl FactOps for Fact {
+    fn project(self, projection: &Projection) -> Result<Row> {
+        Ok(if projection.is_all() {
+            Row::from(self)
+        } else {
+            Row::from(
+                self.values
+                    .into_iter()
+                    .enumerate()
+                    .filter_map(|(i, c)| {
+                        if projection.contains_index(&i) {
+                            Some(c)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<Constant>>(),
+            )
+        })
+    }
+
+    fn select(self, criteria: &Selection) -> Result<Option<Row>> {
+        Ok(if criteria.is_all() || criteria.matches(self.values())? {
+            Some(Row::from(self))
+        } else {
+            None
+        })
+    }
+}
+
 impl Fact {
-    pub fn new<V: Into<Vec<Constant>>>(name: PredicateRef, values: V) -> Self {
-        Self {
-            label: name,
-            values: values.into(),
+    pub fn new<V: Into<Vec<Constant>>>(label: PredicateRef, values: V) -> Result<Self> {
+        let values = values.into();
+        if values.is_empty() {
+            Err(nullary_facts_not_allowed())
+        } else {
+            Ok(Self { label, values })
         }
     }
 
-    fn values(&self) -> &Vec<Constant> {
+    pub fn values(&self) -> &Vec<Constant> {
         &self.values
     }
 }
+
 // ------------------------------------------------------------------------------------------------
 
 impl From<&str> for Constant {
@@ -1135,10 +1175,11 @@ impl Display for Constant {
                 Self::Integer(v) => v.to_string(),
                 Self::Boolean(v) => {
                     if *v {
-                        format!("{}{}", RESERVED_PREFIX, RESERVED_BOOLEAN_TRUE)
+                        RESERVED_BOOLEAN_TRUE
                     } else {
-                        format!("{}{}", RESERVED_PREFIX, RESERVED_BOOLEAN_FALSE)
+                        RESERVED_BOOLEAN_FALSE
                     }
+                    .to_string()
                 }
             }
         )
@@ -1157,6 +1198,12 @@ impl Constant {
     pub fn new_size(v: usize) -> Self {
         Self::Integer(v as i64)
     }
+
+    self_is_as!(string, String);
+
+    self_is_as!(integer, Integer, i64);
+
+    self_is_as!(boolean, Boolean, bool);
 
     pub fn kind(&self) -> AttributeKind {
         match self {

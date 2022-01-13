@@ -10,7 +10,7 @@ This module also provides the following implementations of the [Evaluator] trait
 
 use crate::edb::RelationSet;
 use crate::error::Result;
-use crate::Program;
+use crate::{Program, ProgramCore};
 use std::fmt::Debug;
 
 // ------------------------------------------------------------------------------------------------
@@ -79,5 +79,8 @@ impl Evaluator for NoopEvaluator {
 mod naive;
 pub use naive::NaiveEvaluator;
 
+mod semi_naive;
+pub use semi_naive::SemiNaiveEvaluator;
+
 mod strata;
-pub use strata::{PrecedenceGraph, PrecedenceNode, StratifiedRules};
+pub use strata::{PrecedenceGraph, PrecedenceNode, StratifiedProgram};

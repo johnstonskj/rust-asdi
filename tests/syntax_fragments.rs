@@ -1,5 +1,5 @@
 use asdi::features::{FeatureSet, FEATURE_NEGATION};
-use asdi::{MaybePositive, SyntaxFragments};
+use asdi::MaybePositive;
 
 mod common;
 use crate::common::{quick_program_check, quick_program_check_with_options};
@@ -30,16 +30,34 @@ fn is_non_positive() {
 
 #[test]
 fn is_linear() {
-    quick_program_check("foo(X, Y) :- bar(X, Y).", |p| {
-        assert!(p.is_linear());
-    })
+    quick_program_check(
+        r#"
+.assert bar(integer, integer).
+.infer foo(integer, integer).
+.infer far(integer, integer).
+
+foo(X, Y) :- bar(X, Y).
+foo(X, Y) :- far(X, Y).
+foo(X, Y) :- bar(X, Y), far(X, Y)."#,
+        |p| {
+            assert!(p.is_linear());
+        },
+    )
 }
 
 #[test]
 fn is_non_linear() {
-    quick_program_check("foo(X, Y) :- bar(X, Y), foo(Z, Y).", |p| {
-        assert!(!p.is_linear());
-    })
+    quick_program_check(
+        r#"
+.assert bar(integer, integer).
+.infer foo(integer, integer).
+.infer far(integer, integer).
+
+foo(X, Y) :- foo(X, Y), bar(X, Y), far(X, Y)."#,
+        |p| {
+            assert!(!p.is_linear());
+        },
+    )
 }
 
 // ------------------------------------------------------------------------------------------------

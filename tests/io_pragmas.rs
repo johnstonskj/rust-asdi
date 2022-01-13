@@ -1,5 +1,6 @@
 use asdi::io::Format;
 use asdi::parse::parse_str;
+use asdi::ProgramCore;
 use std::path::PathBuf;
 
 #[test]

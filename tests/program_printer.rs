@@ -1,7 +1,7 @@
 use asdi::io::csv::Options as CsvOptions;
 use asdi::io::json::Options as JsonOptions;
 use asdi::io::{print_relation, Format};
-use asdi::Collection;
+use asdi::{Collection, ProgramCore};
 
 pub mod common;
 use common::make_and_evaluate_ancestors;

@@ -17,7 +17,7 @@ use crate::idb::{query::Query, Atom, ComparisonOperator, Literal, LiteralInner, 
 use crate::syntax::{
     CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DISJUNCTION_UNICODE_SYMBOL,
 };
-use crate::{Collection, Labeled, MaybePositive, Program};
+use crate::{Collection, Labeled, MaybePositive, Program, ProgramCore};
 use std::fmt::Write;
 
 // ------------------------------------------------------------------------------------------------
@@ -239,7 +239,7 @@ impl LatexTypesetter {
 mod tests {
     use crate::parse::parse_str;
     use crate::typeset::{LatexTypesetter, Typesetter};
-    use crate::Collection;
+    use crate::{Collection, ProgramCore};
 
     #[test]
     fn test_wikipedia_example() {

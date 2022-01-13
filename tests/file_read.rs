@@ -3,7 +3,7 @@ pub mod common;
 use asdi::io::csv::Options as CsvOptions;
 use asdi::io::json::Options as JsonOptions;
 use asdi::io::{print_relation, read_relation, FilePragma, Format};
-use asdi::Collection;
+use asdi::{Collection, ProgramCore};
 use common::make_ancestors;
 use std::path::PathBuf;
 

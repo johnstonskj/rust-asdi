@@ -9,7 +9,7 @@ use crate::idb::{
 use crate::io::{string_to_format, FilePragma, Format};
 use crate::parse::Parsed;
 use crate::syntax::{TYPE_NAME_CONST_BOOLEAN, TYPE_NAME_CONST_INTEGER};
-use crate::{error, relation_does_not_exist, Collection, Program};
+use crate::{error, relation_does_not_exist, Collection, Program, ProgramCore};
 use pest::iterators::{Pair, Pairs};
 use pest::{Parser, Span};
 use pest_derive::Parser;

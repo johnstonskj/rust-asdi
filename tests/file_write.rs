@@ -1,7 +1,7 @@
 use asdi::io::csv::Options as CsvOptions;
 use asdi::io::json::Options as JsonOptions;
 use asdi::io::{write_relation, FilePragma, Format};
-use asdi::Collection;
+use asdi::{Collection, ProgramCore};
 use std::path::PathBuf;
 
 pub mod common;

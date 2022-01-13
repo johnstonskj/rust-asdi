@@ -93,7 +93,7 @@ impl Reader for Json {
                     _ => unreachable!(),
                 })
                 .collect();
-            new_relation.add(Fact::new(new_relation.label_ref(), constants?))?;
+            new_relation.add(Fact::new(new_relation.label_ref(), constants?)?)?;
         }
 
         Ok(new_relation)

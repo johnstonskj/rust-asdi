@@ -103,7 +103,19 @@ pub enum Error {
         label: PredicateRef,
     },
 
+    AttributeDoesNotExist {
+        label: String,
+    },
+
+    AttributeIndexInvalid {
+        index: usize,
+    },
+
     NotStratifiable,
+
+    NullaryFactsNotAllowed,
+
+    SelectionIsContradiction,
 }
 
 ///
@@ -215,8 +227,30 @@ pub fn relation_does_not_exist(label: PredicateRef) -> Error {
 }
 
 #[inline]
+pub fn attribute_does_not_exist<S: Into<String>>(label: S) -> Error {
+    Error::AttributeDoesNotExist {
+        label: label.into(),
+    }
+}
+
+#[inline]
+pub fn attribute_index_invalid(index: usize) -> Error {
+    Error::AttributeIndexInvalid { index }
+}
+
+#[inline]
 pub fn program_not_stratifiable() -> Error {
     Error::NotStratifiable
+}
+
+#[inline]
+pub fn nullary_facts_not_allowed() -> Error {
+    Error::NullaryFactsNotAllowed
+}
+
+#[inline]
+pub fn selection_is_contradiction() -> Error {
+    Error::SelectionIsContradiction
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -309,6 +343,10 @@ impl Display for Error {
                 Error::SerializationFormatUnknown { format: serialization } => format!("'{}' is not a supported serialization format.", serialization),
                 Error::SerializationOperationUnsupported{ format: serialization } => format!("The requested I/O operation is not supported by the serialization format '{}'", serialization),
                 Error::NotStratifiable => format!("The program cannot be evaluated as it includes negation but cannot be stratified."),
+                Error::AttributeDoesNotExist { label } => format!("The attribute labeled '{}' was not a member of the target schema.", label),
+                Error::AttributeIndexInvalid { index } => format!("The attribute index '{}' is not valid for the target schema.", index),
+                Error::NullaryFactsNotAllowed => format!("The arity of facts must be greater than, or equal to, 1."),
+                Error::SelectionIsContradiction => format!("Selection criteria represents a contradiction, nothing can be matched."),
             }
         )
     }

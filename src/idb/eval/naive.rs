@@ -1,10 +1,11 @@
 use crate::edb::Constant;
 use crate::error::{language_feature_disabled, Result};
 use crate::features::{FEATURE_COMPARISONS, FEATURE_NEGATION};
+use crate::idb::query::Queryable;
 use crate::idb::{eval::Evaluator, query::View, Atom, Term};
 use crate::{
-    relation_does_not_exist, Collection, Labeled, MaybePositive, Program, RelationSet, RuleForm,
-    FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION,
+    relation_does_not_exist, Collection, IndexedCollection, Labeled, MaybePositive, Program,
+    ProgramCore, RelationSet, RuleForm, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION,
 };
 use tracing::trace;
 
@@ -71,12 +72,14 @@ impl Evaluator for NaiveEvaluator {
                         .literals()
                         .map(|l| {
                             if let Some(atom) = l.as_relational() {
-                                if let Some(view) = program.extensional().matches(atom) {
+                                if let Some(view) = program.extensional().query_atom(atom)? {
                                     trace!("First matches from an extensional relation");
                                     Ok(view)
-                                } else if let Some(mut view) = program.intensional().matches(atom) {
+                                } else if let Some(mut view) =
+                                    program.intensional().query_atom(atom)?
+                                {
                                     trace!("First matches from an intensional relation");
-                                    if let Some(previous_matches) = new_db.matches(atom) {
+                                    if let Some(previous_matches) = new_db.query_atom(atom)? {
                                         trace!(
                                             "Adding in any matches from the in-progress relation"
                                         );
@@ -106,7 +109,7 @@ impl Evaluator for NaiveEvaluator {
                                 .map(|term| match term {
                                     Term::Anonymous => unreachable!(),
                                     Term::Variable(v) => fact
-                                        .get(results.attribute_index(v.clone().into()).unwrap())
+                                        .get(&results.attribute_index(v.clone().into()).unwrap())
                                         .unwrap(),
                                     Term::Constant(c) => c,
                                 })

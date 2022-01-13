@@ -1,8 +1,8 @@
 use asdi::edb::Predicate;
 use asdi::idb::eval::{Evaluator, NaiveEvaluator};
-use asdi::idb::query::Query;
+use asdi::idb::query::{Query, Queryable};
 use asdi::parse::parse_str;
-use asdi::Collection;
+use asdi::{Collection, ProgramCore};
 use std::str::FromStr;
 
 #[test]
@@ -56,7 +56,8 @@ mortal(X) <- human(X).
 
     let query = program.queries().next().unwrap();
 
-    let results = new_intensional.matches(query.as_ref()).unwrap();
+    let results = new_intensional.query(query).unwrap().unwrap();
+    println!("{}", results);
     assert_eq!(results.schema().len(), 1);
     assert_eq!(results.len(), 1);
 
@@ -65,7 +66,7 @@ mortal(X) <- human(X).
 
     let query = Query::new(p_mortal, [program.variables().fetch("X").unwrap().into()]);
 
-    let results = new_intensional.matches(query.as_ref()).unwrap();
+    let results = new_intensional.query(&query).unwrap().unwrap();
     assert_eq!(results.schema().len(), 1);
     assert_eq!(results.len(), 2);
 
@@ -111,7 +112,8 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
     let query = program.queries().next().unwrap();
 
-    let results = program.intensional().matches(query.as_ref()).unwrap();
+    let results = program.intensional().query(query).unwrap().unwrap();
+    println!("{}", results);
     assert_eq!(results.schema().len(), 2);
     assert_eq!(results.len(), 2);
 
@@ -159,7 +161,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
 
     let query = program.queries().next().unwrap();
 
-    let results = results.matches(query.as_ref()).unwrap();
+    let results = results.query(query).unwrap().unwrap();
     assert_eq!(results.schema().len(), 2);
     assert_eq!(results.len(), 16);
 

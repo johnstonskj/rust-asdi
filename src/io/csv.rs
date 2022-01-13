@@ -139,7 +139,7 @@ impl Reader for DelimitedLines {
                         _ => unreachable!(),
                     })
                     .collect();
-                new_relation.add(Fact::new(new_relation.label_ref(), values))?;
+                new_relation.add(Fact::new(new_relation.label_ref(), values)?)?;
             } else {
                 return Err(fact_does_not_correspond_to_schema(
                     new_relation.label_ref(),

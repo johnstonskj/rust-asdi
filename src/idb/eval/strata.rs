@@ -8,9 +8,9 @@ More detailed description, with
 */
 
 use crate::error::Result;
-use crate::idb::{Atom, Literal, Rule};
-use crate::{error, FEATURE_DISJUNCTION};
-use crate::{Collection, Labeled, MaybePositive, Predicate, Program};
+use crate::idb::{Literal, Rule};
+use crate::{error, FeatureSet, RelationSet, RuleSet, FEATURE_DISJUNCTION};
+use crate::{Collection, Labeled, MaybePositive, Predicate, Program, ProgramCore};
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 
@@ -45,8 +45,14 @@ use std::fmt::{Display, Formatter};
 /// a rule that defines it, but this IDB appears in the previous stratum (P2).
 ///
 #[derive(Debug)]
-pub struct StratifiedRules<'a> {
-    strata: Vec<Vec<&'a Rule>>,
+pub struct StratifiedProgram<'a> {
+    strata: Vec<SubProgram<'a>>,
+}
+
+#[derive(Debug)]
+pub struct SubProgram<'a> {
+    program: &'a Program,
+    strata: RuleSet,
 }
 
 ///
@@ -105,11 +111,11 @@ pub struct PrecedenceNode<'a> {
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
-impl Display for StratifiedRules<'_> {
+impl Display for StratifiedProgram<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for (i, strata) in self.strata.iter().enumerate() {
             writeln!(f, "[{}", i)?;
-            for (j, rule) in strata.iter().enumerate() {
+            for (j, rule) in strata.rules().iter().enumerate() {
                 writeln!(f, "  [{}] {}", j, rule)?;
             }
             writeln!(f, "]")?;
@@ -118,25 +124,19 @@ impl Display for StratifiedRules<'_> {
     }
 }
 
-impl<'a> From<StratifiedRules<'a>> for Vec<&'a Rule> {
-    fn from(rules: StratifiedRules<'a>) -> Self {
-        rules.strata.into_iter().flatten().collect()
-    }
-}
-
-impl<'a> StratifiedRules<'a> {
+impl<'a> StratifiedProgram<'a> {
     pub fn from(program: &'a Program) -> Result<Self> {
         // TODO: lift this restriction
         assert!(!program.features().supports(&FEATURE_DISJUNCTION));
 
         let rules = program.rules();
         let graph = PrecedenceGraph::from(program);
-        let mut strata: Vec<Vec<&'a Rule>> = Vec::with_capacity(graph.sources().len());
+        let mut strata: Vec<SubProgram<'_>> = Vec::with_capacity(graph.sources().len());
 
         if graph.is_stratifiable() {
             for rule in rules.iter() {
                 if strata.is_empty() {
-                    strata.push(vec![rule]);
+                    strata.push(SubProgram::from_with_rule(program, rule));
                 } else {
                     let mut leveled: bool = false;
                     let head_label = rule.head().map(|atom| atom.label()).next().unwrap();
@@ -144,7 +144,9 @@ impl<'a> StratifiedRules<'a> {
                     // 1. All the rules defining the same IDB relation are in the same partition.
                     for stratum in strata.iter_mut() {
                         if stratum
-                            .get(0)
+                            .rules()
+                            .iter()
+                            .next()
                             .unwrap()
                             .head()
                             .map(|atom| atom.label())
@@ -152,7 +154,7 @@ impl<'a> StratifiedRules<'a> {
                             .unwrap()
                             == head_label
                         {
-                            stratum.push(rule);
+                            stratum.add_rule(rule);
                             leveled = true;
                             break;
                         }
@@ -170,12 +172,12 @@ impl<'a> StratifiedRules<'a> {
                     //
                     if !leveled {
                         for (i, stratum) in strata.iter().enumerate() {
-                            if stratum.iter().any(|r2| {
+                            if stratum.rules().iter().any(|r2| {
                                 r2.literals()
                                     .filter_map(Literal::as_relational)
                                     .any(|atom| atom.label() == head_label)
                             }) {
-                                strata.insert(i, vec![rule]);
+                                strata.insert(i, SubProgram::from_with_rule(program, rule));
                                 leveled = true;
                                 break;
                             }
@@ -183,7 +185,7 @@ impl<'a> StratifiedRules<'a> {
                     }
 
                     if !leveled {
-                        strata.push(vec![rule]);
+                        strata.push(SubProgram::from_with_rule(program, rule));
                     }
                 }
             }
@@ -201,8 +203,43 @@ impl<'a> StratifiedRules<'a> {
         self.strata.len()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &Vec<&'a Rule>> {
+    pub fn iter(&self) -> impl Iterator<Item = &SubProgram<'_>> {
         self.strata.iter()
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl ProgramCore for SubProgram<'_> {
+    fn features(&self) -> &FeatureSet {
+        self.program.features()
+    }
+
+    fn extensional(&self) -> &RelationSet {
+        self.program.extensional()
+    }
+
+    fn intensional(&self) -> &RelationSet {
+        self.program.intensional()
+    }
+
+    fn rules(&self) -> &RuleSet {
+        &self.strata
+    }
+}
+
+impl<'a> SubProgram<'a> {
+    fn from_with_rule(program: &'a Program, rule: &Rule) -> Self {
+        let mut new = Self {
+            program,
+            strata: Default::default(),
+        };
+        new.add_rule(rule);
+        new
+    }
+
+    fn add_rule(&mut self, rule: &Rule) {
+        self.strata.add(rule.clone())
     }
 }
 
@@ -381,7 +418,7 @@ fn body_predicates(rule: &Rule) -> HashSet<(bool, &Predicate)> {
 #[cfg(test)]
 mod tests {
     use crate::idb::eval::strata::PrecedenceGraph;
-    use crate::idb::eval::StratifiedRules;
+    use crate::idb::eval::StratifiedProgram;
     use crate::parse::parse_str;
     use crate::Predicate;
     use std::str::FromStr;
@@ -402,7 +439,7 @@ tc(X, Y):- v(X), v(Y), NOT t(X, Y).
         .unwrap()
         .into_parsed();
 
-        let stratified = StratifiedRules::from(&program);
+        let stratified = StratifiedProgram::from(&program);
         assert!(stratified.is_ok());
         println!("{}", stratified.unwrap());
     }
@@ -588,7 +625,7 @@ unreachable(X, Y) :- reachable(X, Y), NOT absurdity(X, Y).
         assert!(!graph.is_semi_positive());
         assert!(!graph.is_stratifiable());
 
-        let stratified = StratifiedRules::from(&program);
+        let stratified = StratifiedProgram::from(&program);
         assert!(stratified.is_err());
     }
 }

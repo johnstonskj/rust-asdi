@@ -753,11 +753,9 @@ use crate::error::{
     Result,
 };
 use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION};
-use crate::idb::eval::PrecedenceGraph;
-use crate::idb::{
-    eval::Evaluator, query::Query, query::View, Atom, Literal, Rule, RuleForm, RuleSet, Term,
-    Variable,
-};
+use crate::idb::eval::{Evaluator, PrecedenceGraph};
+use crate::idb::query::{Query, Queryable, View};
+use crate::idb::{Atom, Literal, Rule, RuleForm, RuleSet, Term, Variable};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
@@ -768,6 +766,30 @@ use std::str::FromStr;
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
+
+///
+/// Core, readable, properties of a Datalog program.
+pub trait ProgramCore {
+    ///
+    /// Returns the set of features currently supported by this program.
+    ///
+    fn features(&self) -> &FeatureSet;
+
+    ///
+    /// Returns the current set of extensional relations.
+    ///
+    fn extensional(&self) -> &RelationSet;
+
+    ///
+    /// Returns the current set of intensional relations.
+    ///
+    fn intensional(&self) -> &RelationSet;
+
+    ///
+    /// Return an iterator over the rules in the intensional database.
+    ///
+    fn rules(&self) -> &RuleSet;
+}
 
 ///
 /// A program consists of a set of extensional [`RelationSet`], a set of intensional
@@ -998,6 +1020,24 @@ impl MaybePositive for Program {
     }
 }
 
+impl ProgramCore for Program {
+    fn features(&self) -> &FeatureSet {
+        &self.features
+    }
+
+    fn extensional(&self) -> &RelationSet {
+        &self.asserted
+    }
+
+    fn intensional(&self) -> &RelationSet {
+        &self.infer
+    }
+
+    fn rules(&self) -> &RuleSet {
+        &self.rules
+    }
+}
+
 impl Program {
     pub fn new_with_features(features: FeatureSet) -> Self {
         Self {
@@ -1030,13 +1070,6 @@ impl Program {
 
     // --------------------------------------------------------------------------------------------
 
-    ///
-    /// Returns the set of features currently supported by this program.
-    ///
-    pub fn features(&self) -> &FeatureSet {
-        &self.features
-    }
-
     pub(crate) fn features_mut(&mut self) -> &mut FeatureSet {
         &mut self.features
     }
@@ -1052,13 +1085,6 @@ impl Program {
     }
 
     // --------------------------------------------------------------------------------------------
-
-    ///
-    /// Returns the current set of extensional relations.
-    ///
-    pub fn extensional(&self) -> &RelationSet {
-        &self.asserted
-    }
 
     ///
     /// Returns the current set of extensional relations in a mutable state.
@@ -1090,13 +1116,6 @@ impl Program {
     // --------------------------------------------------------------------------------------------
 
     ///
-    /// Returns the current set of intensional relations.
-    ///
-    pub fn intensional(&self) -> &RelationSet {
-        &self.infer
-    }
-
-    ///
     /// Returns the current set of intensional relations in a mutable state.
     ///
     pub fn intensional_mut(&mut self) -> &mut RelationSet {
@@ -1121,13 +1140,6 @@ impl Program {
     ///
     pub fn add_intensional_relation(&mut self, relation: Relation) {
         self.intensional_mut().add(relation)
-    }
-
-    ///
-    /// Return an iterator over the rules in the intensional database.
-    ///
-    pub fn rules(&self) -> &RuleSet {
-        &self.rules
     }
 
     // Note: there is no `rules_mut` as we cannot allow clients to add rules without going through
@@ -1260,7 +1272,7 @@ impl Program {
                 .filter_map(|literal| literal.as_relational())
                 .filter(|atom| self.intensional().contains(atom.label()))
                 .count()
-                == 1
+                <= 1
         })
     }
 
@@ -1433,9 +1445,9 @@ impl Program {
     fn inner_eval_query(&self, query: &Query, intensional: &RelationSet) -> Result<Option<View>> {
         let label = query.as_ref().label_ref();
         if intensional.contains(&label) {
-            Ok(intensional.matches(query.as_ref()))
+            intensional.query(query)
         } else if self.extensional().contains(&label) {
-            Ok(self.extensional().matches(query.as_ref()))
+            self.extensional().query(query)
         } else {
             Err(relation_does_not_exist(label))
         }

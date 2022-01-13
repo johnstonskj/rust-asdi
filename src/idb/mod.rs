@@ -441,7 +441,7 @@ pub struct Comparison {
 ///
 /// The supported set of operations within an arithmetic literal.
 ///
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum ComparisonOperator {
     Equal,
     NotEqual,
@@ -989,8 +989,26 @@ impl Atom {
         })
     }
 
+    pub fn constants(&self) -> impl Iterator<Item = &Constant> {
+        self.terms.iter().filter_map(|t| {
+            if let Term::Constant(v) = t {
+                Some(v)
+            } else {
+                None
+            }
+        })
+    }
+
     pub fn source_location(&self) -> Option<&SourceLocation> {
         self.src_loc.as_ref()
+    }
+
+    pub fn is_existential(&self) -> bool {
+        self.constants().count() == self.len()
+    }
+
+    pub fn is_universal(&self) -> bool {
+        self.variables().count() == self.len()
     }
 }
 
