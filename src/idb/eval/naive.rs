@@ -67,7 +67,6 @@ impl Evaluator for NaiveEvaluator {
                         }
                     }?;
                     trace!("infer > rule > {}", rule);
-
                     let matches: Result<Vec<View>> = rule
                         .literals()
                         .map(|l| {

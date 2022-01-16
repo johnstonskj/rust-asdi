@@ -452,11 +452,13 @@ alive(X) ⟵ ￢dead(X).
 The language feature `comparisons` corresponds to the language $\small\text{Datalog}^{\theta}$ and
 allows the use of arithmetic literals. Comparisons take place between two literals and are
 currently limited to a set of common operators. Note the addition of a string match operator, this
-is similar to the Per `=~` and requires a string value/variable on the left and a string value or
-variable on the right that compiles to a valid Rust regular expression.
+is similar to the Perl `=~` and requires a string value/variable on the left and a string value or
+variable on the right that compiles to a valid Rust regular expression. Finally, the rule `named-term`
+disallows the use of anonymous variables in arithmetic literals.
 
 ```abnf
-comparison      = term operator term
+comparison      = named-term operator named-term
+named-term      = named-variable / constant
 operator        = "="
                 / "!=" /"/=" / "≠"
                 / "<"
@@ -755,7 +757,7 @@ use crate::error::{
 use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION};
 use crate::idb::eval::{Evaluator, PrecedenceGraph};
 use crate::idb::query::{Query, Queryable, View};
-use crate::idb::{Atom, Literal, Rule, RuleForm, RuleSet, Term, Variable};
+use crate::idb::{Atom, Literal, Rule, RuleForm, RuleSet, Term, Variable, VariableRef};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
@@ -1222,7 +1224,7 @@ impl Program {
         Ok(())
     }
 
-    fn infer_attribute(&self, variable: &Variable, rule: &Rule) -> Attribute<Predicate> {
+    fn infer_attribute(&self, variable: &VariableRef, rule: &Rule) -> Attribute<Predicate> {
         let candidates: Vec<(&Predicate, usize)> = rule
             .literals()
             .filter_map(Literal::as_relational)

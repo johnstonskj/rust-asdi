@@ -514,13 +514,13 @@ fn parse_comparison(mut input_pairs: Pairs<'_, Rule>, program: &mut Program) -> 
             language_feature_disabled(FEATURE_COMPARISONS).to_string()
         ))
     } else {
-        let left = if_match!(input_pairs, term => (parse_term, program));
+        let left = if_match!(input_pairs, named_term => (parse_named_term, program));
 
         let op = if_match_str!(input_pairs, comparison_operator => |s:&str| ComparisonOperator::from_str(s));
 
-        let right = if_match!(input_pairs, term => (parse_term, program));
+        let right = if_match!(input_pairs, named_term => (parse_named_term, program));
 
-        Ok(Comparison::new(left, op, right))
+        Ok(Comparison::new(left, op, right)?)
     }
 }
 
@@ -552,6 +552,19 @@ fn parse_term(mut input_pairs: Pairs<'_, Rule>, program: &mut Program) -> Result
     let first = input_pairs.next().unwrap();
     let value = match first.as_rule() {
         Rule::anonymous_variable => Term::Anonymous,
+        Rule::named_variable => program.variables().fetch(first.as_str())?.into(),
+        Rule::constant => Term::Constant(parse_constant(first.into_inner(), program)?),
+        _ => unexpected_rule!(first),
+    };
+
+    not_expecting_more!(input_pairs);
+
+    Ok(value)
+}
+
+fn parse_named_term(mut input_pairs: Pairs<'_, Rule>, program: &mut Program) -> Result<Term> {
+    let first = input_pairs.next().unwrap();
+    let value = match first.as_rule() {
         Rule::named_variable => program.variables().fetch(first.as_str())?.into(),
         Rule::constant => Term::Constant(parse_constant(first.into_inner(), program)?),
         _ => unexpected_rule!(first),

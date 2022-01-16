@@ -5,7 +5,7 @@ This module provides the both a [Reader] and [Writer] implementation for CSV fil
 use crate::edb::{AttributeKind, Constant, Fact};
 use crate::error::{fact_does_not_correspond_to_schema, Error, Result};
 use crate::io::{Reader, Writer};
-use crate::syntax::{CHAR_COMMA, COLUMN_NAME_UNKNOWN};
+use crate::syntax::{ANONYMOUS_COLUMN_NAME, CHAR_COMMA};
 use crate::{Collection, Labeled, MaybeLabeled, Relation};
 use csv::{ReaderBuilder, Trim, WriterBuilder};
 use std::fs::File;
@@ -195,7 +195,7 @@ fn write<W: Write>(w: &mut csv::Writer<W>, relation: &Relation, has_headers: boo
             .map(|a| {
                 a.label()
                     .map(|p| p.to_string())
-                    .unwrap_or_else(|| COLUMN_NAME_UNKNOWN.to_string())
+                    .unwrap_or_else(|| ANONYMOUS_COLUMN_NAME.to_string())
             })
             .collect();
         w.write_record(&headers)

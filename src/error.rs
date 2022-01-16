@@ -115,7 +115,20 @@ pub enum Error {
 
     NullaryFactsNotAllowed,
 
-    SelectionIsContradiction,
+    ComparisonIsAlwaysTrue {
+        comparison: String,
+    },
+
+    ComparisonIsAlwaysFalse {
+        comparison: String,
+    },
+
+    IncompatibleTypes {
+        lhs_type: String,
+        rhs_type: String,
+    },
+
+    AnonymousVariableNotAllowed,
 }
 
 ///
@@ -249,8 +262,29 @@ pub fn nullary_facts_not_allowed() -> Error {
 }
 
 #[inline]
-pub fn selection_is_contradiction() -> Error {
-    Error::SelectionIsContradiction
+pub fn comparison_is_always_true<S: Into<String>>(comparison: S) -> Error {
+    Error::ComparisonIsAlwaysTrue {
+        comparison: comparison.into(),
+    }
+}
+
+#[inline]
+pub fn comparison_is_always_false<S: Into<String>>(comparison: S) -> Error {
+    Error::ComparisonIsAlwaysFalse {
+        comparison: comparison.into(),
+    }
+}
+
+#[inline]
+pub fn anonymous_variable_not_allowed() -> Error {
+    Error::AnonymousVariableNotAllowed
+}
+
+pub fn incompatible_types<S: Into<String>>(lhs_type: S, rhs_type: S) -> Error {
+    Error::IncompatibleTypes {
+        lhs_type: lhs_type.into(),
+        rhs_type: rhs_type.into(),
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -346,7 +380,10 @@ impl Display for Error {
                 Error::AttributeDoesNotExist { label } => format!("The attribute labeled '{}' was not a member of the target schema.", label),
                 Error::AttributeIndexInvalid { index } => format!("The attribute index '{}' is not valid for the target schema.", index),
                 Error::NullaryFactsNotAllowed => format!("The arity of facts must be greater than, or equal to, 1."),
-                Error::SelectionIsContradiction => format!("Selection criteria represents a contradiction, nothing can be matched."),
+                Error::ComparisonIsAlwaysTrue { comparison } => format!("A comparison operator, or selection criteria, will always be true/⊤ (`{}`).", comparison),
+                Error::ComparisonIsAlwaysFalse { comparison } => format!("A comparison operator, or selection criteria, will always be true/⊥ (`{}`).", comparison),
+                Error::AnonymousVariableNotAllowed => format!("Anonymous variables not allowed in the current context."),
+                Error::IncompatibleTypes { lhs_type, rhs_type } => format!("A required operation cannot be performed between values of type `{}` and `{}`.", lhs_type, rhs_type),
             }
         )
     }

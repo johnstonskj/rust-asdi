@@ -100,9 +100,9 @@ use crate::idb::query::{FactOps, Projection, Queryable, Row, Selection, View};
 use crate::idb::Atom;
 use crate::io::{read_relation, write_relation, FilePragma};
 use crate::syntax::{
-    CHAR_COLON, CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
-    COLUMN_NAME_UNKNOWN, RESERVED_BOOLEAN_FALSE, RESERVED_BOOLEAN_TRUE, RESERVED_PRAGMA_ASSERT,
-    RESERVED_PRAGMA_INFER, RESERVED_PREFIX, TYPE_NAME_PREDICATE,
+    ANONYMOUS_COLUMN_NAME, BOOLEAN_LITERAL_FALSE, BOOLEAN_LITERAL_TRUE, CHAR_COLON, CHAR_COMMA,
+    CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, PRAGMA_ID_ASSERT,
+    PRAGMA_ID_INFER, RESERVED_PREFIX, TYPE_NAME_PREDICATE,
 };
 use crate::{
     AttributeName, AttributeNameRef, Collection, IndexedCollection, Labeled, MaybeAnonymous,
@@ -142,7 +142,7 @@ pub struct Relation {
 ///
 /// A schema is an ordered list of [attribute descriptions](Attribute).
 ///
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Schema<T>
 where
     T: AttributeName,
@@ -155,11 +155,12 @@ where
 /// An Attribute structure provides the label and [type](AttributeKind) of an attribute
 /// within a relation.
 ///
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Attribute<T>
 where
     T: AttributeName,
 {
+    index: Option<usize>,
     label: Option<AttributeNameRef<T>>,
     kind: Option<AttributeKind>,
 }
@@ -180,7 +181,7 @@ where
 ///
 /// The currently supported set of types for [attributes](Attribute).
 ///
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum AttributeKind {
     String,
     Integer,
@@ -291,13 +292,9 @@ impl<T> Collection<Attribute<T>> for Schema<T>
 where
     T: AttributeName,
 {
-    fn is_empty(&self) -> bool {
-        self.attributes.is_empty()
-    }
+    delegate!(is_empty, attributes -> bool);
 
-    fn len(&self) -> usize {
-        self.attributes.len()
-    }
+    delegate!(len, attributes -> usize);
 
     fn iter(&self) -> Box<dyn Iterator<Item = &'_ Attribute<T>> + '_> {
         Box::new(self.attributes.iter())
@@ -510,9 +507,18 @@ where
         kind: K,
     ) -> Self {
         Self {
+            index: None,
             label: name.into(),
             kind: kind.into(),
         }
+    }
+
+    pub fn index(&self) -> Option<usize> {
+        self.index
+    }
+
+    pub fn set_index(&mut self, index: usize) {
+        self.index = Some(index)
     }
 
     pub fn kind(&self) -> Option<AttributeKind> {
@@ -545,7 +551,7 @@ where
             (Some(n), None) => format!("{}", n),
             (None, Some(k)) => {
                 if emit_unknown {
-                    format!("{}{} {}", COLUMN_NAME_UNKNOWN, CHAR_COLON, k)
+                    format!("{}{} {}", ANONYMOUS_COLUMN_NAME, CHAR_COLON, k)
                 } else {
                     k.to_string()
                 }
@@ -648,13 +654,9 @@ impl Queryable for RelationSet {
 }
 
 impl Collection<Relation> for RelationSet {
-    fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
+    delegate!(is_empty -> bool);
 
-    fn len(&self) -> usize {
-        self.0.len()
-    }
+    delegate!(len -> usize);
 
     fn iter(&self) -> Box<dyn Iterator<Item = &'_ Relation> + '_> {
         Box::new(self.0.values())
@@ -767,24 +769,12 @@ impl RelationSet {
 
 // ------------------------------------------------------------------------------------------------
 
-impl Labeled for Relation {
-    fn label(&self) -> &Predicate {
-        &self.label
-    }
-
-    fn label_ref(&self) -> PredicateRef {
-        self.label.clone()
-    }
-}
+impl_labeled! {Relation}
 
 impl Collection<Fact> for Relation {
-    fn is_empty(&self) -> bool {
-        self.facts.is_empty()
-    }
+    delegate!(is_empty, facts -> bool);
 
-    fn len(&self) -> usize {
-        self.facts.len()
-    }
+    delegate!(len, facts -> usize);
 
     fn iter(&self) -> Box<dyn Iterator<Item = &'_ Fact> + '_> {
         Box::new(self.facts.iter())
@@ -1008,9 +998,9 @@ impl Relation {
             "{}{} {}{}{}{}{}",
             RESERVED_PREFIX,
             if extensional {
-                RESERVED_PRAGMA_ASSERT
+                PRAGMA_ID_ASSERT
             } else {
-                RESERVED_PRAGMA_INFER
+                PRAGMA_ID_INFER
             },
             self.label(),
             CHAR_LEFT_PAREN,
@@ -1046,44 +1036,11 @@ impl From<Fact> for Vec<Constant> {
     }
 }
 
-impl Labeled for Fact {
-    fn label(&self) -> &Predicate {
-        &self.label
-    }
+impl_labeled! {Fact}
 
-    fn label_ref(&self) -> PredicateRef {
-        self.label.clone()
-    }
-}
+impl_collection! {Fact, Constant, values}
 
-impl Collection<Constant> for Fact {
-    fn is_empty(&self) -> bool {
-        // Note: this should NEVER be true
-        self.values.is_empty()
-    }
-
-    fn len(&self) -> usize {
-        self.values.len()
-    }
-
-    fn iter(&self) -> Box<dyn Iterator<Item = &'_ Constant> + '_> {
-        Box::new(self.values.iter())
-    }
-
-    fn contains(&self, value: &Constant) -> bool {
-        self.values.contains(value)
-    }
-}
-
-impl IndexedCollection<usize, Constant> for Fact {
-    fn get(&self, index: &usize) -> Option<&Constant> {
-        self.values.get(*index)
-    }
-
-    fn contains_index(&self, index: &usize) -> bool {
-        *index < self.len()
-    }
-}
+impl_indexed_collection! { Fact, Constant, usize, values}
 
 impl FactOps for Fact {
     fn project(self, projection: &Projection) -> Result<Row> {
@@ -1148,17 +1105,9 @@ impl From<String> for Constant {
     }
 }
 
-impl From<i64> for Constant {
-    fn from(v: i64) -> Self {
-        Self::Integer(v)
-    }
-}
+impl_enum_from!(Constant, i64, Integer);
 
-impl From<bool> for Constant {
-    fn from(v: bool) -> Self {
-        Self::Boolean(v)
-    }
-}
+impl_enum_from!(Constant, bool, Boolean);
 
 impl Display for Constant {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -1175,9 +1124,9 @@ impl Display for Constant {
                 Self::Integer(v) => v.to_string(),
                 Self::Boolean(v) => {
                     if *v {
-                        RESERVED_BOOLEAN_TRUE
+                        BOOLEAN_LITERAL_TRUE
                     } else {
-                        RESERVED_BOOLEAN_FALSE
+                        BOOLEAN_LITERAL_FALSE
                     }
                     .to_string()
                 }
@@ -1259,12 +1208,6 @@ impl AsRef<str> for Predicate {
     }
 }
 
-impl From<Predicate> for String {
-    fn from(v: Predicate) -> Self {
-        v.0
-    }
-}
-
 impl AttributeName for Predicate {
     fn is_valid(s: &str) -> bool {
         let mut chars = s.chars();
@@ -1276,4 +1219,8 @@ impl AttributeName for Predicate {
     fn type_name() -> &'static str {
         TYPE_NAME_PREDICATE
     }
+}
+
+impl Predicate {
+    into_inner_fn!(String);
 }

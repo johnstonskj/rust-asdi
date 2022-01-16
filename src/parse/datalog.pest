@@ -50,11 +50,16 @@ literal_list = _{
 }
 
 comparison = {
-    term ~ comparison_operator ~ term ?
+    named_term ~ comparison_operator ~ named_term ?
 }
 
 term = {
     variable | constant
+}
+
+
+named_term = {
+    named_variable | constant
 }
 
 term_list = _{

@@ -270,18 +270,21 @@ converted to Datalog using the examples above.
 
 use crate::edb::{AttributeIndex, Constant, Predicate, Relation};
 use crate::error::{
-    fact_does_not_correspond_to_schema, head_variables_missing_in_body, invalid_head_atom_count,
-    invalid_value, negative_variables_not_also_positive, Error, Result, SourceLocation,
+    anonymous_variable_not_allowed, comparison_is_always_false, comparison_is_always_true,
+    fact_does_not_correspond_to_schema, head_variables_missing_in_body, incompatible_types,
+    invalid_head_atom_count, invalid_value, negative_variables_not_also_positive, Error, Result,
+    SourceLocation,
 };
 use crate::features::{FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
 use crate::syntax::{
     ANONYMOUS_TERM, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE,
     CONJUNCTION_UNICODE_SYMBOL, DISJUNCTION_UNICODE_SYMBOL, EMPTY_STR, FALSE_UNICODE_SYMBOL,
-    IMPLICATION_UNICODE_ARROW, NOT_UNICODE_SYMBOL, OPERATOR_ASCII_EQUAL,
-    OPERATOR_ASCII_GREATER_THAN, OPERATOR_ASCII_GREATER_THAN_OR_EQUAL, OPERATOR_ASCII_LESS_THAN,
-    OPERATOR_ASCII_LESS_THAN_OR_EQUAL, OPERATOR_ASCII_NOT_EQUAL, OPERATOR_ASCII_NOT_EQUAL_ALT,
-    OPERATOR_ASCII_STAR_EQUAL, OPERATOR_ASCII_WORD_MATCHES, OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL,
-    OPERATOR_UNICODE_LESS_THAN_OR_EQUAL, OPERATOR_UNICODE_NOT_EQUAL, OPERATOR_UNICODE_STAR_EQUAL,
+    IMPLICATION_UNICODE_ARROW, NEGATION_UNICODE_SYMBOL, OPERATOR_EQUAL_ASCII,
+    OPERATOR_GREATER_THAN_ASCII, OPERATOR_GREATER_THAN_OR_EQUAL_ASCII,
+    OPERATOR_GREATER_THAN_OR_EQUAL_UNICODE, OPERATOR_LESS_THAN_ASCII,
+    OPERATOR_LESS_THAN_OR_EQUAL_ASCII, OPERATOR_LESS_THAN_OR_EQUAL_UNICODE,
+    OPERATOR_NOT_EQUAL_ASCII, OPERATOR_NOT_EQUAL_ASCII_ALT, OPERATOR_NOT_EQUAL_UNICODE,
+    OPERATOR_STRING_MATCH_ASCII, OPERATOR_STRING_MATCH_ASCII_WORD, OPERATOR_STRING_MATCH_UNICODE,
     TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
 };
 use crate::{
@@ -291,6 +294,7 @@ use crate::{
 use paste::paste;
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
+use std::hash::Hash;
 use std::rc::Rc;
 use std::str::FromStr;
 
@@ -513,13 +517,9 @@ impl Display for RuleSet {
 }
 
 impl Collection<Rule> for RuleSet {
-    fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
+    delegate!(is_empty -> bool);
 
-    fn len(&self) -> usize {
-        self.0.len()
-    }
+    delegate!(len -> usize);
 
     fn iter(&self) -> Box<dyn Iterator<Item = &'_ Rule> + '_> {
         Box::new(self.0.iter())
@@ -658,6 +658,11 @@ impl Rule {
         self.head().map(|atom| atom.iter()).flatten().collect()
     }
 
+    pub fn distinguished_terms_in_order(&self) -> Vec<&Term> {
+        let terms: Vec<&Term> = self.head().map(|atom| atom.iter()).flatten().collect();
+        dedup_in_place(terms)
+    }
+
     pub fn non_distinguished_terms(&self) -> HashSet<&Term> {
         let distinguished = self.distinguished_terms();
         self.terms()
@@ -672,7 +677,7 @@ impl Rule {
             .map(|lit| lit.terms())
             .flatten()
             .collect::<HashSet<&Term>>()
-            .intersection(&self.distinguished_terms())
+            .union(&self.distinguished_terms())
             .copied()
             .collect()
     }
@@ -880,13 +885,9 @@ impl Display for Atom {
 }
 
 impl Labeled for Atom {
-    fn label(&self) -> &Predicate {
-        &self.label
-    }
+    get!(label -> Predicate);
 
-    fn label_ref(&self) -> PredicateRef {
-        self.label.clone()
-    }
+    get_cloned!(label_ref, label -> PredicateRef);
 }
 
 impl MaybeGround for Atom {
@@ -896,13 +897,9 @@ impl MaybeGround for Atom {
 }
 
 impl Collection<Term> for Atom {
-    fn is_empty(&self) -> bool {
-        self.terms.is_empty()
-    }
+    delegate!(is_empty, terms -> bool);
 
-    fn len(&self) -> usize {
-        self.terms.len()
-    }
+    delegate!(len, terms -> usize);
 
     fn iter(&self) -> Box<dyn Iterator<Item = &'_ Term> + '_> {
         Box::new(self.terms.iter())
@@ -989,6 +986,15 @@ impl Atom {
         })
     }
 
+    pub fn variable_index(&self, variable: &VariableRef) -> Option<usize> {
+        self.terms
+            .iter()
+            .enumerate()
+            .filter_map(|(i, term)| term.as_variable().map(|v| (i, v)))
+            .find(|(_, var)| var == &variable)
+            .map(|(i, _)| i)
+    }
+
     pub fn constants(&self) -> impl Iterator<Item = &Constant> {
         self.terms.iter().filter_map(|t| {
             if let Term::Constant(v) = t {
@@ -1020,7 +1026,7 @@ impl Display for Literal {
             f,
             "{}{}",
             if self.negative {
-                NOT_UNICODE_SYMBOL
+                NEGATION_UNICODE_SYMBOL
             } else {
                 EMPTY_STR
             },
@@ -1082,13 +1088,13 @@ impl Literal {
 
     // --------------------------------------------------------------------------------------------
 
-    delegate!(is_relational, inner -> bool);
+    delegate!(pub is_relational, inner -> bool);
 
-    delegate!(as_relational, inner -> Option<&Atom>);
+    delegate!(pub as_relational, inner -> Option<&Atom>);
 
-    delegate!(is_arithmetic, inner -> bool);
+    delegate!(pub is_arithmetic, inner -> bool);
 
-    delegate!(as_arithmetic, inner -> Option<&Comparison>);
+    delegate!(pub as_arithmetic, inner -> Option<&Comparison>);
 
     // --------------------------------------------------------------------------------------------
 
@@ -1111,6 +1117,8 @@ impl Literal {
             })
             .collect()
     }
+
+    into_inner_fn!(LiteralInner, inner);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1128,17 +1136,9 @@ impl Display for LiteralInner {
     }
 }
 
-impl From<Atom> for LiteralInner {
-    fn from(v: Atom) -> Self {
-        Self::Relational(v)
-    }
-}
+impl_enum_from!(LiteralInner, Atom, Relational);
 
-impl From<Comparison> for LiteralInner {
-    fn from(v: Comparison) -> Self {
-        Self::Arithmetic(v)
-    }
-}
+impl_enum_from!(LiteralInner, Comparison, Arithmetic);
 
 impl MaybeGround for LiteralInner {
     fn is_ground(&self) -> bool {
@@ -1169,45 +1169,102 @@ impl MaybeGround for Comparison {
 }
 
 impl Comparison {
-    pub fn new<L: Into<Term>, R: Into<Term>>(lhs: L, operator: ComparisonOperator, rhs: R) -> Self {
-        Self {
+    pub fn new<L: Into<Term>, R: Into<Term>>(
+        lhs: L,
+        operator: ComparisonOperator,
+        rhs: R,
+    ) -> Result<Self> {
+        let new_self = Self {
             lhs: lhs.into(),
             operator,
             rhs: rhs.into(),
+        };
+        new_self.sanity_check()?;
+        Ok(new_self)
+    }
+
+    pub fn sanity_check(&self) -> Result<()> {
+        match (
+            &self.lhs,
+            self.operator == ComparisonOperator::Equal,
+            &self.rhs,
+        ) {
+            (Term::Anonymous, _, _) | (_, _, Term::Anonymous) => {
+                Err(anonymous_variable_not_allowed())
+            }
+            (Term::Constant(lhs), true, Term::Constant(rhs)) => {
+                if lhs.kind() != rhs.kind() {
+                    Err(incompatible_types(
+                        lhs.kind().to_string(),
+                        rhs.kind().to_string(),
+                    ))
+                } else if lhs == rhs {
+                    Err(comparison_is_always_true(self.to_string()))
+                } else {
+                    Err(comparison_is_always_false(self.to_string()))
+                }
+            }
+            (Term::Constant(lhs), false, Term::Constant(rhs)) => {
+                if lhs.kind() != rhs.kind() {
+                    Err(incompatible_types(
+                        lhs.kind().to_string(),
+                        rhs.kind().to_string(),
+                    ))
+                } else if lhs == rhs {
+                    Err(comparison_is_always_false(self.to_string()))
+                } else {
+                    Err(comparison_is_always_true(self.to_string()))
+                }
+            }
+            (Term::Variable(lhs), true, Term::Variable(rhs)) => {
+                if lhs == rhs {
+                    Err(comparison_is_always_true(self.to_string()))
+                } else {
+                    Ok(())
+                }
+            }
+            (Term::Variable(lhs), false, Term::Variable(rhs)) => {
+                if lhs == rhs {
+                    Err(comparison_is_always_false(self.to_string()))
+                } else {
+                    Ok(())
+                }
+            }
+            _ => Ok(()),
         }
     }
 
-    pub fn eq<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Self {
+    pub fn eq<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Result<Self> {
         Self::new(left, ComparisonOperator::Equal, right)
     }
 
-    pub fn ne<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Self {
+    pub fn ne<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Result<Self> {
         Self::new(left, ComparisonOperator::NotEqual, right)
     }
 
-    pub fn lt<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Self {
+    pub fn lt<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Result<Self> {
         Self::new(left, ComparisonOperator::LessThan, right)
     }
 
-    pub fn lte<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Self {
+    pub fn lte<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Result<Self> {
         Self::new(left, ComparisonOperator::LessThanOrEqual, right)
     }
 
-    pub fn gt<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Self {
+    pub fn gt<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Result<Self> {
         Self::new(left, ComparisonOperator::GreaterThan, right)
     }
 
-    pub fn gte<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Self {
+    pub fn gte<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Result<Self> {
         Self::new(left, ComparisonOperator::GreaterThanOrEqual, right)
     }
 
     // --------------------------------------------------------------------------------------------
 
-    get!(lhs -> Term);
+    get!(pub lhs -> Term);
 
-    get!(rhs -> Term);
+    get!(pub rhs -> Term);
 
-    get!(operator -> ComparisonOperator);
+    get!(pub operator -> ComparisonOperator);
 
     // --------------------------------------------------------------------------------------------
 
@@ -1224,13 +1281,13 @@ impl Display for ComparisonOperator {
             f,
             "{}",
             match self {
-                Self::Equal => OPERATOR_ASCII_EQUAL,
-                Self::NotEqual => OPERATOR_ASCII_NOT_EQUAL,
-                Self::LessThan => OPERATOR_ASCII_LESS_THAN,
-                Self::LessThanOrEqual => OPERATOR_ASCII_LESS_THAN_OR_EQUAL,
-                Self::GreaterThan => OPERATOR_ASCII_GREATER_THAN,
-                Self::GreaterThanOrEqual => OPERATOR_ASCII_GREATER_THAN_OR_EQUAL,
-                Self::StringMatch => OPERATOR_ASCII_STAR_EQUAL,
+                Self::Equal => OPERATOR_EQUAL_ASCII,
+                Self::NotEqual => OPERATOR_NOT_EQUAL_ASCII,
+                Self::LessThan => OPERATOR_LESS_THAN_ASCII,
+                Self::LessThanOrEqual => OPERATOR_LESS_THAN_OR_EQUAL_ASCII,
+                Self::GreaterThan => OPERATOR_GREATER_THAN_ASCII,
+                Self::GreaterThanOrEqual => OPERATOR_GREATER_THAN_OR_EQUAL_ASCII,
+                Self::StringMatch => OPERATOR_STRING_MATCH_ASCII,
             }
         )
     }
@@ -1241,22 +1298,36 @@ impl FromStr for ComparisonOperator {
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match s {
-            OPERATOR_ASCII_EQUAL => Ok(Self::Equal),
-            OPERATOR_ASCII_NOT_EQUAL
-            | OPERATOR_ASCII_NOT_EQUAL_ALT
-            | OPERATOR_UNICODE_NOT_EQUAL => Ok(Self::NotEqual),
-            OPERATOR_ASCII_LESS_THAN => Ok(Self::LessThan),
-            OPERATOR_ASCII_LESS_THAN_OR_EQUAL | OPERATOR_UNICODE_LESS_THAN_OR_EQUAL => {
+            OPERATOR_EQUAL_ASCII => Ok(Self::Equal),
+            OPERATOR_NOT_EQUAL_ASCII
+            | OPERATOR_NOT_EQUAL_ASCII_ALT
+            | OPERATOR_NOT_EQUAL_UNICODE => Ok(Self::NotEqual),
+            OPERATOR_LESS_THAN_ASCII => Ok(Self::LessThan),
+            OPERATOR_LESS_THAN_OR_EQUAL_ASCII | OPERATOR_LESS_THAN_OR_EQUAL_UNICODE => {
                 Ok(Self::LessThanOrEqual)
             }
-            OPERATOR_ASCII_GREATER_THAN => Ok(Self::GreaterThan),
-            OPERATOR_ASCII_GREATER_THAN_OR_EQUAL | OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL => {
+            OPERATOR_GREATER_THAN_ASCII => Ok(Self::GreaterThan),
+            OPERATOR_GREATER_THAN_OR_EQUAL_ASCII | OPERATOR_GREATER_THAN_OR_EQUAL_UNICODE => {
                 Ok(Self::GreaterThanOrEqual)
             }
-            OPERATOR_ASCII_STAR_EQUAL
-            | OPERATOR_UNICODE_STAR_EQUAL
-            | OPERATOR_ASCII_WORD_MATCHES => Ok(Self::StringMatch),
+            OPERATOR_STRING_MATCH_ASCII
+            | OPERATOR_STRING_MATCH_UNICODE
+            | OPERATOR_STRING_MATCH_ASCII_WORD => Ok(Self::StringMatch),
             _ => Err(invalid_value(TYPE_NAME_COMPARISON_OPERATOR, s)),
+        }
+    }
+}
+
+impl ComparisonOperator {
+    pub fn inverse(&self) -> Self {
+        match self {
+            Self::Equal => Self::Equal,
+            Self::NotEqual => Self::NotEqual,
+            Self::LessThan => Self::GreaterThanOrEqual,
+            Self::LessThanOrEqual => Self::GreaterThan,
+            Self::GreaterThan => Self::LessThanOrEqual,
+            Self::GreaterThanOrEqual => Self::LessThan,
+            Self::StringMatch => Self::StringMatch,
         }
     }
 }
@@ -1277,17 +1348,9 @@ impl Display for Term {
     }
 }
 
-impl From<VariableRef> for Term {
-    fn from(v: VariableRef) -> Self {
-        Self::Variable(v)
-    }
-}
+impl_enum_from!(Term, VariableRef, Variable);
 
-impl From<Constant> for Term {
-    fn from(v: Constant) -> Self {
-        Self::Constant(v)
-    }
-}
+impl_enum_from!(Term, Constant, Constant);
 
 impl From<&str> for Term {
     fn from(s: &str) -> Self {
@@ -1324,7 +1387,7 @@ impl MaybeAnonymous for Term {
 }
 
 impl Term {
-    self_is_as!(variable, Variable);
+    self_is_as!(variable, Variable, VariableRef);
 
     self_is_as!(constant, Constant);
 }
@@ -1355,12 +1418,6 @@ impl AsRef<str> for Variable {
     }
 }
 
-impl From<Variable> for String {
-    fn from(v: Variable) -> Self {
-        v.0
-    }
-}
-
 impl AttributeName for Variable {
     fn is_valid(s: &str) -> bool {
         let mut chars = s.chars();
@@ -1375,9 +1432,32 @@ impl AttributeName for Variable {
     }
 }
 
+impl Variable {
+    into_inner_fn!(pub String);
+}
+
 // ------------------------------------------------------------------------------------------------
 // Private Functions
 // ------------------------------------------------------------------------------------------------
+
+//
+// TODO: make this better, it's horrible.
+//
+fn dedup_in_place<T: Clone + Eq + Hash, V: Into<Vec<T>>>(v: V) -> Vec<T> {
+    let v = v.into();
+    if v.len() <= 1 {
+        v
+    } else {
+        let mut vs: HashSet<T> = Default::default();
+        let mut v2: Vec<T> = Default::default();
+        for a in v.into_iter() {
+            if vs.insert(a.clone()) {
+                v2.push(a)
+            }
+        }
+        v2
+    }
+}
 
 // ------------------------------------------------------------------------------------------------
 // Modules

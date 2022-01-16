@@ -96,9 +96,9 @@ The text representation allows for `";"`, "|"`, `"∨"`, and `"OR"` to be used t
 
 use crate::syntax::{
     CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DEFAULT_LANGUAGE_NAME,
-    DISJUNCTION_UNICODE_SYMBOL, FEATURE_SYMBOL_BACK_ARROW, FEATURE_SYMBOL_THETA,
-    NOT_UNICODE_SYMBOL, PRAGMA_FEATURE_COMPARISONS, PRAGMA_FEATURE_CONSTRAINTS,
-    PRAGMA_FEATURE_DISJUNCTION, PRAGMA_FEATURE_NEGATION, RESERVED_PRAGMA_FEATURE, RESERVED_PREFIX,
+    FEATURE_COMPARISONS_ID, FEATURE_COMPARISONS_SYMBOL, FEATURE_CONSTRAINTS_ID,
+    FEATURE_CONSTRAINTS_SYMBOL, FEATURE_DISJUNCTION_ID, FEATURE_DISJUNCTION_SYMBOL,
+    FEATURE_NEGATION_ID, NEGATION_UNICODE_SYMBOL, PRAGMA_ID_FEATURE, RESERVED_PREFIX,
 };
 use std::fmt::{Display, Formatter};
 
@@ -128,8 +128,8 @@ pub struct Feature {
 /// this feature it is an error to add a rule with a non-positive literal.
 ///
 pub const FEATURE_NEGATION: Feature = Feature {
-    label: PRAGMA_FEATURE_NEGATION,
-    symbol: NOT_UNICODE_SYMBOL,
+    label: FEATURE_NEGATION_ID,
+    symbol: NEGATION_UNICODE_SYMBOL,
     mask: 1,
 };
 
@@ -138,8 +138,8 @@ pub const FEATURE_NEGATION: Feature = Feature {
 /// this feature it is an error to add a rule with an arithmetic literal.
 ///
 pub const FEATURE_COMPARISONS: Feature = Feature {
-    label: PRAGMA_FEATURE_COMPARISONS,
-    symbol: FEATURE_SYMBOL_THETA,
+    label: FEATURE_COMPARISONS_ID,
+    symbol: FEATURE_COMPARISONS_SYMBOL,
     mask: 2,
 };
 
@@ -148,8 +148,8 @@ pub const FEATURE_COMPARISONS: Feature = Feature {
 /// this feature it is an error to add a rule with a disjunctive head.
 ///
 pub const FEATURE_DISJUNCTION: Feature = Feature {
-    label: PRAGMA_FEATURE_DISJUNCTION,
-    symbol: DISJUNCTION_UNICODE_SYMBOL,
+    label: FEATURE_DISJUNCTION_ID,
+    symbol: FEATURE_DISJUNCTION_SYMBOL,
     mask: 4,
 };
 
@@ -164,8 +164,8 @@ pub const FEATURE_DISJUNCTION: Feature = Feature {
 /// this feature it is an error to add a rule without a head.
 ///
 pub const FEATURE_CONSTRAINTS: Feature = Feature {
-    label: PRAGMA_FEATURE_CONSTRAINTS,
-    symbol: FEATURE_SYMBOL_BACK_ARROW,
+    label: FEATURE_CONSTRAINTS_ID,
+    symbol: FEATURE_CONSTRAINTS_SYMBOL,
     mask: 16,
 };
 
@@ -248,7 +248,7 @@ impl Display for FeatureSet {
                 format!(
                     "{}{}{}{}{}{}",
                     RESERVED_PREFIX,
-                    RESERVED_PRAGMA_FEATURE,
+                    PRAGMA_ID_FEATURE,
                     CHAR_LEFT_PAREN,
                     features.join(&format!("{} ", CHAR_COMMA)),
                     CHAR_RIGHT_PAREN,

@@ -5,13 +5,12 @@ types used to return query results.
 
 use crate::edb::{Attribute, AttributeIndex, AttributeKind, Constant, Fact, Schema};
 use crate::error::{attribute_index_invalid, nullary_facts_not_allowed, Error, Result};
-use crate::idb::{Atom, Variable};
-use crate::idb::{ComparisonOperator, Term};
-use crate::syntax::{CHAR_PERIOD, QUERY_PREFIX_ASCII};
-use crate::{Collection, IndexedCollection, MaybeAnonymous, MaybeLabeled, PredicateRef};
+use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Rule, Term, Variable};
+use crate::syntax::{CHAR_PERIOD, QUERY_ASCII_PREFIX};
+use crate::{Collection, IndexedCollection, Labeled, MaybeAnonymous, MaybeLabeled, PredicateRef};
 use paste::paste;
 use regex::Regex;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
 use tracing::{error, trace};
@@ -60,6 +59,10 @@ pub struct View {
 pub struct Row(Vec<Constant>);
 
 pub trait RelationOps {
+    fn join(self, other: Self) -> Result<Self>
+    where
+        Self: Sized;
+
     fn project(self, indices: &Projection) -> Result<View>
     where
         Self: Sized;
@@ -81,11 +84,31 @@ pub trait FactOps {
         Self: Sized;
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Projection(Vec<(usize, Attribute<Variable>)>);
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub enum RelationalOp {
+    Relation(PredicateRef),
+    Selection(Selection),
+    Projection(Projection),
+    NaturalJoin(NaturalJoin),
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct Selection(Vec<Criteria>);
+pub struct NaturalJoin {
+    lhs: Box<RelationalOp>,
+    rhs: Box<RelationalOp>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Projection {
+    source: Box<RelationalOp>,
+    attributes: Vec<Attribute<Variable>>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Selection {
+    source: Box<RelationalOp>,
+    criteria: Vec<Criteria>,
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Criteria {
@@ -114,7 +137,7 @@ pub trait Queryable {
 
 impl Display for Query {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {}{}", QUERY_PREFIX_ASCII, self.0, CHAR_PERIOD)
+        write!(f, "{} {}{}", QUERY_ASCII_PREFIX, self.0, CHAR_PERIOD)
     }
 }
 
@@ -193,13 +216,9 @@ impl Display for View {
 }
 
 impl Collection<Row> for View {
-    fn is_empty(&self) -> bool {
-        self.facts.is_empty()
-    }
+    delegate!(is_empty, facts -> bool);
 
-    fn len(&self) -> usize {
-        self.facts.len()
-    }
+    delegate!(len, facts -> usize);
 
     fn iter(&self) -> Box<dyn Iterator<Item = &'_ Row> + '_> {
         Box::new(self.facts.iter())
@@ -211,6 +230,49 @@ impl Collection<Row> for View {
 }
 
 impl RelationOps for View {
+    fn join(self, other: Self) -> Result<Self>
+    where
+        Self: Sized,
+    {
+        let mut new_table: Self = Self::new(
+            self.schema()
+                .label_union(other.schema())
+                .into_iter()
+                .map(Attribute::from)
+                .collect::<Vec<Attribute<Variable>>>(),
+        );
+        let common_variables = self.schema().label_intersection(other.schema());
+
+        // TODO: infer attribute types for new results!
+        for left_row in self.iter() {
+            for right_row in other.filter(
+                common_variables
+                    .iter()
+                    .map(|(_, left_i, right_i)| (left_row.get(left_i).unwrap().clone(), *right_i))
+                    .collect(),
+            ) {
+                let mut new_row: Vec<Constant> = Vec::with_capacity(new_table.schema().len());
+                for (i, column) in new_table.schema().iter().enumerate() {
+                    if let Some(index) = self.schema().label_to_index(column.label().unwrap()) {
+                        new_row.insert(i, left_row.get(&index).unwrap().clone())
+                    } else if let Some(index) =
+                        other.schema().label_to_index(column.label().unwrap())
+                    {
+                        new_row.insert(i, right_row.get(&index).unwrap().clone())
+                    } else {
+                        error!(
+                            "The column {:?} ({}) was found in neither table.",
+                            column, i
+                        );
+                        unreachable!()
+                    }
+                }
+                new_table.add(new_row.into())?;
+            }
+        }
+        Ok(new_table)
+    }
+
     fn project(self, projection: &Projection) -> Result<View> {
         Ok(if projection.is_all() {
             self
@@ -288,9 +350,7 @@ impl View {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn schema(&self) -> &Schema<Variable> {
-        &self.schema
-    }
+    get!(pub schema -> Schema<Variable>);
 
     pub fn attribute_index(&self, index: AttributeIndex<Variable>) -> Option<usize> {
         let index = match &index {
@@ -331,50 +391,10 @@ impl View {
             let mut views = views.into_iter();
             let mut result = views.next().unwrap();
             for next in views {
-                result = result.join(&next)?;
+                result = result.join(next)?;
             }
             Ok(result)
         }
-    }
-
-    pub(crate) fn join(&self, other: &Self) -> Result<Self> {
-        let mut new_table: Self = Self::new(
-            self.schema()
-                .label_union(other.schema())
-                .into_iter()
-                .map(Attribute::from)
-                .collect::<Vec<Attribute<Variable>>>(),
-        );
-        let common_variables = self.schema().label_intersection(other.schema());
-
-        // TODO: infer attribute types for new results!
-        for left_row in self.iter() {
-            for right_row in other.filter(
-                common_variables
-                    .iter()
-                    .map(|(_, left_i, right_i)| (left_row.get(left_i).unwrap().clone(), *right_i))
-                    .collect(),
-            ) {
-                let mut new_row: Vec<Constant> = Vec::with_capacity(new_table.schema().len());
-                for (i, column) in new_table.schema().iter().enumerate() {
-                    if let Some(index) = self.schema().label_to_index(column.label().unwrap()) {
-                        new_row.insert(i, left_row.get(&index).unwrap().clone())
-                    } else if let Some(index) =
-                        other.schema().label_to_index(column.label().unwrap())
-                    {
-                        new_row.insert(i, right_row.get(&index).unwrap().clone())
-                    } else {
-                        error!(
-                            "The column {:?} ({}) was found in neither table.",
-                            column, i
-                        );
-                        unreachable!()
-                    }
-                }
-                new_table.add(new_row.into())?;
-            }
-        }
-        Ok(new_table)
     }
 
     fn filter(&self, values: Vec<(Constant, usize)>) -> impl Iterator<Item = &Row> {
@@ -410,13 +430,9 @@ impl From<Fact> for Row {
 }
 
 impl Collection<Constant> for Row {
-    fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
+    delegate!(is_empty -> bool);
 
-    fn len(&self) -> usize {
-        self.0.len()
-    }
+    delegate!(len -> usize);
 
     fn iter(&self) -> Box<dyn Iterator<Item = &'_ Constant> + '_> {
         Box::new(self.0.iter())
@@ -459,9 +475,7 @@ impl FactOps for Row {
     }
 
     fn select(self, criteria: &Selection) -> Result<Option<Row>> {
-        Ok(if criteria.is_all() {
-            Some(self)
-        } else if criteria.matches(self.values())? {
+        Ok(if criteria.is_all() || criteria.matches(self.values())? {
             Some(self)
         } else {
             None
@@ -477,38 +491,407 @@ impl Row {
 
 // ------------------------------------------------------------------------------------------------
 
+impl Display for RelationalOp {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Relation(v) => v.to_string(),
+                Self::Selection(v) => v.to_string(),
+                Self::Projection(v) => v.to_string(),
+                Self::NaturalJoin(v) => v.to_string(),
+            }
+        )
+    }
+}
+
+impl From<PredicateRef> for RelationalOp {
+    fn from(v: PredicateRef) -> Self {
+        Self::Relation(v)
+    }
+}
+
+impl From<Selection> for RelationalOp {
+    fn from(v: Selection) -> Self {
+        Self::Selection(v)
+    }
+}
+
+impl From<Projection> for RelationalOp {
+    fn from(v: Projection) -> Self {
+        Self::Projection(v)
+    }
+}
+
+impl From<NaturalJoin> for RelationalOp {
+    fn from(v: NaturalJoin) -> Self {
+        Self::NaturalJoin(v)
+    }
+}
+
+impl RelationalOp {
+    pub fn compile_atom(atom: &Atom, project_constants: bool) -> Result<Self> {
+        Self::compile_atom_with(atom, project_constants, Default::default())
+    }
+
+    pub fn compile_atom_with(
+        atom: &Atom,
+        project_constants: bool,
+        critera: Vec<Criteria>,
+    ) -> Result<Self> {
+        let projections: Vec<Attribute<Variable>> = atom
+            .iter()
+            .enumerate()
+            .filter(|(_, term)| {
+                if project_constants {
+                    !term.is_anonymous()
+                } else {
+                    term.is_variable()
+                }
+            })
+            .map(|(i, term)| {
+                let mut attribute = match term {
+                    Term::Variable(v) => Attribute::from(v.clone()),
+                    Term::Constant(v) => Attribute::typed(v.kind()),
+                    Term::Anonymous => unreachable!(),
+                };
+                attribute.set_index(i);
+                attribute
+            })
+            .collect();
+
+        if projections.is_empty() {
+            Err(nullary_facts_not_allowed())
+        } else {
+            let mut static_criteria: Vec<Criteria> = atom
+                .iter()
+                .enumerate()
+                .filter_map(|(i, term)| term.as_constant().map(|c| (i, c)))
+                .map(|(i, constant)| Criteria {
+                    index: i,
+                    op: ComparisonOperator::Equal,
+                    value: CriteriaValue::Value(constant.clone()),
+                })
+                .collect();
+            static_criteria.extend(critera.into_iter());
+            Ok(
+                match (
+                    project_constants,
+                    projections.len() == atom.len(), // true if we projection is complete
+                    static_criteria.is_empty(),
+                ) {
+                    (_, true, true) => RelationalOp::Relation(atom.label_ref()),
+                    (_, true, false) => RelationalOp::Selection(Selection::new(
+                        static_criteria,
+                        RelationalOp::Relation(atom.label_ref()),
+                    )),
+                    (true, false, false) => RelationalOp::Selection(Selection::new(
+                        static_criteria,
+                        RelationalOp::Projection(Projection::new(
+                            projections,
+                            RelationalOp::Relation(atom.label_ref()),
+                        )),
+                    )),
+                    (false, false, false) => RelationalOp::Projection(Projection::new(
+                        projections,
+                        RelationalOp::Selection(Selection::new(
+                            static_criteria,
+                            RelationalOp::Relation(atom.label_ref()),
+                        )),
+                    )),
+                    state => {
+                        eprintln!("Unexpected state: {:?}", state);
+                        unreachable!()
+                    }
+                },
+            )
+        }
+    }
+
+    pub fn compile_rule(rule: &Rule) -> Result<Self> {
+        let arithmetic: Vec<&Comparison> =
+            rule.literals().filter_map(Literal::as_arithmetic).collect();
+        let relational: Vec<&Atom> = rule.literals().filter_map(Literal::as_relational).collect();
+
+        let mut ops: Vec<RelationalOp> = Default::default();
+        for atom in relational {
+            let mut criteria: Vec<Criteria> = Default::default();
+            for comparison in &arithmetic {
+                match (comparison.lhs(), comparison.operator(), comparison.rhs()) {
+                    (Term::Variable(lhs), op, Term::Constant(rhs)) => {
+                        if let Some(index) = atom.variable_index(lhs) {
+                            criteria.push(Criteria::new(
+                                index,
+                                *op,
+                                CriteriaValue::Value(rhs.clone()),
+                            ))
+                        }
+                    }
+                    (Term::Constant(lhs), op, Term::Variable(rhs)) => {
+                        if let Some(index) = atom.variable_index(rhs) {
+                            criteria.push(Criteria::new(
+                                index,
+                                op.inverse(),
+                                CriteriaValue::Value(lhs.clone()),
+                            ));
+                        }
+                    }
+                    (Term::Variable(lhs), op, Term::Variable(rhs)) => {
+                        if let Some(lhs_index) = atom.variable_index(lhs) {
+                            if let Some(rhs_index) = atom.variable_index(rhs) {
+                                criteria.push(Criteria::new(
+                                    lhs_index,
+                                    *op,
+                                    CriteriaValue::Index(rhs_index),
+                                ));
+                            }
+                        }
+                    }
+                    _ => unreachable!(),
+                }
+            }
+            ops.push(Self::compile_atom_with(atom, false, criteria)?);
+        }
+
+        // TODO: cross-atom criteria
+
+        let mut ops = ops.into_iter().rev();
+        let last = ops.next().unwrap();
+        let joined = ops.fold(last, |left, right| {
+            NaturalJoin::new(
+                // Simplify if a simple relation reference
+                if let Some(left) = left.as_relation() {
+                    RelationalOp::Relation(left.clone())
+                } else {
+                    left
+                },
+                // Simplify if a simple relation reference
+                if let Some(right) = right.as_relation() {
+                    RelationalOp::Relation(right.clone())
+                } else {
+                    right
+                },
+            )
+            .into()
+        });
+
+        // BUG: these need to be in order!!
+
+        if rule.distinguished_terms_in_order().len() < rule.terms().len() {
+            Ok(Projection::new(
+                rule.distinguished_terms()
+                    .iter()
+                    .filter_map(|t| t.as_variable())
+                    .map(|v| Attribute::labeled(v.clone()))
+                    .collect::<Vec<Attribute<Variable>>>(),
+                joined,
+            )
+            .into())
+        } else {
+            Ok(joined)
+        }
+    }
+
+    self_is_as!(relation, Relation, PredicateRef);
+
+    self_is_as!(selection, Selection, Selection);
+
+    self_is_as!(projection, Projection, Projection);
+
+    self_is_as!(natural_join, NaturalJoin, NaturalJoin);
+
+    pub fn to_graphviz_string(&self) -> String {
+        let (_, nodes, edges) = self.graphviz_one(1);
+        format!(
+            "digraph G {{\n{}\n{}\n}}",
+            nodes
+                .into_iter()
+                .map(|(_, (_, string))| string)
+                .collect::<Vec<String>>()
+                .join("\n"),
+            edges
+                .into_iter()
+                .map(|(lhs, rhs)| format!("  node{} -> node{};", lhs, rhs))
+                .collect::<Vec<String>>()
+                .join("\n"),
+        )
+    }
+
+    #[allow(clippy::type_complexity)]
+    fn graphviz_one(&self, index: u32) -> (u32, HashMap<&Self, (u32, String)>, Vec<(u32, u32)>) {
+        let mut node_map: HashMap<&Self, (u32, String)> = Default::default();
+        let mut edge_vec: Vec<(u32, u32)> = Default::default();
+
+        let next_index = match self {
+            RelationalOp::Relation(op) => {
+                if !node_map.contains_key(self) {
+                    node_map.insert(
+                        self,
+                        (index, format!("  node{} [label=\"{}\"];\n", index, op)),
+                    );
+                }
+                index + 1
+            }
+            RelationalOp::Selection(op) => {
+                let (next_index, nodes, edges) = op.source.graphviz_one(index + 1);
+                node_map.extend(nodes.into_iter());
+                edge_vec.extend(edges.into_iter());
+                if let Some((source_index, _)) = node_map.get(op.source.as_ref()) {
+                    edge_vec.push((index, *source_index));
+                } else {
+                    unreachable!()
+                }
+
+                node_map.insert(
+                    self,
+                    (
+                        index,
+                        format!(
+                            "  node{} [label=\"σ\\n[{}]\"];",
+                            index,
+                            op.criteria
+                                .iter()
+                                .map(|c| c.to_string())
+                                .collect::<Vec<String>>()
+                                .join(", "),
+                        ),
+                    ),
+                );
+                next_index + 1
+            }
+            RelationalOp::Projection(op) => {
+                let (next_index, nodes, edges) = op.source.graphviz_one(index + 1);
+                node_map.extend(nodes.into_iter());
+                edge_vec.extend(edges.into_iter());
+                if let Some((source_index, _)) = node_map.get(op.source.as_ref()) {
+                    edge_vec.push((index, *source_index));
+                } else {
+                    unreachable!()
+                }
+
+                node_map.insert(
+                    self,
+                    (
+                        index,
+                        format!(
+                            "  node{} [label=\"Π\\n[{}]\"];",
+                            index,
+                            op.attributes
+                                .iter()
+                                .map(|v| if let Some(index) = v.index() {
+                                    index.to_string()
+                                } else if let Some(label) = v.label() {
+                                    label.to_string()
+                                } else {
+                                    todo!()
+                                })
+                                .collect::<Vec<String>>()
+                                .join(", "),
+                        ),
+                    ),
+                );
+                next_index + 1
+            }
+            RelationalOp::NaturalJoin(op) => {
+                let (first_next_index, nodes, edges) = op.lhs.graphviz_one(index + 1);
+                node_map.extend(nodes.into_iter());
+                edge_vec.extend(edges.into_iter());
+                if let Some((source_index, _)) = node_map.get(op.lhs.as_ref()) {
+                    edge_vec.push((index, *source_index));
+                } else {
+                    unreachable!()
+                }
+
+                let (next_index, nodes, edges) = op.rhs.graphviz_one(first_next_index + 1);
+                node_map.extend(nodes.into_iter());
+                edge_vec.extend(edges.into_iter());
+                if let Some((source_index, _)) = node_map.get(op.rhs.as_ref()) {
+                    edge_vec.push((index, *source_index));
+                } else {
+                    unreachable!()
+                }
+
+                node_map.insert(self, (index, format!("  node{} [label=\"⨝\"];", index,)));
+                next_index + 1
+            }
+        };
+        (next_index, node_map, edge_vec)
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for NaturalJoin {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}) ⨝ ({})", self.lhs, self.rhs)
+    }
+}
+
+impl NaturalJoin {
+    pub fn new<S: Into<RelationalOp>>(lhs: S, rhs: S) -> Self {
+        Self {
+            lhs: Box::new(lhs.into()),
+            rhs: Box::new(rhs.into()),
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for Projection {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if self.is_all() {
+            write!(f, "{}", self.source)
+        } else {
+            write!(
+                f,
+                "Π[{}]({})",
+                self.attributes
+                    .iter()
+                    .map(|attribute| if let Some(index) = attribute.index() {
+                        index.to_string()
+                    } else if let Some(label) = attribute.label() {
+                        label.to_string()
+                    } else {
+                        unreachable!()
+                    })
+                    .collect::<Vec<String>>()
+                    .join(", "),
+                self.source
+            )
+        }
+    }
+}
+
 impl TryFrom<&Atom> for Projection {
     type Error = Error;
 
     fn try_from(atom: &Atom) -> std::result::Result<Self, Self::Error> {
-        println!("WTF? {:?}", atom);
-        let projections: Vec<(usize, Attribute<Variable>)> = atom
+        let projections: Vec<Attribute<Variable>> = atom
             .iter()
             .enumerate()
             .filter(|(_, term)| !term.is_anonymous())
             .map(|(i, term)| {
-                (
-                    i,
-                    match term {
-                        Term::Variable(v) => Attribute::from(v.clone()),
-                        Term::Constant(v) => Attribute::typed(v.kind()),
-                        Term::Anonymous => unreachable!(),
-                    },
-                )
+                let mut attribute = match term {
+                    Term::Variable(v) => Attribute::from(v.clone()),
+                    Term::Constant(v) => Attribute::typed(v.kind()),
+                    Term::Anonymous => unreachable!(),
+                };
+                attribute.set_index(i);
+                attribute
             })
             .collect();
 
-        println!("WTF??? {:?}", projections);
-
         if projections.len() == atom.len() {
-            println!("ATF!");
-            Ok(Self::project_all())
+            Ok(Self::all(RelationalOp::Relation(atom.label_ref())))
         } else if projections.is_empty() {
-            println!("NTF!");
             Err(nullary_facts_not_allowed())
         } else {
-            println!("STF!");
-            Ok(Self(projections))
+            Ok(Self::new(
+                projections,
+                RelationalOp::Relation(atom.label_ref()),
+            ))
         }
     }
 }
@@ -516,8 +899,8 @@ impl TryFrom<&Atom> for Projection {
 impl From<Projection> for Schema<Variable> {
     fn from(p: Projection) -> Self {
         Self::from(
-            p.0.into_iter()
-                .map(|(_, a)| a)
+            p.attributes
+                .into_iter()
                 .collect::<Vec<Attribute<Variable>>>(),
         )
     }
@@ -525,35 +908,67 @@ impl From<Projection> for Schema<Variable> {
 
 #[allow(clippy::len_without_is_empty)]
 impl Projection {
-    pub fn project_all() -> Self {
-        Self(Default::default())
+    pub fn new<V: Into<Vec<Attribute<Variable>>>, S: Into<RelationalOp>>(
+        attributes: V,
+        from: S,
+    ) -> Self {
+        Self {
+            source: Box::new(from.into()),
+            attributes: attributes.into(),
+        }
+    }
+
+    pub fn all<S: Into<RelationalOp>>(from: S) -> Self {
+        Self {
+            source: Box::new(from.into()),
+            attributes: Default::default(),
+        }
     }
 
     pub fn is_all(&self) -> bool {
-        self.0.is_empty()
+        self.attributes.is_empty()
     }
 
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
+    delegate!(pub len, attributes -> usize);
 
-    pub fn iter(&self) -> impl Iterator<Item = &'_ (usize, Attribute<Variable>)> {
-        self.0.iter()
-    }
+    delegate!(pub iter, attributes -> impl Iterator<Item = &'_ Attribute<Variable>>);
 
     pub fn contains_index(&self, index: &usize) -> bool {
-        self.0.iter().any(|(i, _)| i == index)
+        self.attributes
+            .iter()
+            .any(|attribute| attribute.index() == Some(*index))
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 
+impl Display for Selection {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if self.is_all() {
+            write!(f, "{}", self.source)
+        } else {
+            write!(
+                f,
+                "σ[{}]({})",
+                self.criteria
+                    .iter()
+                    .map(Criteria::to_string)
+                    .collect::<Vec<String>>()
+                    .join(", "),
+                self.source
+            )
+        }
+    }
+}
+
 impl TryFrom<&Atom> for Selection {
     type Error = Error;
 
     fn try_from(atom: &Atom) -> std::result::Result<Self, Self::Error> {
-        Ok(Self(
-            atom.iter()
+        Ok(Self {
+            source: Box::new(RelationalOp::Relation(atom.label_ref())),
+            criteria: atom
+                .iter()
                 .enumerate()
                 .filter_map(|(i, term)| term.as_constant().map(|c| (i, c)))
                 .map(|(i, constant)| Criteria {
@@ -562,44 +977,51 @@ impl TryFrom<&Atom> for Selection {
                     value: CriteriaValue::Value(constant.clone()),
                 })
                 .collect(),
-        ))
+        })
     }
 }
 
 #[allow(clippy::len_without_is_empty)]
 impl Selection {
-    pub fn select_all() -> Self {
-        Self(Default::default())
+    pub fn new<V: Into<Vec<Criteria>>, S: Into<RelationalOp>>(criteria: V, from: S) -> Self {
+        Self {
+            source: Box::new(from.into()),
+            criteria: criteria.into(),
+        }
+    }
+
+    pub fn all<S: Into<RelationalOp>>(from: S) -> Self {
+        Self {
+            source: Box::new(from.into()),
+            criteria: Default::default(),
+        }
     }
 
     pub fn is_all(&self) -> bool {
-        self.0.is_empty()
+        self.criteria.is_empty()
     }
 
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
+    delegate!(pub len, criteria -> usize);
 
-    pub fn iter(&self) -> impl Iterator<Item = &'_ Criteria> {
-        self.0.iter()
-    }
+    delegate!(pub iter, criteria -> impl Iterator<Item = &'_ Criteria>);
 
     pub fn contains(&self, value: &Criteria) -> bool {
-        self.0.contains(value)
+        self.criteria.contains(value)
+    }
+
+    pub fn add(&mut self, criteria: Criteria) {
+        self.criteria.push(criteria);
     }
 
     pub fn matches(&self, fact: &[Constant]) -> Result<bool> {
-        for criteria in &self.0 {
+        for criteria in &self.criteria {
             if !self.matches_one(fact, criteria)? {
                 return Ok(false);
             }
         }
         Ok(true)
     }
-}
 
-impl Selection {
-    #[inline]
     fn matches_one(&self, fact: &[Constant], criteria: &Criteria) -> Result<bool> {
         let lhs = fact
             .get(criteria.index)
@@ -628,7 +1050,17 @@ impl Selection {
 
 // ------------------------------------------------------------------------------------------------
 
+impl Display for Criteria {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}{}{}", self.index, self.op, self.value)
+    }
+}
+
 impl Criteria {
+    pub fn new(index: usize, op: ComparisonOperator, value: CriteriaValue) -> Self {
+        Self { index, op, value }
+    }
+
     pub fn attribute_index(&self) -> usize {
         self.index
     }
@@ -643,6 +1075,19 @@ impl Criteria {
 }
 
 // ------------------------------------------------------------------------------------------------
+
+impl Display for CriteriaValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                CriteriaValue::Value(v) => v.to_string(),
+                CriteriaValue::Index(v) => v.to_string(),
+            }
+        )
+    }
+}
 
 impl From<usize> for CriteriaValue {
     fn from(v: usize) -> Self {
@@ -660,4 +1105,198 @@ impl CriteriaValue {
     self_is_as!(value, Value, Constant);
 
     self_is_as!(index, Index, usize);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Unit Tests
+// ------------------------------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use crate::idb::query::RelationalOp;
+    use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Rule, Term, Variable};
+    use crate::{Predicate, PredicateRef};
+    use std::str::FromStr;
+
+    #[test]
+    fn test_compile_atom_constants() {
+        let predicate: PredicateRef = Predicate::from_str("parent").unwrap().into();
+        let atom = Atom::new(
+            predicate,
+            [
+                Term::Constant("xerces".into()),
+                Term::Constant("brooke".into()),
+            ],
+        );
+        println!(">>> {}", atom);
+        let relational = RelationalOp::compile_atom(&atom, true).unwrap();
+        println!("<<< {}", relational);
+        assert_eq!(
+            relational.to_string(),
+            "σ[0=xerces, 1=brooke](parent)".to_string()
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_compile_atom_constants_fail() {
+        let predicate: PredicateRef = Predicate::from_str("parent").unwrap().into();
+        let atom = Atom::new(
+            predicate,
+            [
+                Term::Constant("xerces".into()),
+                Term::Constant("brooke".into()),
+            ],
+        );
+        // this should panic on `Err` value: NullaryFactsNotAllowed
+        RelationalOp::compile_atom(&atom, false).unwrap();
+    }
+
+    #[test]
+    fn test_compile_atom_variables() {
+        let predicate: PredicateRef = Predicate::from_str("parent").unwrap().into();
+        let atom = Atom::new(
+            predicate,
+            [
+                Term::Variable(Variable::from_str("X").unwrap().into()),
+                Term::Variable(Variable::from_str("Y").unwrap().into()),
+            ],
+        );
+        let relational = RelationalOp::compile_atom(&atom, true).unwrap();
+        assert_eq!(relational.to_string(), "parent".to_string());
+
+        println!(">>> {}", atom);
+        let relational = RelationalOp::compile_atom(&atom, false).unwrap();
+        println!("<<< {}", relational);
+        assert_eq!(relational.to_string(), "parent".to_string());
+    }
+
+    #[test]
+    fn test_compile_atom_mixed() {
+        let predicate: PredicateRef = Predicate::from_str("parent").unwrap().into();
+        let atom = Atom::new(
+            predicate,
+            [
+                Term::Constant("xerces".into()),
+                Term::Variable(Variable::from_str("Y").unwrap().into()),
+            ],
+        );
+        let relational = RelationalOp::compile_atom(&atom, true).unwrap();
+        assert_eq!(relational.to_string(), "σ[0=xerces](parent)".to_string());
+
+        println!(">>> {}", atom);
+        let relational = RelationalOp::compile_atom(&atom, false).unwrap();
+        println!("<<< {}", relational);
+        assert_eq!(
+            relational.to_string(),
+            "Π[1](σ[0=xerces](parent))".to_string()
+        );
+    }
+
+    #[test]
+    fn test_compile_rule_one() {
+        let head = Atom::new(
+            Predicate::from_str("ancestor").unwrap().into(),
+            [
+                Term::Variable(Variable::from_str("X").unwrap().into()),
+                Term::Variable(Variable::from_str("Y").unwrap().into()),
+            ],
+        );
+        let body = Atom::new(
+            Predicate::from_str("parent").unwrap().into(),
+            [
+                Term::Variable(Variable::from_str("X").unwrap().into()),
+                Term::Variable(Variable::from_str("Y").unwrap().into()),
+            ],
+        );
+        let rule: Rule = Rule::new([head], [Literal::from(body)]);
+
+        println!(">>> {}", rule);
+        let relational = RelationalOp::compile_rule(&rule).unwrap();
+        println!("<<< {}", relational);
+        assert_eq!(relational.to_string(), "parent".to_string());
+    }
+
+    #[test]
+    fn test_compile_rule_two() {
+        let head = Atom::new(
+            Predicate::from_str("path").unwrap().into(),
+            [
+                Term::Variable(Variable::from_str("X").unwrap().into()),
+                Term::Variable(Variable::from_str("Y").unwrap().into()),
+            ],
+        );
+        let body_1 = Atom::new(
+            Predicate::from_str("edge").unwrap().into(),
+            [
+                Term::Variable(Variable::from_str("X").unwrap().into()),
+                Term::Variable(Variable::from_str("Z").unwrap().into()),
+            ],
+        );
+        let body_2 = Atom::new(
+            Predicate::from_str("path").unwrap().into(),
+            [
+                Term::Variable(Variable::from_str("Z").unwrap().into()),
+                Term::Variable(Variable::from_str("Y").unwrap().into()),
+            ],
+        );
+        let rule: Rule = Rule::new([head], [Literal::from(body_1), Literal::from(body_2)]);
+
+        println!(">>> {}", rule);
+        let relational = RelationalOp::compile_rule(&rule).unwrap();
+        println!("<<< {}", relational);
+        println!("{}", relational.to_graphviz_string());
+        assert_eq!(
+            relational.to_string(),
+            "Π[X, Y]((path) ⨝ (edge))".to_string()
+        );
+    }
+
+    #[test]
+    fn test_compile_rule_two_with_rule() {
+        let head = Atom::new(
+            Predicate::from_str("path").unwrap().into(),
+            [
+                Term::Variable(Variable::from_str("X").unwrap().into()),
+                Term::Variable(Variable::from_str("Y").unwrap().into()),
+            ],
+        );
+        let body_1 = Atom::new(
+            Predicate::from_str("edge").unwrap().into(),
+            [
+                Term::Variable(Variable::from_str("X").unwrap().into()),
+                Term::Variable(Variable::from_str("Z").unwrap().into()),
+            ],
+        );
+        let body_2 = Atom::new(
+            Predicate::from_str("path").unwrap().into(),
+            [
+                Term::Variable(Variable::from_str("Z").unwrap().into()),
+                Term::Variable(Variable::from_str("Y").unwrap().into()),
+            ],
+        );
+        let body_3 = Comparison::new(
+            Term::Variable(Variable::from_str("Z").unwrap().into()),
+            ComparisonOperator::NotEqual,
+            Term::Constant(101.into()),
+        )
+        .unwrap();
+        let rule: Rule = Rule::new(
+            [head],
+            [
+                Literal::from(body_1),
+                Literal::from(body_2),
+                Literal::from(body_3),
+            ],
+        );
+
+        println!(">>> {}", rule);
+        let relational = RelationalOp::compile_rule(&rule).unwrap();
+        println!("<<< {}", relational);
+        println!("{}", relational.to_graphviz_string());
+        assert_eq!(
+            relational.to_string(),
+            "Π[X, Y]((σ[0!=101](path)) ⨝ (σ[1!=101](edge)))".to_string()
+        );
+    }
 }

@@ -1,128 +1,146 @@
 #![allow(unused)]
+use paste::paste;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
-pub(crate) const EMPTY_STR: &str = "";
+const_string!(EMPTY_STR => "");
 
-pub(crate) const DEFAULT_LANGUAGE_NAME: &str = "Datalog";
+const_string!(DEFAULT_LANGUAGE_NAME => "Datalog");
 
 // ------------------------------------------------------------------------------------------------
 
-pub(crate) const TYPE_NAME_COMPARISON_OPERATOR: &str = "ComparisonOperator";
-
-pub(crate) const TYPE_NAME_IDENTIFIER: &str = "Identifier";
-pub(crate) const TYPE_NAME_PREDICATE: &str = "Predicate";
-pub(crate) const TYPE_NAME_VARIABLE: &str = "Variable";
-
-pub(crate) const TYPE_NAME_CONSTANT: &str = "Constant";
-
-pub(crate) const TYPE_NAME_CONST_STRING: &str = "String";
-pub(crate) const TYPE_NAME_CONST_INTEGER: &str = "Integer";
-pub(crate) const TYPE_NAME_CONST_FLOAT: &str = "Float";
-pub(crate) const TYPE_NAME_CONST_BOOLEAN: &str = "Boolean";
-pub(crate) const TYPE_NAME_CONST_UNKNOWN: &str = "?";
+const_string_block!(
+    TYPE_NAME
+    ( COMPARISON_OPERATOR => "ComparisonOperator" ),
+    ( PREDICATE => "Predicate" ),
+    ( VARIABLE => "Variable" ),
+    ( CONSTANT => "Constant" ),
+    // ----------------------------------------
+    ( CONST_STRING => "String" ),
+    ( CONST_INTEGER => "Integer" ),
+    ( CONST_FLOAT => "Float" ),
+    ( CONST_BOOLEAN => "Boolean" ),
+    ( CONST_UNKNOWN => "?" )
+);
 
 // ------------------------------------------------------------------------------------------------
 
 pub(crate) const RESERVED_PREFIX: &str = ".";
 
-pub(crate) const RESERVED_BOOLEAN_TRUE: &str = "true";
-pub(crate) const RESERVED_BOOLEAN_FALSE: &str = "false";
+const_string_block!(
+    BOOLEAN_LITERAL
+    ( TRUE => "true" ),
+    ( FALSE => "false" )
+);
 
-pub(crate) const RESERVED_PRAGMA_ASSERT: &str = "assert";
-pub(crate) const RESERVED_PRAGMA_INFER: &str = "infer";
-pub(crate) const RESERVED_PRAGMA_FEATURE: &str = "feature";
-pub(crate) const RESERVED_PRAGMA_INCLUDE: &str = "include";
-pub(crate) const RESERVED_PRAGMA_INPUT: &str = "input";
-pub(crate) const RESERVED_PRAGMA_OUTPUT: &str = "output";
+const_string_block!(
+    PRAGMA_ID
+    ( ASSERT => "assert" ),
+    ( INFER => "infer" ),
+    ( FEATURE => "feature" ),
+    ( INCLUDE => "include" ),
+    ( INPUT => "input" ),
+    ( OUTPUT => "output" )
+);
 
-pub(crate) const PRAGMA_FEATURE_NEGATION: &str = "negation";
-pub(crate) const PRAGMA_FEATURE_COMPARISONS: &str = "comparisons";
-pub(crate) const PRAGMA_FEATURE_CONSTRAINTS: &str = "constraints";
-pub(crate) const PRAGMA_FEATURE_DISJUNCTION: &str = "disjunction";
-pub(crate) const PRAGMA_FEATURE_EXCLUSIVE_DISJUNCTION: &str = "exclusive-disjunction";
-
-pub(crate) const FEATURE_SYMBOL_THETA: &str = "θ";
-pub(crate) const FEATURE_SYMBOL_BACK_ARROW: &str = "⇐";
-pub(crate) const FEATURE_SYMBOL_CIRCLE_PLUS: &str = "⊕";
+const_string_block!(
+    FEATURE
+    ( NEGATION_ID => "negation" ),
+    ( NEGATION_SYMBOL => "￢" ),
+    // ----------------------------------------
+    ( COMPARISONS_ID => "comparisons" ),
+    ( COMPARISONS_SYMBOL => "θ" ),
+    // ----------------------------------------
+    ( CONSTRAINTS_ID => "constraints" ),
+    ( CONSTRAINTS_SYMBOL => "⇐" ),
+    // ----------------------------------------
+    ( DISJUNCTION_ID => "disjunction" ),
+    ( DISJUNCTION_SYMBOL => "∨" ),
+    // ----------------------------------------
+    ( EXCLUSIVE_DISJUNCTION_ID => "exclusive-disjunction" ),
+    ( EXCLUSIVE_DISJUNCTION_SYMBOL => "⊕" )
+);
 
 // ------------------------------------------------------------------------------------------------
 
-pub(crate) const COLUMN_NAME_UNKNOWN: &str = "_";
-
-pub(crate) const ANONYMOUS_TERM: &str = "_";
+const_string_block!(
+    ANONYMOUS
+    ( COLUMN_NAME => "_" ),
+    ( TERM => "_" )
+);
 
 // ------------------------------------------------------------------------------------------------
 
-pub(crate) const CONJUNCTION_ASCII: &str = ",";
-pub(crate) const CONJUNCTION_ASCII_SYMBOL: &str = "&";
-pub(crate) const CONJUNCTION_ASCII_WORD: &str = "AND";
-pub(crate) const CONJUNCTION_UNICODE_SYMBOL: &str = "∧";
+const_string_block!(
+    IMPLICATION
+    ( ASCII_TURNSTILE => ":-" ),
+    ( ASCII_ARROW => "<-" ),
+    ( UNICODE_ARROW => "⟵" )
+);
 
-pub(crate) const DISJUNCTION_ASCII: &str = ";";
-pub(crate) const DISJUNCTION_ASCII_SYMBOL: &str = "|";
-pub(crate) const DISJUNCTION_ASCII_WORD: &str = "OR";
-pub(crate) const DISJUNCTION_UNICODE_SYMBOL: &str = "∨";
+const_string_block!(
+    CONJUNCTION
+    ( ASCII => "," ),
+    ( ASCII_SYMBOL => "&" ),
+    ( ASCII_WORD => "AND" ),
+    ( UNICODE_SYMBOL => "∧" )
+);
+
+const_string_block!(
+    DISJUNCTION
+    ( ASCII => ";" ),
+    ( ASCII_SYMBOL => "|" ),
+    ( ASCII_WORD => "OR" ),
+    ( UNICODE_SYMBOL => "∨" )
+);
+
+const_string_block!(
+    NEGATION
+    ( ASCII_SYMBOL => "!" ),
+    ( ASCII_WORD => "NOT" ),
+    ( UNICODE_SYMBOL => "￢" )
+);
+
+// ------------------------------------------------------------------------------------------------
 
 pub(crate) const TRUE_UNICODE_SYMBOL: &str = "⊤";
 pub(crate) const FALSE_UNICODE_SYMBOL: &str = "⊥";
 
-pub(crate) const NOT_ASCII_SYMBOL: &str = "!";
-pub(crate) const NOT_ASCII_WORD: &str = "NOT";
-pub(crate) const NOT_UNICODE_SYMBOL: &str = "￢";
+const_string_block!(
+    OPERATOR
+    ( EQUAL_ASCII => "=" ),
+    // ----------------------------------------
+    ( NOT_EQUAL_ASCII => "!=" ),
+    ( NOT_EQUAL_ASCII_ALT => "/=" ),
+    ( NOT_EQUAL_UNICODE => "≠" ),
+    // ----------------------------------------
+    ( LESS_THAN_ASCII => "<" ),
+    // ----------------------------------------
+    ( LESS_THAN_OR_EQUAL_ASCII => "<=" ),
+    ( LESS_THAN_OR_EQUAL_UNICODE => "," ),
+    // ----------------------------------------
+    ( GREATER_THAN_ASCII => ">" ),
+    // -----------------------------------------
+    ( GREATER_THAN_OR_EQUAL_ASCII => ">=" ),
+    ( GREATER_THAN_OR_EQUAL_UNICODE => "≥" ),
+    // -----------------------------------------
+    ( STRING_MATCH_ASCII => "*=" ),
+    ( STRING_MATCH_ASCII_WORD => "MATCHES" ),
+    ( STRING_MATCH_UNICODE => "≛" )
+);
 
-pub(crate) const OPERATOR_ASCII_EQUAL: &str = "=";
-pub(crate) const OPERATOR_ASCII_NOT_EQUAL: &str = "!=";
-pub(crate) const OPERATOR_ASCII_NOT_EQUAL_ALT: &str = "/=";
-pub(crate) const OPERATOR_ASCII_LESS_THAN: &str = "<";
-pub(crate) const OPERATOR_ASCII_LESS_THAN_OR_EQUAL: &str = "<=";
-pub(crate) const OPERATOR_ASCII_GREATER_THAN: &str = ">";
-pub(crate) const OPERATOR_ASCII_GREATER_THAN_OR_EQUAL: &str = ">=";
-pub(crate) const OPERATOR_ASCII_STAR_EQUAL: &str = "*=";
-pub(crate) const OPERATOR_ASCII_WORD_MATCHES: &str = "MATCHES";
+const_string_block!(
+    QUERY
+    ( ASCII_PREFIX => "?-" ),
+    ( ASCII_SUFFIX => "?" )
+);
 
-pub(crate) const OPERATOR_UNICODE_NOT_EQUAL: &str = "≠";
-pub(crate) const OPERATOR_UNICODE_LESS_THAN_OR_EQUAL: &str = "≤";
-pub(crate) const OPERATOR_UNICODE_GREATER_THAN_OR_EQUAL: &str = "≥";
-pub(crate) const OPERATOR_UNICODE_STAR_EQUAL: &str = "≛";
-
-pub(crate) const IMPLICATION_ASCII_TURNSTILE: &str = ":-";
-pub(crate) const IMPLICATION_ASCII_ARROW: &str = "<-";
-pub(crate) const IMPLICATION_UNICODE_ARROW: &str = "⟵";
-
-pub(crate) const QUERY_PREFIX_ASCII: &str = "?-";
-pub(crate) const QUERY_SUFFIX_ASCII: &str = "?";
-
-pub(crate) const CHAR_LEFT_PAREN: char = '(';
-pub(crate) const CHAR_RIGHT_PAREN: char = ')';
-pub(crate) const CHAR_PERIOD: char = '.';
-pub(crate) const CHAR_COLON: char = ':';
-pub(crate) const CHAR_COMMA: char = ',';
-pub(crate) const CHAR_UNDERSCORE: char = '_';
-pub(crate) const CHAR_SEMI_COLON: char = ';';
-
-// ------------------------------------------------------------------------------------------------
-// Private Types & Constants
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Private Macros
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Public Functions
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Implementations
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Private Functions
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Modules
-// ------------------------------------------------------------------------------------------------
+const_char!(CHAR_LEFT_PAREN => '(');
+const_char!(CHAR_RIGHT_PAREN => ')');
+const_char!(CHAR_PERIOD => '.');
+const_char!(CHAR_COLON => ':');
+const_char!(CHAR_COMMA => ',');
+const_char!(CHAR_UNDERSCORE => '_');
+const_char!(CHAR_SEMI_COLON => ';');
