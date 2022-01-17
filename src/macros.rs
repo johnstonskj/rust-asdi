@@ -188,7 +188,7 @@ macro_rules! const_char {
 macro_rules! const_string_block {
     ($vis:vis $prefix:ident $(($name:ident => $value:expr)),+) => {
         $(
-            paste! {const_string!([<$prefix _ $name>] => $value); }
+            paste! {const_string!($vis [<$prefix _ $name>] => $value); }
         )+
     };
 }
