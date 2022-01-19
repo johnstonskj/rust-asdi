@@ -119,14 +119,13 @@ impl Reader for DelimitedLines {
             .collect();
         let arity = attribute_types.len();
 
-        // MAYBE: could extend this to do name matching, right now it assumes a positional match
+        // MAYBE: (ISSUE/rust-asdi/2) could extend this to do name matching, right now it assumes a positional match
 
         // if reader.has_headers() {
         //     let headers = reader.headers();
         // }
 
         for result in reader.records() {
-            // TODO: propagate error
             let record = result.map_err(|e| Error::Serialization(Box::new(e)))?;
             if record.len() == arity {
                 let values: Vec<Constant> = record

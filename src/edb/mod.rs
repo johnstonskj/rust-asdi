@@ -341,7 +341,6 @@ where
             .collect();
         let pre_hash_len = named.len();
 
-        // BUG: This removes duplicate unnamed variables!!!
         let named = BTreeMap::from_iter(named);
 
         assert_eq!(named.len(), pre_hash_len);
@@ -830,7 +829,7 @@ impl Queryable for Relation {
             let rows: Result<Vec<Row>> = self
                 .iter()
                 .filter_map(|fact| fact.clone().select(&selection).transpose())
-                // TODO: Need to update the view join logic
+                // TODO: (ISSUE/rust-asdi/8) Need to update the view join logic
                 // .map(|fact| match fact {
                 //     Ok(fact) => fact.project(&projection),
                 //     Err(e) => Err(e),

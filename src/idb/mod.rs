@@ -1449,7 +1449,7 @@ impl Variable {
 // ------------------------------------------------------------------------------------------------
 
 //
-// TODO: make this better, it's horrible.
+// TODO: (ISSUE/rust-asdi/6) make this better, it's horrible.
 //
 fn dedup_in_place<T: Clone + Eq + Hash, V: Into<Vec<T>>>(v: V) -> Vec<T> {
     let v = v.into();

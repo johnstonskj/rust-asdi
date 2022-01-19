@@ -177,7 +177,7 @@ impl RelationOps for View {
         );
         let common_variables = self.schema().label_intersection(other.schema());
 
-        // TODO: infer attribute types for new results!
+        // TODO: (ISSUE/rust-asdi/5) infer attribute types for new results!
         for left_row in self.iter() {
             for right_row in other.filter(
                 common_variables

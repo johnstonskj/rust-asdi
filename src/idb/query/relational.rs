@@ -244,7 +244,7 @@ impl RelationalOp {
             rule.literals().filter_map(Literal::as_arithmetic).collect();
         let relational: Vec<&Atom> = rule.literals().filter_map(Literal::as_relational).collect();
 
-        // TODO: negation
+        // TODO: (ISSUE/rust-asdi/3) negation
 
         let mut ops: Vec<RelationalOp> = Default::default();
         let mut theta: Vec<&Comparison> = Default::default();
@@ -305,8 +305,7 @@ impl RelationalOp {
         let last = ops.next().unwrap();
         let joined = ops.fold(last, |left, right| Join::natural(left, right).into());
 
-        // These need to preserve their order.
-        // TODO: may need rework for disjunction.
+        // TODO: (ISSUE/rust-asdi/4) may need rework for disjunction.
         let distinguished_terms = rule.distinguished_terms_in_order();
         if distinguished_terms.len() < rule.terms().len() {
             Ok(Projection::new(
@@ -432,7 +431,7 @@ impl RelationalOp {
                                 } else if let Some(label) = v.label() {
                                     label.to_string()
                                 } else {
-                                    todo!()
+                                    unreachable!()
                                 })
                                 .collect::<Vec<String>>()
                                 .join(", "),

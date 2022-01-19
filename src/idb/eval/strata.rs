@@ -130,7 +130,7 @@ impl Display for StratifiedProgram<'_> {
 
 impl<'a> StratifiedProgram<'a> {
     pub fn from(program: &'a Program) -> Result<Self> {
-        // TODO: lift this restriction
+        // TODO: (ISSUE/rust-asdi/7) Design for disjunction
         assert!(!program.features().supports(&FEATURE_DISJUNCTION));
 
         let start = Instant::now();
