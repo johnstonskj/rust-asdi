@@ -28,6 +28,8 @@ pub trait Evaluator: Debug {
     /// added.
     ///
     fn inference(&self, program: &Program) -> Result<RelationSet>;
+
+    fn label(&self) -> &'static str;
 }
 
 ///
@@ -39,6 +41,11 @@ pub trait Evaluator: Debug {
 ///
 #[derive(Debug)]
 pub struct NoopEvaluator;
+
+#[cfg(feature = "graphviz")]
+pub trait ToGraphViz {
+    fn to_graphviz_string(&self) -> Result<String>;
+}
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
@@ -66,6 +73,10 @@ impl Evaluator for NoopEvaluator {
     fn inference(&self, program: &Program) -> Result<RelationSet> {
         Ok(program.intensional().clone_with_schema_only())
     }
+
+    fn label(&self) -> &'static str {
+        "no_op"
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -79,8 +90,8 @@ impl Evaluator for NoopEvaluator {
 mod naive;
 pub use naive::NaiveEvaluator;
 
-mod semi_naive;
-pub use semi_naive::SemiNaiveEvaluator;
+mod stratified;
+pub use stratified::StratifiedEvaluator;
 
 mod strata;
 pub use strata::{PrecedenceGraph, PrecedenceNode, StratifiedProgram};

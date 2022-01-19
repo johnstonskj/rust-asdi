@@ -7,12 +7,16 @@ More detailed description, with
 
 */
 
-use crate::error::Result;
-use crate::idb::{Literal, Rule};
-use crate::{error, FeatureSet, RelationSet, RuleSet, FEATURE_DISJUNCTION};
-use crate::{Collection, Labeled, MaybePositive, Predicate, Program, ProgramCore};
+use crate::edb::{Predicate, RelationSet};
+use crate::error::{program_not_stratifiable, Result};
+use crate::features::{FeatureSet, FEATURE_DISJUNCTION};
+use crate::idb::eval::ToGraphViz;
+use crate::idb::{Literal, Rule, RuleSet};
+use crate::{Collection, Labeled, MaybePositive, Program, ProgramCore};
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
+use std::time::Instant;
+use tracing::trace;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -129,6 +133,8 @@ impl<'a> StratifiedProgram<'a> {
         // TODO: lift this restriction
         assert!(!program.features().supports(&FEATURE_DISJUNCTION));
 
+        let start = Instant::now();
+
         let rules = program.rules();
         let graph = PrecedenceGraph::from(program);
         let mut strata: Vec<SubProgram<'_>> = Vec::with_capacity(graph.sources().len());
@@ -189,9 +195,16 @@ impl<'a> StratifiedProgram<'a> {
                     }
                 }
             }
+            let delta = start.elapsed();
+            trace!(
+                "Stratified {} rules into {} strata, in {}s",
+                program.rules().len(),
+                strata.len(),
+                delta.as_secs_f64()
+            );
             Ok(Self { strata })
         } else {
-            error::program_not_stratifiable().into()
+            Err(program_not_stratifiable())
         }
     }
 
@@ -287,6 +300,10 @@ impl<'a> PrecedenceGraph<'a> {
             .any(|source| self.reachable_from(source).contains(source))
     }
 
+    pub fn is_positive(&self) -> bool {
+        self.edges().all(|edge| !edge.is_negative_target())
+    }
+
     pub fn is_semi_positive(&self) -> bool {
         let all_sources = self.sources();
         all_sources.iter().all(|source| {
@@ -332,8 +349,10 @@ impl<'a> PrecedenceGraph<'a> {
     fn directly_reachable_nodes_from(&self, source: &Predicate) -> HashSet<&'_ PrecedenceNode<'_>> {
         self.edges().filter(|e| e.source() == source).collect()
     }
+}
 
-    pub fn to_graphviz_string(&self) -> String {
+impl ToGraphViz for PrecedenceGraph<'_> {
+    fn to_graphviz_string(&self) -> Result<String> {
         let mut edges: Vec<String> = self
             .edges()
             .map(|edge| {
@@ -367,25 +386,33 @@ impl<'a> PrecedenceGraph<'a> {
         edb.sort();
         edb.dedup();
 
-        format!("digraph G {{\n{}\n{}}}", edges.join(""), edb.join(""))
+        Ok(format!(
+            "digraph G {{\n{}\n{}}}",
+            edges.join(""),
+            edb.join("")
+        ))
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 
 impl<'a> PrecedenceNode<'a> {
+    #[inline]
     pub fn is_negative_target(&self) -> bool {
         self.negative
     }
 
+    #[inline]
     pub fn is_extensional_target(&self) -> bool {
         self.extensional
     }
 
+    #[inline]
     pub fn source(&self) -> &'a Predicate {
         self.source
     }
 
+    #[inline]
     pub fn target(&self) -> &'a Predicate {
         self.target
     }
@@ -418,7 +445,7 @@ fn body_predicates(rule: &Rule) -> HashSet<(bool, &Predicate)> {
 #[cfg(test)]
 mod tests {
     use crate::idb::eval::strata::PrecedenceGraph;
-    use crate::idb::eval::StratifiedProgram;
+    use crate::idb::eval::{StratifiedProgram, ToGraphViz};
     use crate::parse::parse_str;
     use crate::Predicate;
     use std::str::FromStr;
@@ -463,7 +490,7 @@ tc(X, Y):- v(X), v(Y), NOT t(X, Y).
         assert!(program.is_recursive());
 
         let graph = PrecedenceGraph::from(&program);
-        println!("{}", graph.to_graphviz_string());
+        println!("{}", graph.to_graphviz_string().unwrap());
 
         assert!(graph.is_recursive());
         assert!(!graph.is_semi_positive());
@@ -540,7 +567,7 @@ subProperty(P, rdfs:member) :- instanceOf(P, rdfs:ContainerMembershipProperty).
         .into_parsed();
 
         let graph = PrecedenceGraph::from(&program);
-        println!("{}", graph.to_graphviz_string());
+        println!("{}", graph.to_graphviz_string().unwrap());
 
         assert!(graph.is_recursive());
         assert!(graph.is_semi_positive());
@@ -572,7 +599,7 @@ indirect(X, Y) :- reachable(X, Y), NOT link(X, Y).
         .into_parsed();
 
         let graph = PrecedenceGraph::from(&program);
-        println!("{}", graph.to_graphviz_string());
+        println!("{}", graph.to_graphviz_string().unwrap());
 
         assert!(graph.is_recursive());
         assert!(graph.is_semi_positive());
@@ -596,7 +623,7 @@ unreachable(X, Y) :- reachable(X, Y), anode(X), anode(Y), NOT reachable(X, Y).
         .into_parsed();
 
         let graph = PrecedenceGraph::from(&program);
-        println!("{}", graph.to_graphviz_string());
+        println!("{}", graph.to_graphviz_string().unwrap());
 
         assert!(graph.is_recursive());
         assert!(!graph.is_semi_positive());
@@ -619,7 +646,7 @@ unreachable(X, Y) :- reachable(X, Y), NOT absurdity(X, Y).
         .into_parsed();
 
         let graph = PrecedenceGraph::from(&program);
-        println!("{}", graph.to_graphviz_string());
+        println!("{}", graph.to_graphviz_string().unwrap());
 
         assert!(graph.is_recursive());
         assert!(!graph.is_semi_positive());

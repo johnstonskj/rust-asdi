@@ -801,10 +801,10 @@ pub trait ProgramCore {
 pub struct Program {
     from_file: Option<PathBuf>,
     features: FeatureSet,
-    predicates: NameReferenceSet<Predicate>,
-    variables: NameReferenceSet<Variable>,
-    asserted: RelationSet,
-    infer: RelationSet,
+    predicate_cache: NameReferenceSet<Predicate>,
+    variable_cache: NameReferenceSet<Variable>,
+    extensional: RelationSet,
+    intensional: RelationSet,
     rules: RuleSet,
     queries: HashSet<Query>,
 }
@@ -981,21 +981,21 @@ impl Display for Program {
             writeln!(f)?;
         }
 
-        if !self.asserted.is_empty() {
-            for relation in self.asserted.iter() {
+        if !self.extensional.is_empty() {
+            for relation in self.extensional.iter() {
                 writeln!(f, "{}", relation.to_schema_decl(true, false))?;
             }
             writeln!(f)?;
         }
 
-        if !self.infer.is_empty() {
-            for relation in self.infer.iter() {
+        if !self.intensional.is_empty() {
+            for relation in self.intensional.iter() {
                 writeln!(f, "{}", relation.to_schema_decl(false, false))?;
             }
             writeln!(f)?;
         }
 
-        for db in [&self.infer, &self.asserted] {
+        for db in [&self.intensional, &self.extensional] {
             for relation in db.iter() {
                 if !relation.is_empty() {
                     for fact in relation.iter() {
@@ -1028,11 +1028,11 @@ impl ProgramCore for Program {
     }
 
     fn extensional(&self) -> &RelationSet {
-        &self.asserted
+        &self.extensional
     }
 
     fn intensional(&self) -> &RelationSet {
-        &self.infer
+        &self.intensional
     }
 
     fn rules(&self) -> &RuleSet {
@@ -1045,10 +1045,10 @@ impl Program {
         Self {
             from_file: None,
             features,
-            predicates: Default::default(),
-            variables: Default::default(),
-            asserted: Default::default(),
-            infer: Default::default(),
+            predicate_cache: Default::default(),
+            variable_cache: Default::default(),
+            extensional: Default::default(),
+            intensional: Default::default(),
             queries: Default::default(),
             rules: Default::default(),
         }
@@ -1079,11 +1079,11 @@ impl Program {
     // --------------------------------------------------------------------------------------------
 
     pub fn predicates(&self) -> &NameReferenceSet<Predicate> {
-        &self.predicates
+        &self.predicate_cache
     }
 
     pub fn variables(&self) -> &NameReferenceSet<Variable> {
-        &self.variables
+        &self.variable_cache
     }
 
     // --------------------------------------------------------------------------------------------
@@ -1092,7 +1092,7 @@ impl Program {
     /// Returns the current set of extensional relations in a mutable state.
     ///
     pub fn extensional_mut(&mut self) -> &mut RelationSet {
-        &mut self.asserted
+        &mut self.extensional
     }
 
     ///
@@ -1103,7 +1103,7 @@ impl Program {
         label: PredicateRef,
         schema: V,
     ) -> Result<&mut Relation> {
-        let label = self.predicates.canonical(label);
+        let label = self.predicate_cache.canonical(label);
         self.extensional_mut()
             .add_new_relation(label, schema.into())
     }
@@ -1121,7 +1121,7 @@ impl Program {
     /// Returns the current set of intensional relations in a mutable state.
     ///
     pub fn intensional_mut(&mut self) -> &mut RelationSet {
-        &mut self.infer
+        &mut self.intensional
     }
 
     ///
@@ -1132,7 +1132,7 @@ impl Program {
         label: PredicateRef,
         schema: V,
     ) -> Result<&mut Relation> {
-        let label = self.predicates.canonical(label);
+        let label = self.predicate_cache.canonical(label);
         self.intensional_mut()
             .add_new_relation(label, schema.into())
     }
@@ -1157,7 +1157,7 @@ impl Program {
         head_terms: H,
         body: B,
     ) -> Result<()> {
-        let head_label = self.predicates.canonical(head_label);
+        let head_label = self.predicate_cache.canonical(head_label);
         let rule = Rule::new_pure(Atom::new(head_label, head_terms), body);
         self.add_rule(rule)
     }
@@ -1201,12 +1201,12 @@ impl Program {
             //
             // Update the database schema based on atoms found in the rule's head.
             //
-            if self.asserted.contains(atom.label()) {
+            if self.extensional.contains(atom.label()) {
                 return Err(extensional_predicate_in_rule_head(
                     atom.label_ref(),
                     atom.source_location().cloned(),
                 ));
-            } else if !self.infer.contains(atom.label()) {
+            } else if !self.intensional.contains(atom.label()) {
                 let mut schema = Vec::with_capacity(atom.len());
                 for term in atom.iter() {
                     match term {
@@ -1312,7 +1312,7 @@ impl Program {
         label: PredicateRef,
         terms: T,
     ) -> Result<bool> {
-        let label = self.predicates.canonical(label);
+        let label = self.predicate_cache.canonical(label);
         let query = Query::new(label, terms);
         self.add_query(query)
     }
@@ -1379,7 +1379,7 @@ impl Program {
         }
         let new_idb = evaluator.inference(self)?;
         println!("{:?}", new_idb);
-        self.intensional_mut().merge(new_idb)?;
+        self.intensional_mut().merge_from(new_idb)?;
         self.store_intensional_data()?;
         let results = self.eval_queries()?;
         for (query, view) in results {

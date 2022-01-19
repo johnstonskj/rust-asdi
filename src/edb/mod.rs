@@ -96,7 +96,8 @@ use crate::error::{
     fact_does_not_correspond_to_schema, invalid_value, nullary_facts_not_allowed, relation_exists,
     Error, Result,
 };
-use crate::idb::query::{FactOps, Projection, Queryable, Row, Selection, View};
+use crate::idb::query::relational::{FactOps, Projection, Selection};
+use crate::idb::query::{Queryable, Row, View};
 use crate::idb::Atom;
 use crate::io::{read_relation, write_relation, FilePragma};
 use crate::syntax::{
@@ -755,12 +756,26 @@ impl RelationSet {
         )
     }
 
-    pub fn merge(&mut self, other: Self) -> Result<()> {
+    pub fn merge_from(&mut self, other: Self) -> Result<()> {
         for (other_predicate, other_relation) in other.0 {
             if let Some(relation) = self.0.get_mut(&other_predicate) {
-                relation.extend(other_relation)?
+                relation.extend(other_relation)?;
             } else {
                 self.0.insert(other_predicate, other_relation);
+            }
+        }
+        Ok(())
+    }
+
+    pub fn merge(&mut self, other: &Self) -> Result<()> {
+        for (other_predicate, other_relation) in &other.0 {
+            if let Some(relation) = self.0.get_mut(other_predicate) {
+                for fact in other_relation.facts.iter() {
+                    relation.add(fact.clone())?;
+                }
+            } else {
+                self.0
+                    .insert(other_predicate.clone(), other_relation.clone());
             }
         }
         Ok(())
@@ -874,11 +889,10 @@ impl Relation {
 
     // --------------------------------------------------------------------------------------------
 
-    pub fn add_as_fact<V: Into<Vec<Constant>>>(&mut self, values: V) -> Result<()> {
+    pub fn add_as_fact<V: Into<Vec<Constant>>>(&mut self, values: V) -> Result<bool> {
         let values: Vec<Constant> = values.into();
         if self.schema.conforms(&values) {
-            self.add(Fact::new(self.label.clone(), values)?)?;
-            Ok(())
+            Ok(self.add(Fact::new(self.label.clone(), values)?)?)
         } else {
             Err(fact_does_not_correspond_to_schema(
                 self.label_ref(),
@@ -891,13 +905,9 @@ impl Relation {
         }
     }
 
-    pub fn add(&mut self, fact: Fact) -> Result<()> {
+    pub fn add(&mut self, fact: Fact) -> Result<bool> {
         if fact.label() == self.label() {
-            let fact_str = fact.to_string();
-            if !self.facts.insert(fact) {
-                trace!("Fact {} discarded, already present in relation.", fact_str);
-            }
-            Ok(())
+            Ok(self.facts.insert(fact))
         } else {
             Err(fact_does_not_correspond_to_schema(
                 fact.label_ref(),
@@ -909,12 +919,13 @@ impl Relation {
         }
     }
 
-    pub fn extend(&mut self, other: Self) -> Result<()> {
+    pub fn extend(&mut self, other: Self) -> Result<usize> {
         if self.label() == other.label() && self.schema() == other.schema() {
+            let mut added = 0;
             for fact in other.facts.into_iter() {
-                self.add(fact)?;
+                added += if self.add(fact)? { 1 } else { 0 };
             }
-            Ok(())
+            Ok(added)
         } else {
             panic!()
         }
@@ -970,12 +981,12 @@ impl Relation {
     /// If a [FilePragma] is attached to this relation then read data from the file into this
     /// relation's set of facts.
     ///
-    pub fn load_from_file(&mut self) -> Result<()> {
+    pub fn load_from_file(&mut self) -> Result<usize> {
         if let Some(pragma) = &self.pragma {
             let new_facts = read_relation(self, pragma)?;
             self.extend(new_facts)
         } else {
-            Ok(())
+            Ok(0)
         }
     }
 

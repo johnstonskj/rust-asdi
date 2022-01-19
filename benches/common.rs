@@ -1,8 +1,63 @@
-use asdi::idb::eval::{Evaluator, NaiveEvaluator};
+use asdi::idb::eval::Evaluator;
 use asdi::parse::parse_str;
+use asdi::Program;
 
-#[test]
-fn test_rdfs() {
+pub fn socrates_program() -> Program {
+    const PROGRAM_SOURCE: &str = r#"human("Socrates").
+human("Plato").
+
+mortal(X) <- human(X).
+
+?- mortal("Socrates").
+"#;
+    parse_str(PROGRAM_SOURCE).unwrap().into_parsed()
+}
+
+pub fn eval_socrates<T: Evaluator>(program: &Program, evaluator: T) {
+    let _ = evaluator.inference(program).unwrap();
+}
+
+// ------------------------------------------------------------------------------------------------
+
+pub fn ancestors_program() -> Program {
+    const PROGRAM_SOURCE: &str = r#"parent(xerces, brooke).
+parent(brooke, damocles).
+
+ancestor(X, Y) ⟵ parent(X, Y).
+ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
+
+?- ancestor(xerces, X).
+"#;
+    parse_str(PROGRAM_SOURCE).unwrap().into_parsed()
+}
+
+pub fn eval_ancestors<T: Evaluator>(program: &Program, evaluator: T) {
+    let _ = evaluator.inference(program).unwrap();
+}
+
+// ------------------------------------------------------------------------------------------------
+
+pub fn paths_program() -> Program {
+    const PROGRAM_SOURCE: &str = r#".assert edge(string, string).
+
+edge(a, b).
+edge(c, d).
+edge(d, a).
+edge(b, c).
+
+path(X, Y) ⟵ edge(X, Y).
+path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
+
+?- path(X, Y).
+"#;
+    parse_str(PROGRAM_SOURCE).unwrap().into_parsed()
+}
+
+pub fn eval_paths<T: Evaluator>(program: &Program, evaluator: T) {
+    let _ = evaluator.inference(program).unwrap();
+}
+
+pub fn rdf_schema_program() -> Program {
     const PROGRAM_SOURCE: &str = r#".assert triple(subject: string, predicate: string, object: string).
 
 % Section 2.1: Resoure
@@ -122,16 +177,9 @@ property(P) :- subProperty(_, P).
 % ----- NEGATION: subProperty(P, rdfs:Property) :- property(P) AND NOT property(rdfs:Property).
 instanceOf(P, C2) :- instanceOf(P, C1), subProperty(C1, C2).
 "#;
+    parse_str(PROGRAM_SOURCE).unwrap().into_parsed()
+}
 
-    let mut program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
-
-    let evaluator = NaiveEvaluator::default();
-
-    let results = evaluator.inference(&program);
-    assert!(results.is_ok());
-    let new_relations = results.unwrap();
-
-    program.intensional_mut().merge(new_relations).unwrap();
-
-    print!("{}", program);
+pub fn eval_rdf_schema<T: Evaluator>(program: &Program, evaluator: T) {
+    let _ = evaluator.inference(program).unwrap();
 }

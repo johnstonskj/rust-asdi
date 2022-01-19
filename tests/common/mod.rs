@@ -53,7 +53,10 @@ pub fn make_and_evaluate_ancestors() -> Program {
 
     let new_intensional = evaluator.inference(&program).unwrap();
 
-    program.intensional_mut().merge(new_intensional).unwrap();
+    program
+        .intensional_mut()
+        .merge_from(new_intensional)
+        .unwrap();
 
     program
 }

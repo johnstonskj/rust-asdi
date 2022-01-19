@@ -1174,13 +1174,21 @@ impl Comparison {
         operator: ComparisonOperator,
         rhs: R,
     ) -> Result<Self> {
-        let new_self = Self {
+        let new_self = Self::new_unchecked(lhs, operator, rhs);
+        new_self.sanity_check()?;
+        Ok(new_self)
+    }
+
+    pub fn new_unchecked<L: Into<Term>, R: Into<Term>>(
+        lhs: L,
+        operator: ComparisonOperator,
+        rhs: R,
+    ) -> Self {
+        Self {
             lhs: lhs.into(),
             operator,
             rhs: rhs.into(),
-        };
-        new_self.sanity_check()?;
-        Ok(new_self)
+        }
     }
 
     pub fn sanity_check(&self) -> Result<()> {

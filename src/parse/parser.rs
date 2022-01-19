@@ -236,7 +236,8 @@ fn parse_fact(mut input_pairs: Pairs<'_, Rule>, program: &mut Program) -> Result
         edb.get_mut(&predicate).unwrap()
     };
 
-    relation.add_as_fact(attributes)
+    relation.add_as_fact(attributes)?;
+    Ok(())
 }
 
 fn parse_rule(input_pairs: Pairs<'_, Rule>, program: &mut Program) -> Result<()> {
@@ -248,7 +249,7 @@ fn parse_rule(input_pairs: Pairs<'_, Rule>, program: &mut Program) -> Result<()>
             Rule::rule_body => {
                 let body = parse_rule_body(inner_pair.into_inner(), program)?;
                 let rule = DlRule::new(head, body);
-                if let Err(e) = rule.safety_check(&program.features()) {
+                if let Err(e) = rule.safety_check(program.features()) {
                     return Err(pest_error!(span, e.to_string()));
                 } else {
                     program.add_rule(rule)?;

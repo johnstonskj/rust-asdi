@@ -1,5 +1,5 @@
 use asdi::edb::Predicate;
-use asdi::idb::eval::{Evaluator, NaiveEvaluator};
+use asdi::idb::eval::{Evaluator, StratifiedEvaluator};
 use asdi::idb::query::{Query, Queryable};
 use asdi::parse::parse_str;
 use asdi::{Collection, ProgramCore};
@@ -44,7 +44,7 @@ mortal(X) <- human(X).
 
     println!("-------------------------------------------------------------------------------");
 
-    let evaluator = NaiveEvaluator::default();
+    let evaluator = StratifiedEvaluator::default();
 
     let new_intensional = evaluator.inference(&program).unwrap();
 
@@ -98,8 +98,10 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
     print!("{}", program);
     println!("-------------------------------------------------------------------------------");
 
-    let evaluator = NaiveEvaluator::default();
+    let evaluator = StratifiedEvaluator::default();
+
     let results = evaluator.inference(&program);
+
     program
         .intensional_mut()
         .merge_from(results.unwrap())
@@ -150,7 +152,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
     print!("{}", program);
     println!("-------------------------------------------------------------------------------");
 
-    let evaluator = NaiveEvaluator::default();
+    let evaluator = StratifiedEvaluator::default();
 
     let results = evaluator.inference(&program).unwrap();
 
@@ -292,35 +294,13 @@ instanceOf(P, C2) :- instanceOf(P, C1), subProperty(C1, C2).
 "#;
     let mut program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
 
-    let evaluator = NaiveEvaluator::default();
+    let evaluator = StratifiedEvaluator::default();
 
     let results = evaluator.inference(&program);
     assert!(results.is_ok());
     let new_relations = results.unwrap();
 
     program.intensional_mut().merge_from(new_relations).unwrap();
-
-    print!("{}", program);
-
-    print!("{}", PROGRAM_SOURCE);
-    println!("-------------------------------------------------------------------------------");
-
-    let program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
-
-    let p_triple = program.predicates().fetch("triple").unwrap();
-    let p_instance_of = program.predicates().fetch("instanceOf").unwrap();
-
-    assert_eq!(program.extensional().get(&p_triple).unwrap().len(), 39);
-    assert_eq!(program.intensional().get(&p_instance_of).unwrap().len(), 0);
-
-    print!("{}", program);
-    println!("-------------------------------------------------------------------------------");
-
-    let evaluator = NaiveEvaluator::default();
-    let results = evaluator.inference(&program).unwrap();
-
-    assert_eq!(program.extensional().get(&p_triple).unwrap().len(), 39);
-    assert_eq!(results.get(&p_instance_of).unwrap().len(), 29);
 
     print!("{}", program);
 }

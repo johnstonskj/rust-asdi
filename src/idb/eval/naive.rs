@@ -1,8 +1,9 @@
 use crate::edb::Constant;
 use crate::error::{language_feature_disabled, Result};
 use crate::features::{FEATURE_COMPARISONS, FEATURE_NEGATION};
-use crate::idb::query::Queryable;
-use crate::idb::{eval::Evaluator, query::View, Atom, Term};
+use crate::idb::eval::Evaluator;
+use crate::idb::query::{Queryable, View};
+use crate::idb::{Atom, Term};
 use crate::{
     relation_does_not_exist, Collection, IndexedCollection, Labeled, MaybePositive, Program,
     ProgramCore, RelationSet, RuleForm, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION,
@@ -123,9 +124,14 @@ impl Evaluator for NaiveEvaluator {
                     break;
                 }
             }
+
             Ok(new_db)
         } else {
             Err(language_feature_disabled(FEATURE_NEGATION))
         }
+    }
+
+    fn label(&self) -> &'static str {
+        "naive"
     }
 }

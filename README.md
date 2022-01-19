@@ -100,6 +100,15 @@ fn ancestor_example() {
 
 ## Changes
 
+**Version 0.2.4**
+
+* Completed work to support stratification, including precedence graphs.
+* Added new `StratifiedEvaluator` implementation that performs stratification as well as using the semi-naive evaluation
+  scheme.
+* Added [Criterion](https://bheisler.github.io/criterion.rs/book/index.html)-based benchmarks for evaluation implementations.
+* Separated query trait from relational operations.
+* Minor changes in API for consistency.
+
 **Version 0.2.3**
 
 * Added new "*=" operator for regular expressions
