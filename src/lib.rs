@@ -17,7 +17,7 @@ the drawbacks of Prolog and the advantages of Datalog for certain tasks.
 When referring to the specifics of the language we will use the common format $\text{\small{Datalog}}$ with
 superscripts that identify specific language extensions; for example, $\small\text{Datalog}^{\lnot}$ is
 the language extended with negation of literals, $\small\text{Datalog}^{\Gamma}$ is the language
-extended with type checking on attributes, and $\small\text{Datalog}^{\lnot,\theta}$. is the language
+extended with type checking on attributes, and $\small\text{Datalog}^{\lnot,\theta}$ is the language
 extended with negation of literals _and_ arithmetic literals. The order of superscript symbols is
 irrelevant. Additionally, text in **bold** indicates a key concept in the language while text in
 _italics_ indicates a forward reference to such a concept.
@@ -407,7 +407,7 @@ ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Y) <- parent(X, Y).
 ancestor(X, Y) ⟵ parent(X, Y).
 
-movie_star(X) :- star(X), movie_cast_member(X, _, _).
+movie_star(X) :- star(X)  ,  movie_cast_member(X, _, _).
 movie_star(X) :- star(X)  &  movie_cast_member(X, _, _).
 movie_star(X) :- star(X) AND movie_cast_member(X, _, _).
 movie_star(X) :- star(X)  ∧  movie_cast_member(X, _, _).
@@ -432,12 +432,16 @@ father **or** mother_.
 ```datalog
 .feature(disjunction).
 
-father(X) ⋁ mother(X) :- parent(X).
+father(X) ;  mother(X) :- parent(X).
+father(X) |  mother(X) :- parent(X).
+father(X) OR mother(X) :- parent(X).
+father(X) ⋁  mother(X) :- parent(X).
 ```
 
-As the disjunction is inclusive it is considered that any disjunction as above can be translated
-into the following form. Clearly, in this case this is not the expected semantics which would require
-an exclusive disjunction, the language $\small\text{Datalog}^{\oplus}$.
+As the use of disjunction in this position in the head is _inclusive_ it is considered that any rule as above can be transformed
+into the following standard form. Clearly, in this case this is not the expected semantics which would require
+an exclusive disjunction, the language $\small\text{Datalog}^{\oplus}$. Because the semantics may
+cause such confusion ASDI does not do this transformation by default.
 
 ```datalog
 father(X) :- parent(X).
@@ -460,11 +464,14 @@ ASDI will disallow the addition of rules that are unsafe according to the abstra
 following are examples of unsafe rules:
 
 * `a(X) :- b(Y).` -- because `X` appears as a distinguished variable but does not appear in a
-  positive relational literal ([Error::HeadVariablesMissingInBody]).
+  positive relational literal, error
+  [`HeadVariablesMissingInBody`](error/enum.Error.html#variant.NegativeVariablesNotAlsoPositive).
 * `a(X) :- b(Y), NOT b(X).` -- because `X` appears in a negated literal but does not appear in a
-  positive relational literal ([Error::NegativeVariablesNotAlsoPositive]).
+  positive relational literal, error
+  [`NegativeVariablesNotAlsoPositive`](error/enum.Error.html#variant.NegativeVariablesNotAlsoPositive).
 * `a(X) :- b(Y), X < Y.` -- Because `X` appears in an arithmetic literal but does not appear in a
-  positive relational literal ([Error::ArithmeticVariablesNotAlsoPositive]).
+  positive relational literal, error
+  [`ArithmeticVariablesNotAlsoPositive`](error/enum.Error.html#variant.ArithmeticVariablesNotAlsoPositive).
 
 ### Atoms
 
@@ -503,7 +510,7 @@ anon-variable
         ::= "_"
 ```
 
-The following are all atoms.
+The following are all valid body atoms.
 
 ```datalog
 dead(julius_caesar).
@@ -528,9 +535,9 @@ literal
 The following rules are all equivalent.
 
 ```datalog
-ancestor(X, Y) ⟵ parent(X, Z), ancestor(Z, Y).
-ancestor(X, Y) ⟵ parent(X, Z) & ancestor(Z, Y).
-ancestor(X, Y) ⟵ parent(X, Z) ∧ ancestor(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z)  ,  ancestor(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z)  &  ancestor(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z)  ∧  ancestor(Z, Y).
 ancestor(X, Y) ⟵ parent(X, Z) AND ancestor(Z, Y).
 ```
 
@@ -727,7 +734,9 @@ an intensional relation in terms of a previously defined extensional relation.
 
 ```ebnf
 infer
-        ::= "infer" ( predicate "(" attribute-decl ( "," attribute-decl )* ")" | "from" predicate ) "."
+        ::= "infer"
+            ( predicate "(" attribute-decl ( "," attribute-decl )* ")" )
+            | "from" predicate "."
 ```
 
 ```datalog

@@ -1,0 +1,84 @@
+program
+        ::= assignment | expression
+
+assignment
+        ::= identifier ( "≔" | ":=" ) expression
+
+expression
+        ::=  relation-identifier
+          |  union
+          |  intersection
+          |  difference
+          |  cartesian-product
+          |  selection
+          |  projection
+          |  rename
+          |  join
+          |  "(" expression ")"
+
+/* ************************************************************************* */
+
+union   ::= expression ( "∪" | "union" ) expression
+
+intersection
+        ::= expression ( "∩" | "intersect" ) expression
+
+difference
+        ::= expression ( "∖" | "-" | "diff" ) expression
+
+cartesian-product
+        ::= expression ( "⨯" | "×" | "product" ) expression
+
+selection
+        ::= expression
+            ( "σ" | "select" ) "[" criteria ("," criteria )* "]"
+            expression
+
+criteria
+        ::= ( attribute-identifier | literal )
+            operation
+            ( attribute-identifier | literal )
+
+operation
+        ::= "=" | "!=" "<" | "<=" | ">" | ">="
+
+projection
+        ::= expression
+            ( "Π" | "π" | ""project" ) "[" attribute-identifier ("," attribute-identifier )* "]"
+            expression
+
+rename  ::= expression
+            ( "ρ" | "rename" ) "[" rename-pair ("," rename-pair )* "]"
+            expression
+
+rename-pair
+        ::= attribute-identifier "=" attribute-identifier
+
+join    ::= expression
+            ( natural-join | theta-join )
+            expression
+
+natural-join
+        ::= "⨝" | "natural-join"
+
+theta-join
+        ::= ( "⨝" | "theta-join" ) "[" criteria  ("," criteria )* "]"
+
+/* ************************************************************************* */
+
+relation-identifier
+        ::= ALPHA ( ALPHANUM | "_" )*
+
+attribute-identifier
+        ::= relation-identifier
+            ( "." ( relation-identifier | integer ) )
+
+/* ************************************************************************* */
+
+literal ::= integer | string | boolean
+
+integer ::= DIGIT+
+
+string  ::= '"' [^\"]* '"'
+
+boolean ::= "true" | "false"
