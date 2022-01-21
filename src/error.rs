@@ -95,6 +95,12 @@ pub enum Error {
         location: Option<SourceLocation>,
     },
 
+    ArithmeticVariablesNotAlsoPositive {
+        atom: PredicateRef,
+        variables: Vec<String>,
+        location: Option<SourceLocation>,
+    },
+
     RelationExists {
         label: PredicateRef,
     },
@@ -362,7 +368,17 @@ impl Display for Error {
                     ),
                 Error::NegativeVariablesNotAlsoPositive{ atom, variables, location } =>
                     format!(
-                        "In rule '{}'{}, the variables '{}' in some negative literals do not appear in any positive literal in the body.",
+                        "In rule '{}'{}, the variables '{}' in some negative literal(s) do not appear in any positive literal in the body.",
+                        atom,
+                        match location {
+                            None => String::new(),
+                            Some(src) => format!(", at {}", src),
+                        },
+                        variables.join(", ")
+                    ),
+                Error::ArithmeticVariablesNotAlsoPositive{ atom, variables, location } =>
+                    format!(
+                        "In rule '{}'{}, the variables '{}' in some arithmetic literal(s) do not appear in any positive literal in the body.",
                         atom,
                         match location {
                             None => String::new(),
@@ -376,13 +392,13 @@ impl Display for Error {
                 Error::Serialization(e) => format!("An error occured either serializing or deserializing a relation: {}", e),
                 Error::SerializationFormatUnknown { format: serialization } => format!("'{}' is not a supported serialization format.", serialization),
                 Error::SerializationOperationUnsupported{ format: serialization } => format!("The requested I/O operation is not supported by the serialization format '{}'", serialization),
-                Error::NotStratifiable => format!("The program cannot be evaluated as it includes negation but cannot be stratified."),
+                Error::NotStratifiable => "The program cannot be evaluated as it includes negation but cannot be stratified.".to_string(),
                 Error::AttributeDoesNotExist { label } => format!("The attribute labeled '{}' was not a member of the target schema.", label),
                 Error::AttributeIndexInvalid { index } => format!("The attribute index '{}' is not valid for the target schema.", index),
-                Error::NullaryFactsNotAllowed => format!("The arity of facts must be greater than, or equal to, 1."),
+                Error::NullaryFactsNotAllowed => "The arity of facts must be greater than, or equal to, 1.".to_string(),
                 Error::ComparisonIsAlwaysTrue { comparison } => format!("A comparison operator, or selection criteria, will always be true/⊤ (`{}`).", comparison),
                 Error::ComparisonIsAlwaysFalse { comparison } => format!("A comparison operator, or selection criteria, will always be true/⊥ (`{}`).", comparison),
-                Error::AnonymousVariableNotAllowed => format!("Anonymous variables not allowed in the current context."),
+                Error::AnonymousVariableNotAllowed => "Anonymous variables not allowed in the current context.".to_string(),
                 Error::IncompatibleTypes { lhs_type, rhs_type } => format!("A required operation cannot be performed between values of type `{}` and `{}`.", lhs_type, rhs_type),
             }
         )
