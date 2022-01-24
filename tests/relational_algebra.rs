@@ -1,4 +1,5 @@
 use asdi::edb::{Predicate, PredicateRef};
+use asdi::features::{FeatureSet, FEATURE_NEGATION};
 use asdi::idb::eval::ToGraphViz;
 use asdi::idb::query::relational::{program_to_graphviz, RelationalOp};
 use asdi::idb::{Atom, Comparison, ComparisonOperator, Literal, Rule, Term, Variable};
@@ -97,11 +98,80 @@ fn test_compile_rule_one() {
         ],
     );
     let rule: Rule = Rule::new([head], [Literal::from(body)]);
+    rule.safety_check(&FeatureSet::from(FEATURE_NEGATION))
+        .unwrap();
 
     println!(">>> {}", rule);
     let relational = RelationalOp::compile_rule(&rule).unwrap();
     println!("<<< {}", relational);
-    assert_eq!(relational.to_string(), "parent".to_string());
+    assert_eq!(relational.to_string(), "ancestor ≔ parent".to_string());
+}
+
+#[test]
+fn test_compile_rule_one_criteria() {
+    let head = Atom::new(
+        Predicate::from_str("unused").unwrap().into(),
+        [Term::Variable(Variable::from_str("X").unwrap().into())],
+    );
+    let body_atom = Atom::new(
+        Predicate::from_str("done_something").unwrap().into(),
+        [
+            Term::Variable(Variable::from_str("X").unwrap().into()),
+            Term::Variable(Variable::from_str("Y").unwrap().into()),
+        ],
+    );
+    let body_comp = Comparison::ne(
+        Term::Variable(Variable::from_str("Y").unwrap().into()),
+        Term::Constant(0.into()),
+    )
+    .unwrap();
+    let rule: Rule = Rule::new([head], [Literal::from(body_atom), Literal::from(body_comp)]);
+    rule.safety_check(&FeatureSet::from(FEATURE_NEGATION))
+        .unwrap();
+
+    println!(">>> {}", rule);
+    let relational = RelationalOp::compile_rule(&rule).unwrap();
+    println!("<<< {}", relational);
+    assert_eq!(
+        relational.to_string(),
+        "unused ≔ Π[X](σ[1!=0](done_something))".to_string()
+    );
+}
+
+#[test]
+fn test_compile_rule_negated_literal() {
+    let head = Atom::new(
+        Predicate::from_str("living").unwrap().into(),
+        [Term::Variable(Variable::from_str("X").unwrap().into())],
+    );
+    let body_1 = Atom::new(
+        Predicate::from_str("person").unwrap().into(),
+        [Term::Variable(Variable::from_str("X").unwrap().into())],
+    );
+    let body_2 = Atom::new(
+        Predicate::from_str("died_on").unwrap().into(),
+        [
+            Term::Variable(Variable::from_str("X").unwrap().into()),
+            Term::Anonymous,
+        ],
+    );
+    let rule: Rule = Rule::new(
+        [head],
+        [
+            Literal::relational(body_1),
+            Literal::negative_relational(body_2),
+        ],
+    );
+    rule.safety_check(&FeatureSet::from(FEATURE_NEGATION))
+        .unwrap();
+
+    println!(">>> {}", rule);
+    let relational = RelationalOp::compile_rule(&rule).unwrap();
+    println!("<<< {}", relational);
+    assert_eq!(
+        relational.to_string(),
+        "living ≔ (person) ∖ ((died_on) ⨝ (person))".to_string()
+    );
 }
 
 #[test]
@@ -128,6 +198,8 @@ fn test_compile_rule_two() {
         ],
     );
     let rule: Rule = Rule::new([head], [Literal::from(body_1), Literal::from(body_2)]);
+    rule.safety_check(&FeatureSet::from(FEATURE_NEGATION))
+        .unwrap();
 
     println!(">>> {}", rule);
     let relational = RelationalOp::compile_rule(&rule).unwrap();
@@ -135,7 +207,7 @@ fn test_compile_rule_two() {
     println!("{}", relational.to_graphviz_string().unwrap());
     assert_eq!(
         relational.to_string(),
-        "Π[X, Y]((path) ⨝ (edge))".to_string()
+        "path ≔ Π[X, Y]((path) ⨝ (edge))".to_string()
     );
 }
 
@@ -176,6 +248,8 @@ fn test_compile_rule_two_with_rule() {
             Literal::from(body_3),
         ],
     );
+    rule.safety_check(&FeatureSet::from(FEATURE_NEGATION))
+        .unwrap();
 
     println!(">>> {}", rule);
     let relational = RelationalOp::compile_rule(&rule).unwrap();
@@ -183,7 +257,7 @@ fn test_compile_rule_two_with_rule() {
     println!("{}", relational.to_graphviz_string().unwrap());
     assert_eq!(
         relational.to_string(),
-        "Π[X, Y]((σ[0!=101](path)) ⨝ (σ[1!=101](edge)))".to_string()
+        "path ≔ Π[X, Y]((σ[0!=101](path)) ⨝ (σ[1!=101](edge)))".to_string()
     );
 }
 
