@@ -7,6 +7,7 @@ Another Simplistic Datalog Implementation (in Rust).
 ![Minimum Rust Version](https://img.shields.io/badge/Min%20Rust-1.53-green.svg)
 [![crates.io](https://img.shields.io/crates/v/asdi.svg)](https://crates.io/crates/asdi)
 [![docs.rs](https://docs.rs/asdi/badge.svg)](https://docs.rs/asdi)
+[![mdbook to pages](https://github.com/johnstonskj/rust-asdi/actions/workflows/gh-pages.yml/badge.svg)](https://github.com/johnstonskj/rust-asdi/actions/workflows/gh-pages.yml)
 ![Build](https://github.com/johnstonskj/rust-asdi/workflows/Rust/badge.svg)
 ![Audit](https://github.com/johnstonskj/rust-asdi/workflows/Security%20audit/badge.svg)
 [![GitHub stars](https://img.shields.io/github/stars/johnstonskj/rust-asdi.svg)](https://github.com/johnstonskj/rust-asdi/stargazers)
