@@ -1,0 +1,351 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Relational Algebra Mapping - Another Simplistic Datalog Implementation (in Rust)</title>
+        <!-- Custom HTML head -->
+<link   rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"
+        integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs"
+        crossorigin="anonymous">
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+
+<script defer>
+document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "\\(", right: "\\)", display: false},
+            {left: "$", right: "$", display: false},
+            {left: "\\[", right: "\\]", display: true}
+        ]
+    });
+});
+</script>
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../asdi.css">
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html" class="active"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">5.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">6.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">7.</strong> Appendix: References</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Another Simplistic Datalog Implementation (in Rust)</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/johnstonskj/rust-asdi" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="relational-algebra-mapping"><a class="header" href="#relational-algebra-mapping">Relational Algebra Mapping</a></h1>
+<p>Every expression in the <em>basic</em> relational algebra can be expressed as a $\small\text{Datalog}$
+query. However, operations in the extended relational algebra (grouping, aggregation, and sorting)
+have no corresponding capability in $\small\text{Datalog}$. Similarly, $\small\text{Datalog}$ can
+express recursion, which the relational algebra cannot. The following describes the foundational
+relational operations and their $\small\text{Datalog}$ equivalent.</p>
+<p>The semantics of $\small\text{Datalog}$ relations are primarily set based we would expect common
+set operations to work in $\small\text{Datalog}$ rules. Given the relations R, $\small r(a,b,c)$,
+and S, $\small s(d,e,f)$, we can easily describe the common set operations.</p>
+<h2 id="union-smallcup"><a class="header" href="#union-smallcup">Union ($\small\cup$)</a></h2>
+<p>Union is a binary operator that is written as $\small R \cup S$, where
+$\small R$ and $\small S$ are relations.</p>
+<p>For set union and set difference, the two relations involved must be <strong>union-compatible</strong> -—
+that is, the two relations must have the same set of attributes. A strict form of this rule does not
+allow for same-named attributes whereas a looser form allows duplicate names IFF they have identical
+types. Because set intersection is defined in terms of set union and set difference, the two
+relations involved in set intersection must also be union-compatible.</p>
+<p>Consider the expression $\small U \coloneqq R \cup S$, which can be expressed as follows:</p>
+<pre><code class="language-datalog">u(X, Y, Z) :- r(X, Y, Z).
+u(X, Y, Z) :- s(X, Y, Z).
+</code></pre>
+<h2 id="difference-smallsetminus"><a class="header" href="#difference-smallsetminus">Difference ($\small\setminus$)</a></h2>
+<p>Difference is a binary operator that is written as $\small R \setminus S$,
+where $\small R$ and $\small S$ are relations. This cannot be
+implemented in $\small\text{Datalog}$ as it required negation.</p>
+<p>Consider the expression $\small D \coloneqq R \setminus S$ which can be expressed in
+$\small\text{Datalog}^{\lnot}$ as follows:</p>
+<pre><code class="language-datalog">d(X,Y,Z) :- r(X,Y,Z) AND NOT s(X,Y,Z).
+</code></pre>
+<h2 id="intersection-smallcap"><a class="header" href="#intersection-smallcap">Intersection ($\small\cap$)</a></h2>
+<p>Intersection is a binary operator that is written as $\small R \cap S$, where
+$\small R$ and $\small S$ are relations.</p>
+<p>Consider the expression $\small I \coloneqq R \cap S$, which can be expressed as follows:</p>
+<pre><code class="language-datalog">i(X,Y,Z) :- r(X,Y,Z) AND s(X,Y,Z).
+</code></pre>
+<p>Intersection may be defined in terms of the difference operation, as below.</p>
+<p>$$\small R \cap S \enspace\equiv\medspace R \setminus (R \setminus S)$$</p>
+<h2 id="cartesian-product-smalltimes"><a class="header" href="#cartesian-product-smalltimes">Cartesian Product ($\small\times$)</a></h2>
+<p>Cartesian Product is a binary operator that is written as $\small R \times S$,
+where $\small R$ and $\small S$ are relations. In relational algebra it is required that the two
+relations involved must have disjoint headers—that is, they must not have a common attribute name.</p>
+<p>The following is a valid expression of $\small P \coloneqq R \times S$:</p>
+<pre><code class="language-datalog">p(A, B, C, D, E, F) :- r(A, B, C) AND s(D, E, F).
+</code></pre>
+<h2 id="projection-smallpi"><a class="header" href="#projection-smallpi">Projection ($\small\Pi$)</a></h2>
+<p>Projection is a unary operation written as
+$\small\Pi_{a_{1},\ldots ,a_{n}}(R)$ where $a_{1},\ldots ,a_{n}$ is a set of attribute names. The
+result of such projection is defined as the set that is obtained when all tuples in $R$ are
+restricted to the set $\small\lbrace a_{1},\ldots ,a_{n}\rbrace$. In some literature the lower case
+$\small\pi$ is used instead of $\small\Pi$.</p>
+<p>For example, the projection $\small P \coloneqq \Pi_{X} (R)$, a projection of the first attribute in R only,
+can be expressed in $\small\text{Datalog}$ as either of the following equivalent rules.</p>
+<pre><code class="language-datalog">p(X) :- r(X, Y, Z).
+p(X) :- r(X, _, _).
+</code></pre>
+<h2 id="generalized-selection-smallsigma"><a class="header" href="#generalized-selection-smallsigma">Generalized Selection ($\small\sigma$)</a></h2>
+<p>As defined by Codd, selection is written as $\small \sigma_{a\theta b}(R)$ or
+$\small \sigma_{a\theta v}(R)$ where:</p>
+<ul>
+<li>$\small a$ and $\small b$ are attribute names,</li>
+<li>$\small\theta$ is a binary operation, where $\small\theta\in\lbrace =, \neq, &lt;, \leq, &gt;, \geq, \overset{\star}{=} \rbrace$,</li>
+<li>$\small v$ is a constant value,</li>
+<li>$\small R$ is a relation,</li>
+</ul>
+<p>The selection $\small\sigma_{a\theta b}(R)$ denotes all tuples in $\small R$ for which $\small\theta$
+holds between the $\small a$ and the $\small b$ attribute.</p>
+<p>The selection $\small\sigma_{a\theta v}(R)$ denotes all tuples in $\small R$ for which $\small\theta$
+holds between the $\small a$ attribute and the value $\small v$.</p>
+<p>Selection requires arithmetic literals and therefore the languages $\small\text{Datalog}^{\theta}$
+and $\small\text{Datalog}^{\lnot}$ for negation.</p>
+<p><strong>Generalized Selection</strong> is a unary operation written as $\small\sigma_{\varphi}(R)$ where
+$\small\varphi$ is a propositional formula that consists of conditions as allowed in the normal selection
+and the logical operators $\small\land$ (and), $\small\lor$ (or) and $\small\lnot$ (negation). This selection
+selects all those tuples in $\small R$ for which $\small\varphi$ holds.</p>
+<p>In $\small\text{Datalog}^{\theta}$ the selection $\small L \coloneqq \sigma_{X&gt;100 \land Y=‘something’} (R)$
+can be expressed as follows, where both rules are equivalent.</p>
+<pre><code class="language-datalog">l(X, Y, Z) :- r(X, Y, Z) AND X &gt; 100 AND Y = something.
+l(X, Y, Z) :- r(X, Y, something) AND X &gt; 100.
+</code></pre>
+<h2 id="rename-smallrho"><a class="header" href="#rename-smallrho">Rename ($\small\rho$)</a></h2>
+<p>Rename is a unary operation written as $\small\rho_{a/b}(R)$ where the result is identical to $\small R$
+except that the $\small b$ attribute in all tuples is renamed to an $\small a$ attribute. This is
+simply used to rename the attribute of a relation or the relation itself. There is also the
+$\small\rho_{x(A_{1},\ldots, A_{n})}(R)$ notation, where $\small R$ is renamed to $\small x$ and the
+attributes $\small\lbrace a_{1},\ldots, a_{n}\rbrace$ are renamed to $\small\lbrace A_{1}, \ldots, A_{n}\rbrace$.</p>
+<p>TBD</p>
+<h2 id="theta-join-smalljoin_theta"><a class="header" href="#theta-join-smalljoin_theta">Theta Join ($\small\Join_{\theta}$)</a></h2>
+<p>Theta Join is a binary operator that is written as $\small{R \Join S} \atop {a \theta b}$ and
+$\small{R \Join S} \atop {a \theta v}$ or alternatively as $\small R \Join_{a \theta b} S$ and
+$\small R \Join_{a \theta v} S$, where $\small R$ and $\small S$ are relations,
+and the expressions $\small a\theta b$ and $\small a\theta v$ should be interpreted in the same way
+as for selection.</p>
+<p>A <strong>generalized Theta Join</strong> can be described following the convention of generalized selection where
+$\small\theta$ expands into a propositional formula in the same manner as $\small\varphi$. Unfortunately
+there is no notational alignment where a generalized theta join might be signified as
+$\small\Join_{\varphi}$</p>
+<p>For example, the natural join $\small J \coloneqq R \Join_{S.X&gt;100} S$, a join conditional join on an attribute
+in S can be expressed in $\small\text{Datalog}^{\theta}$ as follows.</p>
+<pre><code class="language-datalog">j(X,Y,Z) :- r(X,Y,Z) AND s(Xs,Y,Z) AND Xs &gt; 100.
+</code></pre>
+<p>It is possible to dispense with the theta join in most cases as it can be expressed in terms of
+the selection and cartesian product operators described above.</p>
+<p>$$\small R \Join_{\theta} \enspace\equiv\enspace \sigma_{\theta}(R \times S)$$</p>
+<p>An <strong>Equi-Join</strong> is a special case of the Theta Join where $\small\theta$ contains only equalities.</p>
+<h2 id="natural-join-smalljoin"><a class="header" href="#natural-join-smalljoin">Natural Join ($\small\Join$)</a></h2>
+<p>Natural Join is a binary operator that is written as $\small R \Join S$, where $\small R$ and
+$\small S$ are relations. The result of the natural join is the set of all combinations of tuples
+in $\small R$ and $\small S$ that are equal on their common attribute names. The natural join is
+arguably one of the most important operators since it is the relational counterpart of the logical
+AND operator.</p>
+<p>For example, the natural join $\small J = R \Join S$, a join on the first two attributes of R and S,
+can be expressed in $\small\text{Datalog}$ as follows. Note that the common attributes are defined
+by the names of their variables, not the underlying names of the attribute schema.</p>
+<pre><code class="language-datalog">j(X,Y,Z,Q) :- r(X,Y,Z) AND s(X,Y,Q).
+</code></pre>
+<p>A Natural Join is a special case of the Equi-Join where equality operations are performed on all
+common attributes.</p>
+<h2 id="complex-expressions"><a class="header" href="#complex-expressions">Complex Expressions</a></h2>
+<p>More complex examples can the be made from combining relational operators. The relational
+query $\small A \coloneqq \Pi_{X}(\sigma_{Y = 3} (R) )$ becomes</p>
+<pre><code class="language-datalog">a(X) :- r(X, 3, _).
+</code></pre>
+<p>Similarly, the relational query $\small A \coloneqq \Pi_{X}(\sigma_{Y = 3} (R) \Join_{R.X=S.X}\sigma_{Y = 5} (S))$
+becomes</p>
+<pre><code class="language-datalog">a(X) :- r(X, 3, _) AND s(X, 5, _).
+</code></pre>
+<h2 id="recursion"><a class="header" href="#recursion">Recursion</a></h2>
+<p>Although relational algebra seems powerful enough for most practical purposes, there are some
+simple and natural operators on relations that cannot be expressed by relational algebra.
+One of them is the transitive closure of a binary relation. Given a domain $\small D$, let binary
+relation $\small R$, $\small \text{Datalog } r(x, y)$, be a subset of $\small D\times D$. The transitive closure $\small R^{+}$ of $R$ is the smallest
+subset of $\small D\times D$ that contains $R$ and satisfies the following condition:</p>
+<p>$$\small\forall x\forall y\forall z\left((x,y)\in R^{+}\land (y,z)\in R^{+}\Rightarrow (x,z)\in R^{+}\right)$$</p>
+<p>In Datalog this form of recursion is naturally expressed, as follows.</p>
+<pre><code class="language-datalog">r_plus(X, Z) :- r(X, Y), r_plus(Y, Z).
+</code></pre>
+<p><em>Acknowledgements</em>. Examples in this section are taken from <a href="https://courses.cs.washington.edu/courses/cse344/12au/lectures/lecture10-datalog.pdf"><em>Introduction to Data Management CSE 344, Lecture 10:
+Datalog</em></a>,
+Magda Balazinska, Fall 2012. Definitions for the relational algebra are taken from
+<a href="https://en.wikipedia.org/wiki/Relational_algebra"><em>Relational algebra</em></a>, Wikipedia, fetched
+January 2022. The <a href="http://www.grammaticalframework.org/qconv/qconv-a.html">Relational Algebra Query Converter</a>
+is an interesting way to take a SQL query and convert to relational algebra which can then be
+converted to Datalog using the examples above.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../datalog/concrete.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../datalog/features.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../datalog/concrete.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../datalog/features.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        <script type="text/javascript" src="../datalog.js"></script>
+        <script type="text/javascript" src="../asdi.js"></script>
+    </body>
+</html>

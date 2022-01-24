@@ -1,0 +1,428 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Abstract Syntax - Another Simplistic Datalog Implementation (in Rust)</title>
+        <!-- Custom HTML head -->
+<link   rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"
+        integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs"
+        crossorigin="anonymous">
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+
+<script defer>
+document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "\\(", right: "\\)", display: false},
+            {left: "$", right: "$", display: false},
+            {left: "\\[", right: "\\]", display: true}
+        ]
+    });
+});
+</script>
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../asdi.css">
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html" class="active"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">5.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">6.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">7.</strong> Appendix: References</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Another Simplistic Datalog Implementation (in Rust)</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/johnstonskj/rust-asdi" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="abstract-syntax"><a class="header" href="#abstract-syntax">Abstract Syntax</a></h1>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
+<p>Rules $\small R$ are built from a language $\small \mathcal{L}=( \mathcal{C},\mathcal{P},\mathcal{V})$
+that contains the</p>
+<ol>
+<li>$\small \mathcal{C}$ – the finite sets of symbols for all constant values; e.g. <code>hello</code>, <code>&quot;hi&quot;</code>
+<code>123</code>,</li>
+<li>$\small \mathcal{P}$ – the finite set of alphanumeric character strings that begin with a
+lowercase character; e.g. <code>human</code>, <code>size</code>, <code>a</code>,</li>
+<li>$\small \mathcal{V}$ – the finite set of alphanumeric character strings that begin with an
+uppercase character; e.g. <code>X</code>, <code>A</code>, <code>Var</code>.</li>
+</ol>
+<p>While it would appear that the values from $\small \mathcal{P}$ or $\small \mathcal{V}$ would
+overlap, these values must remain distinct. For example, the value <code>human</code> is a valid predicate and
+string constant but they have distinct types in ASDI that ensure they are distinct.</p>
+<p>Each rule $\small r \in R$ has the form:</p>
+<p>$$\tag{i}\small A_1, \ldots, A_m \leftarrow L_1, \ldots, L_n$$</p>
+<p>as well as the following properties:</p>
+<ol>
+<li>$\small head(r)$ (the consequence), returns the set of <em>atom</em> values $\small A_1, \ldots, A_m$ where $\small m \in \mathbb{N}$,</li>
+<li>$\small body(r)$ (the antecedence), returns the set of <em>literal</em> values $\small L_1, \ldots, L_n$ where $\small n \in \mathbb{N}$,</li>
+<li>$\small distinguished(r)$ returns the set of <em>terms</em> in the head of a rule,
+$$\tag{ii}\small distinguished(r) \coloneqq \lbrace t | t \in \bigcup\lbrace terms(a) | a \in head(r) \rbrace \rbrace$$</li>
+<li>$\small non\text{-}distinguished(r)$ returns the set of <em>terms</em> in the body that of a rule that are not in the head,
+$$\tag{iii}\small non\text{-}distinguished(r) \coloneqq \lbrace t | t \in ( \bigcup\lbrace terms(a) | a \in body(r) \rbrace - distinguished(r) \rbrace)\rbrace$$</li>
+<li>$\small ground(r)$  returns true if its head and its body are both <em>ground</em>:
+$$\tag{iv}\small ground(r) \coloneqq (\forall{a}\in head(r); ground(a)) \land (\forall{l}\in body(r); ground(l))$$</li>
+<li>$\small positive(r)$ returns true if all body <em>literals</em> are <em>positive</em>:
+$$\tag{v}\small positive(r) \coloneqq (\forall{l}\in body(r); positive(l))$$</li>
+</ol>
+<p>A <em>pure</em> rule is one where there is only a single atom in the head; if the body is true, the head is
+true. A <strong>constraint</strong> rule, or contradiction, does not allow any consequence to be determined from
+evaluation of its body. A <strong>disjunctive</strong> rule is one where there is more than one atom, and any one
+may be true if the body is true. The language $\small\text{Datalog}^{\lor}$ allows for <em>inclusive</em>
+disjunction, and while a language, $\small\text{Datalog}^{\oplus}$, exists for <em>exclusive</em> disjunction
+it is not implemented here.</p>
+<p>The property $\small form(r)$ returns the form of the rule, based
+on the cardinality of the rule’s head as follows:</p>
+<p>$$\tag{vi}\small
+form(r) \coloneqq
+\begin{cases}
+pure, &amp;\text{if } |head(r)| = 1 \\
+constraint, &amp;\text{if } |head(r)| = 0 \land \text{Datalog}^{\lnot} \\
+disjunctive, &amp;\text{if } |head(r)| &gt; 1  \land \text{Datalog}^{\lor}
+\end{cases}$$</p>
+<p>Note that this notation is similar to that of a <a href="https://en.wikipedia.org/wiki/Sequent"><em>sequent</em></a>.
+Taking our definition of a rule, $\small A_1, \ldots, A_m \leftarrow L_1, \ldots, L_n$, and swap the
+order of antecedence and consequence we get $\small L_1, \ldots, L_m \vdash A_1, \ldots, A_n$.
+A pure rule is termed a <em>simple conditional assertion</em>, a constraint rule is termed an
+<em>unconditional assertion</em>, and a disjunctive rule is termed a <em>sequent</em> (or simply <em>conditional
+assertion</em>).</p>
+<p>Alternatively, some literature defines a rule in the following form:</p>
+<p>$$\tag{ia}\small C_1 | C_2 | \ldots | C_n \leftarrow A_1, \ldots, A_m, \lnot B_1, \ldots, \lnot B_k$$</p>
+<p>Where this form shows the expanded head structure according to $\small\text{Datalog}^{\lor}$, and the
+set of negated literals according to $\small\text{Datalog}^{\lnot}$.</p>
+<h2 id="terms"><a class="header" href="#terms">Terms</a></h2>
+<p>Terms, mentioned above, may be constant values or variables such that
+$\small\mathcal{T}=\mathcal{C}\cup\mathcal{V}\cup\bar{t}$ where $\small\bar{t}$ represents an
+anonymous variable.</p>
+<p>Terms have the following properties:</p>
+<ol>
+<li>$\small constant(t)$ returns true if the term argument is a constant value.</li>
+<li>$\small variable(t)$ returns true if the term argument is a variable.</li>
+<li>$\small anonymous(t)$ returns true if the term argument is the anonymous variable, $\small\bar{t}$.</li>
+</ol>
+<p>With the definition of rules so far it is possible to write rules that generate an an
+infinite number of results. To avoid such problems Datalog rules are required to satisfy the
+following <strong>Safety</strong> conditions:</p>
+<ol>
+<li>Every variable that appears in the head of a clause also appears in a positive relational literal
+(atom) in the body of the clause.
+$$\tag{vii}\small
+\begin{alignat*}{2}
+safe\text{-}head(r) &amp;\coloneqq &amp;&amp;\lbrace t | t \in distinguished(r), t \in \mathcal{V} \rbrace \\
+&amp;- &amp;&amp;\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), atom(a), positive(a) \rbrace, t \in \mathcal{V} \rbrace \\
+&amp;= &amp;&amp;\empty
+\end{alignat*}$$</li>
+<li>Every variable appearing in a negative literal in the body of a clause also appears in some
+positive relational literal in the body of the clause.
+$$\tag{viii}\small
+\begin{alignat*}{2}
+safe\text{-}negatives(r) &amp;\coloneqq &amp;&amp;\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), \lnot positive(a) \rbrace, t \in \mathcal{V} \rbrace \\
+&amp;- &amp;&amp;\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), atom(a), positive(a) \rbrace, t \in \mathcal{V} \rbrace \\
+&amp;= &amp;&amp;\empty
+\end{alignat*}$$</li>
+</ol>
+<h2 id="atoms"><a class="header" href="#atoms">Atoms</a></h2>
+<p>Atoms are comprised of a label, $\small p \in \mathcal{P}$, and a tuple of <em>terms</em>. A set of atoms
+form a <strong>Relation</strong> if each <em>conforms to</em> the schema of the relation. The form of an
+individual atom is as follows:</p>
+<p>$$\tag{ix}\small p(t_1, \ldots, t_k)$$</p>
+<p>as well as the following properties:</p>
+<ol>
+<li>$\small label(a)$ returns the predicate $\small p$,</li>
+<li>$\small terms(a)$ returns the tuple of term values $\small t_1, \ldots, t_k$; where
+$\small t \in \mathcal{T}$ and $\small k \in \mathbb{N}^{+}$,</li>
+<li>$\small arity(a)$ returns the cardinality of the relation identified by the predicate;
+$\small arity(a) \equiv |terms(a)| \equiv k$,</li>
+<li>in $\small\text{Datalog}^{\Gamma}$:
+<ol>
+<li>there exists a type environment $\small \Gamma$ consisting of one or more types $\small \tau$,</li>
+<li>each term $\small t_i$ has a corresponding type  $\small \tau_i$ where $\small \tau \in \Gamma$,</li>
+<li>$\small type(t)$ returns the type $\small \tau$ for that term,</li>
+<li>$\small types(a)$ returns a tuple such that;
+$\small (i \in {1, \ldots, arity(a)} | type(t_i))$,</li>
+</ol>
+</li>
+<li>$\small ground(a)$ returns true if its terms are all constants:
+$$\tag{x}\small ground(a) \coloneqq (\forall{t}\in terms(a); t \in \mathcal{C})$$</li>
+</ol>
+<h2 id="relations"><a class="header" href="#relations">Relations</a></h2>
+<p>Every relation $\small r$ has a schema that describes a set of attributes
+$\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$, and each attribute may be named, and may in
+$\small\text{Datalog}^{\Gamma}$ also have a type.</p>
+<p>Relations have the following properties:</p>
+<ol>
+<li>$\small label(r)$ returns the predicate $\small p$,</li>
+<li>$\small schema(r)$ returns the set of attributes $\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$;
+where $\small k \in \mathbb{N}^{+}$,</li>
+<li>$\small arity(r)$ returns the number of attributes in the relation’s schema, and therefore all
+atoms within the relation; $\small arity(r) \equiv |schema(a)| \equiv j$.</li>
+</ol>
+<p>Attributes have the following properties:</p>
+<ol>
+<li>$\small label(\alpha)$ returns either the predicate label of the attribute, or $\small\bot$.</li>
+<li>in $\small\text{Datalog}^{\Gamma}$:
+<ol>
+<li>$\small type(\alpha)$ returns a type $\small \tau$ for the attribute, where $\small \tau \in \Gamma$, or $\small\bot$.</li>
+</ol>
+</li>
+</ol>
+<p>The following defines a binary function that determines whether an atom $\small a$ conforms to the
+schema of a relationship $\small r$.</p>
+<p>$$\tag{xi}\small
+\begin{alignat*}{2}
+conforms(a, r) &amp;\coloneqq &amp;&amp;ground(a) \\
+&amp;\land &amp;&amp;label(a) = label(r) \\
+&amp;\land &amp;&amp;arity(a) = arity(r) \\
+&amp;\land &amp;&amp;\forall{i} \in \lbrace 1, \ldots, arity(r)\rbrace \medspace conforms( a_{t_i}, r_{\alpha_i} )
+\end{alignat*}
+$$
+$$\tag{xii}\small
+conforms(t, \alpha) \coloneqq
+label(t) = label(\alpha) \land
+\tau_{t} = \tau{\alpha}
+$$</p>
+<p>Note that in relational algebra it is more common to use the term domain $\small D$ to denote a possibly
+infinite set of values. Each attribute on a relation has a domain $\small D_i$ such that each ground
+term is a value $\small d_i$ and the equivalent of $\small \tau_i \in \Gamma$ becomes
+$\small d_i \in D_i$.</p>
+<p>To visualize a set of facts in a relational form we take may create a table $p$, where each column,
+or attribute, corresponds to a term index $1 \ldots k$. If the facts are typed then each column
+takes on the corresponding $\tau$ type. Finally each row in the table is populated with the tuple
+of term values.</p>
+<table><thead><tr><th></th><th>$\small col_1: \tau_1$</th><th>$\small \ldots$</th><th>$\small col_k: \tau_k$</th></tr></thead><tbody>
+<tr><td>$\small row_1$</td><td>$\small t_{1_1}$</td><td>$\small \ldots$</td><td>$\small t_{1_k}$</td></tr>
+<tr><td>$\small \ldots$</td><td>$\small \ldots$</td><td>$\small \ldots$</td><td>$\small \ldots$</td></tr>
+<tr><td>$\small row_y$</td><td>$\small t_{y_1}$</td><td>$\small \ldots$</td><td>$\small t_{y_k}$</td></tr>
+</tbody></table>
+<h2 id="literals"><a class="header" href="#literals">Literals</a></h2>
+<p>Literals within the body of a rule, represent sub-goals that are the required to be true for the
+rule’s head to be considered true.</p>
+<ol>
+<li>A literal may be an atom (termed a relational literal) or, in $\small\text{Datalog}^{\theta}$, a
+conditional expression (termed an arithmetic literal),</li>
+<li>a an arithmetic literal has the form $\small \langle t_{lhs} \theta t_{rhs} \rangle$, where
+<ol>
+<li>$\small \theta \in \lbrace =, \neq, &lt;, \leq, &gt;, \geq \rbrace$,</li>
+<li>in $\small\text{Datalog}^{\Gamma}$ both $\small t_{lhs}$ and $\small t_{rhs}$ terms have
+corresponding types $\small \tau_{lhs}$ and $\small \tau_{rhs}$,</li>
+<li>the types $\small \tau_{lhs}$ and $\small \tau_{rhs}$ <strong>must</strong> be <em>compatible</em>, for some
+system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_{rhs}, \theta)$,</li>
+</ol>
+</li>
+<li>in $\small\text{Datalog}^{\lnot}$ a literal may be negated, appearing as $\small \lnot l$,</li>
+<li>and has the following properties:
+<ol>
+<li>$\small relational(l)$ returns true if the literal argument is a relational literal.</li>
+<li>$\small arithmetic(l)$ returns true if the literal argument is a arithmetic literal.</li>
+<li>$\small terms(l)$ returns either the set of terms in a literal,
+$$\tag{xiii}\small
+terms(l) \coloneqq
+\begin{cases}
+terms(l), &amp;\text{if } relational(l) \\
+\lbrace t_{lhs}, t_{rhs} \rbrace, &amp;\text{if } arithmetic(l) \land \text{Datalog}^{\theta}
+\end{cases}$$</li>
+<li>$\small ground(l)$ returns true if its terms are all constants $\small (\forall{t}\in terms(l); t \in \mathcal{C})$,</li>
+<li>$\small positive(l)$ in $\small\text{Datalog}^{\lnot}$ returns false if negated,
+otherwise it will always return true.</li>
+</ol>
+</li>
+</ol>
+<h2 id="facts"><a class="header" href="#facts">Facts</a></h2>
+<p>Any ground rule where $\small m=1$ and where $\small n=0$ is termed a <strong>Fact</strong> as it is true by
+nature of having an empty body, or alternatively we may consider the body be comprised of the truth
+value $\small\top$.</p>
+<p>$$\tag{xiv}\small fact(r) \coloneqq (ground(r) \land form(r)=pure \land body(r)=\empty)$$</p>
+<h2 id="queries"><a class="header" href="#queries">Queries</a></h2>
+<p>An atom may be also used as a <strong>Goal</strong> or <strong>Query</strong> clause in that its constant and variable terms
+may be used to match facts from the known facts or those that may be inferred from the set of rules
+introduced. A ground goal is simply determining that any fact exists that matches all of the
+constant values provided and will return true or false.
+In the case that one or more variables exist a set of facts will be returned that match the
+expressed constants and provide the corresponding values for the variables.</p>
+<p>The set of facts (ground atoms) known a-priori is termed the <strong>Extensional</strong> database, EDB, or $\small D_E$,.
+The set of rules, and any inferred facts, are termed the <strong>Intensional</strong> database, IDB, or $\small D_I$.</p>
+<p>A Datalog <strong>Program</strong> $\small P$ is a tuple comprising the extensional database $\small D_{E}$, the
+intensional database $\small D_{I}$, and a set of queries.</p>
+<p>$$\tag{xv}\small P=( D_E, D_I, Q )$$</p>
+<p>This implies, at least, that the set of predicates accessible to queries in the program is the union
+of predicates in the extensional and intensional databases.</p>
+<p>$$\tag{xvi}\small \mathcal{P}_P = \mathcal{P}_E \cup \mathcal{P}_I$$</p>
+<p>It should be obvious that the same exists for constants and variables;
+$\small \mathcal{C}_P = \mathcal{C}_E \cup \mathcal{C}_I$ and
+$\small \mathcal{V}_P = \mathcal{V}_E \cup \mathcal{V}_I$.</p>
+<p>Datalog does not, in general, allow the rules comprising the intensional database to infer new
+values for predicates that exist in the extensional database. This may be expressed as follows:</p>
+<p>$$\tag{xvii}\small \mathcal{P}_E \cap \mathcal{P}_I = \empty$$</p>
+<p>The same restriction is not required for constants in $\small \mathcal{C}_P$ or variables in
+$\small \mathcal{V}_P$ which should be shared.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../datalog/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../datalog/concrete.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../datalog/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../datalog/concrete.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        <script type="text/javascript" src="../datalog.js"></script>
+        <script type="text/javascript" src="../asdi.js"></script>
+    </body>
+</html>

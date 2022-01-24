@@ -1,0 +1,1225 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Another Simplistic Datalog Implementation (in Rust)</title>
+        <meta name="robots" content="noindex" />
+        <!-- Custom HTML head -->
+<link   rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"
+        integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs"
+        crossorigin="anonymous">
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+
+<script defer>
+document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "\\(", right: "\\)", display: false},
+            {left: "$", right: "$", display: false},
+            {left: "\\[", right: "\\]", display: true}
+        ]
+    });
+});
+</script>
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="asdi.css">
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="reference/datalog_ebnf.html"><strong aria-hidden="true">5.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="reference/relational_ebnf.html"><strong aria-hidden="true">6.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="reference/references.html"><strong aria-hidden="true">7.</strong> Appendix: References</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Another Simplistic Datalog Implementation (in Rust)</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/johnstonskj/rust-asdi" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>Another Simplistic <a href="https://en.wikipedia.org/wiki/Datalog">Datalog</a> Implementation (ASDI), in Rust.</p>
+<p>This package provides a data model to represent <a href="https://en.wikipedia.org/wiki/Datalog">Datalog</a>
+programs in memory, a parser for the textual representation, and some evaluation implementations.</p>
+<p>Datalog is a logic programming language and a subset of the earlier
+<a href="https://en.wikipedia.org/wiki/Prolog">Prolog</a>. Chapter 1 of <a href="https://link.springer.com/book/10.1007/978-3-642-83952-8">Logic Programming and
+Databases</a> provides a good overview of
+the drawbacks of Prolog and the advantages of Datalog for certain tasks.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="datalog"><a class="header" href="#datalog">Datalog</a></h1>
+<p>When referring to the specifics of the language we will use the common format $\text{\small{Datalog}}$ with
+superscripts that identify specific language extensions; for example, $\small\text{Datalog}^{\lnot}$ is
+the language extended with negation of literals, $\small\text{Datalog}^{\Gamma}$ is the language
+extended with type checking on attributes, and $\small\text{Datalog}^{\lnot,\theta}$ is the language
+extended with negation of literals <em>and</em> arithmetic literals. The order of superscript symbols is
+irrelevant. Additionally, text in <strong>bold</strong> indicates a key concept in the language while text in
+<em>italics</em> indicates a forward reference to such a concept.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="abstract-syntax"><a class="header" href="#abstract-syntax">Abstract Syntax</a></h1>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
+<p>Rules $\small R$ are built from a language $\small \mathcal{L}=( \mathcal{C},\mathcal{P},\mathcal{V})$
+that contains the</p>
+<ol>
+<li>$\small \mathcal{C}$ – the finite sets of symbols for all constant values; e.g. <code>hello</code>, <code>&quot;hi&quot;</code>
+<code>123</code>,</li>
+<li>$\small \mathcal{P}$ – the finite set of alphanumeric character strings that begin with a
+lowercase character; e.g. <code>human</code>, <code>size</code>, <code>a</code>,</li>
+<li>$\small \mathcal{V}$ – the finite set of alphanumeric character strings that begin with an
+uppercase character; e.g. <code>X</code>, <code>A</code>, <code>Var</code>.</li>
+</ol>
+<p>While it would appear that the values from $\small \mathcal{P}$ or $\small \mathcal{V}$ would
+overlap, these values must remain distinct. For example, the value <code>human</code> is a valid predicate and
+string constant but they have distinct types in ASDI that ensure they are distinct.</p>
+<p>Each rule $\small r \in R$ has the form:</p>
+<p>$$\tag{i}\small A_1, \ldots, A_m \leftarrow L_1, \ldots, L_n$$</p>
+<p>as well as the following properties:</p>
+<ol>
+<li>$\small head(r)$ (the consequence), returns the set of <em>atom</em> values $\small A_1, \ldots, A_m$ where $\small m \in \mathbb{N}$,</li>
+<li>$\small body(r)$ (the antecedence), returns the set of <em>literal</em> values $\small L_1, \ldots, L_n$ where $\small n \in \mathbb{N}$,</li>
+<li>$\small distinguished(r)$ returns the set of <em>terms</em> in the head of a rule,
+$$\tag{ii}\small distinguished(r) \coloneqq \lbrace t | t \in \bigcup\lbrace terms(a) | a \in head(r) \rbrace \rbrace$$</li>
+<li>$\small non\text{-}distinguished(r)$ returns the set of <em>terms</em> in the body that of a rule that are not in the head,
+$$\tag{iii}\small non\text{-}distinguished(r) \coloneqq \lbrace t | t \in ( \bigcup\lbrace terms(a) | a \in body(r) \rbrace - distinguished(r) \rbrace)\rbrace$$</li>
+<li>$\small ground(r)$  returns true if its head and its body are both <em>ground</em>:
+$$\tag{iv}\small ground(r) \coloneqq (\forall{a}\in head(r); ground(a)) \land (\forall{l}\in body(r); ground(l))$$</li>
+<li>$\small positive(r)$ returns true if all body <em>literals</em> are <em>positive</em>:
+$$\tag{v}\small positive(r) \coloneqq (\forall{l}\in body(r); positive(l))$$</li>
+</ol>
+<p>A <em>pure</em> rule is one where there is only a single atom in the head; if the body is true, the head is
+true. A <strong>constraint</strong> rule, or contradiction, does not allow any consequence to be determined from
+evaluation of its body. A <strong>disjunctive</strong> rule is one where there is more than one atom, and any one
+may be true if the body is true. The language $\small\text{Datalog}^{\lor}$ allows for <em>inclusive</em>
+disjunction, and while a language, $\small\text{Datalog}^{\oplus}$, exists for <em>exclusive</em> disjunction
+it is not implemented here.</p>
+<p>The property $\small form(r)$ returns the form of the rule, based
+on the cardinality of the rule’s head as follows:</p>
+<p>$$\tag{vi}\small
+form(r) \coloneqq
+\begin{cases}
+pure, &amp;\text{if } |head(r)| = 1 \\
+constraint, &amp;\text{if } |head(r)| = 0 \land \text{Datalog}^{\lnot} \\
+disjunctive, &amp;\text{if } |head(r)| &gt; 1  \land \text{Datalog}^{\lor}
+\end{cases}$$</p>
+<p>Note that this notation is similar to that of a <a href="https://en.wikipedia.org/wiki/Sequent"><em>sequent</em></a>.
+Taking our definition of a rule, $\small A_1, \ldots, A_m \leftarrow L_1, \ldots, L_n$, and swap the
+order of antecedence and consequence we get $\small L_1, \ldots, L_m \vdash A_1, \ldots, A_n$.
+A pure rule is termed a <em>simple conditional assertion</em>, a constraint rule is termed an
+<em>unconditional assertion</em>, and a disjunctive rule is termed a <em>sequent</em> (or simply <em>conditional
+assertion</em>).</p>
+<p>Alternatively, some literature defines a rule in the following form:</p>
+<p>$$\tag{ia}\small C_1 | C_2 | \ldots | C_n \leftarrow A_1, \ldots, A_m, \lnot B_1, \ldots, \lnot B_k$$</p>
+<p>Where this form shows the expanded head structure according to $\small\text{Datalog}^{\lor}$, and the
+set of negated literals according to $\small\text{Datalog}^{\lnot}$.</p>
+<h2 id="terms"><a class="header" href="#terms">Terms</a></h2>
+<p>Terms, mentioned above, may be constant values or variables such that
+$\small\mathcal{T}=\mathcal{C}\cup\mathcal{V}\cup\bar{t}$ where $\small\bar{t}$ represents an
+anonymous variable.</p>
+<p>Terms have the following properties:</p>
+<ol>
+<li>$\small constant(t)$ returns true if the term argument is a constant value.</li>
+<li>$\small variable(t)$ returns true if the term argument is a variable.</li>
+<li>$\small anonymous(t)$ returns true if the term argument is the anonymous variable, $\small\bar{t}$.</li>
+</ol>
+<p>With the definition of rules so far it is possible to write rules that generate an an
+infinite number of results. To avoid such problems Datalog rules are required to satisfy the
+following <strong>Safety</strong> conditions:</p>
+<ol>
+<li>Every variable that appears in the head of a clause also appears in a positive relational literal
+(atom) in the body of the clause.
+$$\tag{vii}\small
+\begin{alignat*}{2}
+safe\text{-}head(r) &amp;\coloneqq &amp;&amp;\lbrace t | t \in distinguished(r), t \in \mathcal{V} \rbrace \\
+&amp;- &amp;&amp;\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), atom(a), positive(a) \rbrace, t \in \mathcal{V} \rbrace \\
+&amp;= &amp;&amp;\empty
+\end{alignat*}$$</li>
+<li>Every variable appearing in a negative literal in the body of a clause also appears in some
+positive relational literal in the body of the clause.
+$$\tag{viii}\small
+\begin{alignat*}{2}
+safe\text{-}negatives(r) &amp;\coloneqq &amp;&amp;\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), \lnot positive(a) \rbrace, t \in \mathcal{V} \rbrace \\
+&amp;- &amp;&amp;\lbrace t | t \in \bigcup\lbrace terms(a) | a \in body(r), atom(a), positive(a) \rbrace, t \in \mathcal{V} \rbrace \\
+&amp;= &amp;&amp;\empty
+\end{alignat*}$$</li>
+</ol>
+<h2 id="atoms"><a class="header" href="#atoms">Atoms</a></h2>
+<p>Atoms are comprised of a label, $\small p \in \mathcal{P}$, and a tuple of <em>terms</em>. A set of atoms
+form a <strong>Relation</strong> if each <em>conforms to</em> the schema of the relation. The form of an
+individual atom is as follows:</p>
+<p>$$\tag{ix}\small p(t_1, \ldots, t_k)$$</p>
+<p>as well as the following properties:</p>
+<ol>
+<li>$\small label(a)$ returns the predicate $\small p$,</li>
+<li>$\small terms(a)$ returns the tuple of term values $\small t_1, \ldots, t_k$; where
+$\small t \in \mathcal{T}$ and $\small k \in \mathbb{N}^{+}$,</li>
+<li>$\small arity(a)$ returns the cardinality of the relation identified by the predicate;
+$\small arity(a) \equiv |terms(a)| \equiv k$,</li>
+<li>in $\small\text{Datalog}^{\Gamma}$:
+<ol>
+<li>there exists a type environment $\small \Gamma$ consisting of one or more types $\small \tau$,</li>
+<li>each term $\small t_i$ has a corresponding type  $\small \tau_i$ where $\small \tau \in \Gamma$,</li>
+<li>$\small type(t)$ returns the type $\small \tau$ for that term,</li>
+<li>$\small types(a)$ returns a tuple such that;
+$\small (i \in {1, \ldots, arity(a)} | type(t_i))$,</li>
+</ol>
+</li>
+<li>$\small ground(a)$ returns true if its terms are all constants:
+$$\tag{x}\small ground(a) \coloneqq (\forall{t}\in terms(a); t \in \mathcal{C})$$</li>
+</ol>
+<h2 id="relations"><a class="header" href="#relations">Relations</a></h2>
+<p>Every relation $\small r$ has a schema that describes a set of attributes
+$\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$, and each attribute may be named, and may in
+$\small\text{Datalog}^{\Gamma}$ also have a type.</p>
+<p>Relations have the following properties:</p>
+<ol>
+<li>$\small label(r)$ returns the predicate $\small p$,</li>
+<li>$\small schema(r)$ returns the set of attributes $\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$;
+where $\small k \in \mathbb{N}^{+}$,</li>
+<li>$\small arity(r)$ returns the number of attributes in the relation’s schema, and therefore all
+atoms within the relation; $\small arity(r) \equiv |schema(a)| \equiv j$.</li>
+</ol>
+<p>Attributes have the following properties:</p>
+<ol>
+<li>$\small label(\alpha)$ returns either the predicate label of the attribute, or $\small\bot$.</li>
+<li>in $\small\text{Datalog}^{\Gamma}$:
+<ol>
+<li>$\small type(\alpha)$ returns a type $\small \tau$ for the attribute, where $\small \tau \in \Gamma$, or $\small\bot$.</li>
+</ol>
+</li>
+</ol>
+<p>The following defines a binary function that determines whether an atom $\small a$ conforms to the
+schema of a relationship $\small r$.</p>
+<p>$$\tag{xi}\small
+\begin{alignat*}{2}
+conforms(a, r) &amp;\coloneqq &amp;&amp;ground(a) \\
+&amp;\land &amp;&amp;label(a) = label(r) \\
+&amp;\land &amp;&amp;arity(a) = arity(r) \\
+&amp;\land &amp;&amp;\forall{i} \in \lbrace 1, \ldots, arity(r)\rbrace \medspace conforms( a_{t_i}, r_{\alpha_i} )
+\end{alignat*}
+$$
+$$\tag{xii}\small
+conforms(t, \alpha) \coloneqq
+label(t) = label(\alpha) \land
+\tau_{t} = \tau{\alpha}
+$$</p>
+<p>Note that in relational algebra it is more common to use the term domain $\small D$ to denote a possibly
+infinite set of values. Each attribute on a relation has a domain $\small D_i$ such that each ground
+term is a value $\small d_i$ and the equivalent of $\small \tau_i \in \Gamma$ becomes
+$\small d_i \in D_i$.</p>
+<p>To visualize a set of facts in a relational form we take may create a table $p$, where each column,
+or attribute, corresponds to a term index $1 \ldots k$. If the facts are typed then each column
+takes on the corresponding $\tau$ type. Finally each row in the table is populated with the tuple
+of term values.</p>
+<table><thead><tr><th></th><th>$\small col_1: \tau_1$</th><th>$\small \ldots$</th><th>$\small col_k: \tau_k$</th></tr></thead><tbody>
+<tr><td>$\small row_1$</td><td>$\small t_{1_1}$</td><td>$\small \ldots$</td><td>$\small t_{1_k}$</td></tr>
+<tr><td>$\small \ldots$</td><td>$\small \ldots$</td><td>$\small \ldots$</td><td>$\small \ldots$</td></tr>
+<tr><td>$\small row_y$</td><td>$\small t_{y_1}$</td><td>$\small \ldots$</td><td>$\small t_{y_k}$</td></tr>
+</tbody></table>
+<h2 id="literals"><a class="header" href="#literals">Literals</a></h2>
+<p>Literals within the body of a rule, represent sub-goals that are the required to be true for the
+rule’s head to be considered true.</p>
+<ol>
+<li>A literal may be an atom (termed a relational literal) or, in $\small\text{Datalog}^{\theta}$, a
+conditional expression (termed an arithmetic literal),</li>
+<li>a an arithmetic literal has the form $\small \langle t_{lhs} \theta t_{rhs} \rangle$, where
+<ol>
+<li>$\small \theta \in \lbrace =, \neq, &lt;, \leq, &gt;, \geq \rbrace$,</li>
+<li>in $\small\text{Datalog}^{\Gamma}$ both $\small t_{lhs}$ and $\small t_{rhs}$ terms have
+corresponding types $\small \tau_{lhs}$ and $\small \tau_{rhs}$,</li>
+<li>the types $\small \tau_{lhs}$ and $\small \tau_{rhs}$ <strong>must</strong> be <em>compatible</em>, for some
+system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_{rhs}, \theta)$,</li>
+</ol>
+</li>
+<li>in $\small\text{Datalog}^{\lnot}$ a literal may be negated, appearing as $\small \lnot l$,</li>
+<li>and has the following properties:
+<ol>
+<li>$\small relational(l)$ returns true if the literal argument is a relational literal.</li>
+<li>$\small arithmetic(l)$ returns true if the literal argument is a arithmetic literal.</li>
+<li>$\small terms(l)$ returns either the set of terms in a literal,
+$$\tag{xiii}\small
+terms(l) \coloneqq
+\begin{cases}
+terms(l), &amp;\text{if } relational(l) \\
+\lbrace t_{lhs}, t_{rhs} \rbrace, &amp;\text{if } arithmetic(l) \land \text{Datalog}^{\theta}
+\end{cases}$$</li>
+<li>$\small ground(l)$ returns true if its terms are all constants $\small (\forall{t}\in terms(l); t \in \mathcal{C})$,</li>
+<li>$\small positive(l)$ in $\small\text{Datalog}^{\lnot}$ returns false if negated,
+otherwise it will always return true.</li>
+</ol>
+</li>
+</ol>
+<h2 id="facts"><a class="header" href="#facts">Facts</a></h2>
+<p>Any ground rule where $\small m=1$ and where $\small n=0$ is termed a <strong>Fact</strong> as it is true by
+nature of having an empty body, or alternatively we may consider the body be comprised of the truth
+value $\small\top$.</p>
+<p>$$\tag{xiv}\small fact(r) \coloneqq (ground(r) \land form(r)=pure \land body(r)=\empty)$$</p>
+<h2 id="queries"><a class="header" href="#queries">Queries</a></h2>
+<p>An atom may be also used as a <strong>Goal</strong> or <strong>Query</strong> clause in that its constant and variable terms
+may be used to match facts from the known facts or those that may be inferred from the set of rules
+introduced. A ground goal is simply determining that any fact exists that matches all of the
+constant values provided and will return true or false.
+In the case that one or more variables exist a set of facts will be returned that match the
+expressed constants and provide the corresponding values for the variables.</p>
+<p>The set of facts (ground atoms) known a-priori is termed the <strong>Extensional</strong> database, EDB, or $\small D_E$,.
+The set of rules, and any inferred facts, are termed the <strong>Intensional</strong> database, IDB, or $\small D_I$.</p>
+<p>A Datalog <strong>Program</strong> $\small P$ is a tuple comprising the extensional database $\small D_{E}$, the
+intensional database $\small D_{I}$, and a set of queries.</p>
+<p>$$\tag{xv}\small P=( D_E, D_I, Q )$$</p>
+<p>This implies, at least, that the set of predicates accessible to queries in the program is the union
+of predicates in the extensional and intensional databases.</p>
+<p>$$\tag{xvi}\small \mathcal{P}_P = \mathcal{P}_E \cup \mathcal{P}_I$$</p>
+<p>It should be obvious that the same exists for constants and variables;
+$\small \mathcal{C}_P = \mathcal{C}_E \cup \mathcal{C}_I$ and
+$\small \mathcal{V}_P = \mathcal{V}_E \cup \mathcal{V}_I$.</p>
+<p>Datalog does not, in general, allow the rules comprising the intensional database to infer new
+values for predicates that exist in the extensional database. This may be expressed as follows:</p>
+<p>$$\tag{xvii}\small \mathcal{P}_E \cap \mathcal{P}_I = \empty$$</p>
+<p>The same restriction is not required for constants in $\small \mathcal{C}_P$ or variables in
+$\small \mathcal{V}_P$ which should be shared.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="concrete-syntax"><a class="header" href="#concrete-syntax">Concrete Syntax</a></h1>
+<p>The definitions below uses both Extended Backus-Naur Form (EBNF) and syntax diagrams to focus on the
+concrete syntax as expressed in the text representation. The EBNF definition is somewhat simplified
+from the grammar used in the ASDI parser although any deviations do not significantly affect the
+meaning of the language.</p>
+<p>For the original description of the EBNF notation as it is used here, please refer to “<a href="http://www.w3.org/TR/2010/REC-xquery-20101214/#EBNFNotation">A.1.1
+Notation</a>” in the <a href="http://www.w3.org/TR/2010/REC-xquery-20101214/">XQuery
+recommendation</a>. The diagrams included below were
+generated by the <a href="https://www.bottlecaps.de/rr/ui">bottlecaps</a> online tool from the file
+<a href="https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/doc-src/datalog.ebnf">datalog.ebnf</a>.</p>
+<h2 id="programs"><a class="header" href="#programs">Programs</a></h2>
+<p>A program consists of a set of facts that comprise the extensional database, a list of rules that
+comprise the intensional database, and possibly a set of queries to interrogate the result of any
+reasoning performed over the program.</p>
+<p><img src="datalog/images/program.png" alt="program" /></p>
+<pre><code class="language-ebnf">program
+        ::= pragma* ( fact | rule | query )* ;
+</code></pre>
+<p>A program consists of a single file containing facts, rules, and queries as well as any additional
+files referenced via <em>pragmas</em>.</p>
+<h2 id="facts-1"><a class="header" href="#facts-1">Facts</a></h2>
+<p>Facts <strong>must</strong> be expressed in the form of ground atoms and so they have a specific rule rather
+than a constrained form of the <code>atom</code> rule.</p>
+<p><img src="datalog/images/fact.png" alt="fact" /></p>
+<pre><code class="language-ebnf">fact
+        ::= predicate ( &quot;(&quot; constant ( &quot;,&quot; constant )* &quot;)&quot; )? &quot;.&quot; ;
+</code></pre>
+<p>A predicate is the identifier shared by a fact and relation.</p>
+<p><img src="datalog/images/predicate.png" alt="predicate" /></p>
+<pre><code class="language-ebnf">predicate
+        ::= LC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )* ;
+</code></pre>
+<p>The following demonstrates a simple fact denoting that the constant <code>brooke</code> representing some
+individual is the parent of some individual represented by the constant <code>&quot;Xerces&quot;</code>.</p>
+<pre><code class="language-datalog">parent(&quot;Xerces&quot;, brooke).
+</code></pre>
+<h2 id="constant-values"><a class="header" href="#constant-values">Constant Values</a></h2>
+<p>Constants are supported in three types, String, Integer, and Boolean. Whereas some definitions of
+Datalog introduce an additional Identifier type, ASDI treats these as <em>short strings</em> that can
+safely be expressed without quotes; therefore, the values <code>xerces</code> and <code>&quot;xerces&quot;</code> are equivalent.</p>
+<p><img src="datalog/images/constant.png" alt="constant" /></p>
+<pre><code class="language-ebnf">constant
+        ::= string | integer | boolean ;
+</code></pre>
+<p>Strings are described in both the identifier and quoted form in the <code>string</code> rule.</p>
+<p><img src="datalog/images/string.png" alt="string" /></p>
+<pre><code class="language-ebnf">string
+        ::= predicate ( &quot;:&quot; ALPHA ( ALPHA | DIGIT | &quot;_&quot; * )? )
+            | DQUOTE [^\&quot;]* DQUOTE ;
+</code></pre>
+<p>Integers bounds are currently unspecified, just strings of decimal digits.</p>
+<p><img src="datalog/images/integer.png" alt="integer" /></p>
+<pre><code class="language-ebnf">integer
+        ::= ( &quot;+&quot; | &quot;-&quot; )? DIGIT+ ;
+</code></pre>
+<p>Boolean values may also be represented using <code>⊤</code> (down tack <code>\u{22a4}</code>) for true, and <code>⊥</code> (up tack
+<code>\u{22a5}</code>) for false where this may improve readability.</p>
+<p><img src="datalog/images/boolean.png" alt="boolean" /></p>
+<pre><code class="language-ebnf">boolean
+        ::= ( &quot;true&quot; | &quot;⊤&quot; ) | ( &quot;false&quot; | &quot;⊥&quot; ) ;
+</code></pre>
+<h3 id="rules-1"><a class="header" href="#rules-1">Rules</a></h3>
+<p>As facts are syntactically distinct from rules in the text representation there is no need for empty
+bodies – all rules <strong>must</strong> have at least one literal. Material implication may be written using
+the Unicode character <code>⟵</code> (long leftwards arrow<code>\u{27f5}</code>).</p>
+<p><img src="datalog/images/rule.png" alt="rule" /></p>
+<pre><code class="language-ebnf">rule
+        ::= ( head | &quot;⊥&quot; )? ( &quot;:-&quot; | &quot;&lt;-&quot; | &quot;⟵&quot; ) body &quot;.&quot; ;
+</code></pre>
+<p>The head of a rule is a disjunction of atoms, or in the case of a constraint the head may is
+optional or replaced by the value <code>&quot;⊥&quot;</code>.</p>
+<p><img src="datalog/images/head.png" alt="head" /></p>
+<pre><code class="language-ebnf">head
+        ::= ( atom ( ( &quot;;&quot; | &quot;|&quot; | &quot;OR&quot; | &quot;∨&quot; ) atom )* ) ;
+</code></pre>
+<p>The body of a rule is comprised of one, or more, literals.</p>
+<p><img src="datalog/images/body.png" alt="body" /></p>
+<pre><code class="language-ebnf">body
+        ::= literal ( ( &quot;,&quot; | &quot;&amp;&quot; | &quot;AND&quot; | &quot;∧&quot; ) literal )* ;
+</code></pre>
+<p>The following sets of rules are equivalent.</p>
+<pre><code class="language-datalog">ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Y) &lt;- parent(X, Y).
+ancestor(X, Y) ⟵ parent(X, Y).
+
+movie_star(X) :- star(X)  ,  movie_cast_member(X, _, _).
+movie_star(X) :- star(X)  &amp;  movie_cast_member(X, _, _).
+movie_star(X) :- star(X) AND movie_cast_member(X, _, _).
+movie_star(X) :- star(X)  ∧  movie_cast_member(X, _, _).
+</code></pre>
+<p>As described in the abstract syntax it is an error to use an extensional relation in the head of
+a rule. The following will generate an error:</p>
+<pre><code class="language-datalog">parent(&quot;Xerces&quot;, brooke).
+
+parent(X,Y) :- father(X,Y).
+</code></pre>
+<p>The language feature <code>disjunction</code> corresponds to the language $\small\text{Datalog}^{\lor}$ and
+allows multiple atoms to appear in the rule’s head with the semantics that these are choices. This
+syntax will not be accepted unless the feature is enabled.</p>
+<p>For example, the following describes the rule that <em>if X is a parent then X is <strong>either</strong> a
+father <strong>or</strong> mother</em>.</p>
+<pre><code class="language-datalog">.feature(disjunction).
+
+father(X) ;  mother(X) :- parent(X).
+father(X) |  mother(X) :- parent(X).
+father(X) OR mother(X) :- parent(X).
+father(X) ⋁  mother(X) :- parent(X).
+</code></pre>
+<p>As the use of disjunction in this position in the head is <em>inclusive</em> it is considered that any rule as above can be transformed
+into the following standard form. Clearly, in this case this is not the expected semantics which would require
+an exclusive disjunction, the language $\small\text{Datalog}^{\oplus}$. Because the semantics may
+cause such confusion ASDI does not do this transformation by default.</p>
+<pre><code class="language-datalog">father(X) :- parent(X).
+mother(X) :- parent(X).
+</code></pre>
+<p>The language feature <code>constraints</code> corresponds to the language $\small\text{Datalog}^{\Leftarrow}$ and
+allows the specification of rules with no head. In this case the material implication symbol is
+<strong>required</strong>, the falsum value is optional for readability, therefore the following rules are
+equivalent.</p>
+<pre><code class="language-datalog">.feature(constraints).
+
+:- alive(X) AND dead(X).
+⊥ ⟵ alive(X) ∧ dead(X).
+</code></pre>
+<p>ASDI will disallow the addition of rules that are unsafe according to the abstract syntax. The
+following are examples of unsafe rules:</p>
+<ul>
+<li><code>a(X) :- b(Y).</code> – because <code>X</code> appears as a distinguished variable but does not appear in a
+positive relational literal, error
+<a href="datalog/error/enum.Error.html#variant.NegativeVariablesNotAlsoPositive"><code>HeadVariablesMissingInBody</code></a>.</li>
+<li><code>a(X) :- b(Y), NOT b(X).</code> – because <code>X</code> appears in a negated literal but does not appear in a
+positive relational literal, error
+<a href="datalog/error/enum.Error.html#variant.NegativeVariablesNotAlsoPositive"><code>NegativeVariablesNotAlsoPositive</code></a>.</li>
+<li><code>a(X) :- b(Y), X &lt; Y.</code> – Because <code>X</code> appears in an arithmetic literal but does not appear in a
+positive relational literal, error
+<a href="datalog/error/enum.Error.html#variant.ArithmeticVariablesNotAlsoPositive"><code>ArithmeticVariablesNotAlsoPositive</code></a>.</li>
+</ul>
+<h2 id="atoms-1"><a class="header" href="#atoms-1">Atoms</a></h2>
+<p>The text representation of an atom is a relatively simple translation from the abstract syntax
+above.</p>
+<p><img src="datalog/images/atom.png" alt="atom" /></p>
+<pre><code class="language-ebnf">atom
+        ::= predicate &quot;(&quot; term ( &quot;,&quot; term )* &quot;)&quot; ;
+</code></pre>
+<p><img src="datalog/images/term.png" alt="term" /></p>
+<pre><code class="language-ebnf">term
+        ::= variable | constant ;
+</code></pre>
+<p>Note that we explicitly separate variables into named and anonymous forms here.</p>
+<p><img src="datalog/images/variable.png" alt="variable" /></p>
+<pre><code class="language-ebnf">variable
+        ::= named-variable | anon-variable ;
+</code></pre>
+<p><img src="datalog/images/named-variable.png" alt="named-variable" /></p>
+<pre><code class="language-ebnf">named-variable
+        ::= UC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )* ;
+anon-variable
+        ::= &quot;_&quot; ;
+</code></pre>
+<p>The following are all valid body atoms.</p>
+<pre><code class="language-datalog">dead(julius_caesar).
+emperor(julius_caesar, rome).
+emperor(X, Y).
+emperor(X, rome).
+</code></pre>
+<h2 id="literals-1"><a class="header" href="#literals-1">Literals</a></h2>
+<p>Any valid atom is also a valid <em>positive relational</em> literal. The syntax below also allows for <em>negative</em>
+literals as well as arithmetic expressions as literals. Conjunction may be written with the Unicode
+character <code>∧</code> (logical and <code>\u{2227}</code>).</p>
+<p><img src="datalog/images/literal.png" alt="literal" /></p>
+<pre><code class="language-ebnf">literal
+        ::= ( &quot;!&quot; | &quot;NOT&quot; | &quot;￢&quot; )? ( atom | comparison ) ;
+</code></pre>
+<p>The following rules are all equivalent.</p>
+<pre><code class="language-datalog">ancestor(X, Y) ⟵ parent(X, Z)  ,  ancestor(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z)  &amp;  ancestor(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z)  ∧  ancestor(Z, Y).
+ancestor(X, Y) ⟵ parent(X, Z) AND ancestor(Z, Y).
+</code></pre>
+<p>The language feature <code>negation</code> corresponds to the language $\small\text{Datalog}^{\lnot}$ and
+allows the specification of negated literals. Negation may also be written using the Unicode
+character <code>￢</code> (full-width not sign <code>\u{ffe2}</code>). The following rules are equivalent.</p>
+<pre><code class="language-datalog">.feature(negation).
+
+alive(X) :- person(X), NOT dead(X).
+alive(X) ⟵ person(X) ∧ ￢dead(X).
+</code></pre>
+<p>The following will fail as the negated rule is not considered safe ([Error::NegativeVariablesNotAlsoPositive]).</p>
+<pre><code class="language-datalog">.feature(negation).
+
+alive(X) :- NOT dead(X).
+alive(X) ⟵ ￢dead(X).
+</code></pre>
+<h2 id="arithmetic-literals"><a class="header" href="#arithmetic-literals">Arithmetic Literals</a></h2>
+<p>The language feature <code>comparisons</code> corresponds to the language $\small\text{Datalog}^{\theta}$ and
+allows the use of arithmetic literals. Comparisons take place between two literals and are
+currently limited to a set of common operators. Note the addition of a string match operator, this
+is similar to the Perl <code>=~</code> and requires a string value/variable on the left and a string value or
+variable on the right that compiles to a valid Rust regular expression. Finally, the rule <code>named-term</code>
+disallows the use of anonymous variables in arithmetic literals.</p>
+<p><img src="datalog/images/comparison.png" alt="comparison" /></p>
+<pre><code class="language-ebnf">comparison
+        ::= ( named-variable | constant ) operator ( named-variable | constant ) ;
+</code></pre>
+<p><img src="datalog/images/operator.png" alt="operator" /></p>
+<pre><code class="language-ebnf">operator
+        ::= &quot;=&quot;
+            | (&quot;!=&quot; | &quot;/=&quot; | &quot;≠&quot;)
+            | &quot;&lt;&quot;
+            | (&quot;&lt;=&quot; | &quot;≤&quot;)
+            | &quot;&gt;&quot;
+            | (&quot;&gt;=&quot; | &quot;≥&quot;)
+            | (&quot;*=&quot; | &quot;≛&quot; | &quot;MATCHES&quot;) ;
+</code></pre>
+<p>The Unicode characters <code>≠</code> (not equal to <code>\u{2260}</code>), <code>≤</code> (less-than or equal to <code>\u{2264}</code>),
+<code>≥</code> (greater-than or equal to <code>\u{2265}</code>, and star equals <code>\u{e2899b}</code>) may be substituted for the
+common arithmetic and string operators.</p>
+<p>All arithmetic operations <strong>must</strong> be between terms of the some type, such that the property
+<em>compatible</em> introduce above is defined as:</p>
+<p>$$\tag{xvi}\small compatible(\tau_{lhs}, \tau_{rhs}, \theta) \leftarrow \tau_{lhs} = \tau_{rhs}$$</p>
+<p>Additionally, some operators are not present for all types, as shown in the table below.</p>
+<table><thead><tr><th>Type</th><th><code>=</code>, <code>≠</code></th><th><code>&lt;</code>, <code>≤</code>, <code>&gt;</code>, <code>≥</code></th><th><code>≛</code></th></tr></thead><tbody>
+<tr><td>String</td><td>Yes</td><td>Yes - lexical</td><td>Yes</td></tr>
+<tr><td>Integer</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+<tr><td>Boolean</td><td>Yes</td><td>No</td><td>No</td></tr>
+</tbody></table>
+<p>The following is an example using arithmetic literals and the <em>car</em> relation.</p>
+<pre><code class="language-datalog">.feature(comparisons).
+.assert car(make: string, model: string, age: integer).
+
+antique(X, Y) :- car(X, Y, _) AND X *= &quot;[dD]uesenberg&quot;.
+antique(X, Y) :- car(X, Y, _) AND Y = &quot;model t&quot;.
+antique(X, Y) :- car(X, Y, Z) AND Z &gt; 50.
+</code></pre>
+<h2 id="queries-1"><a class="header" href="#queries-1">Queries</a></h2>
+<p>A query is simply an atom, but one identified to the system as a goal with either the prefix <code>?-</code>
+or the suffix <code>?</code>.</p>
+<p><img src="datalog/images/query.png" alt="query" /></p>
+<pre><code class="language-ebnf">query
+        ::= ( &quot;?-&quot; atom &quot;.&quot; ) | ( atom &quot;?&quot; ) ;
+</code></pre>
+<p>The following queries are equivalent and will return the value of the variable <code>X</code> for any facts in
+the <em>ancestor</em> relationship where the first attribute is the string value <code>&quot;xerces&quot;</code>.</p>
+<pre><code class="language-datalog">?- ancestor(xerces, X).
+ancestor(xerces, X)?
+</code></pre>
+<p>When the value <code>_</code> is used in a query it denotes an attribute of the relation that has no meaning
+in either the query or the response. For example, in the following query we ask for all values of
+the <em>model</em> attribute in the <em>car</em> relation where the <em>make</em> is “ford”, and ignore the age entirely.</p>
+<pre><code class="language-datalog">.assert car(make: string, model: string, age: integer).
+
+car(&quot;ford&quot;, X, _)?
+</code></pre>
+<p>The results of this query would not include the age column:</p>
+<pre><code class="language-text">+------------+
+| model      |
++============+
+| edge       |
++------------+
+| escort     |
++------------+
+| fiesta     |
++------------+
+| focus      |
++------------+
+| fusion     |
++------------+
+| mustang    |
++------------+
+     ...
+</code></pre>
+<h2 id="pragmas"><a class="header" href="#pragmas">Pragmas</a></h2>
+<p>Pragmas are declarative statements meant for the parser and runtime tooling, they do not affect
+the meaning of the program itself.</p>
+<p><img src="datalog/images/pragma.png" alt="pragma" /></p>
+<pre><code class="language-ebnf">pragma
+        ::= &quot;.&quot; ( feature | assert | infer | input | output ) ;
+</code></pre>
+<p>The <code>feature</code> pragma determines which Datalog language is in use. Use of syntax not supported by the
+selected language feature will result in errors.</p>
+<p><img src="datalog/images/feature.png" alt="feature" /></p>
+<pre><code class="language-ebnf">feature
+        ::= &quot;feature&quot; &quot;(&quot; feature-id ( &quot;,&quot; feature-id )* &quot;)&quot; &quot;.&quot; ;
+</code></pre>
+<p><img src="datalog/images/feature-id.png" alt="feature-id" /></p>
+<pre><code class="language-ebnf">feature-id
+        ::= &quot;comparisons&quot; | &quot;constraints&quot; | &quot;disjunction&quot; | &quot;negation&quot; ;
+</code></pre>
+<pre><code class="language-datalog">.feature(negation).
+.feature(comparisons, disjunction).
+</code></pre>
+<p>The <code>assert</code> pragma describes a new relation in the extensional database. The parser can determine
+the schema for facts from their types in the database. The use of this pragma is therefore optional,
+but recommended.</p>
+<p><img src="datalog/images/assert.png" alt="assert" /></p>
+<pre><code class="language-ebnf">assert
+        ::= &quot;assert&quot; predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot; &quot;.&quot; ;
+</code></pre>
+<p><img src="datalog/images/attribute-decl.png" alt="attribute-decl" /></p>
+<pre><code class="language-ebnf">attribute-decl
+        ::= ( predicate &quot;:&quot; )? ( &quot;boolean&quot; | &quot;integer&quot; | &quot;string&quot; ) ;
+</code></pre>
+<pre><code class="language-datalog">.assert human(name: string).
+</code></pre>
+<p>The <code>infer</code> pragma describes a new relation in the intensional database. Typically the parser
+can determine the schema for relational literals from their context, The use of this pragma
+is therefore optional, but recommended. The alternate form is more explicit in that it defines
+an intensional relation in terms of a previously defined extensional relation.</p>
+<p><img src="datalog/images/infer.png" alt="infer" /></p>
+<pre><code class="language-ebnf">infer
+        ::= &quot;infer&quot;
+            ( predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot; )
+            | &quot;from&quot; predicate &quot;.&quot; ;
+</code></pre>
+<pre><code class="language-datalog">.infer mortal(name: string).
+</code></pre>
+<p>Alternatively the short-cut form is often more convenient.</p>
+<pre><code class="language-datalog">.assert human(name: string).
+.infer mortal from human.
+</code></pre>
+<p>The <code>input</code> pragma instructs the parser to load facts for the named extensional relation from an
+external file. This pragma <strong>requires</strong> that the relation be previously defined via the <code>assert</code>
+pragma.</p>
+<p><img src="datalog/images/input.png" alt="input" /></p>
+<pre><code class="language-ebnf">input
+        ::= &quot;input&quot; io-details &quot;.&quot;
+</code></pre>
+<p><img src="datalog/images/io-details.png" alt="io-details" /></p>
+<pre><code class="language-ebnf">io-details
+        ::= &quot;(&quot; predicate &quot;,&quot; quoted-string ( &quot;,&quot; quoted-string )? &quot;)&quot; ;
+</code></pre>
+<pre><code class="language-datalog">.assert human(name: string).
+.input(human, &quot;data/humans.csv&quot;, &quot;csv&quot;).
+</code></pre>
+<p>The <code>output</code> pragma instructs the parser to write facts from the named intensional relation to an
+external file. This pragma <strong>requires</strong> that the relation be previously defined via the <code>infer</code>
+pragma.</p>
+<p><img src="datalog/images/output.png" alt="output" /></p>
+<pre><code class="language-ebnf">output
+        ::= &quot;output&quot; io-details &quot;.&quot; ;
+</code></pre>
+<pre><code class="language-datalog">.infer mortal(name: string).
+.output(mortal, &quot;data/mortals.txt&quot;).
+</code></pre>
+<h2 id="comments"><a class="header" href="#comments">Comments</a></h2>
+<p>Comments in Datalog are either 1) the <code>%</code> character and continue to the end of the line, or
+2) C-style with <code>/*</code> to start and <code>*/</code> to end.</p>
+<p><img src="datalog/images/comment.png" alt="comment" /></p>
+<pre><code class="language-ebnf">comment
+        ::= &quot;%&quot; [^\r\n]* EOL
+            | &quot;/&quot; &quot;*&quot; ( [^\*] | &quot;*&quot;+ [^\*\/] )* &quot;*&quot;+ &quot;/&quot; ;
+</code></pre>
+<pre><code class="language-datalog">% Here's a comment
+?- ancestor(xerces, X). % and another
+?- ancestor(brooke /* and one inline */, X). % and another
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="relational-algebra-mapping"><a class="header" href="#relational-algebra-mapping">Relational Algebra Mapping</a></h1>
+<p>Every expression in the <em>basic</em> relational algebra can be expressed as a $\small\text{Datalog}$
+query. However, operations in the extended relational algebra (grouping, aggregation, and sorting)
+have no corresponding capability in $\small\text{Datalog}$. Similarly, $\small\text{Datalog}$ can
+express recursion, which the relational algebra cannot. The following describes the foundational
+relational operations and their $\small\text{Datalog}$ equivalent.</p>
+<p>The semantics of $\small\text{Datalog}$ relations are primarily set based we would expect common
+set operations to work in $\small\text{Datalog}$ rules. Given the relations R, $\small r(a,b,c)$,
+and S, $\small s(d,e,f)$, we can easily describe the common set operations.</p>
+<h2 id="union-smallcup"><a class="header" href="#union-smallcup">Union ($\small\cup$)</a></h2>
+<p>Union is a binary operator that is written as $\small R \cup S$, where
+$\small R$ and $\small S$ are relations.</p>
+<p>For set union and set difference, the two relations involved must be <strong>union-compatible</strong> -—
+that is, the two relations must have the same set of attributes. A strict form of this rule does not
+allow for same-named attributes whereas a looser form allows duplicate names IFF they have identical
+types. Because set intersection is defined in terms of set union and set difference, the two
+relations involved in set intersection must also be union-compatible.</p>
+<p>Consider the expression $\small U \coloneqq R \cup S$, which can be expressed as follows:</p>
+<pre><code class="language-datalog">u(X, Y, Z) :- r(X, Y, Z).
+u(X, Y, Z) :- s(X, Y, Z).
+</code></pre>
+<h2 id="difference-smallsetminus"><a class="header" href="#difference-smallsetminus">Difference ($\small\setminus$)</a></h2>
+<p>Difference is a binary operator that is written as $\small R \setminus S$,
+where $\small R$ and $\small S$ are relations. This cannot be
+implemented in $\small\text{Datalog}$ as it required negation.</p>
+<p>Consider the expression $\small D \coloneqq R \setminus S$ which can be expressed in
+$\small\text{Datalog}^{\lnot}$ as follows:</p>
+<pre><code class="language-datalog">d(X,Y,Z) :- r(X,Y,Z) AND NOT s(X,Y,Z).
+</code></pre>
+<h2 id="intersection-smallcap"><a class="header" href="#intersection-smallcap">Intersection ($\small\cap$)</a></h2>
+<p>Intersection is a binary operator that is written as $\small R \cap S$, where
+$\small R$ and $\small S$ are relations.</p>
+<p>Consider the expression $\small I \coloneqq R \cap S$, which can be expressed as follows:</p>
+<pre><code class="language-datalog">i(X,Y,Z) :- r(X,Y,Z) AND s(X,Y,Z).
+</code></pre>
+<p>Intersection may be defined in terms of the difference operation, as below.</p>
+<p>$$\small R \cap S \enspace\equiv\medspace R \setminus (R \setminus S)$$</p>
+<h2 id="cartesian-product-smalltimes"><a class="header" href="#cartesian-product-smalltimes">Cartesian Product ($\small\times$)</a></h2>
+<p>Cartesian Product is a binary operator that is written as $\small R \times S$,
+where $\small R$ and $\small S$ are relations. In relational algebra it is required that the two
+relations involved must have disjoint headers—that is, they must not have a common attribute name.</p>
+<p>The following is a valid expression of $\small P \coloneqq R \times S$:</p>
+<pre><code class="language-datalog">p(A, B, C, D, E, F) :- r(A, B, C) AND s(D, E, F).
+</code></pre>
+<h2 id="projection-smallpi"><a class="header" href="#projection-smallpi">Projection ($\small\Pi$)</a></h2>
+<p>Projection is a unary operation written as
+$\small\Pi_{a_{1},\ldots ,a_{n}}(R)$ where $a_{1},\ldots ,a_{n}$ is a set of attribute names. The
+result of such projection is defined as the set that is obtained when all tuples in $R$ are
+restricted to the set $\small\lbrace a_{1},\ldots ,a_{n}\rbrace$. In some literature the lower case
+$\small\pi$ is used instead of $\small\Pi$.</p>
+<p>For example, the projection $\small P \coloneqq \Pi_{X} (R)$, a projection of the first attribute in R only,
+can be expressed in $\small\text{Datalog}$ as either of the following equivalent rules.</p>
+<pre><code class="language-datalog">p(X) :- r(X, Y, Z).
+p(X) :- r(X, _, _).
+</code></pre>
+<h2 id="generalized-selection-smallsigma"><a class="header" href="#generalized-selection-smallsigma">Generalized Selection ($\small\sigma$)</a></h2>
+<p>As defined by Codd, selection is written as $\small \sigma_{a\theta b}(R)$ or
+$\small \sigma_{a\theta v}(R)$ where:</p>
+<ul>
+<li>$\small a$ and $\small b$ are attribute names,</li>
+<li>$\small\theta$ is a binary operation, where $\small\theta\in\lbrace =, \neq, &lt;, \leq, &gt;, \geq, \overset{\star}{=} \rbrace$,</li>
+<li>$\small v$ is a constant value,</li>
+<li>$\small R$ is a relation,</li>
+</ul>
+<p>The selection $\small\sigma_{a\theta b}(R)$ denotes all tuples in $\small R$ for which $\small\theta$
+holds between the $\small a$ and the $\small b$ attribute.</p>
+<p>The selection $\small\sigma_{a\theta v}(R)$ denotes all tuples in $\small R$ for which $\small\theta$
+holds between the $\small a$ attribute and the value $\small v$.</p>
+<p>Selection requires arithmetic literals and therefore the languages $\small\text{Datalog}^{\theta}$
+and $\small\text{Datalog}^{\lnot}$ for negation.</p>
+<p><strong>Generalized Selection</strong> is a unary operation written as $\small\sigma_{\varphi}(R)$ where
+$\small\varphi$ is a propositional formula that consists of conditions as allowed in the normal selection
+and the logical operators $\small\land$ (and), $\small\lor$ (or) and $\small\lnot$ (negation). This selection
+selects all those tuples in $\small R$ for which $\small\varphi$ holds.</p>
+<p>In $\small\text{Datalog}^{\theta}$ the selection $\small L \coloneqq \sigma_{X&gt;100 \land Y=‘something’} (R)$
+can be expressed as follows, where both rules are equivalent.</p>
+<pre><code class="language-datalog">l(X, Y, Z) :- r(X, Y, Z) AND X &gt; 100 AND Y = something.
+l(X, Y, Z) :- r(X, Y, something) AND X &gt; 100.
+</code></pre>
+<h2 id="rename-smallrho"><a class="header" href="#rename-smallrho">Rename ($\small\rho$)</a></h2>
+<p>Rename is a unary operation written as $\small\rho_{a/b}(R)$ where the result is identical to $\small R$
+except that the $\small b$ attribute in all tuples is renamed to an $\small a$ attribute. This is
+simply used to rename the attribute of a relation or the relation itself. There is also the
+$\small\rho_{x(A_{1},\ldots, A_{n})}(R)$ notation, where $\small R$ is renamed to $\small x$ and the
+attributes $\small\lbrace a_{1},\ldots, a_{n}\rbrace$ are renamed to $\small\lbrace A_{1}, \ldots, A_{n}\rbrace$.</p>
+<p>TBD</p>
+<h2 id="theta-join-smalljoin_theta"><a class="header" href="#theta-join-smalljoin_theta">Theta Join ($\small\Join_{\theta}$)</a></h2>
+<p>Theta Join is a binary operator that is written as $\small{R \Join S} \atop {a \theta b}$ and
+$\small{R \Join S} \atop {a \theta v}$ or alternatively as $\small R \Join_{a \theta b} S$ and
+$\small R \Join_{a \theta v} S$, where $\small R$ and $\small S$ are relations,
+and the expressions $\small a\theta b$ and $\small a\theta v$ should be interpreted in the same way
+as for selection.</p>
+<p>A <strong>generalized Theta Join</strong> can be described following the convention of generalized selection where
+$\small\theta$ expands into a propositional formula in the same manner as $\small\varphi$. Unfortunately
+there is no notational alignment where a generalized theta join might be signified as
+$\small\Join_{\varphi}$</p>
+<p>For example, the natural join $\small J \coloneqq R \Join_{S.X&gt;100} S$, a join conditional join on an attribute
+in S can be expressed in $\small\text{Datalog}^{\theta}$ as follows.</p>
+<pre><code class="language-datalog">j(X,Y,Z) :- r(X,Y,Z) AND s(Xs,Y,Z) AND Xs &gt; 100.
+</code></pre>
+<p>It is possible to dispense with the theta join in most cases as it can be expressed in terms of
+the selection and cartesian product operators described above.</p>
+<p>$$\small R \Join_{\theta} \enspace\equiv\enspace \sigma_{\theta}(R \times S)$$</p>
+<p>An <strong>Equi-Join</strong> is a special case of the Theta Join where $\small\theta$ contains only equalities.</p>
+<h2 id="natural-join-smalljoin"><a class="header" href="#natural-join-smalljoin">Natural Join ($\small\Join$)</a></h2>
+<p>Natural Join is a binary operator that is written as $\small R \Join S$, where $\small R$ and
+$\small S$ are relations. The result of the natural join is the set of all combinations of tuples
+in $\small R$ and $\small S$ that are equal on their common attribute names. The natural join is
+arguably one of the most important operators since it is the relational counterpart of the logical
+AND operator.</p>
+<p>For example, the natural join $\small J = R \Join S$, a join on the first two attributes of R and S,
+can be expressed in $\small\text{Datalog}$ as follows. Note that the common attributes are defined
+by the names of their variables, not the underlying names of the attribute schema.</p>
+<pre><code class="language-datalog">j(X,Y,Z,Q) :- r(X,Y,Z) AND s(X,Y,Q).
+</code></pre>
+<p>A Natural Join is a special case of the Equi-Join where equality operations are performed on all
+common attributes.</p>
+<h2 id="complex-expressions"><a class="header" href="#complex-expressions">Complex Expressions</a></h2>
+<p>More complex examples can the be made from combining relational operators. The relational
+query $\small A \coloneqq \Pi_{X}(\sigma_{Y = 3} (R) )$ becomes</p>
+<pre><code class="language-datalog">a(X) :- r(X, 3, _).
+</code></pre>
+<p>Similarly, the relational query $\small A \coloneqq \Pi_{X}(\sigma_{Y = 3} (R) \Join_{R.X=S.X}\sigma_{Y = 5} (S))$
+becomes</p>
+<pre><code class="language-datalog">a(X) :- r(X, 3, _) AND s(X, 5, _).
+</code></pre>
+<h2 id="recursion"><a class="header" href="#recursion">Recursion</a></h2>
+<p>Although relational algebra seems powerful enough for most practical purposes, there are some
+simple and natural operators on relations that cannot be expressed by relational algebra.
+One of them is the transitive closure of a binary relation. Given a domain $\small D$, let binary
+relation $\small R$, $\small \text{Datalog } r(x, y)$, be a subset of $\small D\times D$. The transitive closure $\small R^{+}$ of $R$ is the smallest
+subset of $\small D\times D$ that contains $R$ and satisfies the following condition:</p>
+<p>$$\small\forall x\forall y\forall z\left((x,y)\in R^{+}\land (y,z)\in R^{+}\Rightarrow (x,z)\in R^{+}\right)$$</p>
+<p>In Datalog this form of recursion is naturally expressed, as follows.</p>
+<pre><code class="language-datalog">r_plus(X, Z) :- r(X, Y), r_plus(Y, Z).
+</code></pre>
+<p><em>Acknowledgements</em>. Examples in this section are taken from <a href="https://courses.cs.washington.edu/courses/cse344/12au/lectures/lecture10-datalog.pdf"><em>Introduction to Data Management CSE 344, Lecture 10:
+Datalog</em></a>,
+Magda Balazinska, Fall 2012. Definitions for the relational algebra are taken from
+<a href="https://en.wikipedia.org/wiki/Relational_algebra"><em>Relational algebra</em></a>, Wikipedia, fetched
+January 2022. The <a href="http://www.grammaticalframework.org/qconv/qconv-a.html">Relational Algebra Query Converter</a>
+is an interesting way to take a SQL query and convert to relational algebra which can then be
+converted to Datalog using the examples above.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="language-features"><a class="header" href="#language-features">Language Features</a></h1>
+<p>By default, the language supported by ASDI is sometimes termed <em>Pure Datalog</em>. This language
+allows for positive literals only, and allow for recursion. It does support additional features
+with feature sets applied to programs. Without a feature specified certain types will fail
+well-formedness rules, the parser will report errors, and some tools will not execute. However,
+the enabling of features is relatively simple in both the text representation using the <code>.feature</code>
+pragma, and using <code>FeatureSet</code>s in the API.</p>
+<h1 id="example"><a class="header" href="#example">Example</a></h1>
+<p>The following demonstrates the text representation support for enabling features.</p>
+<pre><code class="language-datalog">.features(negation, comparisons, disjunction).
+</code></pre>
+<p>Similarly, the following API example shows how to create a feature set that may be added to a
+program during creation.</p>
+<pre><pre class="playground"><code class="language-rust no_run edition2018">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use asdi::features::{
+    FEATURE_COMPARISONS, FEATURE_DISJUNCTION, FEATURE_NEGATION, FeatureSet
+};
+
+let features = FeatureSet::from(vec![FEATURE_NEGATION, FEATURE_DISJUNCTION]);
+
+assert!(features.supports(&amp;FEATURE_NEGATION));
+assert!(!features.supports(&amp;FEATURE_COMPARISONS));
+
+assert_eq!(features.to_string(), &quot;.feature(negation, disjunction).&quot;);
+<span class="boring">}
+</span></code></pre></pre>
+<h1 id="supported-features"><a class="header" href="#supported-features">Supported Features</a></h1>
+<p>The following describe the set of currently supported features.</p>
+<h2 id="negation"><a class="header" href="#negation">Negation</a></h2>
+<p>The feature <code>negation</code> enables the negation of individual literals in the body of a rule. This
+language is often described as $\text{\small{Datalog}}^{\lnot}$.</p>
+<pre><code class="language-datalog">.features(negation).
+alive(X) :- person(X) AND NOT dead(X).
+alive(X) :- person(X) ∧ ￢dead(X).
+</code></pre>
+<p>The text representation allows for <code>&quot;!&quot;</code>, <code>&quot;￢&quot;</code>, and <code>&quot;NOT&quot;</code> to be used to denote negation.</p>
+<h2 id="constraints"><a class="header" href="#constraints">Constraints</a></h2>
+<p>The feature <code>constraints</code> enables the specification of rules that have no head, which in turn
+specifies a rule that <em>may never</em> be true. This language is described herein as
+$\text{\small{Datalog}}^{\bot}$.</p>
+<pre><code class="language-datalog">.features(constraints).
+⊥ :- dead(X) AND alive(X).
+:- dead(X) AND alive(X).
+</code></pre>
+<p>The text allows for either an entirely missing head, or the value <code>&quot;⊥&quot;</code> as the head to denote
+a constraint. The latter signifies that the rule implies falsity (or absurdity).</p>
+<h2 id="comparisons"><a class="header" href="#comparisons">Comparisons</a></h2>
+<p>The feature <code>comparisons</code> enables the inclusion of literal terms that use standard comparison
+operators. This language is described herein as $\text{\small{Datalog}}^{\theta}$.</p>
+<pre><code class="language-datalog">.features(comparisons).
+old(X) :- age(X, Y) ∧ Y &gt; 75.
+</code></pre>
+<p>The text representation supports the operators equality (<code>&quot;=&quot;</code>), inequality (<code>&quot;!=&quot;</code>, <code>&quot;/=&quot;</code>,
+or <code>&quot;≠&quot;</code>), less than (<code>&quot;&lt;&quot;</code>), less than or equal-to (<code>&quot;&lt;=&quot;</code>, or <code>&quot;≤&quot;</code>), greater than (<code>&quot;&gt;&quot;</code>), and
+greater than or equal-to (<code>&quot;&gt;=&quot;</code>, or <code>&quot;≥&quot;</code>).</p>
+<h2 id="disjunction"><a class="header" href="#disjunction">Disjunction</a></h2>
+<p>The feature <code>disjunction</code> enables the negation of individual literals in the body of a rule. This
+language is often described as $\text{\small{Datalog}}^{\lor}$.</p>
+<pre><code class="language-datalog">.features(disjunction).
+mother(X, Y) OR father(X, Y) :- parent(X, Y).
+mother(X, Y) ∨ father(X, Y) :- parent(X, Y).
+</code></pre>
+<p>The text representation allows for <code>&quot;;&quot;</code>, “|”<code>, </code>“∨”<code>, and </code>“OR”` to be used to denote disjunction.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="model-api"><a class="header" href="#model-api">Model API</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="programs-1"><a class="header" href="#programs-1">Programs</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="relations-1"><a class="header" href="#relations-1">Relations</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="queries-2"><a class="header" href="#queries-2">Queries</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="views"><a class="header" href="#views">Views</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="model-extension"><a class="header" href="#model-extension">Model Extension</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="writing-an-evaluator"><a class="header" href="#writing-an-evaluator">Writing an Evaluator</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="writing-a-typesetter"><a class="header" href="#writing-a-typesetter">Writing a Typesetter</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="appendix-datalog-ebnf"><a class="header" href="#appendix-datalog-ebnf">Appendix: Datalog EBNF</a></h1>
+<pre><code class="language-ebnf">program
+        ::= pragma* ( fact | rule | query )* ;
+
+(* ************************************************************************* *)
+
+fact
+        ::= predicate ( &quot;(&quot; constant ( &quot;,&quot; constant )* &quot;)&quot; )? &quot;.&quot; ;
+predicate
+        ::= LC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )* ;
+
+(* ************************************************************************* *)
+
+constant
+        ::= string | integer | boolean ;
+string
+        ::= predicate ( &quot;:&quot; ALPHA ( ALPHA | DIGIT | &quot;_&quot; * )? )
+            | DQUOTE [^\u{22}]* DQUOTE ;
+integer
+        ::= ( &quot;+&quot; | &quot;-&quot;)? DIGIT+ ;
+boolean
+        ::= ( &quot;true&quot; | &quot;⊤&quot; ) | ( &quot;false&quot; | &quot;⊥&quot; ) ;
+
+(* ************************************************************************* *)
+
+rule
+        ::= ( head | &quot;⊥&quot; )? ( &quot;:-&quot; | &quot;&lt;-&quot; | &quot;⟵&quot; ) body &quot;.&quot; ;
+head
+        ::= ( atom ( ( &quot;;&quot; | &quot;|&quot; | &quot;OR&quot; | &quot;∨&quot; ) atom )* ) ;
+body
+        ::= literal ( ( &quot;,&quot; | &quot;&amp;&quot; | &quot;AND&quot; | &quot;∧&quot; ) literal )* ;
+
+(* ************************************************************************* *)
+
+atom
+        ::= predicate &quot;(&quot; term ( &quot;,&quot; term )* &quot;)&quot; ;
+term
+        ::= variable | constant ;
+variable
+        ::= named-variable | anon-variable ;
+named-variable
+        ::= UC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )* ;
+anon-variable
+        ::= &quot;_&quot; ;
+
+(* ************************************************************************* *)
+
+literal
+        ::= ( &quot;!&quot; | &quot;NOT&quot; | &quot;￢&quot; )? ( atom | comparison ) ;
+
+(* ************************************************************************* *)
+
+comparison
+        ::= ( named-variable | constant ) operator ( named-variable | constant ) ;
+operator
+        ::= &quot;=&quot;
+            | (&quot;!=&quot; | &quot;/=&quot; | &quot;≠&quot;)
+            | &quot;&lt;&quot;
+            | (&quot;&lt;=&quot; | &quot;≤&quot;)
+            | &quot;&gt;&quot;
+            | (&quot;&gt;=&quot; | &quot;≥&quot;)
+            | (&quot;*=&quot; | &quot;≛&quot; | &quot;MATCHES&quot;) ;
+
+(* ************************************************************************* *)
+
+query
+        ::= ( &quot;?-&quot; atom &quot;.&quot; ) | ( atom &quot;?&quot; ) ;
+
+(* ************************************************************************* *)
+
+pragma
+        ::= &quot;.&quot; ( feature | assert | infer | input | output ) ;
+
+feature
+        ::= &quot;feature&quot; &quot;(&quot; feature-id ( &quot;,&quot; feature-id )* &quot;)&quot; &quot;.&quot; ;
+feature-id
+        ::= &quot;comparisons&quot; | &quot;constraints&quot; | &quot;disjunction&quot; | &quot;negation&quot; ;
+
+assert
+        ::= &quot;assert&quot; predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot; &quot;.&quot; ;
+infer
+        ::= &quot;infer&quot; ( predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot;
+                    | &quot;from&quot; predicate ) &quot;.&quot; ;
+attribute-decl
+        ::= ( predicate &quot;:&quot; )? ( &quot;boolean&quot; | &quot;integer&quot; | &quot;string&quot; ) ;
+
+input
+        ::= &quot;input&quot; io-details &quot;.&quot; ;
+output
+        ::= &quot;output&quot; io-details &quot;.&quot; ;
+io-details
+        ::= &quot;(&quot; predicate &quot;,&quot; quoted-string ( &quot;,&quot; quoted-string )? &quot;)&quot; ;
+
+(* ************************************************************************* *)
+
+comment
+        ::= &quot;%&quot; [^\r\n]* EOL
+            | &quot;/&quot; &quot;\u{2a}&quot; ( [^\u{2a}] | &quot;\u{2a}&quot;+ [^\u{2a}/] )* &quot;\u{2a}&quot;+ &quot;/&quot; ;
+
+(* ************************************************************************* *)
+
+EOL
+        ::= &quot;\n&quot; | &quot;\r\n&quot; | &quot;\r&quot; ;
+WHITESPACE
+        ::= &quot; &quot; | &quot;\t&quot; | EOL ;
+
+DQUOTE
+        ::= '&quot;' ;
+
+LC_ALPHA
+        ::= ? corresponds to the Unicode category 'Ll' ? ;
+UC_ALPHA
+        ::= ? corresponds to the Unicode category 'Lu' ? ;
+ALPHA
+        ::= LC_ALPHA | UC_ALPHA ;
+DIGIT
+        ::= ? corresponds to the Unicode category 'Nd' (decimal number) ? ;
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="appendix-relational-algebra-ebnf"><a class="header" href="#appendix-relational-algebra-ebnf">Appendix: Relational Algebra EBNF</a></h1>
+<pre><code class="language-ebnf">program
+        ::= assignment | expression ;
+
+assignment
+        ::= identifier ( &quot;≔&quot; | &quot;:=&quot; ) expression ;
+
+expression
+        ::=  relation-identifier
+          |  union
+          |  intersection
+          |  difference
+          |  cartesian-product
+          |  selection
+          |  projection
+          |  rename
+          |  join
+          |  &quot;(&quot; expression &quot;)&quot; ;
+
+(* ************************************************************************* *)
+
+union   ::= expression ( &quot;∪&quot; | &quot;union&quot; ) expression ;
+
+intersection
+        ::= expression ( &quot;∩&quot; | &quot;intersect&quot; ) expression ;
+
+difference
+        ::= expression ( &quot;∖&quot; | &quot;-&quot; | &quot;diff&quot; ) expression ;
+
+cartesian-product
+        ::= expression ( &quot;⨯&quot; | &quot;×&quot; | &quot;product&quot; ) expression ;
+
+selection
+        ::= expression
+            ( &quot;σ&quot; | &quot;select&quot; ) &quot;[&quot; criteria (&quot;,&quot; criteria )* &quot;]&quot;
+            expression ;
+
+criteria
+        ::= ( attribute-identifier | literal )
+            operation
+            ( attribute-identifier | literal ) ;
+
+operation
+        ::= &quot;=&quot; | &quot;!=&quot; | &quot;&lt;&quot; | &quot;&lt;=&quot; | &quot;&gt;&quot; | &quot;&gt;=&quot; ;
+
+projection
+        ::= expression
+            ( &quot;Π&quot; | &quot;π&quot; | &quot;project&quot; )
+                &quot;[&quot; attribute-identifier (&quot;,&quot; attribute-identifier )* &quot;]&quot;
+            expression ;
+
+rename  ::= expression
+            ( &quot;ρ&quot; | &quot;rename&quot; ) &quot;[&quot; rename-pair (&quot;,&quot; rename-pair )* &quot;]&quot;
+            expression ;
+
+rename-pair
+        ::= attribute-identifier &quot;=&quot; attribute-identifier ;
+
+join    ::= expression
+            ( natural-join | theta-join )
+            expression ;
+
+natural-join
+        ::= &quot;⨝&quot; | &quot;natural-join&quot;
+
+theta-join
+        ::= ( &quot;⨝&quot; | &quot;theta-join&quot; ) &quot;[&quot; criteria  (&quot;,&quot; criteria )* &quot;]&quot; ;
+
+(* ************************************************************************* *)
+
+relation-identifier
+        ::= ALPHA ( ALPHANUM | &quot;_&quot; )* ;
+
+attribute-identifier
+        ::= relation-identifier
+            ( &quot;.&quot; ( relation-identifier | integer ) ) ;
+
+(* ************************************************************************* *)
+
+literal ::= integer | string | boolean ;
+
+integer ::= ( &quot;+&quot; | &quot;-&quot; )? DIGIT+ ;
+
+string  ::= '&quot;' [^\u{22}]* '&quot;' ;
+
+boolean ::= &quot;true&quot; | &quot;false&quot; ;
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="appendix-references"><a class="header" href="#appendix-references">Appendix: References</a></h1>
+<div class="biblio">
+<ol start="2">
+<li>Balazinska, M. (2012). <em>CSE 344: Introduction to Data Management. Lecture 10: Datalog</em>. University of Washington. Retrieved January 24, 2022, from <a href="https://courses.cs.washington.edu/courses/cse344/12au/lectures/lecture10-datalog.pdf">courses.cs.washington.edu</a>.</li>
+<li>Ceri, S., Gottlob, G., and Tanca, L. (1990). <em>Logic Programming and Databases</em>. Springer Berlin Heidelberg. <a href="https://doi.org/10.1007/978-3-642-83952-8">DOI: 10.1007/978-3-642-83952-8</a></li>
+<li>Datalog. (January 9, 2022). In <em>Wikipedia</em>. Retrieved January 24, 2022, from  <a href="https://en.wikipedia.org/w/index.php?title=Datalog&amp;oldid=1064721744">en.wikipedia.org/Datalog</a>. </li>
+<li>Grammatical Framework. (March 1, 2018). Query-converter - SQL to Relational Algebra. Retrieved January 24, 2022, from <a href="http://www.grammaticalframework.org/qconv/qconv-a.html">grammaticalframework.org</a></li>
+<li>Relational algebra. (December 1, 2021). In <em>Wikipedia</em>. Retrieved January 24, 2022, from <a href="https://en.wikipedia.org/w/index.php?title=Relational_algebra&amp;oldid=1058055410">en.wikipedia.org/Relational_algebra</a>. </li>
+</ol>
+</div>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        <script type="text/javascript" src="datalog.js"></script>
+        <script type="text/javascript" src="asdi.js"></script>
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+    </body>
+</html>
