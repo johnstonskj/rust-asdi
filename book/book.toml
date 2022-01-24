@@ -1,0 +1,16 @@
+[book]
+authors = ["Simon Johnston <johnstonskj@gmail.com>"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Another Simplistic Datalog Implementation (in Rust)"
+
+[rust]
+edition = "2018"
+
+[output.html]
+git-repository-url = "https://github.com/johnstonskj/rust-asdi"
+additional-css = ["asdi.css"]
+additional-js = ["datalog.js", "asdi.js"]
+curly-quotes = true
+mathjax-support = false
