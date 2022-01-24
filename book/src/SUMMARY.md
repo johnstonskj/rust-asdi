@@ -1,0 +1,21 @@
+# Summary
+
+1. [Introduction](introduction/introduction.md)
+1. [Datalog](datalog/index.md)
+   1. [Abstract Syntax](datalog/abstract.md)
+   2. [Concrete Syntax](datalog/concrete.md)
+   3. [Relational Algebra Mapping](datalog/relational.md)
+   4. [Language Features](datalog/features.md)
+1. [Model API](model/index.md)
+   1. [Programs](model/programs.md)
+   1. [Relations](model/relations.md)
+   1. [Queries](model/queries.md)
+   1. [Views](model/views.md)
+1. [Model Extension](extension/index.md)
+   2. [RelationSet I/O](extension/i_o.md)
+   1. [Writing an Evaluator](extension/evaluator.md)
+   3. [Writing a Typesetter](extension/typeset.md)
+
+1. [Appendix: Datalog EBNF](reference/datalog_ebnf.md)
+1. [Appendix: Relational Algebra EBNF](reference/relational_ebnf.md)
+1. [Appendix: References](reference/references.md)
