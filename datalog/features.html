@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html" class="active"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">5.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">6.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">7.</strong> Appendix: References</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html" class="active"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/abstract_graph.html"><strong aria-hidden="true">5.</strong> Appendix: Abstract Graphical View</a></li><li class="chapter-item expanded "><a href="../reference/logic.html"><strong aria-hidden="true">6.</strong> Appendix: First-Order Logic &amp; Horn Clauses</a></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">7.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">8.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">9.</strong> Appendix: References</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -171,29 +171,6 @@ with feature sets applied to programs. Without a feature specified certain types
 well-formedness rules, the parser will report errors, and some tools will not execute. However,
 the enabling of features is relatively simple in both the text representation using the <code>.feature</code>
 pragma, and using <code>FeatureSet</code>s in the API.</p>
-<h1 id="example"><a class="header" href="#example">Example</a></h1>
-<p>The following demonstrates the text representation support for enabling features.</p>
-<pre><code class="language-datalog">.features(negation, comparisons, disjunction).
-</code></pre>
-<p>Similarly, the following API example shows how to create a feature set that may be added to a
-program during creation.</p>
-<pre><pre class="playground"><code class="language-rust no_run edition2018">
-<span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>use asdi::features::{
-    FEATURE_COMPARISONS, FEATURE_DISJUNCTION, FEATURE_NEGATION, FeatureSet
-};
-
-let features = FeatureSet::from(vec![FEATURE_NEGATION, FEATURE_DISJUNCTION]);
-
-assert!(features.supports(&amp;FEATURE_NEGATION));
-assert!(!features.supports(&amp;FEATURE_COMPARISONS));
-
-assert_eq!(features.to_string(), &quot;.feature(negation, disjunction).&quot;);
-<span class="boring">}
-</span></code></pre></pre>
-<h1 id="supported-features"><a class="header" href="#supported-features">Supported Features</a></h1>
-<p>The following describe the set of currently supported features.</p>
 <h2 id="negation"><a class="header" href="#negation">Negation</a></h2>
 <p>The feature <code>negation</code> enables the negation of individual literals in the body of a rule. This
 language is often described as $\text{\small{Datalog}}^{\lnot}$.</p>
@@ -229,6 +206,27 @@ mother(X, Y) OR father(X, Y) :- parent(X, Y).
 mother(X, Y) ∨ father(X, Y) :- parent(X, Y).
 </code></pre>
 <p>The text representation allows for <code>&quot;;&quot;</code>, “|”<code>, </code>“∨”<code>, and </code>“OR”` to be used to denote disjunction.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<p>The following demonstrates the text representation support for enabling features.</p>
+<pre><code class="language-datalog">.features(negation, comparisons, disjunction).
+</code></pre>
+<p>Similarly, the following API example shows how to create a feature set that may be added to a
+program during creation.</p>
+<pre><pre class="playground"><code class="language-rust no_run edition2018">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use asdi::features::{
+    FEATURE_COMPARISONS, FEATURE_DISJUNCTION, FEATURE_NEGATION, FeatureSet
+};
+
+let features = FeatureSet::from(vec![FEATURE_NEGATION, FEATURE_DISJUNCTION]);
+
+assert!(features.supports(&amp;FEATURE_NEGATION));
+assert!(!features.supports(&amp;FEATURE_COMPARISONS));
+
+assert_eq!(features.to_string(), &quot;.feature(negation, disjunction).&quot;);
+<span class="boring">}
+</span></code></pre></pre>
 
                     </main>
 
@@ -268,6 +266,7 @@ mother(X, Y) ∨ father(X, Y) :- parent(X, Y).
 
         <!-- Custom JS scripts -->
         <script type="text/javascript" src="../datalog.js"></script>
+        <script type="text/javascript" src="../dot.js"></script>
         <script type="text/javascript" src="../asdi.js"></script>
     </body>
 </html>

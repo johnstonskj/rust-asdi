@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html" class="active"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">5.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">6.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">7.</strong> Appendix: References</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html" class="active"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/abstract_graph.html"><strong aria-hidden="true">5.</strong> Appendix: Abstract Graphical View</a></li><li class="chapter-item expanded "><a href="../reference/logic.html"><strong aria-hidden="true">6.</strong> Appendix: First-Order Logic &amp; Horn Clauses</a></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">7.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">8.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">9.</strong> Appendix: References</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -166,13 +166,86 @@ document.addEventListener("DOMContentLoaded", function() {
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p>Another Simplistic <a href="https://en.wikipedia.org/wiki/Datalog">Datalog</a> Implementation (ASDI), in Rust.</p>
-<p>This package provides a data model to represent <a href="https://en.wikipedia.org/wiki/Datalog">Datalog</a>
-programs in memory, a parser for the textual representation, and some evaluation implementations.</p>
 <p>Datalog is a logic programming language and a subset of the earlier
-<a href="https://en.wikipedia.org/wiki/Prolog">Prolog</a>. Chapter 1 of <a href="https://link.springer.com/book/10.1007/978-3-642-83952-8">Logic Programming and
-Databases</a> provides a good overview of
-the drawbacks of Prolog and the advantages of Datalog for certain tasks.</p>
+<a href="https://en.wikipedia.org/wiki/Prolog">Prolog</a><span class="fnref"><a href="#1">1</a></span>. This package provides a data model to represent 
+<a href="https://en.wikipedia.org/wiki/Datalog">Datalog</a> programs in memory, a parser for the textual representation, 
+and some evaluation implementations.</p>
+<h2 id="brief-example"><a class="header" href="#brief-example">Brief Example</a></h2>
+<p>We will consider the following syllogism from <span class="bibref inline"><a href="../reference/references.html#Mill1851">Mill1851</a>, vol. 1, chap. 2</span>:</p>
+<blockquote>
+<p>All men are mortal.</p>
+<p>Socrates is a man.</p>
+<p>Therefore, Socrates is mortal.</p>
+</blockquote>
+<p>This can be represented in the following Datalog program.</p>
+<pre><code class="language-datalog">human(&quot;Socrates&quot;).
 
+mortal(X) &lt;- human(X).
+
+?- mortal(&quot;Socrates&quot;).
+</code></pre>
+<p>The execution of this program will start with the goal query “<em>is Socrates mortal?</em>” and in
+doing so will evaluate the necessary rule and derive the relation <em>mortal</em>. The result is a
+boolean value denoting whether the goal is satisfied.</p>
+<pre><code class="language-text">+------------+
+| _: boolean |
++============+
+| true      |
++------------+
+</code></pre>
+<p>However, if we were to change the final query to replace the constant with a variable, as follows.</p>
+<pre><code class="language-datalog">?- mortal(X).
+</code></pre>
+<p>The program will select all matching (in this case all) facts from the <em>mortal</em> relation.</p>
+<pre><code class="language-text">+------------+
+| X: string  |
++============+
+| &quot;Socrates&quot; |
++------------+
+</code></pre>
+<p>The following is the same example constructed via the ASDI library.</p>
+<pre><pre class="playground"><code class="language-rust edition2018">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use asdi::{NameReferenceSet, Program};
+use asdi::edb::{Attribute, Predicate};
+use asdi::idb::{Atom, Term, Variable};
+use std::str::FromStr;
+
+let mut syllogism = Program::default();
+
+let predicates = syllogism.predicates();
+let p_human = predicates.fetch(&quot;human&quot;).unwrap();
+let p_mortal = predicates.fetch(&quot;mortal&quot;).unwrap();
+
+let human = syllogism
+    .add_new_extensional_relation(p_human.clone(), vec![Attribute::string()])
+    .unwrap();
+human.add_as_fact([&quot;Socrates&quot;.into()]).unwrap();
+
+let variables = syllogism.variables();
+let var_x: Term = variables.fetch(&quot;X&quot;).unwrap().into();
+
+syllogism
+    .add_new_pure_rule(
+        p_mortal.clone(),
+        [var_x.clone()],
+        [Atom::new(p_human, [var_x]).into()],
+    )
+    .unwrap();
+
+syllogism
+    .add_new_query(p_mortal, [&quot;Socrates&quot;.into()])
+    .unwrap();
+<span class="boring">}
+</span></code></pre></pre>
+<hr />
+<div class="footnotes">
+<ol>
+<li><a name="1">Chapter</a> 1 of <span class="bibref inline"><a href="../reference/references.html#CeGoTa90">CeGoTa90</a></span>
+provides a good overview of the drawbacks of Prolog and the advantages of Datalog for certain tasks.</li>
+</ol>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -205,6 +278,7 @@ the drawbacks of Prolog and the advantages of Datalog for certain tasks.</p>
 
         <!-- Custom JS scripts -->
         <script type="text/javascript" src="../datalog.js"></script>
+        <script type="text/javascript" src="../dot.js"></script>
         <script type="text/javascript" src="../asdi.js"></script>
     </body>
 </html>

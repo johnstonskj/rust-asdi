@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Relations - Another Simplistic Datalog Implementation (in Rust)</title>
+        <title>Appendix: First-Order Logic &amp; Horn Clauses - Another Simplistic Datalog Implementation (in Rust)</title>
         <!-- Custom HTML head -->
 <link   rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"
@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html" class="active"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/abstract_graph.html"><strong aria-hidden="true">5.</strong> Appendix: Abstract Graphical View</a></li><li class="chapter-item expanded "><a href="../reference/logic.html"><strong aria-hidden="true">6.</strong> Appendix: First-Order Logic &amp; Horn Clauses</a></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">7.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">8.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">9.</strong> Appendix: References</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/abstract_graph.html"><strong aria-hidden="true">5.</strong> Appendix: Abstract Graphical View</a></li><li class="chapter-item expanded "><a href="../reference/logic.html" class="active"><strong aria-hidden="true">6.</strong> Appendix: First-Order Logic &amp; Horn Clauses</a></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">7.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">8.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">9.</strong> Appendix: References</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -164,16 +164,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="relations"><a class="header" href="#relations">Relations</a></h1>
+                        <h1 id="appendix-first-order-logic--horn-clauses"><a class="header" href="#appendix-first-order-logic--horn-clauses">Appendix: First-Order Logic &amp; Horn Clauses</a></h1>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../model/programs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../reference/abstract_graph.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                            <a rel="next" href="../model/queries.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../reference/datalog_ebnf.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -182,10 +182,10 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../model/programs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../reference/abstract_graph.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                    <a rel="next" href="../model/queries.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../reference/datalog_ebnf.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

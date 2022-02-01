@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html" class="active"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">5.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">6.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">7.</strong> Appendix: References</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html" class="active"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/abstract_graph.html"><strong aria-hidden="true">5.</strong> Appendix: Abstract Graphical View</a></li><li class="chapter-item expanded "><a href="../reference/logic.html"><strong aria-hidden="true">6.</strong> Appendix: First-Order Logic &amp; Horn Clauses</a></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">7.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">8.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">9.</strong> Appendix: References</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -165,24 +165,37 @@ document.addEventListener("DOMContentLoaded", function() {
                 <div id="content" class="content">
                     <main>
                         <h1 id="abstract-syntax"><a class="header" href="#abstract-syntax">Abstract Syntax</a></h1>
+<p>This section describes the structure of $\small\text{Datalog}$ languages without reference to any concrete syntax
+or serialized representation. The most common concrete syntax is derived from Prolog and will be described in detail in 
+the <a href="concrete.html">following section</a>. </p>
+<p>It is common in definitions of Datalog to start from a basis in 
+<a href="https://en.wikipedia.org/wiki/First-order_logic">predicate logic</a> or <a href="https://en.wikipedia.org/wiki/Horn_clause">Horn clauses</a>
+and demonstrate how these relate to the rules in a Datalog program. This section takes a more direct approach leaving
+the relationship with other logic forms for a brief <a href="../reference/logic.html">appendix</a>.</p>
+<h2 id="programs"><a class="header" href="#programs">Programs</a></h2>
+<p>A Datalog <strong>Program</strong> $\small P$ is a tuple comprising the <strong>Extensional</strong> database, EDB, or  $\small D_{E}$, the
+<strong>Intensional</strong> database, IDB, or  $\small D_{I}$, and a set of queries $\small Q$.</p>
+<p>$$\tag{0}\small P=( D_E, D_I, Q )$$</p>
+<p>The extensional database in turn is a set of <em>relations</em> each of which is a set of <em>facts</em> (<em>ground atoms</em>). 
+The intensional database is a set of <em>rules</em> that derive additional facts into intensional relations via entailment.</p>
 <h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
 <p>Rules $\small R$ are built from a language $\small \mathcal{L}=( \mathcal{C},\mathcal{P},\mathcal{V})$
 that contains the</p>
-<ol>
-<li>$\small \mathcal{C}$ – the finite sets of symbols for all constant values; e.g. <code>hello</code>, <code>&quot;hi&quot;</code>
+<ul>
+<li>$\small \mathcal{C}$ — the finite sets of symbols for all constant values; e.g. <code>hello</code>, <code>&quot;hi&quot;</code>
 <code>123</code>,</li>
-<li>$\small \mathcal{P}$ – the finite set of alphanumeric character strings that begin with a
+<li>$\small \mathcal{P}$ — the finite set of alphanumeric character strings that begin with a
 lowercase character; e.g. <code>human</code>, <code>size</code>, <code>a</code>,</li>
-<li>$\small \mathcal{V}$ – the finite set of alphanumeric character strings that begin with an
+<li>$\small \mathcal{V}$ — the finite set of alphanumeric character strings that begin with an
 uppercase character; e.g. <code>X</code>, <code>A</code>, <code>Var</code>.</li>
-</ol>
+</ul>
 <p>While it would appear that the values from $\small \mathcal{P}$ or $\small \mathcal{V}$ would
 overlap, these values must remain distinct. For example, the value <code>human</code> is a valid predicate and
 string constant but they have distinct types in ASDI that ensure they are distinct.</p>
 <p>Each rule $\small r \in R$ has the form:</p>
 <p>$$\tag{i}\small A_1, \ldots, A_m \leftarrow L_1, \ldots, L_n$$</p>
 <p>as well as the following properties:</p>
-<ol>
+<ul>
 <li>$\small head(r)$ (the consequence), returns the set of <em>atom</em> values $\small A_1, \ldots, A_m$ where $\small m \in \mathbb{N}$,</li>
 <li>$\small body(r)$ (the antecedence), returns the set of <em>literal</em> values $\small L_1, \ldots, L_n$ where $\small n \in \mathbb{N}$,</li>
 <li>$\small distinguished(r)$ returns the set of <em>terms</em> in the head of a rule,
@@ -193,7 +206,7 @@ $$\tag{iii}\small non\text{-}distinguished(r) \coloneqq \lbrace t | t \in ( \big
 $$\tag{iv}\small ground(r) \coloneqq (\forall{a}\in head(r); ground(a)) \land (\forall{l}\in body(r); ground(l))$$</li>
 <li>$\small positive(r)$ returns true if all body <em>literals</em> are <em>positive</em>:
 $$\tag{v}\small positive(r) \coloneqq (\forall{l}\in body(r); positive(l))$$</li>
-</ol>
+</ul>
 <p>A <em>pure</em> rule is one where there is only a single atom in the head; if the body is true, the head is
 true. A <strong>constraint</strong> rule, or contradiction, does not allow any consequence to be determined from
 evaluation of its body. A <strong>disjunctive</strong> rule is one where there is more than one atom, and any one
@@ -219,16 +232,21 @@ assertion</em>).</p>
 <p>$$\tag{ia}\small C_1 | C_2 | \ldots | C_n \leftarrow A_1, \ldots, A_m, \lnot B_1, \ldots, \lnot B_k$$</p>
 <p>Where this form shows the expanded head structure according to $\small\text{Datalog}^{\lor}$, and the
 set of negated literals according to $\small\text{Datalog}^{\lnot}$.</p>
+<p>Datalog does not allow rules to infer new values for relations that exist in the extensional database. This may be
+expressed as follows:</p>
+<p>$$\tag{xvii}\small \mathcal{P}_E \cap \mathcal{P}_I = \empty$$</p>
+<p>The same restriction is not required for constants in $\small \mathcal{C}_P$ or variables in
+$\small \mathcal{V}_P$ which should be shared.</p>
 <h2 id="terms"><a class="header" href="#terms">Terms</a></h2>
 <p>Terms, mentioned above, may be constant values or variables such that
 $\small\mathcal{T}=\mathcal{C}\cup\mathcal{V}\cup\bar{t}$ where $\small\bar{t}$ represents an
 anonymous variable.</p>
 <p>Terms have the following properties:</p>
-<ol>
+<ul>
 <li>$\small constant(t)$ returns true if the term argument is a constant value.</li>
 <li>$\small variable(t)$ returns true if the term argument is a variable.</li>
 <li>$\small anonymous(t)$ returns true if the term argument is the anonymous variable, $\small\bar{t}$.</li>
-</ol>
+</ul>
 <p>With the definition of rules so far it is possible to write rules that generate an an
 infinite number of results. To avoid such problems Datalog rules are required to satisfy the
 following <strong>Safety</strong> conditions:</p>
@@ -256,45 +274,45 @@ form a <strong>Relation</strong> if each <em>conforms to</em> the schema of the 
 individual atom is as follows:</p>
 <p>$$\tag{ix}\small p(t_1, \ldots, t_k)$$</p>
 <p>as well as the following properties:</p>
-<ol>
+<ul>
 <li>$\small label(a)$ returns the predicate $\small p$,</li>
 <li>$\small terms(a)$ returns the tuple of term values $\small t_1, \ldots, t_k$; where
 $\small t \in \mathcal{T}$ and $\small k \in \mathbb{N}^{+}$,</li>
 <li>$\small arity(a)$ returns the cardinality of the relation identified by the predicate;
 $\small arity(a) \equiv |terms(a)| \equiv k$,</li>
 <li>in $\small\text{Datalog}^{\Gamma}$:
-<ol>
+<ul>
 <li>there exists a type environment $\small \Gamma$ consisting of one or more types $\small \tau$,</li>
 <li>each term $\small t_i$ has a corresponding type  $\small \tau_i$ where $\small \tau \in \Gamma$,</li>
 <li>$\small type(t)$ returns the type $\small \tau$ for that term,</li>
 <li>$\small types(a)$ returns a tuple such that;
 $\small (i \in {1, \ldots, arity(a)} | type(t_i))$,</li>
-</ol>
+</ul>
 </li>
 <li>$\small ground(a)$ returns true if its terms are all constants:
 $$\tag{x}\small ground(a) \coloneqq (\forall{t}\in terms(a); t \in \mathcal{C})$$</li>
-</ol>
+</ul>
 <h2 id="relations"><a class="header" href="#relations">Relations</a></h2>
 <p>Every relation $\small r$ has a schema that describes a set of attributes
 $\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$, and each attribute may be named, and may in
 $\small\text{Datalog}^{\Gamma}$ also have a type.</p>
 <p>Relations have the following properties:</p>
-<ol>
+<ul>
 <li>$\small label(r)$ returns the predicate $\small p$,</li>
 <li>$\small schema(r)$ returns the set of attributes $\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$;
 where $\small k \in \mathbb{N}^{+}$,</li>
 <li>$\small arity(r)$ returns the number of attributes in the relation’s schema, and therefore all
 atoms within the relation; $\small arity(r) \equiv |schema(a)| \equiv j$.</li>
-</ol>
+</ul>
 <p>Attributes have the following properties:</p>
-<ol>
+<ul>
 <li>$\small label(\alpha)$ returns either the predicate label of the attribute, or $\small\bot$.</li>
 <li>in $\small\text{Datalog}^{\Gamma}$:
-<ol>
+<ul>
 <li>$\small type(\alpha)$ returns a type $\small \tau$ for the attribute, where $\small \tau \in \Gamma$, or $\small\bot$.</li>
-</ol>
+</ul>
 </li>
-</ol>
+</ul>
 <p>The following defines a binary function that determines whether an atom $\small a$ conforms to the
 schema of a relationship $\small r$.</p>
 <p>$$\tag{xi}\small
@@ -326,24 +344,24 @@ of term values.</p>
 <h2 id="literals"><a class="header" href="#literals">Literals</a></h2>
 <p>Literals within the body of a rule, represent sub-goals that are the required to be true for the
 rule’s head to be considered true.</p>
-<ol>
+<ul>
 <li>A literal may be an atom (termed a relational literal) or, in $\small\text{Datalog}^{\theta}$, a
 conditional expression (termed an arithmetic literal),</li>
-<li>a an arithmetic literal has the form $\small \langle t_{lhs} \theta t_{rhs} \rangle$, where
-<ol>
+<li>an arithmetic literal has the form $\small \langle t_{lhs} \theta t_{rhs} \rangle$, where
+<ul>
 <li>$\small \theta \in \lbrace =, \neq, &lt;, \leq, &gt;, \geq \rbrace$,</li>
 <li>in $\small\text{Datalog}^{\Gamma}$ both $\small t_{lhs}$ and $\small t_{rhs}$ terms have
 corresponding types $\small \tau_{lhs}$ and $\small \tau_{rhs}$,</li>
 <li>the types $\small \tau_{lhs}$ and $\small \tau_{rhs}$ <strong>must</strong> be <em>compatible</em>, for some
 system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_{rhs}, \theta)$,</li>
-</ol>
+</ul>
 </li>
 <li>in $\small\text{Datalog}^{\lnot}$ a literal may be negated, appearing as $\small \lnot l$,</li>
 <li>and has the following properties:
-<ol>
+<ul>
 <li>$\small relational(l)$ returns true if the literal argument is a relational literal.</li>
-<li>$\small arithmetic(l)$ returns true if the literal argument is a arithmetic literal.</li>
-<li>$\small terms(l)$ returns either the set of terms in a literal,
+<li>$\small arithmetic(l)$ returns true if the literal argument is a arithmetic literal.
+*. $\small terms(l)$ returns the set of terms in a literal,
 $$\tag{xiii}\small
 terms(l) \coloneqq
 \begin{cases}
@@ -353,9 +371,20 @@ terms(l), &amp;\text{if } relational(l) \\
 <li>$\small ground(l)$ returns true if its terms are all constants $\small (\forall{t}\in terms(l); t \in \mathcal{C})$,</li>
 <li>$\small positive(l)$ in $\small\text{Datalog}^{\lnot}$ returns false if negated,
 otherwise it will always return true.</li>
-</ol>
+</ul>
 </li>
-</ol>
+</ul>
+<table><thead><tr><th></th><th>$\small relational(l)$</th><th>$\small arithmetic(l)$</th><th>$\small terms(l)$</th><th>$\small ground(l)$</th><th>$\small positive(l)$</th></tr></thead><tbody>
+<tr><td>$\small p(X, Y)$</td><td><code>true</code></td><td><code>false</code></td><td>$\small \lbrace X, Y \rbrace$</td><td><code>false</code></td><td><code>true</code></td></tr>
+<tr><td>$\small p(X, 1)$</td><td><code>true</code></td><td><code>false</code></td><td>$\small \lbrace X, 1 \rbrace$</td><td><code>false</code></td><td><code>true</code></td></tr>
+<tr><td>$\small p(2, 1)$</td><td><code>true</code></td><td><code>false</code></td><td>$\small \lbrace 2, 1 \rbrace$</td><td><code>true</code></td><td><code>true</code></td></tr>
+<tr><td>$\small X = 1$</td><td><code>false</code></td><td><code>true</code></td><td>$\small \lbrace X, 1 \rbrace$</td><td><code>false</code></td><td><code>true</code></td></tr>
+<tr><td>$\small \lnot p(2, 1)$</td><td><code>true</code></td><td><code>false</code></td><td>$\small \lbrace 2, 1 \rbrace$</td><td><code>true</code></td><td><code>false</code></td></tr>
+<tr><td>$\small \lnot X = 1$</td><td><code>false</code></td><td><code>true</code></td><td>$\small \lbrace X, 1 \rbrace$</td><td><code>false</code></td><td><code>false</code> †</td></tr>
+</tbody></table>
+<blockquote>
+<p>† note that while $\small \lnot X = 1$ <strong>is</strong> a negative literal, the corresponding literal $\small X \neq 1$ <strong>is not</strong>.</p>
+</blockquote>
 <h2 id="facts"><a class="header" href="#facts">Facts</a></h2>
 <p>Any ground rule where $\small m=1$ and where $\small n=0$ is termed a <strong>Fact</strong> as it is true by
 nature of having an empty body, or alternatively we may consider the body be comprised of the truth
@@ -364,26 +393,16 @@ value $\small\top$.</p>
 <h2 id="queries"><a class="header" href="#queries">Queries</a></h2>
 <p>An atom may be also used as a <strong>Goal</strong> or <strong>Query</strong> clause in that its constant and variable terms
 may be used to match facts from the known facts or those that may be inferred from the set of rules
-introduced. A ground goal is simply determining that any fact exists that matches all of the
+introduced. A ground goal is simply determining that any fact exists that matches all the
 constant values provided and will return true or false.
 In the case that one or more variables exist a set of facts will be returned that match the
 expressed constants and provide the corresponding values for the variables.</p>
-<p>The set of facts (ground atoms) known a-priori is termed the <strong>Extensional</strong> database, EDB, or $\small D_E$,.
-The set of rules, and any inferred facts, are termed the <strong>Intensional</strong> database, IDB, or $\small D_I$.</p>
-<p>A Datalog <strong>Program</strong> $\small P$ is a tuple comprising the extensional database $\small D_{E}$, the
-intensional database $\small D_{I}$, and a set of queries.</p>
-<p>$$\tag{xv}\small P=( D_E, D_I, Q )$$</p>
-<p>This implies, at least, that the set of predicates accessible to queries in the program is the union
-of predicates in the extensional and intensional databases.</p>
+<p>The set of relations accessible to queries in the program is the union of relations in the extensional and 
+intensional databases.</p>
 <p>$$\tag{xvi}\small \mathcal{P}_P = \mathcal{P}_E \cup \mathcal{P}_I$$</p>
-<p>It should be obvious that the same exists for constants and variables;
+<p>It should be noted that the same exists for constants and variables;
 $\small \mathcal{C}_P = \mathcal{C}_E \cup \mathcal{C}_I$ and
 $\small \mathcal{V}_P = \mathcal{V}_E \cup \mathcal{V}_I$.</p>
-<p>Datalog does not, in general, allow the rules comprising the intensional database to infer new
-values for predicates that exist in the extensional database. This may be expressed as follows:</p>
-<p>$$\tag{xvii}\small \mathcal{P}_E \cap \mathcal{P}_I = \empty$$</p>
-<p>The same restriction is not required for constants in $\small \mathcal{C}_P$ or variables in
-$\small \mathcal{V}_P$ which should be shared.</p>
 
                     </main>
 
@@ -423,6 +442,7 @@ $\small \mathcal{V}_P$ which should be shared.</p>
 
         <!-- Custom JS scripts -->
         <script type="text/javascript" src="../datalog.js"></script>
+        <script type="text/javascript" src="../dot.js"></script>
         <script type="text/javascript" src="../asdi.js"></script>
     </body>
 </html>

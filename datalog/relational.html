@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html" class="active"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">5.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">6.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">7.</strong> Appendix: References</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html" class="active"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/abstract_graph.html"><strong aria-hidden="true">5.</strong> Appendix: Abstract Graphical View</a></li><li class="chapter-item expanded "><a href="../reference/logic.html"><strong aria-hidden="true">6.</strong> Appendix: First-Order Logic &amp; Horn Clauses</a></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">7.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">8.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">9.</strong> Appendix: References</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -224,7 +224,11 @@ p(X) :- r(X, _, _).
 $\small \sigma_{a\theta v}(R)$ where:</p>
 <ul>
 <li>$\small a$ and $\small b$ are attribute names,</li>
-<li>$\small\theta$ is a binary operation, where $\small\theta\in\lbrace =, \neq, &lt;, \leq, &gt;, \geq, \overset{\star}{=} \rbrace$,</li>
+<li>$\small\theta$ is a binary operation, where $\small\theta\in\lbrace =, \neq, &lt;, \leq, &gt;, \geq \rbrace$,
+<ul>
+<li>ASDI adds the non-standard <em>string match</em> operator $\small\overset{\star}{=}$ to the set $\small\theta$,</li>
+</ul>
+</li>
 <li>$\small v$ is a constant value,</li>
 <li>$\small R$ is a relation,</li>
 </ul>
@@ -241,7 +245,7 @@ selects all those tuples in $\small R$ for which $\small\varphi$ holds.</p>
 <p>In $\small\text{Datalog}^{\theta}$ the selection $\small L \coloneqq \sigma_{X&gt;100 \land Y=‘something’} (R)$
 can be expressed as follows, where both rules are equivalent.</p>
 <pre><code class="language-datalog">l(X, Y, Z) :- r(X, Y, Z) AND X &gt; 100 AND Y = something.
-l(X, Y, Z) :- r(X, Y, something) AND X &gt; 100.
+l(X, Y, Z) :- r(X, something, Z) AND X &gt; 100.
 </code></pre>
 <h2 id="rename-smallrho"><a class="header" href="#rename-smallrho">Rename ($\small\rho$)</a></h2>
 <p>Rename is a unary operation written as $\small\rho_{a/b}(R)$ where the result is identical to $\small R$
@@ -300,13 +304,12 @@ subset of $\small D\times D$ that contains $R$ and satisfies the following condi
 <p>In Datalog this form of recursion is naturally expressed, as follows.</p>
 <pre><code class="language-datalog">r_plus(X, Z) :- r(X, Y), r_plus(Y, Z).
 </code></pre>
-<p><em>Acknowledgements</em>. Examples in this section are taken from <a href="https://courses.cs.washington.edu/courses/cse344/12au/lectures/lecture10-datalog.pdf"><em>Introduction to Data Management CSE 344, Lecture 10:
-Datalog</em></a>,
-Magda Balazinska, Fall 2012. Definitions for the relational algebra are taken from
-<a href="https://en.wikipedia.org/wiki/Relational_algebra"><em>Relational algebra</em></a>, Wikipedia, fetched
-January 2022. The <a href="http://www.grammaticalframework.org/qconv/qconv-a.html">Relational Algebra Query Converter</a>
-is an interesting way to take a SQL query and convert to relational algebra which can then be
-converted to Datalog using the examples above.</p>
+<h2 id="acknowledgements"><a class="header" href="#acknowledgements">Acknowledgements</a></h2>
+<p>Examples in this section are taken from <em>Introduction to Data Management CSE 344, Lecture 10:
+Datalog</em><span class="bibref"><a href="../reference/references.html#Balaz12">Balaz12</a></span>, and definitions for 
+the relational algebra are taken from <em>Relational algebra</em><span 
+class="bibref"><a href="../reference/references.html#WikiRelalg">WikiRelalg</a></span>. The <em>Relational Algebra Query Converter</em><span class="bibref"><a href="../reference/references.html#QConv">QConv</a></span> is a useful tool to take a SQL query 
+and convert to relational algebra which can then be converted to Datalog using the examples above.</p>
 
                     </main>
 
@@ -346,6 +349,7 @@ converted to Datalog using the examples above.</p>
 
         <!-- Custom JS scripts -->
         <script type="text/javascript" src="../datalog.js"></script>
+        <script type="text/javascript" src="../dot.js"></script>
         <script type="text/javascript" src="../asdi.js"></script>
     </body>
 </html>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Relations - Another Simplistic Datalog Implementation (in Rust)</title>
+        <title>Appendix: Abstract Graphical View - Another Simplistic Datalog Implementation (in Rust)</title>
         <!-- Custom HTML head -->
 <link   rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"
@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html" class="active"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/abstract_graph.html"><strong aria-hidden="true">5.</strong> Appendix: Abstract Graphical View</a></li><li class="chapter-item expanded "><a href="../reference/logic.html"><strong aria-hidden="true">6.</strong> Appendix: First-Order Logic &amp; Horn Clauses</a></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">7.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">8.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">9.</strong> Appendix: References</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/abstract_graph.html" class="active"><strong aria-hidden="true">5.</strong> Appendix: Abstract Graphical View</a></li><li class="chapter-item expanded "><a href="../reference/logic.html"><strong aria-hidden="true">6.</strong> Appendix: First-Order Logic &amp; Horn Clauses</a></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">7.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">8.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">9.</strong> Appendix: References</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -164,16 +164,97 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="relations"><a class="header" href="#relations">Relations</a></h1>
+                        <h1 id="appendix-abstract-graphical-view"><a class="header" href="#appendix-abstract-graphical-view">Appendix: Abstract Graphical View</a></h1>
+<p>The following graph is an alternative representation of the <a href="../datalog/abstract.html">abstract syntax</a>. It represents 
+<em>leaf values</em> (constants, variables, …) in rectangles and <em>composite values</em> as ellipses. Additionally, where a 
+composite is defined as $\small A \oplus B$ a small filled diamond shape represents the exclusive or relationship.
+Finally, some edges in the graph are labeled with “<code>*</code>”, “<code>+</code>”, and “<code>?</code>” which are the common cardinality notation used
+in regular expressions and BNF notation. </p>
+<p><img src="graphviz.svg" alt="Graphical View" /></p>
+<ol>
+<li>The edge between <em>rule</em> and <em>head</em> has the label “<code>?/*</code>” as it has differing cardinality under $\small\text{Datalog}$, 
+$\small\text{Datalog}^{\lor}$, and $\small\text{Datalog}^{\bot}$. </li>
+<li>The edge between <em>literal</em> and <em>negated?</em> is labeled as “<code>?</code>” as it is necessary under $\small\text{Datalog}^{\lnot}$
+but not under $\small\text{Datalog}$.</li>
+<li>The edge from the choice between <em>literal</em> and <em>comparison</em> is labeled as “<code>?</code>” as it is necessary under
+$\small\text{Datalog}^{\theta}$ but not under $\small\text{Datalog}$.</li>
+<li>The two dashed lines represent the following constraints.
+<ol>
+<li>Between <em>relation</em> and <em>predicate</em> to represent the fact that the predicate for a relation may be derived from the
+predicate of the <em>atoms</em> within it (or vice versa).</li>
+<li>Between <em>head</em> and <em>body</em> to represent the fact that while both are optional for a <em>rule</em>, one or other must be 
+present.</li>
+</ol>
+</li>
+</ol>
+<h2 id="graphviz-source"><a class="header" href="#graphviz-source">GraphViz Source</a></h2>
+<p>The following is the source for the graph above.</p>
+<pre><code class="language-dot">digraph G {
+  rankdir=LR;
+  pad=0.1;
+  splines=true;
+
+  negated [label=&quot;negated?&quot;; shape=box; width=0.1; height=0.1];
+  boolean [shape=box; width=0.1; height=0.1];
+  string [shape=box; width=0.1; height=0.1];
+  integer [shape=box; width=0.1; height=0.1];
+  variable [shape=box; width=0.1; height=0.1];
+  anonymous [shape=box; width=0.1; height=0.1];
+  predicate [shape=box; width=0.1; height=0.1;];
+
+  program [root=true];
+
+  program -&gt; edb;
+  program -&gt; idb;
+  edb -&gt; relation [label=&quot;*&quot;];
+  idb -&gt; relation [label=&quot;*&quot;];
+  idb -&gt; rule [label=&quot;*&quot;];
+  rule -&gt; head [label=&quot;?/*&quot;];
+  head -&gt; atom;
+  rule -&gt; body [label=&quot;?&quot;];
+  body -&gt; literal [label=&quot;+&quot;];
+
+  head -&gt; body [arrowhead=none;style=dashed;label=&quot;|head|+|tail|&gt;=1&quot;];
+
+  literal -&gt; xor3;
+  literal -&gt; negated [label=&quot;?&quot;];
+  xor3 -&gt; atom;
+  xor3 -&gt; comparison [label=&quot;?&quot;];
+
+  comparison -&gt; term [label=&quot;lhs&quot;];
+  comparison -&gt; term [label=&quot;rhs&quot;];
+  comparison -&gt; operator;
+
+  relation -&gt; predicate [style=dashed];
+  relation -&gt; atom [label=&quot;*&quot;];
+  atom -&gt; term [label=&quot;+&quot;];
+  atom -&gt; predicate;
+
+  term -&gt; xor2;
+  xor2 -&gt; constant;
+  xor2 -&gt; variable;
+  xor2 -&gt; anonymous;
+
+  xor1 [shape=diamond,style=filled,label=&quot;&quot;,height=.1,width=.1];
+  xor2 [shape=diamond,style=filled,label=&quot;&quot;,height=.1,width=.1];
+  xor3 [shape=diamond,style=filled,label=&quot;&quot;,height=.1,width=.1];
+
+  constant -&gt; xor1;
+  xor1 -&gt; integer;
+  xor1 -&gt; string;
+  xor1 -&gt; boolean;
+}
+</code></pre>
+<p>This file is accessible directly <a href="abstract_graph.dot">here</a>.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../model/programs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../extension/typeset.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                            <a rel="next" href="../model/queries.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../reference/logic.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -182,10 +263,10 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../model/programs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../extension/typeset.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                    <a rel="next" href="../model/queries.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../reference/logic.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

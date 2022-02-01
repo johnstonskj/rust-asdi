@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html" class="active"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">5.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">6.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">7.</strong> Appendix: References</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html" class="active"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/relational.html"><strong aria-hidden="true">2.3.</strong> Relational Algebra Mapping</a></li><li class="chapter-item expanded "><a href="../datalog/features.html"><strong aria-hidden="true">2.4.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.3.</strong> Queries</a></li><li class="chapter-item expanded "><a href="../model/views.html"><strong aria-hidden="true">3.4.</strong> Views</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.1.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/typeset.html"><strong aria-hidden="true">4.2.</strong> Writing a Typesetter</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/abstract_graph.html"><strong aria-hidden="true">5.</strong> Appendix: Abstract Graphical View</a></li><li class="chapter-item expanded "><a href="../reference/logic.html"><strong aria-hidden="true">6.</strong> Appendix: First-Order Logic &amp; Horn Clauses</a></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">7.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">8.</strong> Appendix: Relational Algebra EBNF</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">9.</strong> Appendix: References</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -172,8 +172,8 @@ meaning of the language.</p>
 <p>For the original description of the EBNF notation as it is used here, please refer to “<a href="http://www.w3.org/TR/2010/REC-xquery-20101214/#EBNFNotation">A.1.1
 Notation</a>” in the <a href="http://www.w3.org/TR/2010/REC-xquery-20101214/">XQuery
 recommendation</a>. The diagrams included below were
-generated by the <a href="https://www.bottlecaps.de/rr/ui">bottlecaps</a> online tool from the file
-<a href="https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/doc-src/datalog.ebnf">datalog.ebnf</a>.</p>
+generated by the <a href="https://www.bottlecaps.de/rr/ui">bottlecaps</a> online tool from the definition in the
+<a href="../reference/datalog_ebnf.html">appendix</a>.</p>
 <h2 id="programs"><a class="header" href="#programs">Programs</a></h2>
 <p>A program consists of a set of facts that comprise the extensional database, a list of rules that
 comprise the intensional database, and possibly a set of queries to interrogate the result of any
@@ -196,6 +196,7 @@ than a constrained form of the <code>atom</code> rule.</p>
 <pre><code class="language-ebnf">predicate
         ::= LC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )* ;
 </code></pre>
+<h3 id="example"><a class="header" href="#example">Example</a></h3>
 <p>The following demonstrates a simple fact denoting that the constant <code>brooke</code> representing some
 individual is the parent of some individual represented by the constant <code>&quot;Xerces&quot;</code>.</p>
 <pre><code class="language-datalog">parent(&quot;Xerces&quot;, brooke).
@@ -212,7 +213,7 @@ safely be expressed without quotes; therefore, the values <code>xerces</code> an
 <p><img src="images/string.png" alt="string" /></p>
 <pre><code class="language-ebnf">string
         ::= predicate ( &quot;:&quot; ALPHA ( ALPHA | DIGIT | &quot;_&quot; * )? )
-            | DQUOTE [^\&quot;]* DQUOTE ;
+            | DQUOTE [^\u{22}]* DQUOTE ;
 </code></pre>
 <p>Integers bounds are currently unspecified, just strings of decimal digits.</p>
 <p><img src="images/integer.png" alt="integer" /></p>
@@ -244,6 +245,7 @@ optional or replaced by the value <code>&quot;⊥&quot;</code>.</p>
 <pre><code class="language-ebnf">body
         ::= literal ( ( &quot;,&quot; | &quot;&amp;&quot; | &quot;AND&quot; | &quot;∧&quot; ) literal )* ;
 </code></pre>
+<h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
 <p>The following sets of rules are equivalent.</p>
 <pre><code class="language-datalog">ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Y) &lt;- parent(X, Y).
@@ -288,16 +290,17 @@ equivalent.</p>
 :- alive(X) AND dead(X).
 ⊥ ⟵ alive(X) ∧ dead(X).
 </code></pre>
+<h3 id="safety"><a class="header" href="#safety">Safety</a></h3>
 <p>ASDI will disallow the addition of rules that are unsafe according to the abstract syntax. The
 following are examples of unsafe rules:</p>
 <ul>
-<li><code>a(X) :- b(Y).</code> – because <code>X</code> appears as a distinguished variable but does not appear in a
+<li><code>a(X) :- b(Y).</code> — because <code>X</code> appears as a distinguished variable but does not appear in a
 positive relational literal, error
 <a href="error/enum.Error.html#variant.NegativeVariablesNotAlsoPositive"><code>HeadVariablesMissingInBody</code></a>.</li>
-<li><code>a(X) :- b(Y), NOT b(X).</code> – because <code>X</code> appears in a negated literal but does not appear in a
+<li><code>a(X) :- b(Y), NOT b(X).</code> — because <code>X</code> appears in a negated literal but does not appear in a
 positive relational literal, error
 <a href="error/enum.Error.html#variant.NegativeVariablesNotAlsoPositive"><code>NegativeVariablesNotAlsoPositive</code></a>.</li>
-<li><code>a(X) :- b(Y), X &lt; Y.</code> – Because <code>X</code> appears in an arithmetic literal but does not appear in a
+<li><code>a(X) :- b(Y), X &lt; Y.</code> — Because <code>X</code> appears in an arithmetic literal but does not appear in a
 positive relational literal, error
 <a href="error/enum.Error.html#variant.ArithmeticVariablesNotAlsoPositive"><code>ArithmeticVariablesNotAlsoPositive</code></a>.</li>
 </ul>
@@ -323,6 +326,7 @@ above.</p>
 anon-variable
         ::= &quot;_&quot; ;
 </code></pre>
+<h3 id="example-1"><a class="header" href="#example-1">Example</a></h3>
 <p>The following are all valid body atoms.</p>
 <pre><code class="language-datalog">dead(julius_caesar).
 emperor(julius_caesar, rome).
@@ -337,6 +341,7 @@ character <code>∧</code> (logical and <code>\u{2227}</code>).</p>
 <pre><code class="language-ebnf">literal
         ::= ( &quot;!&quot; | &quot;NOT&quot; | &quot;￢&quot; )? ( atom | comparison ) ;
 </code></pre>
+<h3 id="examples-1"><a class="header" href="#examples-1">Examples</a></h3>
 <p>The following rules are all equivalent.</p>
 <pre><code class="language-datalog">ancestor(X, Y) ⟵ parent(X, Z)  ,  ancestor(Z, Y).
 ancestor(X, Y) ⟵ parent(X, Z)  &amp;  ancestor(Z, Y).
@@ -390,6 +395,7 @@ common arithmetic and string operators.</p>
 <tr><td>Integer</td><td>Yes</td><td>Yes</td><td>No</td></tr>
 <tr><td>Boolean</td><td>Yes</td><td>No</td><td>No</td></tr>
 </tbody></table>
+<h3 id="example-2"><a class="header" href="#example-2">Example</a></h3>
 <p>The following is an example using arithmetic literals and the <em>car</em> relation.</p>
 <pre><code class="language-datalog">.feature(comparisons).
 .assert car(make: string, model: string, age: integer).
@@ -405,6 +411,7 @@ or the suffix <code>?</code>.</p>
 <pre><code class="language-ebnf">query
         ::= ( &quot;?-&quot; atom &quot;.&quot; ) | ( atom &quot;?&quot; ) ;
 </code></pre>
+<h3 id="examples-2"><a class="header" href="#examples-2">Examples</a></h3>
 <p>The following queries are equivalent and will return the value of the variable <code>X</code> for any facts in
 the <em>ancestor</em> relationship where the first attribute is the string value <code>&quot;xerces&quot;</code>.</p>
 <pre><code class="language-datalog">?- ancestor(xerces, X).
@@ -452,6 +459,7 @@ selected language feature will result in errors.</p>
 <pre><code class="language-ebnf">feature-id
         ::= &quot;comparisons&quot; | &quot;constraints&quot; | &quot;disjunction&quot; | &quot;negation&quot; ;
 </code></pre>
+<h3 id="example-3"><a class="header" href="#example-3">Example</a></h3>
 <pre><code class="language-datalog">.feature(negation).
 .feature(comparisons, disjunction).
 </code></pre>
@@ -466,6 +474,7 @@ but recommended.</p>
 <pre><code class="language-ebnf">attribute-decl
         ::= ( predicate &quot;:&quot; )? ( &quot;boolean&quot; | &quot;integer&quot; | &quot;string&quot; ) ;
 </code></pre>
+<h3 id="example-4"><a class="header" href="#example-4">Example</a></h3>
 <pre><code class="language-datalog">.assert human(name: string).
 </code></pre>
 <p>The <code>infer</code> pragma describes a new relation in the intensional database. Typically the parser
@@ -478,6 +487,7 @@ an intensional relation in terms of a previously defined extensional relation.</
             ( predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot; )
             | &quot;from&quot; predicate &quot;.&quot; ;
 </code></pre>
+<h3 id="example-5"><a class="header" href="#example-5">Example</a></h3>
 <pre><code class="language-datalog">.infer mortal(name: string).
 </code></pre>
 <p>Alternatively the short-cut form is often more convenient.</p>
@@ -495,6 +505,7 @@ pragma.</p>
 <pre><code class="language-ebnf">io-details
         ::= &quot;(&quot; predicate &quot;,&quot; quoted-string ( &quot;,&quot; quoted-string )? &quot;)&quot; ;
 </code></pre>
+<h3 id="example-6"><a class="header" href="#example-6">Example</a></h3>
 <pre><code class="language-datalog">.assert human(name: string).
 .input(human, &quot;data/humans.csv&quot;, &quot;csv&quot;).
 </code></pre>
@@ -505,20 +516,39 @@ pragma.</p>
 <pre><code class="language-ebnf">output
         ::= &quot;output&quot; io-details &quot;.&quot; ;
 </code></pre>
+<h3 id="example-7"><a class="header" href="#example-7">Example</a></h3>
 <pre><code class="language-datalog">.infer mortal(name: string).
 .output(mortal, &quot;data/mortals.txt&quot;).
 </code></pre>
 <h2 id="comments"><a class="header" href="#comments">Comments</a></h2>
 <p>Comments in Datalog are either 1) the <code>%</code> character and continue to the end of the line, or
-2) C-style with <code>/*</code> to start and <code>*/</code> to end.</p>
+2) C-style with <code>/*</code> to start and <code>*/</code> to end. These correspond to the same rules as Prolog.</p>
 <p><img src="images/comment.png" alt="comment" /></p>
 <pre><code class="language-ebnf">comment
         ::= &quot;%&quot; [^\r\n]* EOL
             | &quot;/&quot; &quot;*&quot; ( [^\*] | &quot;*&quot;+ [^\*\/] )* &quot;*&quot;+ &quot;/&quot; ;
 </code></pre>
+<h3 id="example-8"><a class="header" href="#example-8">Example</a></h3>
 <pre><code class="language-datalog">% Here's a comment
 ?- ancestor(xerces, X). % and another
 ?- ancestor(brooke /* and one inline */, X). % and another
+</code></pre>
+<h2 id="terminal-lexical-symbols"><a class="header" href="#terminal-lexical-symbols">Terminal (Lexical) Symbols</a></h2>
+<p>The following are lexical rules that can be assumed by the rules above.</p>
+<pre><code class="language-ebnf">EOL
+        ::= &quot;\n&quot; | &quot;\r\n&quot; | &quot;\r&quot; ;
+WHITESPACE
+        ::= &quot; &quot; | &quot;\t&quot; | EOL ;
+DQUOTE
+        ::= '&quot;' ;
+LC_ALPHA
+        ::= ? corresponds to the Unicode category 'Ll' ? ;
+UC_ALPHA
+        ::= ? corresponds to the Unicode category 'Lu' ? ;
+ALPHA
+        ::= LC_ALPHA | UC_ALPHA ;
+DIGIT
+        ::= ? corresponds to the Unicode category 'Nd' (decimal number) ? ;
 </code></pre>
 
                     </main>
@@ -559,6 +589,7 @@ pragma.</p>
 
         <!-- Custom JS scripts -->
         <script type="text/javascript" src="../datalog.js"></script>
+        <script type="text/javascript" src="../dot.js"></script>
         <script type="text/javascript" src="../asdi.js"></script>
     </body>
 </html>
