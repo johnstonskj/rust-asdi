@@ -7,34 +7,6 @@ well-formedness rules, the parser will report errors, and some tools will not ex
 the enabling of features is relatively simple in both the text representation using the `.feature`
 pragma, and using `FeatureSet`s in the API.
 
-# Example
-
-The following demonstrates the text representation support for enabling features.
-
-```datalog
-.features(negation, comparisons, disjunction).
-```
-
-Similarly, the following API example shows how to create a feature set that may be added to a
-program during creation.
-
-```rust,no_run
-use asdi::features::{
-    FEATURE_COMPARISONS, FEATURE_DISJUNCTION, FEATURE_NEGATION, FeatureSet
-};
-
-let features = FeatureSet::from(vec![FEATURE_NEGATION, FEATURE_DISJUNCTION]);
-
-assert!(features.supports(&FEATURE_NEGATION));
-assert!(!features.supports(&FEATURE_COMPARISONS));
-
-assert_eq!(features.to_string(), ".feature(negation, disjunction).");
-```
-
-# Supported Features
-
-The following describe the set of currently supported features.
-
 ## Negation
 
 The feature `negation` enables the negation of individual literals in the body of a rule. This
@@ -89,3 +61,28 @@ mother(X, Y) ∨ father(X, Y) :- parent(X, Y).
 ```
 
 The text representation allows for `";"`, "|"`, `"∨"`, and `"OR"` to be used to denote disjunction.
+
+
+## Example
+
+The following demonstrates the text representation support for enabling features.
+
+```datalog
+.features(negation, comparisons, disjunction).
+```
+
+Similarly, the following API example shows how to create a feature set that may be added to a
+program during creation.
+
+```rust,no_run
+use asdi::features::{
+    FEATURE_COMPARISONS, FEATURE_DISJUNCTION, FEATURE_NEGATION, FeatureSet
+};
+
+let features = FeatureSet::from(vec![FEATURE_NEGATION, FEATURE_DISJUNCTION]);
+
+assert!(features.supports(&FEATURE_NEGATION));
+assert!(!features.supports(&FEATURE_COMPARISONS));
+
+assert_eq!(features.to_string(), ".feature(negation, disjunction).");
+```

@@ -11,6 +11,6 @@ edition = "2018"
 [output.html]
 git-repository-url = "https://github.com/johnstonskj/rust-asdi"
 additional-css = ["asdi.css"]
-additional-js = ["datalog.js", "asdi.js"]
+additional-js = ["datalog.js", "dot.js", "asdi.js"]
 curly-quotes = true
 mathjax-support = false

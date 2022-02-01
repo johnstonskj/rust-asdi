@@ -1,15 +1,34 @@
 # Abstract Syntax
 
+This section describes the structure of $\small\text{Datalog}$ languages without reference to any concrete syntax
+or serialized representation. The most common concrete syntax is derived from Prolog and will be described in detail in 
+the [following section](concrete.md). 
+
+It is common in definitions of Datalog to start from a basis in 
+[predicate logic](https://en.wikipedia.org/wiki/First-order_logic) or [Horn clauses](https://en.wikipedia.org/wiki/Horn_clause)
+and demonstrate how these relate to the rules in a Datalog program. This section takes a more direct approach leaving
+the relationship with other logic forms for a brief [appendix](../reference/logic.md).
+
+## Programs
+
+A Datalog **Program** $\small P$ is a tuple comprising the **Extensional** database, EDB, or  $\small D_{E}$, the
+**Intensional** database, IDB, or  $\small D_{I}$, and a set of queries $\small Q$.
+
+$$\tag{0}\small P=\( D_E, D_I, Q \)$$
+
+The extensional database in turn is a set of _relations_ each of which is a set of _facts_ (_ground atoms_). 
+The intensional database is a set of _rules_ that derive additional facts into intensional relations via entailment.
+
 ## Rules
 
 Rules $\small R$ are built from a language $\small \mathcal{L}=\( \mathcal{C},\mathcal{P},\mathcal{V}\)$
 that contains the
 
-1. $\small \mathcal{C}$ -- the finite sets of symbols for all constant values; e.g. `hello`, `"hi"`
+* $\small \mathcal{C}$ — the finite sets of symbols for all constant values; e.g. `hello`, `"hi"`
    `123`,
-2. $\small \mathcal{P}$ -- the finite set of alphanumeric character strings that begin with a
+* $\small \mathcal{P}$ — the finite set of alphanumeric character strings that begin with a
    lowercase character; e.g. `human`, `size`, `a`,
-3. $\small \mathcal{V}$ -- the finite set of alphanumeric character strings that begin with an
+* $\small \mathcal{V}$ — the finite set of alphanumeric character strings that begin with an
    uppercase character; e.g. `X`, `A`, `Var`.
 
 While it would appear that the values from $\small \mathcal{P}$ or $\small \mathcal{V}$ would
@@ -22,15 +41,15 @@ $$\tag{i}\small A_1, \ldots, A_m \leftarrow L_1, \ldots, L_n$$
 
 as well as the following properties:
 
-1. $\small head(r)$ (the consequence), returns the set of _atom_ values $\small A_1, \ldots, A_m$ where $\small m \in \mathbb{N}$,
-2. $\small body(r)$ (the antecedence), returns the set of _literal_ values $\small L_1, \ldots, L_n$ where $\small n \in \mathbb{N}$,
-1. $\small distinguished(r)$ returns the set of _terms_ in the head of a rule,
+* $\small head(r)$ (the consequence), returns the set of _atom_ values $\small A_1, \ldots, A_m$ where $\small m \in \mathbb{N}$,
+* $\small body(r)$ (the antecedence), returns the set of _literal_ values $\small L_1, \ldots, L_n$ where $\small n \in \mathbb{N}$,
+* $\small distinguished(r)$ returns the set of _terms_ in the head of a rule,
    $$\tag{ii}\small distinguished(r) \coloneqq \lbrace t | t \in \bigcup\lbrace terms(a) | a \in head(r) \rbrace \rbrace$$
-1. $\small non\text{-}distinguished(r)$ returns the set of _terms_ in the body that of a rule that are not in the head,
+* $\small non\text{-}distinguished(r)$ returns the set of _terms_ in the body that of a rule that are not in the head,
    $$\tag{iii}\small non\text{-}distinguished(r) \coloneqq \lbrace t | t \in \( \bigcup\lbrace terms(a) | a \in body(r) \rbrace - distinguished(r) \rbrace\)\rbrace$$
-3. $\small ground(r)$  returns true if its head and its body are both _ground_:
+* $\small ground(r)$  returns true if its head and its body are both _ground_:
    $$\tag{iv}\small ground\(r\) \coloneqq \(\forall{a}\in head\(r\); ground\(a\)\) \land \(\forall{l}\in body\(r\); ground\(l\)\)$$
-4. $\small positive(r)$ returns true if all body _literals_ are _positive_:
+* $\small positive(r)$ returns true if all body _literals_ are _positive_:
    $$\tag{v}\small positive(r) \coloneqq \(\forall{l}\in body\(r\); positive(l\)\)$$
 
 A _pure_ rule is one where there is only a single atom in the head; if the body is true, the head is
@@ -65,6 +84,14 @@ $$\tag{ia}\small C_1 | C_2 | \ldots | C_n \leftarrow A_1, \ldots, A_m, \lnot B_1
 Where this form shows the expanded head structure according to $\small\text{Datalog}^{\lor}$, and the
 set of negated literals according to $\small\text{Datalog}^{\lnot}$.
 
+Datalog does not allow rules to infer new values for relations that exist in the extensional database. This may be
+expressed as follows:
+
+$$\tag{xvii}\small \mathcal{P}_E \cap \mathcal{P}_I = \empty$$
+
+The same restriction is not required for constants in $\small \mathcal{C}_P$ or variables in
+$\small \mathcal{V}_P$ which should be shared.
+
 ## Terms
 
 Terms, mentioned above, may be constant values or variables such that
@@ -73,9 +100,9 @@ anonymous variable.
 
 Terms have the following properties:
 
-1. $\small constant\(t\)$ returns true if the term argument is a constant value.
-1. $\small variable\(t\)$ returns true if the term argument is a variable.
-1. $\small anonymous\(t\)$ returns true if the term argument is the anonymous variable, $\small\bar{t}$.
+* $\small constant\(t\)$ returns true if the term argument is a constant value.
+* $\small variable\(t\)$ returns true if the term argument is a variable.
+* $\small anonymous\(t\)$ returns true if the term argument is the anonymous variable, $\small\bar{t}$.
 
 With the definition of rules so far it is possible to write rules that generate an an
 infinite number of results. To avoid such problems Datalog rules are required to satisfy the
@@ -108,19 +135,19 @@ $$\tag{ix}\small p\(t_1, \ldots, t_k\)$$
 
 as well as the following properties:
 
-1. $\small label\(a\)$ returns the predicate $\small p$,
-1. $\small terms\(a\)$ returns the tuple of term values $\small t_1, \ldots, t_k$; where
-   $\small t \in \mathcal{T}$ and $\small k \in \mathbb{N}^{+}$,
-1. $\small arity\(a\)$ returns the cardinality of the relation identified by the predicate;
-   $\small arity\(a\) \equiv |terms(a)| \equiv k$,
-1. in $\small\text{Datalog}^{\Gamma}$:
-    1. there exists a type environment $\small \Gamma$ consisting of one or more types $\small \tau$,
-    1. each term $\small t_i$ has a corresponding type  $\small \tau_i$ where $\small \tau \in \Gamma$,
-    1. $\small type\(t\)$ returns the type $\small \tau$ for that term,
-    1. $\small types\(a\)$ returns a tuple such that;
-       $\small \(i \in \{1, \ldots, arity(a)\} | type(t_i)\)$,
-1. $\small ground(a)$ returns true if its terms are all constants:
-   $$\tag{x}\small ground\(a\) \coloneqq \(\forall{t}\in terms\(a\); t \in \mathcal{C}\)$$
+* $\small label\(a\)$ returns the predicate $\small p$,
+* $\small terms\(a\)$ returns the tuple of term values $\small t_1, \ldots, t_k$; where
+  $\small t \in \mathcal{T}$ and $\small k \in \mathbb{N}^{+}$,
+* $\small arity\(a\)$ returns the cardinality of the relation identified by the predicate;
+  $\small arity\(a\) \equiv |terms(a)| \equiv k$,
+* in $\small\text{Datalog}^{\Gamma}$:
+  * there exists a type environment $\small \Gamma$ consisting of one or more types $\small \tau$,
+  * each term $\small t_i$ has a corresponding type  $\small \tau_i$ where $\small \tau \in \Gamma$,
+  * $\small type\(t\)$ returns the type $\small \tau$ for that term,
+  * $\small types\(a\)$ returns a tuple such that;
+    $\small \(i \in \{1, \ldots, arity(a)\} | type(t_i)\)$,
+* $\small ground(a)$ returns true if its terms are all constants:
+  $$\tag{x}\small ground\(a\) \coloneqq \(\forall{t}\in terms\(a\); t \in \mathcal{C}\)$$
 
 ## Relations
 
@@ -130,17 +157,17 @@ $\small\text{Datalog}^{\Gamma}$ also have a type.
 
 Relations have the following properties:
 
-1. $\small label\(r\)$ returns the predicate $\small p$,
-1. $\small schema\(r\)$ returns the set of attributes $\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$;
+* $\small label\(r\)$ returns the predicate $\small p$,
+* $\small schema\(r\)$ returns the set of attributes $\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$;
    where $\small k \in \mathbb{N}^{+}$,
-1. $\small arity\(r\)$ returns the number of attributes in the relation's schema, and therefore all
+* $\small arity\(r\)$ returns the number of attributes in the relation's schema, and therefore all
    atoms within the relation; $\small arity\(r\) \equiv |schema(a)| \equiv j$.
 
 Attributes have the following properties:
 
-1. $\small label\(\alpha\)$ returns either the predicate label of the attribute, or $\small\bot$.
-1. in $\small\text{Datalog}^{\Gamma}$:
-    1. $\small type\(\alpha\)$ returns a type $\small \tau$ for the attribute, where $\small \tau \in \Gamma$, or $\small\bot$.
+* $\small label\(\alpha\)$ returns either the predicate label of the attribute, or $\small\bot$.
+* in $\small\text{Datalog}^{\Gamma}$:
+  * $\small type\(\alpha\)$ returns a type $\small \tau$ for the attribute, where $\small \tau \in \Gamma$, or $\small\bot$.
 
 The following defines a binary function that determines whether an atom $\small a$ conforms to the
 schema of a relationship $\small r$.
@@ -180,28 +207,40 @@ of term values.
 Literals within the body of a rule, represent sub-goals that are the required to be true for the
 rule's head to be considered true.
 
-1. A literal may be an atom (termed a relational literal) or, in $\small\text{Datalog}^{\theta}$, a
-   conditional expression (termed an arithmetic literal),
-1. a an arithmetic literal has the form $\small \langle t_{lhs} \theta t_{rhs} \rangle$, where
-    1. $\small \theta \in \lbrace =, \neq, <, \leq, >, \geq \rbrace$,
-    1. in $\small\text{Datalog}^{\Gamma}$ both $\small t_{lhs}$ and $\small t_{rhs}$ terms have
-       corresponding types $\small \tau_{lhs}$ and $\small \tau_{rhs}$,
-    1. the types $\small \tau_{lhs}$ and $\small \tau_{rhs}$ **must** be _compatible_, for some
-       system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_{rhs}, \theta)$,
-1. in $\small\text{Datalog}^{\lnot}$ a literal may be negated, appearing as $\small \lnot l$,
-1. and has the following properties:
-    1. $\small relational\(l\)$ returns true if the literal argument is a relational literal.
-    1. $\small arithmetic\(l\)$ returns true if the literal argument is a arithmetic literal.
-    1. $\small terms\(l\)$ returns either the set of terms in a literal,
+* A literal may be an atom (termed a relational literal) or, in $\small\text{Datalog}^{\theta}$, a
+  conditional expression (termed an arithmetic literal),
+* an arithmetic literal has the form $\small \langle t_{lhs} \theta t_{rhs} \rangle$, where
+  * $\small \theta \in \lbrace =, \neq, <, \leq, >, \geq \rbrace$,
+  * in $\small\text{Datalog}^{\Gamma}$ both $\small t_{lhs}$ and $\small t_{rhs}$ terms have
+    corresponding types $\small \tau_{lhs}$ and $\small \tau_{rhs}$,
+  * the types $\small \tau_{lhs}$ and $\small \tau_{rhs}$ **must** be _compatible_, for some
+    system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_{rhs}, \theta)$,
+* in $\small\text{Datalog}^{\lnot}$ a literal may be negated, appearing as $\small \lnot l$,
+* and has the following properties:
+  * $\small relational\(l\)$ returns true if the literal argument is a relational literal.
+  * $\small arithmetic\(l\)$ returns true if the literal argument is a arithmetic literal.
+    *. $\small terms\(l\)$ returns the set of terms in a literal,
        $$\tag{xiii}\small
        terms(l) \coloneqq
        \begin{cases}
        terms(l), &\text{if } relational(l) \\\\
        \lbrace t_{lhs}, t_{rhs} \rbrace, &\text{if } arithmetic(l) \land \text{Datalog}^{\theta}
        \end{cases}$$
-    1. $\small ground\(l\)$ returns true if its terms are all constants $\small \(\forall{t}\in terms\(l\); t \in \mathcal{C}\)$,
-    1. $\small positive\(l\)$ in $\small\text{Datalog}^{\lnot}$ returns false if negated,
+  * $\small ground\(l\)$ returns true if its terms are all constants $\small \(\forall{t}\in terms\(l\); t \in \mathcal{C}\)$,
+  * $\small positive\(l\)$ in $\small\text{Datalog}^{\lnot}$ returns false if negated,
        otherwise it will always return true.
+
+
+|                        | $\small relational\(l\)$ | $\small arithmetic\(l\)$ | $\small terms\(l\)$           | $\small ground\(l\)$ | $\small positive\(l\)$ | 
+|------------------------|--------------------------|--------------------------|-------------------------------|----------------------|------------------------|
+| $\small p(X, Y)$       | `true`                   | `false`                  | $\small \lbrace X, Y \rbrace$ | `false`              | `true`                 |
+| $\small p(X, 1)$       | `true`                   | `false`                  | $\small \lbrace X, 1 \rbrace$ | `false`              | `true`                 |
+| $\small p(2, 1)$       | `true`                   | `false`                  | $\small \lbrace 2, 1 \rbrace$ | `true`               | `true`                 |
+| $\small X = 1$         | `false`                  | `true`                   | $\small \lbrace X, 1 \rbrace$ | `false`              | `true`                 |
+| $\small \lnot p(2, 1)$ | `true`                   | `false`                  | $\small \lbrace 2, 1 \rbrace$ | `true`               | `false`                |
+| $\small \lnot X = 1$   | `false`                  | `true`                   | $\small \lbrace X, 1 \rbrace$ | `false`              | `false` †              |
+
+> † note that while $\small \lnot X = 1$ **is** a negative literal, the corresponding literal $\small X \neq 1$ **is not**.
 
 ## Facts
 
@@ -215,32 +254,16 @@ $$\tag{xiv}\small fact(r) \coloneqq \(ground\(r\) \land form\(r\)=pure \land bod
 
 An atom may be also used as a **Goal** or **Query** clause in that its constant and variable terms
 may be used to match facts from the known facts or those that may be inferred from the set of rules
-introduced. A ground goal is simply determining that any fact exists that matches all of the
+introduced. A ground goal is simply determining that any fact exists that matches all the
 constant values provided and will return true or false.
 In the case that one or more variables exist a set of facts will be returned that match the
 expressed constants and provide the corresponding values for the variables.
 
-The set of facts (ground atoms) known a-priori is termed the **Extensional** database, EDB, or $\small D_E$,.
-The set of rules, and any inferred facts, are termed the **Intensional** database, IDB, or $\small D_I$.
-
-A Datalog **Program** $\small P$ is a tuple comprising the extensional database $\small D_{E}$, the
-intensional database $\small D_{I}$, and a set of queries.
-
-$$\tag{xv}\small P=\( D_E, D_I, Q \)$$
-
-This implies, at least, that the set of predicates accessible to queries in the program is the union
-of predicates in the extensional and intensional databases.
+The set of relations accessible to queries in the program is the union of relations in the extensional and 
+intensional databases.
 
 $$\tag{xvi}\small \mathcal{P}_P = \mathcal{P}_E \cup \mathcal{P}_I$$
 
-It should be obvious that the same exists for constants and variables;
+It should be noted that the same exists for constants and variables;
 $\small \mathcal{C}_P = \mathcal{C}_E \cup \mathcal{C}_I$ and
 $\small \mathcal{V}_P = \mathcal{V}_E \cup \mathcal{V}_I$.
-
-Datalog does not, in general, allow the rules comprising the intensional database to infer new
-values for predicates that exist in the extensional database. This may be expressed as follows:
-
-$$\tag{xvii}\small \mathcal{P}_E \cap \mathcal{P}_I = \empty$$
-
-The same restriction is not required for constants in $\small \mathcal{C}_P$ or variables in
-$\small \mathcal{V}_P$ which should be shared.

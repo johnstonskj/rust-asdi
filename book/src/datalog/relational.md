@@ -91,7 +91,8 @@ As defined by Codd, selection is written as $\small \sigma_{a\theta b}(R)$ or
 $\small \sigma_{a\theta v}(R)$ where:
 
 * $\small a$ and $\small b$ are attribute names,
-* $\small\theta$ is a binary operation, where $\small\theta\in\lbrace =, \neq, <, \leq, >, \geq, \overset{\star}{=} \rbrace$,
+* $\small\theta$ is a binary operation, where $\small\theta\in\lbrace =, \neq, <, \leq, >, \geq \rbrace$,
+  * ASDI adds the non-standard _string match_ operator $\small\overset{\star}{=}$ to the set $\small\theta$,
 * $\small v$ is a constant value,
 * $\small R$ is a relation,
 
@@ -114,7 +115,7 @@ can be expressed as follows, where both rules are equivalent.
 
 ```datalog
 l(X, Y, Z) :- r(X, Y, Z) AND X > 100 AND Y = something.
-l(X, Y, Z) :- r(X, Y, something) AND X > 100.
+l(X, Y, Z) :- r(X, something, Z) AND X > 100.
 ```
 
 ## Rename ($\small\rho$)
@@ -205,10 +206,10 @@ In Datalog this form of recursion is naturally expressed, as follows.
 r_plus(X, Z) :- r(X, Y), r_plus(Y, Z).
 ```
 
-_Acknowledgements_. Examples in this section are taken from [_Introduction to Data Management CSE 344, Lecture 10:
-Datalog_](https://courses.cs.washington.edu/courses/cse344/12au/lectures/lecture10-datalog.pdf),
-Magda Balazinska, Fall 2012. Definitions for the relational algebra are taken from
-[_Relational algebra_](https://en.wikipedia.org/wiki/Relational_algebra), Wikipedia, fetched
-January 2022. The [Relational Algebra Query Converter](http://www.grammaticalframework.org/qconv/qconv-a.html)
-is an interesting way to take a SQL query and convert to relational algebra which can then be
-converted to Datalog using the examples above.
+## Acknowledgements
+
+Examples in this section are taken from _Introduction to Data Management CSE 344, Lecture 10:
+Datalog_<span class="bibref">[Balaz12](../reference/references.md#Balaz12)</span>, and definitions for 
+the relational algebra are taken from _Relational algebra_<span 
+class="bibref">[WikiRelalg](../reference/references.md#WikiRelalg)</span>. The _Relational Algebra Query Converter_<span class="bibref">[QConv](../reference/references.md#QConv)</span> is a useful tool to take a SQL query 
+and convert to relational algebra which can then be converted to Datalog using the examples above.

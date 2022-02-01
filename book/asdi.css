@@ -43,6 +43,11 @@ main .bibref {
     vertical-align: super;
 }
 
+main .inline {
+    font-size: unset;
+    vertical-align: unset;
+}
+
 main .bibref::before {
     content: "[";
 }
@@ -52,20 +57,60 @@ main .bibref::after {
 }
 
 main .biblio ol {
-    counter-reset: item;
-    margin-left: 0;
-    padding-left: 0;
+    list-style-position: inside;
+    list-style-type: none;
 }
 
 main .biblio ol li {
     display: block;
     margin-left: 2.5em;
+    margin-bottom: 0.5em;
 }
 
-main .biblio ol li::before {
+main .biblio ol li .bibkey {
+    margin-left: -2.5em;
+}
+
+main .biblio ol li .bibkey::before {
+    content: "[";
+}
+
+main .biblio ol li .bibkey::after {
+    content: "]\a";
+    white-space: pre;
+}
+
+
+main .fnref {
+    font-size: smaller;
+    vertical-align: super;
+}
+
+main .fnref::before {
+    content: "[";
+}
+
+main .fnref::after {
+    content: "]";
+}
+
+main .footnotes ol {
+    font-size: smaller;
+    counter-reset: item;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+main .footnotes ol li {
+    display: block;
+    margin-left: 2.5em;
+}
+
+main .footnotes ol li::before {
     display: inline-block;
     content: "[" counter(item) "] ";
     counter-increment: item;
     width: 2.5em;
     margin-left: -2.5em;
 }
+
