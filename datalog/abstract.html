@@ -176,8 +176,15 @@ the relationship with other logic forms for a brief <a href="../reference/logic.
 <p>A Datalog <strong>Program</strong> $\small P$ is a tuple comprising the <strong>Extensional</strong> database, EDB, or  $\small D_{E}$, the
 <strong>Intensional</strong> database, IDB, or  $\small D_{I}$, and a set of queries $\small Q$.</p>
 <p>$$\tag{0}\small P=( D_E, D_I, Q )$$</p>
-<p>The extensional database in turn is a set of <em>relations</em> each of which is a set of <em>facts</em> (<em>ground atoms</em>). 
-The intensional database is a set of <em>rules</em> that derive additional facts into intensional relations via entailment.</p>
+<p>The extensional database in turn is a set of <em>relations</em> each of which is a set of <em>facts</em> (<em>ground atoms</em>). The intensional database is a set of <em>rules</em> that derive additional facts into intensional <em>relations</em> via entailment. </p>
+<p>A program has the following properties.</p>
+<ul>
+<li>$\small edb(P)$ returns the set of relations comprising the extensional database.</li>
+<li>$\small idb(P)$ returns the set of relations comprising the intensional database, <strong>IFF</strong> entailment has occured. </li>
+<li>$\small rules(P)$ returns the set of rules associated with the intensional database.</li>
+<li>$\small positive(r)$ returns true if all intensional rules are <em>positive</em>:
+$$\tag{v}\small positive(p) \coloneqq (\forall{r}\in rules(p); positive(r))$$</li>
+</ul>
 <h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
 <p>Rules $\small R$ are built from a language $\small \mathcal{L}=( \mathcal{C},\mathcal{P},\mathcal{V})$
 that contains the</p>
@@ -303,6 +310,7 @@ $\small\text{Datalog}^{\Gamma}$ also have a type.</p>
 where $\small k \in \mathbb{N}^{+}$,</li>
 <li>$\small arity(r)$ returns the number of attributes in the relation’s schema, and therefore all
 atoms within the relation; $\small arity(r) \equiv |schema(a)| \equiv j$.</li>
+<li>$\small atoms(r)$ returns the set of atoms that comprise this relation.</li>
 </ul>
 <p>Attributes have the following properties:</p>
 <ul>
@@ -320,13 +328,13 @@ schema of a relationship $\small r$.</p>
 conforms(a, r) &amp;\coloneqq &amp;&amp;ground(a) \\
 &amp;\land &amp;&amp;label(a) = label(r) \\
 &amp;\land &amp;&amp;arity(a) = arity(r) \\
-&amp;\land &amp;&amp;\forall{i} \in \lbrace 1, \ldots, arity(r)\rbrace \medspace conforms( a_{t_i}, r_{\alpha_i} )
+&amp;\land &amp;&amp;\forall{i} \in [1, arity(r)] \medspace conforms( a_{t_i}, r_{\alpha_i} )
 \end{alignat*}
 $$
 $$\tag{xii}\small
 conforms(t, \alpha) \coloneqq
 label(t) = label(\alpha) \land
-\tau_{t} = \tau{\alpha}
+\tau_{t} = \tau_{\alpha}
 $$</p>
 <p>Note that in relational algebra it is more common to use the term domain $\small D$ to denote a possibly
 infinite set of values. Each attribute on a relation has a domain $\small D_i$ such that each ground
@@ -360,8 +368,8 @@ system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_
 <li>and has the following properties:
 <ul>
 <li>$\small relational(l)$ returns true if the literal argument is a relational literal.</li>
-<li>$\small arithmetic(l)$ returns true if the literal argument is a arithmetic literal.
-*. $\small terms(l)$ returns the set of terms in a literal,
+<li>$\small arithmetic(l)$ returns true if the literal argument is a arithmetic literal.</li>
+<li>$\small terms(l)$ returns the set of terms in a literal,
 $$\tag{xiii}\small
 terms(l) \coloneqq
 \begin{cases}

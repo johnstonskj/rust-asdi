@@ -165,6 +165,82 @@ document.addEventListener("DOMContentLoaded", function() {
                 <div id="content" class="content">
                     <main>
                         <h1 id="appendix-first-order-logic--horn-clauses"><a class="header" href="#appendix-first-order-logic--horn-clauses">Appendix: First-Order Logic &amp; Horn Clauses</a></h1>
+<p>This section does not provide a primer on propositional logic, or first-order predicate logic. However, some background may be required and this section will briefly outline key terms, we refer the reader to <span class="bibref inline"><a href="../reference/references.html#AbHuVi94">AbHuVi94</a>, chapter 2</span>.</p>
+<h2 id="propositional-logic"><a class="header" href="#propositional-logic">Propositional logic</a></h2>
+<p>For Propositional logic we define a language comprising the following:</p>
+<ol>
+<li>An infinite set of propositional <em>variables</em>, $\small \mathcal{V}$.</li>
+<li>The <em>constant</em> values <code>true</code> and <code>false</code>.</li>
+<li>Propositional formulae $\small\varphi$, comprising variables, constants, the unary connective negation ($\small\lnot$) and the following binary connectives;
+<ol>
+<li>disjunction ($\small\lor$),</li>
+<li>conjunction ($\small\land$), </li>
+<li>implication ($\small\rightarrow$),</li>
+<li>equivalence ($\small\leftrightarrow$).</li>
+</ol>
+</li>
+</ol>
+<p>A <em>literal</em> is a (sub-)formula comprising a single variable or constant that may be negated, i.e. $\small p$ or $\small \lnot p$.</p>
+<p>A propositional formula $\small\varphi$ is in <em>conjunctive normal form</em> (CNF) if it has the form </p>
+<p>$$\tag{i}\small\psi_1 \land \cdots \land \psi_n$$</p>
+<p>where each formula $\small\psi$ is a disjunction of literals.</p>
+<h2 id="first-order-predicate-logic"><a class="header" href="#first-order-predicate-logic">First-Order Predicate logic</a></h2>
+<p>First-Order Predicate logic is a more general language than propositional logic allowing predicate symbols that range over n-ary relationships. A <em>first-order language</em> $\small L$ is differentiated by the set of predicate symbols, constant values, and functions it chooses to allow. </p>
+<ol>
+<li>An infinite set of <em>variables</em> $\small \mathcal{V}$.</li>
+<li>A set of constant values, $\small \mathcal{C}$, usually including <code>true</code> and <code>false</code>.</li>
+<li>A set of n-ary predicate symbols, $\small \mathcal{P}$.</li>
+<li>A set of n-ary function symbols, $\small \mathcal{F}$.</li>
+<li><em>Well-formed formulae</em> (WFF) comprising variables, constants, the unary connective negation ($\small\lnot$) and the following binary connectives;
+<ol>
+<li>disjunction ($\small\lor$),</li>
+<li>conjunction ($\small\land$),</li>
+<li>implication ($\small\rightarrow$),</li>
+<li>equivalence ($\small\leftrightarrow$).</li>
+</ol>
+</li>
+<li>The univeral quantifier $\small\forall$ and the existential quantifier $\small\exists$.</li>
+</ol>
+<p>An <em>atom</em> corresponds to the a propositional variable and is either <code>true</code>, <code>false</code>, or $\small p(t_1, \cdots, t_n)$, where $\small p$ is a predicate symbol and $\small t_1, \cdots, t_n$ are terms.</p>
+<p>A <em>term</em> is either a variable, constant value, or function symbol.</p>
+<p>Additionally, the language may include equality so as to allow atoms of the form $\small t_1 = t_2$. Note that <span class="bibref inline"><a href="../reference/references.html#AbHuVi94">AbHuVi94</a></span> uses $\small t_1 \approx t_2$.</p>
+<h2 id="horn-clauses"><a class="header" href="#horn-clauses">Horn Clauses</a></h2>
+<p>A Clause is simply a disjunctions of positive $\small a_1, \cdots, a_m$ and negative $\small b_1, \cdots, b_n$ literals and may be written in either of the following forms.</p>
+<p>$$\tag{ii}\small a_1 \lor \cdots \lor a_m \lor \lnot b_1 \lor \cdots \lor \lnot b_n$$</p>
+<p>$$\tag{iii}\small \forall x_1, \cdots, x_k (a_1 \lor \cdots \lor a_m \lor \lnot b_1 \lor \cdots \lor \lnot b_n)$$</p>
+<p>Where the latter form introduces the set of variables used in the clause. This is often removed for clarity as the universal quantification is assumed for any variable present. This can also be written in <em>clausal form</em>, something that looks a lot like Datalog.</p>
+<p>$$\tag{iv}\small a_1, \cdots, a_m \leftarrow b_1, \cdots, b_n$$</p>
+<p>A <em>Horn Clause</em> is a formula consisting of a disjunction of literals of which <strong>at most one</strong> is positive.</p>
+<p>$$\tag{vi}\small a \lor \lnot b_1 \lor \cdots \lor \lnot b_n$$</p>
+<p>or, in clausal form,</p>
+<p>$$\tag{vii}\small a_1 \leftarrow b_1, \cdots, b_n$$</p>
+<p>The following table describes additional clause forms along with their equivalent Datalog form.</p>
+<table><thead><tr><th>Propositional</th><th>Form/Datalog</th><th>Clausal</th></tr></thead><tbody>
+<tr><td>$\small a_1(x,y) \lor a_2(x,y) \lor \lnot b_1(x,z) \lor \lnot b_2(z,y)$</td><td>indefinite/disjunctive</td><td>$\small a_1(x,y), a_2(x,y) \leftarrow b_1(x,z), b_2(z,y)$</td></tr>
+<tr><td>$\small a(x,y) \lor \lnot b_1(x,z) \lor \lnot b_2(z,y)$</td><td>definite/pure<sup class="footnote-reference"><a href="#1">1</a></sup></td><td>$\small a(x,y) \leftarrow b_1(x,z), b_2(z,y)$</td></tr>
+<tr><td>$\small b(x,y)$</td><td>unit/fact<sup class="footnote-reference"><a href="#2">2</a></sup></td><td>$\small b(x,y) \leftarrow$</td></tr>
+<tr><td>$\lnot b_1(x,z) \lor \lnot b_2(z,y)$</td><td>goal/constraint</td><td>$\small \leftarrow b_1(x,z), b_2(z,y)$</td></tr>
+<tr><td>$\small false$ or $\small\bot$</td><td>empty</td><td>$\small \square$</td></tr>
+</tbody></table>
+<h2 id="mapping-from-datalog-to-first-order-logic"><a class="header" href="#mapping-from-datalog-to-first-order-logic">Mapping from Datalog to First-Order Logic</a></h2>
+<p>The purpose of the descriptions above was to allow for the mapping of Datalog into a <em>first-order language</em>.</p>
+<p>Given a Datalog program $\small P=( D_E, D_I, Q )$ we can construct a new first-order language $\small L=(\mathcal{C},\mathcal{P},\mathcal{F})$ in the following manner.</p>
+<ol>
+<li>$\mathcal{C}$ is comprised the set of all constant values in any EDB or IDB relation.
+$$\small \lbrace c | c \in \bigcup \lbrace terms(atoms(r)) | r \in edb(P) \cap idb(P) \rbrace \rbrace$$</li>
+<li>$\mathcal{P}$ is comprised the set of labels for all EDB and IDB relations.
+$$\small \lbrace label(r) | r \in edb(P) \cap idb(P) \rbrace$$</li>
+<li>In $\small\text{Datalog}$, which does not allow functions, $\mathcal{F}=\empty$. However, in $\small\text{Datalog}^{\theta}$ which allows certain operators in arithmetic literals $\mathcal{F}=\theta$.</li>
+<li>For each rule $\small r \in rules(P)$:</li>
+</ol>
+<p><strong>TBD</strong></p>
+<hr />
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>In Datalog a pure rule must also follow the safety constraint that all variables that appear in the head <strong>must also</strong> appear in the body.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>In Datalog a fact <strong>must also</strong> be ground.</p>
+</div>
 
                     </main>
 

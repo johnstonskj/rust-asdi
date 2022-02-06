@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p>Another Simplistic <a href="https://en.wikipedia.org/wiki/Datalog">Datalog</a> Implementation (ASDI), in Rust.</p>
 <p>Datalog is a logic programming language and a subset of the earlier
-<a href="https://en.wikipedia.org/wiki/Prolog">Prolog</a><span class="fnref"><a href="introduction/introduction.html#1">1</a></span>. This package provides a data model to represent 
+<a href="https://en.wikipedia.org/wiki/Prolog">Prolog</a><sup class="footnote-reference"><a href="#1">1</a></sup>. This package provides a data model to represent 
 <a href="https://en.wikipedia.org/wiki/Datalog">Datalog</a> programs in memory, a parser for the textual representation, 
 and some evaluation implementations.</p>
 <h2 id="brief-example"><a class="header" href="#brief-example">Brief Example</a></h2>
@@ -191,7 +191,7 @@ boolean value denoting whether the goal is satisfied.</p>
 <pre><code class="language-text">+------------+
 | _: boolean |
 +============+
-| true      |
+| true       |
 +------------+
 </code></pre>
 <p>However, if we were to change the final query to replace the constant with a variable, as follows.</p>
@@ -241,12 +241,10 @@ syllogism
 <span class="boring">}
 </span></code></pre></pre>
 <hr />
-<div class="footnotes">
-<ol>
-<li><a name="1">Chapter</a> 1 of <span class="bibref inline"><a href="introduction/../reference/references.html#CeGoTa90">CeGoTa90</a></span>
-provides a good overview of the drawbacks of Prolog and the advantages of Datalog for certain tasks.</li>
-</ol>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="datalog"><a class="header" href="#datalog">Datalog</a></h1>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>Chapter 1 of <span class="bibref inline"><a href="introduction/../reference/references.html#CeGoTa90">CeGoTa90</a></span> provides a good overview of the drawbacks of Prolog and the advantages of Datalog for certain tasks.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="datalog"><a class="header" href="#datalog">Datalog</a></h1>
 <p>When referring to the specifics of the language we will use the common format $\text{\small{Datalog}}$ with
 superscripts that identify specific language extensions; for example, $\small\text{Datalog}^{\lnot}$ is
 the language extended with negation of literals, $\small\text{Datalog}^{\Gamma}$ is the language
@@ -266,8 +264,15 @@ the relationship with other logic forms for a brief <a href="datalog/../referenc
 <p>A Datalog <strong>Program</strong> $\small P$ is a tuple comprising the <strong>Extensional</strong> database, EDB, or  $\small D_{E}$, the
 <strong>Intensional</strong> database, IDB, or  $\small D_{I}$, and a set of queries $\small Q$.</p>
 <p>$$\tag{0}\small P=( D_E, D_I, Q )$$</p>
-<p>The extensional database in turn is a set of <em>relations</em> each of which is a set of <em>facts</em> (<em>ground atoms</em>). 
-The intensional database is a set of <em>rules</em> that derive additional facts into intensional relations via entailment.</p>
+<p>The extensional database in turn is a set of <em>relations</em> each of which is a set of <em>facts</em> (<em>ground atoms</em>). The intensional database is a set of <em>rules</em> that derive additional facts into intensional <em>relations</em> via entailment. </p>
+<p>A program has the following properties.</p>
+<ul>
+<li>$\small edb(P)$ returns the set of relations comprising the extensional database.</li>
+<li>$\small idb(P)$ returns the set of relations comprising the intensional database, <strong>IFF</strong> entailment has occured. </li>
+<li>$\small rules(P)$ returns the set of rules associated with the intensional database.</li>
+<li>$\small positive(r)$ returns true if all intensional rules are <em>positive</em>:
+$$\tag{v}\small positive(p) \coloneqq (\forall{r}\in rules(p); positive(r))$$</li>
+</ul>
 <h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
 <p>Rules $\small R$ are built from a language $\small \mathcal{L}=( \mathcal{C},\mathcal{P},\mathcal{V})$
 that contains the</p>
@@ -393,6 +398,7 @@ $\small\text{Datalog}^{\Gamma}$ also have a type.</p>
 where $\small k \in \mathbb{N}^{+}$,</li>
 <li>$\small arity(r)$ returns the number of attributes in the relation’s schema, and therefore all
 atoms within the relation; $\small arity(r) \equiv |schema(a)| \equiv j$.</li>
+<li>$\small atoms(r)$ returns the set of atoms that comprise this relation.</li>
 </ul>
 <p>Attributes have the following properties:</p>
 <ul>
@@ -410,13 +416,13 @@ schema of a relationship $\small r$.</p>
 conforms(a, r) &amp;\coloneqq &amp;&amp;ground(a) \\
 &amp;\land &amp;&amp;label(a) = label(r) \\
 &amp;\land &amp;&amp;arity(a) = arity(r) \\
-&amp;\land &amp;&amp;\forall{i} \in \lbrace 1, \ldots, arity(r)\rbrace \medspace conforms( a_{t_i}, r_{\alpha_i} )
+&amp;\land &amp;&amp;\forall{i} \in [1, arity(r)] \medspace conforms( a_{t_i}, r_{\alpha_i} )
 \end{alignat*}
 $$
 $$\tag{xii}\small
 conforms(t, \alpha) \coloneqq
 label(t) = label(\alpha) \land
-\tau_{t} = \tau{\alpha}
+\tau_{t} = \tau_{\alpha}
 $$</p>
 <p>Note that in relational algebra it is more common to use the term domain $\small D$ to denote a possibly
 infinite set of values. Each attribute on a relation has a domain $\small D_i$ such that each ground
@@ -450,8 +456,8 @@ system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_
 <li>and has the following properties:
 <ul>
 <li>$\small relational(l)$ returns true if the literal argument is a relational literal.</li>
-<li>$\small arithmetic(l)$ returns true if the literal argument is a arithmetic literal.
-*. $\small terms(l)$ returns the set of terms in a literal,
+<li>$\small arithmetic(l)$ returns true if the literal argument is a arithmetic literal.</li>
+<li>$\small terms(l)$ returns the set of terms in a literal,
 $$\tag{xiii}\small
 terms(l) \coloneqq
 \begin{cases}
@@ -494,15 +500,10 @@ intensional databases.</p>
 $\small \mathcal{C}_P = \mathcal{C}_E \cup \mathcal{C}_I$ and
 $\small \mathcal{V}_P = \mathcal{V}_E \cup \mathcal{V}_I$.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="concrete-syntax"><a class="header" href="#concrete-syntax">Concrete Syntax</a></h1>
-<p>The definitions below uses both Extended Backus-Naur Form (EBNF) and syntax diagrams to focus on the
-concrete syntax as expressed in the text representation. The EBNF definition is somewhat simplified
-from the grammar used in the ASDI parser although any deviations do not significantly affect the
-meaning of the language.</p>
-<p>For the original description of the EBNF notation as it is used here, please refer to “<a href="http://www.w3.org/TR/2010/REC-xquery-20101214/#EBNFNotation">A.1.1
-Notation</a>” in the <a href="http://www.w3.org/TR/2010/REC-xquery-20101214/">XQuery
-recommendation</a>. The diagrams included below were
-generated by the <a href="https://www.bottlecaps.de/rr/ui">bottlecaps</a> online tool from the definition in the
-<a href="datalog/../reference/datalog_ebnf.html">appendix</a>.</p>
+<p>The definitions below uses both Extended Backus-Naur Form (EBNF)<sup class="footnote-reference"><a href="#ebnf">1</a></sup> and 
+syntax diagrams<sup class="footnote-reference"><a href="#railroad">2</a></sup> to focus on the concrete syntax as expressed in the 
+text representation. The EBNF definition is somewhat simplified from the grammar used in the ASDI parser 
+although any deviations do not significantly affect the meaning of the language.</p>
 <h2 id="programs-1"><a class="header" href="#programs-1">Programs</a></h2>
 <p>A program consists of a set of facts that comprise the extensional database, a list of rules that
 comprise the intensional database, and possibly a set of queries to interrogate the result of any
@@ -879,6 +880,15 @@ ALPHA
 DIGIT
         ::= ? corresponds to the Unicode category 'Nd' (decimal number) ? ;
 </code></pre>
+<hr />
+<div class="footnote-definition" id="ebnf"><sup class="footnote-definition-label">1</sup>
+<p>For the original description of the EBNF notation as it is used here, please refer to 
+“<a href="http://www.w3.org/TR/2010/REC-xquery-20101214/#EBNFNotation">A.1.1 Notation</a>” in the 
+<a href="http://www.w3.org/TR/2010/REC-xquery-20101214/">XQuery recommendation</a>. </p>
+</div>
+<div class="footnote-definition" id="railroad"><sup class="footnote-definition-label">2</sup>
+<p>The syntax, or <em>railroad</em>, diagrams were generated by the <a href="https://www.bottlecaps.de/rr/ui">bottlecaps</a> online tool from the definition in the <a href="datalog/../reference/datalog_ebnf.html">appendix</a>.</p>
+</div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="relational-algebra-mapping"><a class="header" href="#relational-algebra-mapping">Relational Algebra Mapping</a></h1>
 <p>Every expression in the <em>basic</em> relational algebra can be expressed as a $\small\text{Datalog}$
 query. However, operations in the extended relational algebra (grouping, aggregation, and sorting)
@@ -1179,6 +1189,82 @@ present.</li>
 </code></pre>
 <p>This file is accessible directly <a href="reference/abstract_graph.dot">here</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="appendix-first-order-logic--horn-clauses"><a class="header" href="#appendix-first-order-logic--horn-clauses">Appendix: First-Order Logic &amp; Horn Clauses</a></h1>
+<p>This section does not provide a primer on propositional logic, or first-order predicate logic. However, some background may be required and this section will briefly outline key terms, we refer the reader to <span class="bibref inline"><a href="reference/../reference/references.html#AbHuVi94">AbHuVi94</a>, chapter 2</span>.</p>
+<h2 id="propositional-logic"><a class="header" href="#propositional-logic">Propositional logic</a></h2>
+<p>For Propositional logic we define a language comprising the following:</p>
+<ol>
+<li>An infinite set of propositional <em>variables</em>, $\small \mathcal{V}$.</li>
+<li>The <em>constant</em> values <code>true</code> and <code>false</code>.</li>
+<li>Propositional formulae $\small\varphi$, comprising variables, constants, the unary connective negation ($\small\lnot$) and the following binary connectives;
+<ol>
+<li>disjunction ($\small\lor$),</li>
+<li>conjunction ($\small\land$), </li>
+<li>implication ($\small\rightarrow$),</li>
+<li>equivalence ($\small\leftrightarrow$).</li>
+</ol>
+</li>
+</ol>
+<p>A <em>literal</em> is a (sub-)formula comprising a single variable or constant that may be negated, i.e. $\small p$ or $\small \lnot p$.</p>
+<p>A propositional formula $\small\varphi$ is in <em>conjunctive normal form</em> (CNF) if it has the form </p>
+<p>$$\tag{i}\small\psi_1 \land \cdots \land \psi_n$$</p>
+<p>where each formula $\small\psi$ is a disjunction of literals.</p>
+<h2 id="first-order-predicate-logic"><a class="header" href="#first-order-predicate-logic">First-Order Predicate logic</a></h2>
+<p>First-Order Predicate logic is a more general language than propositional logic allowing predicate symbols that range over n-ary relationships. A <em>first-order language</em> $\small L$ is differentiated by the set of predicate symbols, constant values, and functions it chooses to allow. </p>
+<ol>
+<li>An infinite set of <em>variables</em> $\small \mathcal{V}$.</li>
+<li>A set of constant values, $\small \mathcal{C}$, usually including <code>true</code> and <code>false</code>.</li>
+<li>A set of n-ary predicate symbols, $\small \mathcal{P}$.</li>
+<li>A set of n-ary function symbols, $\small \mathcal{F}$.</li>
+<li><em>Well-formed formulae</em> (WFF) comprising variables, constants, the unary connective negation ($\small\lnot$) and the following binary connectives;
+<ol>
+<li>disjunction ($\small\lor$),</li>
+<li>conjunction ($\small\land$),</li>
+<li>implication ($\small\rightarrow$),</li>
+<li>equivalence ($\small\leftrightarrow$).</li>
+</ol>
+</li>
+<li>The univeral quantifier $\small\forall$ and the existential quantifier $\small\exists$.</li>
+</ol>
+<p>An <em>atom</em> corresponds to the a propositional variable and is either <code>true</code>, <code>false</code>, or $\small p(t_1, \cdots, t_n)$, where $\small p$ is a predicate symbol and $\small t_1, \cdots, t_n$ are terms.</p>
+<p>A <em>term</em> is either a variable, constant value, or function symbol.</p>
+<p>Additionally, the language may include equality so as to allow atoms of the form $\small t_1 = t_2$. Note that <span class="bibref inline"><a href="reference/../reference/references.html#AbHuVi94">AbHuVi94</a></span> uses $\small t_1 \approx t_2$.</p>
+<h2 id="horn-clauses"><a class="header" href="#horn-clauses">Horn Clauses</a></h2>
+<p>A Clause is simply a disjunctions of positive $\small a_1, \cdots, a_m$ and negative $\small b_1, \cdots, b_n$ literals and may be written in either of the following forms.</p>
+<p>$$\tag{ii}\small a_1 \lor \cdots \lor a_m \lor \lnot b_1 \lor \cdots \lor \lnot b_n$$</p>
+<p>$$\tag{iii}\small \forall x_1, \cdots, x_k (a_1 \lor \cdots \lor a_m \lor \lnot b_1 \lor \cdots \lor \lnot b_n)$$</p>
+<p>Where the latter form introduces the set of variables used in the clause. This is often removed for clarity as the universal quantification is assumed for any variable present. This can also be written in <em>clausal form</em>, something that looks a lot like Datalog.</p>
+<p>$$\tag{iv}\small a_1, \cdots, a_m \leftarrow b_1, \cdots, b_n$$</p>
+<p>A <em>Horn Clause</em> is a formula consisting of a disjunction of literals of which <strong>at most one</strong> is positive.</p>
+<p>$$\tag{vi}\small a \lor \lnot b_1 \lor \cdots \lor \lnot b_n$$</p>
+<p>or, in clausal form,</p>
+<p>$$\tag{vii}\small a_1 \leftarrow b_1, \cdots, b_n$$</p>
+<p>The following table describes additional clause forms along with their equivalent Datalog form.</p>
+<table><thead><tr><th>Propositional</th><th>Form/Datalog</th><th>Clausal</th></tr></thead><tbody>
+<tr><td>$\small a_1(x,y) \lor a_2(x,y) \lor \lnot b_1(x,z) \lor \lnot b_2(z,y)$</td><td>indefinite/disjunctive</td><td>$\small a_1(x,y), a_2(x,y) \leftarrow b_1(x,z), b_2(z,y)$</td></tr>
+<tr><td>$\small a(x,y) \lor \lnot b_1(x,z) \lor \lnot b_2(z,y)$</td><td>definite/pure<sup class="footnote-reference"><a href="#1">1</a></sup></td><td>$\small a(x,y) \leftarrow b_1(x,z), b_2(z,y)$</td></tr>
+<tr><td>$\small b(x,y)$</td><td>unit/fact<sup class="footnote-reference"><a href="#2">2</a></sup></td><td>$\small b(x,y) \leftarrow$</td></tr>
+<tr><td>$\lnot b_1(x,z) \lor \lnot b_2(z,y)$</td><td>goal/constraint</td><td>$\small \leftarrow b_1(x,z), b_2(z,y)$</td></tr>
+<tr><td>$\small false$ or $\small\bot$</td><td>empty</td><td>$\small \square$</td></tr>
+</tbody></table>
+<h2 id="mapping-from-datalog-to-first-order-logic"><a class="header" href="#mapping-from-datalog-to-first-order-logic">Mapping from Datalog to First-Order Logic</a></h2>
+<p>The purpose of the descriptions above was to allow for the mapping of Datalog into a <em>first-order language</em>.</p>
+<p>Given a Datalog program $\small P=( D_E, D_I, Q )$ we can construct a new first-order language $\small L=(\mathcal{C},\mathcal{P},\mathcal{F})$ in the following manner.</p>
+<ol>
+<li>$\mathcal{C}$ is comprised the set of all constant values in any EDB or IDB relation.
+$$\small \lbrace c | c \in \bigcup \lbrace terms(atoms(r)) | r \in edb(P) \cap idb(P) \rbrace \rbrace$$</li>
+<li>$\mathcal{P}$ is comprised the set of labels for all EDB and IDB relations.
+$$\small \lbrace label(r) | r \in edb(P) \cap idb(P) \rbrace$$</li>
+<li>In $\small\text{Datalog}$, which does not allow functions, $\mathcal{F}=\empty$. However, in $\small\text{Datalog}^{\theta}$ which allows certain operators in arithmetic literals $\mathcal{F}=\theta$.</li>
+<li>For each rule $\small r \in rules(P)$:</li>
+</ol>
+<p><strong>TBD</strong></p>
+<hr />
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>In Datalog a pure rule must also follow the safety constraint that all variables that appear in the head <strong>must also</strong> appear in the body.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>In Datalog a fact <strong>must also</strong> be ground.</p>
+</div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="appendix-datalog-ebnf"><a class="header" href="#appendix-datalog-ebnf">Appendix: Datalog EBNF</a></h1>
 <pre><code class="language-ebnf">program
         ::= pragma* ( fact | rule | query )* ;
@@ -1391,12 +1477,13 @@ boolean ::= &quot;true&quot; | &quot;false&quot; ;
 <ol>
 <li><span class="bibkey" id="AbHuVi94">AbHuVi94</span>Abiteboul, S., Hull, R., &amp; Vianu, V. <em>Foundations of Databases: The Logical Level</em>. (Pearson, 1995). <a href="http://webdam.inria.fr/Alice/">webdam.inria.fr/Alice/</a>.</li>
 <li><span class="bibkey" id="Balaz12">Balaz12</span>Balazinska, M. <em>CSE 344: Introduction to Data Management. Lecture 10: Datalog</em>. (University of Washington, 2012). Retrieved January 24, 2022, from <a href="https://courses.cs.washington.edu/courses/cse344/12au/lectures/lecture10-datalog.pdf">courses.cs.washington.edu</a>.</li>
-<li><span class="bibkey" id="CeGoTa90">CeGoTa90</span>Ceri, S., Gottlob, G., &amp; Tanca, L. <em>Logic Programming and Databases</em>. (Springer Berlin Heidelberg, 1990). <a href="https://doi.org/10.1007/978-3-642-83952-8">DOI: 10.1007/978-3-642-83952-8</a></li>
+<li><span class="bibkey" id="CeGoTa90">CeGoTa90</span>Ceri, S., Gottlob, G., &amp; Tanca, L. <em>Logic Programming and Databases</em>. (Springer Berlin Heidelberg, 1990). <a href="https://doi.org/10.1007/978-3-642-83952-8">DOI: 10.1007/978-3-642-83952-8</a>.</li>
 <li><span class="bibkey" id="ChVa97">ChVa97</span>Chaudhuri, S., and Vardi, M. Y. (1997). On the Equivalence of Recursive and Nonrecursive Datalog Programs. <em>Journal of Computer and System Sciences</em>, <em>54</em>(1), 61–78. <a href="https://doi.org/10.1006/JCSS.1997.1452">DOI: 10.1006/JCSS.1997.1452</a>.</li>
 <li><span class="bibkey" id="Colomb">Colomb98</span>Colomb, R. M. <em>Deductive Databases and their Applications</em>. (Taylor &amp; Francis, 1998).</li>
 <li><span class="bibkey" id="GreMol15">GreMol15</span>Greco, S. &amp; Molinaro, C. <em>Datalog and Logic Databases</em>. (Morgan &amp; Claypool Publishers, 2015).</li>
 <li><span class="bibkey" id="Mill1851">Mill1851</span>Mill, J. S. <em>A System of Logic, Ratiocinative and Inductive, Being a Connected View of the Principles of Evidence, and the Methods of Scientific Investigation</em>. (John W. Parker, 1851).</li>
-<li><span class="bibkey" id="QConv">QConv</span>Grammatical Framework. (March 1, 2018). <em>Query-converter – SQL to Relational Algebra</em>. Retrieved January 24, 2022, from <a href="http://www.grammaticalframework.org/qconv/qconv-a.html">grammaticalframework.org</a></li>
+<li><span class="bibkey" id="QConv">QConv</span>Grammatical Framework. (March 1, 2018). <em>Query-converter – SQL to Relational Algebra</em>. Retrieved January 24, 2022, from <a href="http://www.grammaticalframework.org/qconv/qconv-a.html">grammaticalframework.org</a>.</li>
+<li><span class="bibkey" id="Shep88">Shep88</span>Shepherdson, John C. <em>Negation in Logic Programming</em> in Foundations of Deductive Databases and Logic Programming. (1988).</li>
 <li><span class="bibkey" id="WikiDatalog">WikiDatalog</span>Datalog. (January 9, 2022). In <em>Wikipedia</em>. Retrieved January 24, 2022, from  <a href="https://en.wikipedia.org/w/index.php?title=Datalog&amp;oldid=1064721744">en.wikipedia.org/Datalog</a>. </li>
 <li><span class="bibkey" id="WikiRelalg">WikiRelalg</span>Relational algebra. (December 1, 2021). In <em>Wikipedia</em>. Retrieved January 24, 2022, from <a href="https://en.wikipedia.org/w/index.php?title=Relational_algebra&amp;oldid=1058055410">en.wikipedia.org/Relational_algebra</a>. </li>
 </ol>

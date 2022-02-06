@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p>Another Simplistic <a href="https://en.wikipedia.org/wiki/Datalog">Datalog</a> Implementation (ASDI), in Rust.</p>
 <p>Datalog is a logic programming language and a subset of the earlier
-<a href="https://en.wikipedia.org/wiki/Prolog">Prolog</a><span class="fnref"><a href="#1">1</a></span>. This package provides a data model to represent 
+<a href="https://en.wikipedia.org/wiki/Prolog">Prolog</a><sup class="footnote-reference"><a href="#1">1</a></sup>. This package provides a data model to represent 
 <a href="https://en.wikipedia.org/wiki/Datalog">Datalog</a> programs in memory, a parser for the textual representation, 
 and some evaluation implementations.</p>
 <h2 id="brief-example"><a class="header" href="#brief-example">Brief Example</a></h2>
@@ -190,7 +190,7 @@ boolean value denoting whether the goal is satisfied.</p>
 <pre><code class="language-text">+------------+
 | _: boolean |
 +============+
-| true      |
+| true       |
 +------------+
 </code></pre>
 <p>However, if we were to change the final query to replace the constant with a variable, as follows.</p>
@@ -240,12 +240,10 @@ syllogism
 <span class="boring">}
 </span></code></pre></pre>
 <hr />
-<div class="footnotes">
-<ol>
-<li><a name="1">Chapter</a> 1 of <span class="bibref inline"><a href="../reference/references.html#CeGoTa90">CeGoTa90</a></span>
-provides a good overview of the drawbacks of Prolog and the advantages of Datalog for certain tasks.</li>
-</ol>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>Chapter 1 of <span class="bibref inline"><a href="../reference/references.html#CeGoTa90">CeGoTa90</a></span> provides a good overview of the drawbacks of Prolog and the advantages of Datalog for certain tasks.</p>
 </div>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
