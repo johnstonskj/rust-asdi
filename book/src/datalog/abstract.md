@@ -16,8 +16,15 @@ A Datalog **Program** $\small P$ is a tuple comprising the **Extensional** datab
 
 $$\tag{0}\small P=\( D_E, D_I, Q \)$$
 
-The extensional database in turn is a set of _relations_ each of which is a set of _facts_ (_ground atoms_). 
-The intensional database is a set of _rules_ that derive additional facts into intensional relations via entailment.
+The extensional database in turn is a set of _relations_ each of which is a set of _facts_ (_ground atoms_). The intensional database is a set of _rules_ that derive additional facts into intensional _relations_ via entailment. 
+
+A program has the following properties.
+
+* $\small edb\(P\)$ returns the set of relations comprising the extensional database.
+* $\small idb\(P\)$ returns the set of relations comprising the intensional database, **IFF** entailment has occured. 
+* $\small rules\(P\)$ returns the set of rules associated with the intensional database.
+* $\small positive(r)$ returns true if all intensional rules are _positive_:
+   $$\tag{v}\small positive(p) \coloneqq \(\forall{r}\in rules\(p\); positive(r\)\)$$
 
 ## Rules
 
@@ -162,6 +169,7 @@ Relations have the following properties:
    where $\small k \in \mathbb{N}^{+}$,
 * $\small arity\(r\)$ returns the number of attributes in the relation's schema, and therefore all
    atoms within the relation; $\small arity\(r\) \equiv |schema(a)| \equiv j$.
+* $\small atoms\(r\)$ returns the set of atoms that comprise this relation.
 
 Attributes have the following properties:
 
@@ -177,13 +185,13 @@ $$\tag{xi}\small
 conforms\(a, r\) &\coloneqq &&ground\(a\) \\\\
 &\land &&label\(a\) = label\(r\) \\\\
 &\land &&arity\(a\) = arity\(r\) \\\\
-&\land &&\forall{i} \in \lbrace 1, \ldots, arity\(r\)\rbrace \medspace conforms\( a_{t_i}, r_{\alpha_i} \)
+&\land &&\forall{i} \in \[1, arity\(r\)\] \medspace conforms\( a_{t_i}, r_{\alpha_i} \)
 \end{alignat*}
 $$
 $$\tag{xii}\small
 conforms\(t, \alpha\) \coloneqq
 label\(t\) = label\(\alpha\) \land
-\tau_{t} = \tau{\alpha}
+\tau_{t} = \tau_{\alpha}
 $$
 
 Note that in relational algebra it is more common to use the term domain $\small D$ to denote a possibly
@@ -219,7 +227,7 @@ rule's head to be considered true.
 * and has the following properties:
   * $\small relational\(l\)$ returns true if the literal argument is a relational literal.
   * $\small arithmetic\(l\)$ returns true if the literal argument is a arithmetic literal.
-    *. $\small terms\(l\)$ returns the set of terms in a literal,
+  * $\small terms\(l\)$ returns the set of terms in a literal,
        $$\tag{xiii}\small
        terms(l) \coloneqq
        \begin{cases}

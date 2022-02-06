@@ -3,7 +3,7 @@
 Another Simplistic [Datalog](https://en.wikipedia.org/wiki/Datalog) Implementation (ASDI), in Rust.
 
 Datalog is a logic programming language and a subset of the earlier
-[Prolog](https://en.wikipedia.org/wiki/Prolog)<span class="fnref">[1](#1)</span>. This package provides a data model to represent 
+[Prolog](https://en.wikipedia.org/wiki/Prolog)[^1]. This package provides a data model to represent 
 [Datalog](https://en.wikipedia.org/wiki/Datalog) programs in memory, a parser for the textual representation, 
 and some evaluation implementations.
 
@@ -35,7 +35,7 @@ boolean value denoting whether the goal is satisfied.
 +------------+
 | _: boolean |
 +============+
-| true      |
+| true       |
 +------------+
 ```
 
@@ -92,9 +92,4 @@ syllogism
 
 ----------
 
-<div class="footnotes">
-
-1. <a name="1">Chapter</a> 1 of <span class="bibref inline">[CeGoTa90](../reference/references.md#CeGoTa90)</span>
-   provides a good overview of the drawbacks of Prolog and the advantages of Datalog for certain tasks.
-
-</div>
+[^1]: Chapter 1 of <span class="bibref inline">[CeGoTa90](../reference/references.md#CeGoTa90)</span> provides a good overview of the drawbacks of Prolog and the advantages of Datalog for certain tasks.
