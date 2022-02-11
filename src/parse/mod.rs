@@ -2,6 +2,8 @@
 This module provides the type [`Parsed`] that contains a program parsed from the text representation
 as well as the [`parse_file`], [`parse_str`], and [`parse_str_with_features`] functions.
 
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/parse.svg)
+
 TBD
 
 # Example

@@ -1,6 +1,9 @@
 /*!
 This module provides the `Feature` and `FeatureSet` types that allow programs to support specific
 extensions to Datalog.
+
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/features.svg)
+
 */
 
 use crate::syntax::{

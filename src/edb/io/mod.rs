@@ -1,6 +1,9 @@
 /*!
 This module provides the set of types that are used to implement formatted input/output operations
 for [Relation]s.
+
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/edb_io.svg)
+
 */
 
 use crate::error;
