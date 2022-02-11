@@ -1,0 +1,53 @@
+@startuml
+
+!include options.plantuml
+
+interface std::error::Error
+hide "std::error::Error" members
+
+class std::result::Result
+hide "std::result::Result" members
+
+namespace asdi::error {
+    class SourceLocation {
+        line: usize
+        column: usize
+    }
+
+    enum Error {
+        AnonymousVariableNotAllowed
+        AttributeDoesNotExist
+        AttributeIndexInvalid
+        ComparisonIsAlwaysTrue
+        ComparisonIsAlwaysFalse
+        ExtensionalPredicateInRuleHead
+        FactDoesNotConformToSchema
+        FormatError
+        HeadVariablesMissingInBody
+        IncompatibleTypes
+        InvalidHeadAtomCount
+        InvalidValue
+        LanguageFeatureDisabled
+        LanguageFeatureUnsupported
+        NegativeVariablesNotAlsoPositive
+        NotStratifiable
+        NullaryFactsNotAllowed
+        ParserError
+        RelationExists
+        RelationDoesNotExist
+        Serialization
+        SerializationFormatUnknown
+        SerializationOperationUnsupported
+    }
+    hide Error methods
+
+    Error ..|> std::error::Error
+    Error .right.> SourceLocation
+
+    class Result << (T,#ADD1B2) type >>
+
+    Result .left.> Error
+    Result ..> std::result::Result: base
+}
+
+@enduml

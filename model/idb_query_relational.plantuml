@@ -1,0 +1,79 @@
+@startuml
+
+!include options.plantuml
+
+interface asdi::ProgramCore
+hide "asdi::ProgramCore" members
+
+interface asdi::edb::Attribute
+hide "asdi::edb::Attribute" members
+
+interface asdi::edb::Constant
+hide "asdi::edb::Constant" members
+
+interface asdi::edb::PredicateRef
+hide "asdi::edb::PredicateRef" members
+
+enum asdi::idb::ComparisonOperator
+hide "asdi::idb::ComparisonOperator" members
+
+interface asdi::idb::query::Row
+hide "asdi::idb::query::Row" members
+
+interface asdi::idb::query::View
+hide "asdi::idb::query::View" members
+
+namespace asdi::idb::query::relational {
+    interface FactOps
+    interface RelationalOps
+
+    class Criteria
+    class Join
+    class Projection
+    class Selection
+
+    enum CriteriaValue {
+        Value : asdi::edb::Constant
+        Index : usize
+    }
+    enum RelationalOp {
+        Relation : asdi::edb::PredicateRef
+        Selection : Selection
+        Projection : Projection
+        Join : Join
+    }
+
+    CriteriaValue .down.> asdi::edb::Constant
+
+    RelationalOp .down.> asdi::edb::PredicateRef
+
+    Criteria *-> CriteriaValue
+    Criteria *-down-> asdi::idb::ComparisonOperator
+
+    Join o-> RelationalOp
+    Join o-> RelationalOp
+    Join *-> "*" Criteria
+
+    Projection o-> RelationalOp
+    Projection o-down-> "attributes *" asdi::edb::Attribute
+
+    Selection o-> RelationalOp
+    Selection o-down-> "attributes *" asdi::edb::Attribute
+
+    FactOps ..> Projection
+    FactOps ..> Selection
+    FactOps .up.> asdi::idb::query::Row
+
+    RelationalOps ..> Criteria
+    RelationalOps ..> Projection
+    RelationalOps ..> Selection
+    RelationalOps .up.> asdi::idb::query::View
+
+    class relational << module >> {
+        program_to_graphviz(): String
+    }
+
+    relational .down.> asdi::ProgramCore
+}
+
+@enduml

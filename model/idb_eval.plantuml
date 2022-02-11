@@ -1,0 +1,54 @@
+@startuml
+
+!include options.plantuml
+
+class asdi::Program
+hide "asdi::Program" members
+
+interface asdi::ProgramCore
+hide "asdi::ProgramCore" members
+
+interface asdi::idb::RuleSet
+hide "asdi::idb::RuleSet" members
+
+class asdi::edb::RelationSet
+hide "asdi::edb::RelationSet" members
+
+class asdi::edb::Predicate
+hide "asdi::edb::Predicate" members
+
+namespace asdi::idb::eval {
+    interface Evaluator
+
+    class NaiveEvaluator
+    class NoopEvaluator
+    class StratifiedEvaluator
+    class SubProgram
+
+    class PrecedenceGraph
+    class PrecedenceNode {
+        negative: bool
+        extensional: bool
+    }
+    class StratifiedProgram
+
+    NaiveEvaluator ..|> Evaluator
+    NoopEvaluator ..|> Evaluator
+    StratifiedEvaluator ..|> Evaluator
+
+    Evaluator ..> asdi::Program
+    Evaluator ..> asdi::edb::RelationSet
+
+    PrecedenceGraph *-down-> "*" PrecedenceNode
+    PrecedenceNode o-> "source, target" asdi::edb::Predicate
+
+    StratifiedProgram *-> "*" SubProgram
+
+    SubProgram o-> asdi::Program
+    SubProgram *-> "strata" asdi::idb::RuleSet
+    SubProgram ..|> asdi::ProgramCore
+
+    StratifiedEvaluator .left.> StratifiedProgram
+}
+
+@enduml

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="520px" preserveAspectRatio="none" style="width:1144px;height:520px;background:#FFFFFF;" version="1.1" viewBox="0 0 1144 520" width="1144px" zoomAndPan="magnify"><defs><filter height="300%" id="f11y08qv9mbkq1" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[e274c4916ac42ef1c11391a83d303c10]
+cluster asdi--><polygon fill="#FFFFFF" filter="url(#f11y08qv9mbkq1)" points="122,430,158,430,165,452.4883,379,452.4883,379,513,122,513,122,430" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="122" x2="165" y1="452.4883" y2="452.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="30" x="126" y="445.5352">asdi</text><!--MD5=[ae3c197a01158459eb2ddb806e23d6f2]
+cluster asdi::idb--><polygon fill="#FFFFFF" filter="url(#f11y08qv9mbkq1)" points="16,6,81,6,88,28.4883,1127,28.4883,1127,406,16,406,16,6" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="16" x2="88" y1="28.4883" y2="28.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="59" x="20" y="21.5352">asdi::idb</text><!--MD5=[bbfb16aff101aff206c25fb1af5c6b4b]
+cluster asdi::idb::eval--><polygon fill="#FFFFFF" filter="url(#f11y08qv9mbkq1)" points="125,49,160,49,167,71.4883,1103,71.4883,1103,382,125,382,125,49" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="125" x2="167" y1="71.4883" y2="71.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="29" x="129" y="64.5352">eval</text><!--MD5=[6bc3af5db4038e5494ba0622f07de59b]
+cluster asdi::edb--><polygon fill="#FFFFFF" filter="url(#f11y08qv9mbkq1)" points="606,430,674,430,681,452.4883,855,452.4883,855,513,606,513,606,430" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="606" x2="681" y1="452.4883" y2="452.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="62" x="610" y="445.5352">asdi::edb</text><!--MD5=[619a18f3975bec44ed0f3b908af212c9]
+class asdi::Program--><rect codeLine="4" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="32" id="asdi::Program" style="stroke:#A80036;stroke-width:1.5;" width="81" x="281.5" y="465"/><ellipse cx="296.5" cy="481" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M298.9731,487.1431 Q298.3921,487.4419 297.7529,487.5913 Q297.1138,487.7407 296.4082,487.7407 Q293.9014,487.7407 292.5815,486.0889 Q291.2617,484.437 291.2617,481.3159 Q291.2617,478.1865 292.5815,476.5347 Q293.9014,474.8828 296.4082,474.8828 Q297.1138,474.8828 297.7612,475.0322 Q298.4087,475.1816 298.9731,475.4805 L298.9731,478.2031 Q298.3423,477.6221 297.7488,477.3523 Q297.1553,477.0825 296.5244,477.0825 Q295.1797,477.0825 294.4949,478.1492 Q293.8101,479.2158 293.8101,481.3159 Q293.8101,483.4077 294.4949,484.4744 Q295.1797,485.541 296.5244,485.541 Q297.1553,485.541 297.7488,485.2712 Q298.3423,485.0015 298.9731,484.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="49" x="310.5" y="485.5352">Program</text><!--MD5=[91cc3482fb0350396608f11633162af9]
+class asdi::ProgramCore--><rect codeLine="7" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="32" id="asdi::ProgramCore" style="stroke:#A80036;stroke-width:1.5;" width="108" x="138" y="465"/><ellipse cx="153" cy="481" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M149.4277,477.2651 L149.4277,475.1069 L156.8071,475.1069 L156.8071,477.2651 L154.3418,477.2651 L154.3418,485.3418 L156.8071,485.3418 L156.8071,487.5 L149.4277,487.5 L149.4277,485.3418 L151.8931,485.3418 L151.8931,477.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="76" x="167" y="485.5352">ProgramCore</text><!--MD5=[30c8d4c59bd3776484494cc31a150236]
+class asdi::idb::RuleSet--><rect codeLine="10" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="32" id="asdi::idb::RuleSet" style="stroke:#A80036;stroke-width:1.5;" width="74" x="32" y="213"/><ellipse cx="47" cy="229" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M43.4277,225.2651 L43.4277,223.1069 L50.8071,223.1069 L50.8071,225.2651 L48.3418,225.2651 L48.3418,233.3418 L50.8071,233.3418 L50.8071,235.5 L43.4277,235.5 L43.4277,233.3418 L45.8931,233.3418 L45.8931,225.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="42" x="61" y="233.5352">RuleSet</text><!--MD5=[3cb0415412475ec7ae49204a9fbdfed2]
+class asdi::idb::eval::Evaluator--><rect codeLine="20" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="40" id="asdi::idb::eval::Evaluator" style="stroke:#A80036;stroke-width:1.5;" width="85" x="465.5" y="326"/><ellipse cx="480.5" cy="342" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M476.9277,338.2651 L476.9277,336.1069 L484.3071,336.1069 L484.3071,338.2651 L481.8418,338.2651 L481.8418,346.3418 L484.3071,346.3418 L484.3071,348.5 L476.9277,348.5 L476.9277,346.3418 L479.3931,346.3418 L479.3931,338.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="53" x="494.5" y="346.5352">Evaluator</text><line style="stroke:#A80036;stroke-width:1.5;" x1="466.5" x2="549.5" y1="358" y2="358"/><!--MD5=[0abad6331dca243eb8baa75e375fa835]
+class asdi::idb::eval::ToGraphViz--><rect codeLine="21" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="40" id="asdi::idb::eval::ToGraphViz" style="stroke:#A80036;stroke-width:1.5;" width="101" x="673.5" y="326"/><ellipse cx="688.5" cy="342" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M684.9277,338.2651 L684.9277,336.1069 L692.3071,336.1069 L692.3071,338.2651 L689.8418,338.2651 L689.8418,346.3418 L692.3071,346.3418 L692.3071,348.5 L684.9277,348.5 L684.9277,346.3418 L687.3931,346.3418 L687.3931,338.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="69" x="702.5" y="346.5352">ToGraphViz</text><line style="stroke:#A80036;stroke-width:1.5;" x1="674.5" x2="773.5" y1="358" y2="358"/><!--MD5=[12539c91152c3ca549cd7939389e534a]
+class asdi::idb::eval::NaiveEvaluator--><rect codeLine="23" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="48" id="asdi::idb::eval::NaiveEvaluator" style="stroke:#A80036;stroke-width:1.5;" width="117" x="449.5" y="205"/><ellipse cx="464.5" cy="221" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M466.9731,227.1431 Q466.3921,227.4419 465.7529,227.5913 Q465.1138,227.7407 464.4082,227.7407 Q461.9014,227.7407 460.5815,226.0889 Q459.2617,224.437 459.2617,221.3159 Q459.2617,218.1865 460.5815,216.5347 Q461.9014,214.8828 464.4082,214.8828 Q465.1138,214.8828 465.7612,215.0322 Q466.4087,215.1816 466.9731,215.4805 L466.9731,218.2031 Q466.3423,217.6221 465.7488,217.3523 Q465.1553,217.0825 464.5244,217.0825 Q463.1797,217.0825 462.4949,218.1492 Q461.8101,219.2158 461.8101,221.3159 Q461.8101,223.4077 462.4949,224.4744 Q463.1797,225.541 464.5244,225.541 Q465.1553,225.541 465.7488,225.2712 Q466.3423,225.0015 466.9731,224.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="85" x="478.5" y="225.5352">NaiveEvaluator</text><line style="stroke:#A80036;stroke-width:1.5;" x1="450.5" x2="565.5" y1="237" y2="237"/><line style="stroke:#A80036;stroke-width:1.5;" x1="450.5" x2="565.5" y1="245" y2="245"/><!--MD5=[637d6fbc8d3090d341036b87a6f02fdc]
+class asdi::idb::eval::NoopEvaluator--><rect codeLine="24" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="48" id="asdi::idb::eval::NoopEvaluator" style="stroke:#A80036;stroke-width:1.5;" width="116" x="602" y="205"/><ellipse cx="617" cy="221" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M619.4731,227.1431 Q618.8921,227.4419 618.2529,227.5913 Q617.6138,227.7407 616.9082,227.7407 Q614.4014,227.7407 613.0815,226.0889 Q611.7617,224.437 611.7617,221.3159 Q611.7617,218.1865 613.0815,216.5347 Q614.4014,214.8828 616.9082,214.8828 Q617.6138,214.8828 618.2612,215.0322 Q618.9087,215.1816 619.4731,215.4805 L619.4731,218.2031 Q618.8423,217.6221 618.2488,217.3523 Q617.6553,217.0825 617.0244,217.0825 Q615.6797,217.0825 614.9949,218.1492 Q614.3101,219.2158 614.3101,221.3159 Q614.3101,223.4077 614.9949,224.4744 Q615.6797,225.541 617.0244,225.541 Q617.6553,225.541 618.2488,225.2712 Q618.8423,225.0015 619.4731,224.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="84" x="631" y="225.5352">NoopEvaluator</text><line style="stroke:#A80036;stroke-width:1.5;" x1="603" x2="717" y1="237" y2="237"/><line style="stroke:#A80036;stroke-width:1.5;" x1="603" x2="717" y1="245" y2="245"/><!--MD5=[88c208813f6c6a29344003ddbaf54fa8]
+class asdi::idb::eval::StratifiedEvaluator--><rect codeLine="25" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="48" id="asdi::idb::eval::StratifiedEvaluator" style="stroke:#A80036;stroke-width:1.5;" width="136" x="278" y="205"/><ellipse cx="293" cy="221" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M295.4731,227.1431 Q294.8921,227.4419 294.2529,227.5913 Q293.6138,227.7407 292.9082,227.7407 Q290.4014,227.7407 289.0815,226.0889 Q287.7617,224.437 287.7617,221.3159 Q287.7617,218.1865 289.0815,216.5347 Q290.4014,214.8828 292.9082,214.8828 Q293.6138,214.8828 294.2612,215.0322 Q294.9087,215.1816 295.4731,215.4805 L295.4731,218.2031 Q294.8423,217.6221 294.2488,217.3523 Q293.6553,217.0825 293.0244,217.0825 Q291.6797,217.0825 290.9949,218.1492 Q290.3101,219.2158 290.3101,221.3159 Q290.3101,223.4077 290.9949,224.4744 Q291.6797,225.541 293.0244,225.541 Q293.6553,225.541 294.2488,225.2712 Q294.8423,225.0015 295.4731,224.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="104" x="307" y="225.5352">StratifiedEvaluator</text><line style="stroke:#A80036;stroke-width:1.5;" x1="279" x2="413" y1="237" y2="237"/><line style="stroke:#A80036;stroke-width:1.5;" x1="279" x2="413" y1="245" y2="245"/><!--MD5=[a766060a0480f42b956634d927e1d478]
+class asdi::idb::eval::SubProgram--><rect codeLine="26" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="48" id="asdi::idb::eval::SubProgram" style="stroke:#A80036;stroke-width:1.5;" width="102" x="141" y="205"/><ellipse cx="156" cy="221" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M158.4731,227.1431 Q157.8921,227.4419 157.2529,227.5913 Q156.6138,227.7407 155.9082,227.7407 Q153.4014,227.7407 152.0815,226.0889 Q150.7617,224.437 150.7617,221.3159 Q150.7617,218.1865 152.0815,216.5347 Q153.4014,214.8828 155.9082,214.8828 Q156.6138,214.8828 157.2612,215.0322 Q157.9087,215.1816 158.4731,215.4805 L158.4731,218.2031 Q157.8423,217.6221 157.2488,217.3523 Q156.6553,217.0825 156.0244,217.0825 Q154.6797,217.0825 153.9949,218.1492 Q153.3101,219.2158 153.3101,221.3159 Q153.3101,223.4077 153.9949,224.4744 Q154.6797,225.541 156.0244,225.541 Q156.6553,225.541 157.2488,225.2712 Q157.8423,225.0015 158.4731,224.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="70" x="170" y="225.5352">SubProgram</text><line style="stroke:#A80036;stroke-width:1.5;" x1="142" x2="242" y1="237" y2="237"/><line style="stroke:#A80036;stroke-width:1.5;" x1="142" x2="242" y1="245" y2="245"/><!--MD5=[9a662da35d9021e4f98a277b74a14cb8]
+class asdi::idb::eval::PrecedenceGraph--><rect codeLine="28" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="48" id="asdi::idb::eval::PrecedenceGraph" style="stroke:#A80036;stroke-width:1.5;" width="135" x="902.5" y="84"/><ellipse cx="917.5" cy="100" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M919.9731,106.1431 Q919.3921,106.4419 918.7529,106.5913 Q918.1138,106.7407 917.4082,106.7407 Q914.9014,106.7407 913.5815,105.0889 Q912.2617,103.437 912.2617,100.3159 Q912.2617,97.1865 913.5815,95.5347 Q914.9014,93.8828 917.4082,93.8828 Q918.1138,93.8828 918.7612,94.0322 Q919.4087,94.1816 919.9731,94.4805 L919.9731,97.2031 Q919.3423,96.6221 918.7488,96.3523 Q918.1553,96.0825 917.5244,96.0825 Q916.1797,96.0825 915.4949,97.1492 Q914.8101,98.2158 914.8101,100.3159 Q914.8101,102.4077 915.4949,103.4744 Q916.1797,104.541 917.5244,104.541 Q918.1553,104.541 918.7488,104.2712 Q919.3423,104.0015 919.9731,103.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="103" x="931.5" y="104.5352">PrecedenceGraph</text><line style="stroke:#A80036;stroke-width:1.5;" x1="903.5" x2="1036.5" y1="116" y2="116"/><line style="stroke:#A80036;stroke-width:1.5;" x1="903.5" x2="1036.5" y1="124" y2="124"/><!--MD5=[4615c5274794b948ee8e0f7fd198fb36]
+class asdi::idb::eval::PrecedenceNode--><rect codeLine="29" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="73.9102" id="asdi::idb::eval::PrecedenceNode" style="stroke:#A80036;stroke-width:1.5;" width="130" x="957" y="192"/><ellipse cx="972" cy="208" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M974.4731,214.1431 Q973.8921,214.4419 973.2529,214.5913 Q972.6138,214.7407 971.9082,214.7407 Q969.4014,214.7407 968.0815,213.0889 Q966.7617,211.437 966.7617,208.3159 Q966.7617,205.1865 968.0815,203.5347 Q969.4014,201.8828 971.9082,201.8828 Q972.6138,201.8828 973.2612,202.0322 Q973.9087,202.1816 974.4731,202.4805 L974.4731,205.2031 Q973.8423,204.6221 973.2488,204.3523 Q972.6553,204.0825 972.0244,204.0825 Q970.6797,204.0825 969.9949,205.1492 Q969.3101,206.2158 969.3101,208.3159 Q969.3101,210.4077 969.9949,211.4744 Q970.6797,212.541 972.0244,212.541 Q972.6553,212.541 973.2488,212.2712 Q973.8423,212.0015 974.4731,211.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="98" x="986" y="212.5352">PrecedenceNode</text><line style="stroke:#A80036;stroke-width:1.5;" x1="958" x2="1086" y1="224" y2="224"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="75" x="963" y="238.6348">negative: bool</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="92" x="963" y="251.5898">extensional: bool</text><line style="stroke:#A80036;stroke-width:1.5;" x1="958" x2="1086" y1="257.9102" y2="257.9102"/><!--MD5=[ef0f5253ff8ffa8a74eb1f95e63d5a99]
+class asdi::idb::eval::StratifiedProgram--><rect codeLine="33" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="48" id="asdi::idb::eval::StratifiedProgram" style="stroke:#A80036;stroke-width:1.5;" width="132" x="753" y="205"/><ellipse cx="768" cy="221" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M770.4731,227.1431 Q769.8921,227.4419 769.2529,227.5913 Q768.6138,227.7407 767.9082,227.7407 Q765.4014,227.7407 764.0815,226.0889 Q762.7617,224.437 762.7617,221.3159 Q762.7617,218.1865 764.0815,216.5347 Q765.4014,214.8828 767.9082,214.8828 Q768.6138,214.8828 769.2612,215.0322 Q769.9087,215.1816 770.4731,215.4805 L770.4731,218.2031 Q769.8423,217.6221 769.2488,217.3523 Q768.6553,217.0825 768.0244,217.0825 Q766.6797,217.0825 765.9949,218.1492 Q765.3101,219.2158 765.3101,221.3159 Q765.3101,223.4077 765.9949,224.4744 Q766.6797,225.541 768.0244,225.541 Q768.6553,225.541 769.2488,225.2712 Q769.8423,225.0015 770.4731,224.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="100" x="782" y="225.5352">StratifiedProgram</text><line style="stroke:#A80036;stroke-width:1.5;" x1="754" x2="884" y1="237" y2="237"/><line style="stroke:#A80036;stroke-width:1.5;" x1="754" x2="884" y1="245" y2="245"/><!--MD5=[6137f69857c1321f4d06c717c9c09db2]
+class asdi::edb::RelationSet--><rect codeLine="13" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="32" id="asdi::edb::RelationSet" style="stroke:#A80036;stroke-width:1.5;" width="95" x="622.5" y="465"/><ellipse cx="637.5" cy="481" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M639.9731,487.1431 Q639.3921,487.4419 638.7529,487.5913 Q638.1138,487.7407 637.4082,487.7407 Q634.9014,487.7407 633.5815,486.0889 Q632.2617,484.437 632.2617,481.3159 Q632.2617,478.1865 633.5815,476.5347 Q634.9014,474.8828 637.4082,474.8828 Q638.1138,474.8828 638.7612,475.0322 Q639.4087,475.1816 639.9731,475.4805 L639.9731,478.2031 Q639.3423,477.6221 638.7488,477.3523 Q638.1553,477.0825 637.5244,477.0825 Q636.1797,477.0825 635.4949,478.1492 Q634.8101,479.2158 634.8101,481.3159 Q634.8101,483.4077 635.4949,484.4744 Q636.1797,485.541 637.5244,485.541 Q638.1553,485.541 638.7488,485.2712 Q639.3423,485.0015 639.9731,484.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="63" x="651.5" y="485.5352">RelationSet</text><!--MD5=[a5d376e5744e5d84d0764534baa4474d]
+class asdi::edb::Predicate--><rect codeLine="16" fill="#FEFECE" filter="url(#f11y08qv9mbkq1)" height="32" id="asdi::edb::Predicate" style="stroke:#A80036;stroke-width:1.5;" width="86" x="753" y="465"/><ellipse cx="768" cy="481" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M770.4731,487.1431 Q769.8921,487.4419 769.2529,487.5913 Q768.6138,487.7407 767.9082,487.7407 Q765.4014,487.7407 764.0815,486.0889 Q762.7617,484.437 762.7617,481.3159 Q762.7617,478.1865 764.0815,476.5347 Q765.4014,474.8828 767.9082,474.8828 Q768.6138,474.8828 769.2612,475.0322 Q769.9087,475.1816 770.4731,475.4805 L770.4731,478.2031 Q769.8423,477.6221 769.2488,477.3523 Q768.6553,477.0825 768.0244,477.0825 Q766.6797,477.0825 765.9949,478.1492 Q765.3101,479.2158 765.3101,481.3159 Q765.3101,483.4077 765.9949,484.4744 Q766.6797,485.541 768.0244,485.541 Q768.6553,485.541 769.2488,485.2712 Q769.8423,485.0015 770.4731,484.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="54" x="782" y="485.5352">Predicate</text><!--MD5=[21f50933ca34c4f8b8e99bd1cc15ddae]
+link asdi::idb::eval::NaiveEvaluator to asdi::idb::eval::ToGraphViz--><path codeLine="35" d="M551.45,253.13 C585.73,271.38 633.71,296.93 670.38,316.45 " fill="none" id="asdi::idb::eval::NaiveEvaluator-to-asdi::idb::eval::ToGraphViz" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="673.77,310.32,688.13,325.9,667.19,322.68,673.77,310.32" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[e1b1f36e39eb79909e4bcc4c3dd725ed]
+link asdi::idb::eval::NoopEvaluator to asdi::idb::eval::ToGraphViz--><path codeLine="36" d="M672.95,253.27 C681.74,269.07 693.55,290.28 703.59,308.33 " fill="none" id="asdi::idb::eval::NoopEvaluator-to-asdi::idb::eval::ToGraphViz" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="709.79,305.07,713.4,325.95,697.56,311.88,709.79,305.07" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[cf90a413b6ab8b2258014f6a159c9b8e]
+link asdi::idb::eval::StratifiedEvaluator to asdi::idb::eval::ToGraphViz--><path codeLine="37" d="M397.87,253.01 C409.03,257.59 420.82,262.17 432,266 C506.6,291.58 594.15,314.33 653.79,328.77 " fill="none" id="asdi::idb::eval::StratifiedEvaluator-to-asdi::idb::eval::ToGraphViz" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="655.45,321.97,673.27,333.43,652.19,335.59,655.45,321.97" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[837817a047e3a74b0ad5daadc07a8609]
+link asdi::idb::eval::PrecedenceGraph to asdi::idb::eval::ToGraphViz--><path codeLine="38" d="M961.16,132.28 C945.35,173.49 912.94,255.93 903,266 C873.32,296.04 830.26,315.54 793.8,327.64 " fill="none" id="asdi::idb::eval::PrecedenceGraph-to-asdi::idb::eval::ToGraphViz" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="795.81,334.35,774.63,333.55,791.69,320.97,795.81,334.35" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[4e1f247d42ffe073a09e66d5df54f2a8]
+link asdi::idb::eval::PrecedenceNode to asdi::idb::eval::ToGraphViz--><path codeLine="39" d="M956.69,255.62 C947.72,259.12 938.64,262.65 930,266 C884.37,283.68 832.98,303.39 792.94,318.7 " fill="none" id="asdi::idb::eval::PrecedenceNode-to-asdi::idb::eval::ToGraphViz" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="795.17,325.34,773.99,325.94,790.17,312.26,795.17,325.34" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[f5eb1b71a128079b6fe1ef9709f26159]
+link asdi::idb::eval::StratifiedProgram to asdi::idb::eval::ToGraphViz--><path codeLine="40" d="M799.78,253.27 C786.24,269.65 767.9,291.86 752.65,310.32 " fill="none" id="asdi::idb::eval::StratifiedProgram-to-asdi::idb::eval::ToGraphViz" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="757.87,314.99,739.74,325.95,747.08,306.07,757.87,314.99" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[1dc5af81951ed02d332d3d47c056d05d]
+link asdi::idb::eval::NaiveEvaluator to asdi::idb::eval::Evaluator--><path codeLine="42" d="M508,253.27 C508,268.32 508,288.27 508,305.73 " fill="none" id="asdi::idb::eval::NaiveEvaluator-to-asdi::idb::eval::Evaluator" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="515,305.95,508,325.95,501,305.95,515,305.95" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[227ef62235453682a8126346e43c8368]
+link asdi::idb::eval::NoopEvaluator to asdi::idb::eval::Evaluator--><path codeLine="43" d="M629.24,253.27 C606.26,270.66 574.61,294.6 549.41,313.67 " fill="none" id="asdi::idb::eval::NoopEvaluator-to-asdi::idb::eval::Evaluator" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="553.35,319.46,533.18,325.95,544.91,308.3,553.35,319.46" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[6f99ab971918332161b66e25314156d4]
+link asdi::idb::eval::StratifiedEvaluator to asdi::idb::eval::Evaluator--><path codeLine="44" d="M378.78,253.27 C403.51,270.82 437.66,295.06 464.64,314.22 " fill="none" id="asdi::idb::eval::StratifiedEvaluator-to-asdi::idb::eval::Evaluator" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="468.91,308.66,481.16,325.95,460.8,320.08,468.91,308.66" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[520c4531a11b2b8403effd2ed564525c]
+link asdi::idb::eval::Evaluator to asdi::Program--><path codeLine="46" d="M481.35,366.06 C445.54,391.66 382.34,436.85 347.26,461.94 " fill="none" id="asdi::idb::eval::Evaluator-to-asdi::Program" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="343.12,464.9,352.7633,462.8981,347.1809,461.983,348.0961,456.4007,343.12,464.9" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[68dc2bbb0c7587de8d971a69f5d98b5f]
+link asdi::idb::eval::Evaluator to asdi::edb::RelationSet--><path codeLine="47" d="M531.21,366.06 C562.19,391.49 616.7,436.24 647.38,461.43 " fill="none" id="asdi::idb::eval::Evaluator-to-asdi::edb::RelationSet" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="651.36,464.7,646.9486,455.8943,647.4979,461.5245,641.8677,462.0738,651.36,464.7" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[d15f0b35eda5fb6547e36bcac22fd86d]
+link asdi::idb::eval::PrecedenceGraph to asdi::idb::eval::PrecedenceNode--><path codeLine="49" d="M984.955,143.226 C984.955,143.226 995.78,168 1000.92,179.76 " fill="none" id="asdi::idb::eval::PrecedenceGraph-asdi::idb::eval::PrecedenceNode" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="1006.14,191.71,1006.2059,181.8614,1004.1399,187.1274,998.8739,185.0615,1006.14,191.71" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="1004.1399" x2="1000.94" y1="187.1274" y2="179.8"/><polygon fill="#A80036" points="980.15,132.23,978.8872,139.3297,984.955,143.226,986.2178,136.1263,980.15,132.23" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="6" x="996.7806" y="181.3358">*</text><!--MD5=[7ff2fd4b106f49b261f1130501359431]
+link asdi::idb::eval::PrecedenceNode to asdi::edb::Predicate--><path codeLine="50" d="M981.3342,274.9931 C981.3342,274.9931 856.46,413.12 818.69,454.91 " fill="none" id="asdi::idb::eval::PrecedenceNode-asdi::edb::Predicate" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="809.74,464.8,818.7453,460.8119,813.0954,461.0931,812.8143,455.4432,809.74,464.8" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="813.0954" x2="818.455" y1="461.0931" y2="455.155"/><polygon fill="none" points="989.38,266.09,982.3894,267.8596,981.3342,274.9931,988.3248,273.2235,989.38,266.09" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="87" x="717.3581" y="454.2447">source, target</text><!--MD5=[47566a142dd1ddbc56bfdb01098dc2d2]
+link asdi::idb::eval::StratifiedProgram to asdi::idb::eval::SubProgram--><path codeLine="52" d="M782.852,197.3362 C782.852,197.3362 741.54,168.98 718.5,162 C624.7,133.6 370.14,130.03 277.5,162 C257.51,168.9 238.63,182.61 223.72,195.84 " fill="none" id="asdi::idb::eval::StratifiedProgram-asdi::idb::eval::SubProgram" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="214.07,204.83,223.3829,201.6253,217.7297,201.4231,217.9319,195.7699,214.07,204.83" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="217.7297" x2="223.58" y1="201.4231" y2="195.97"/><polygon fill="#A80036" points="792.28,204.76,790.0406,197.9054,782.852,197.3362,785.0914,204.1908,792.28,204.76" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="6" x="212.9567" y="194.3227">*</text><!--MD5=[b19c0375ff4d94fabc0e3b4632332d8a]
+link asdi::idb::eval::SubProgram to asdi::Program--><path codeLine="54" d="M209.5296,263.7201 C209.5296,263.7201 284.36,407.62 308.06,453.19 " fill="none" id="asdi::idb::eval::SubProgram-asdi::Program" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="314.18,464.97,313.5732,455.1399,311.8717,460.5347,306.4768,458.8332,314.18,464.97" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="311.8717" x2="308.185" y1="460.5347" y2="453.44"/><polygon fill="none" points="204,253.07,203.2148,260.2382,209.5296,263.7201,210.3148,256.5518,204,253.07" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[78e65212d4ac9f9dc94f321edd60cc17]
+link asdi::idb::eval::SubProgram to asdi::idb::RuleSet--><path codeLine="55" d="M128.89,229 C128.89,229 122.3,229 119.65,229 " fill="none" id="asdi::idb::eval::SubProgram-asdi::idb::RuleSet" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="106.48,229,115.48,233,111.48,229,115.48,225,106.48,229" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="111.48" x2="119.48" y1="229" y2="229"/><polygon fill="#A80036" points="140.89,229,134.89,225,128.89,229,134.89,233,140.89,229" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="36" x="97.0419" y="223.2381">strata</text><!--MD5=[2d2bda5a78ae8067f5a87aaef8517275]
+link asdi::idb::eval::SubProgram to asdi::ProgramCore--><path codeLine="56" d="M192,253.07 C192,296.99 192,392.84 192,444.81 " fill="none" id="asdi::idb::eval::SubProgram-to-asdi::ProgramCore" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="199,444.97,192,464.97,185,444.97,199,444.97" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[d1ae26f727a90418e1a9849b536d3734]
+reverse link asdi::idb::eval::StratifiedProgram to asdi::idb::eval::StratifiedEvaluator--><path codeLine="58" d="M788.15,201.44 C769.43,186.61 744.25,169.8 718.5,162 C604.07,127.35 564.16,128.13 449.5,162 C421.17,170.37 393.31,189.18 373.64,204.75 " fill="none" id="asdi::idb::eval::StratifiedProgram-backto-asdi::idb::eval::StratifiedEvaluator" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="792.28,204.76,787.7627,196.0082,788.3798,201.6313,782.7568,202.2485,792.28,204.76" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[e86d602d1dc7a970db649ef503a00f9e]
+@startuml
+
+!include options.plantuml
+
+class asdi::Program
+hide "asdi::Program" members
+
+interface asdi::ProgramCore
+hide "asdi::ProgramCore" members
+
+interface asdi::idb::RuleSet
+hide "asdi::idb::RuleSet" members
+
+class asdi::edb::RelationSet
+hide "asdi::edb::RelationSet" members
+
+class asdi::edb::Predicate
+hide "asdi::edb::Predicate" members
+
+namespace asdi::idb::eval {
+    interface Evaluator
+    interface ToGraphViz
+
+    class NaiveEvaluator
+    class NoopEvaluator
+    class StratifiedEvaluator
+    class SubProgram
+
+    class PrecedenceGraph
+    class PrecedenceNode {
+        negative: bool
+        extensional: bool
+    }
+    class StratifiedProgram
+
+    NaiveEvaluator ..|> ToGraphViz
+    NoopEvaluator ..|> ToGraphViz
+    StratifiedEvaluator ..|> ToGraphViz
+    PrecedenceGraph ..|> ToGraphViz
+    PrecedenceNode ..|> ToGraphViz
+    StratifiedProgram ..|> ToGraphViz
+
+    NaiveEvaluator ..|> Evaluator
+    NoopEvaluator ..|> Evaluator
+    StratifiedEvaluator ..|> Evaluator
+
+    Evaluator ..> asdi::Program
+    Evaluator ..> asdi::edb::RelationSet
+
+    PrecedenceGraph *-down-> "*" PrecedenceNode
+    PrecedenceNode o-> "source, target" asdi::edb::Predicate
+
+    StratifiedProgram *-> "*" SubProgram
+
+    SubProgram o-> asdi::Program
+    SubProgram *-> "strata" asdi::idb::RuleSet
+    SubProgram ..|> asdi::ProgramCore
+
+    StratifiedEvaluator .left.> StratifiedProgram
+}
+
+@enduml
+
+@startuml
+
+set namespaceSeparator ::
+hide enum methods
+hide interface fields
+hide << const >> members
+hide << type >> members
+hide << type >> stereotype
+hide << module >> fields
+hide << module >> circle
+
+class asdi::Program
+hide "asdi::Program" members
+
+interface asdi::ProgramCore
+hide "asdi::ProgramCore" members
+
+interface asdi::idb::RuleSet
+hide "asdi::idb::RuleSet" members
+
+class asdi::edb::RelationSet
+hide "asdi::edb::RelationSet" members
+
+class asdi::edb::Predicate
+hide "asdi::edb::Predicate" members
+
+namespace asdi::idb::eval {
+    interface Evaluator
+    interface ToGraphViz
+
+    class NaiveEvaluator
+    class NoopEvaluator
+    class StratifiedEvaluator
+    class SubProgram
+
+    class PrecedenceGraph
+    class PrecedenceNode {
+        negative: bool
+        extensional: bool
+    }
+    class StratifiedProgram
+
+    NaiveEvaluator ..|> ToGraphViz
+    NoopEvaluator ..|> ToGraphViz
+    StratifiedEvaluator ..|> ToGraphViz
+    PrecedenceGraph ..|> ToGraphViz
+    PrecedenceNode ..|> ToGraphViz
+    StratifiedProgram ..|> ToGraphViz
+
+    NaiveEvaluator ..|> Evaluator
+    NoopEvaluator ..|> Evaluator
+    StratifiedEvaluator ..|> Evaluator
+
+    Evaluator ..> asdi::Program
+    Evaluator ..> asdi::edb::RelationSet
+
+    PrecedenceGraph *-down-> "*" PrecedenceNode
+    PrecedenceNode o-> "source, target" asdi::edb::Predicate
+
+    StratifiedProgram *-> "*" SubProgram
+
+    SubProgram o-> asdi::Program
+    SubProgram *-> "strata" asdi::idb::RuleSet
+    SubProgram ..|> asdi::ProgramCore
+
+    StratifiedEvaluator .left.> StratifiedProgram
+}
+
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 10:19:58 PST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

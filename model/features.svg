@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="283px" preserveAspectRatio="none" style="width:301px;height:283px;background:#FFFFFF;" version="1.1" viewBox="0 0 301 283" width="301px" zoomAndPan="magnify"><defs><filter height="300%" id="f15js4nsq33sro" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[af63c64fec698275cfc4891f303451d3]
+cluster asdi::features--><polygon fill="#FFFFFF" filter="url(#f15js4nsq33sro)" points="16,6,117,6,124,28.4883,284,28.4883,284,276,16,276,16,6" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="16" x2="124" y1="28.4883" y2="28.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="95" x="20" y="21.5352">asdi::features</text><!--MD5=[b7d621662b47b4b8208121f11410dc9a]
+class asdi::features::Feature--><rect codeLine="5" fill="#FEFECE" filter="url(#f15js4nsq33sro)" height="48" id="asdi::features::Feature" style="stroke:#A80036;stroke-width:1.5;" width="75" x="159.5" y="212"/><ellipse cx="174.5" cy="228" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M176.9731,234.1431 Q176.3921,234.4419 175.7529,234.5913 Q175.1138,234.7407 174.4082,234.7407 Q171.9014,234.7407 170.5815,233.0889 Q169.2617,231.437 169.2617,228.3159 Q169.2617,225.1865 170.5815,223.5347 Q171.9014,221.8828 174.4082,221.8828 Q175.1138,221.8828 175.7612,222.0322 Q176.4087,222.1816 176.9731,222.4805 L176.9731,225.2031 Q176.3423,224.6221 175.7488,224.3523 Q175.1553,224.0825 174.5244,224.0825 Q173.1797,224.0825 172.4949,225.1492 Q171.8101,226.2158 171.8101,228.3159 Q171.8101,230.4077 172.4949,231.4744 Q173.1797,232.541 174.5244,232.541 Q175.1553,232.541 175.7488,232.2712 Q176.3423,232.0015 176.9731,231.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="43" x="188.5" y="232.5352">Feature</text><line style="stroke:#A80036;stroke-width:1.5;" x1="160.5" x2="233.5" y1="244" y2="244"/><line style="stroke:#A80036;stroke-width:1.5;" x1="160.5" x2="233.5" y1="252" y2="252"/><!--MD5=[10e3bb9f30c83b84488054de99f42877]
+class asdi::features::FeatureSet--><rect codeLine="6" fill="#FEFECE" filter="url(#f15js4nsq33sro)" height="48" id="asdi::features::FeatureSet" style="stroke:#A80036;stroke-width:1.5;" width="92" x="32" y="212"/><ellipse cx="47" cy="228" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M49.4731,234.1431 Q48.8921,234.4419 48.2529,234.5913 Q47.6138,234.7407 46.9082,234.7407 Q44.4014,234.7407 43.0815,233.0889 Q41.7617,231.437 41.7617,228.3159 Q41.7617,225.1865 43.0815,223.5347 Q44.4014,221.8828 46.9082,221.8828 Q47.6138,221.8828 48.2612,222.0322 Q48.9087,222.1816 49.4731,222.4805 L49.4731,225.2031 Q48.8423,224.6221 48.2488,224.3523 Q47.6553,224.0825 47.0244,224.0825 Q45.6797,224.0825 44.9949,225.1492 Q44.3101,226.2158 44.3101,228.3159 Q44.3101,230.4077 44.9949,231.4744 Q45.6797,232.541 47.0244,232.541 Q47.6553,232.541 48.2488,232.2712 Q48.8423,232.0015 49.4731,231.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="60" x="61" y="232.5352">FeatureSet</text><line style="stroke:#A80036;stroke-width:1.5;" x1="33" x2="123" y1="244" y2="244"/><line style="stroke:#A80036;stroke-width:1.5;" x1="33" x2="123" y1="252" y2="252"/><!--MD5=[51fc472c7e3be7036857e5a67718368f]
+class asdi::features::features--><rect codeLine="10" fill="#FEFECE" filter="url(#f15js4nsq33sro)" height="111.041" id="asdi::features::features" style="stroke:#A80036;stroke-width:1.5;" width="236" x="32" y="41"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="55" x="122.5" y="57.6016">«module»</text><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="47" x="126.5" y="71.7344">features</text><line style="stroke:#A80036;stroke-width:1.5;" x1="33" x2="267" y1="79.2656" y2="79.2656"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="171" x="38" y="93.9004">ALL_FEATURES: Feature «const»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="224" x="38" y="106.8555">FEATURE_COMPARISONS: Feature «const»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="222" x="38" y="119.8105">FEATURE_CONSTRAINTS: Feature «const»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="216" x="38" y="132.7656">FEATURE_DISJUNCTION: Feature «const»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="202" x="38" y="145.7207">FEATURE_NEGATION: Feature «const»</text><!--MD5=[b7212f46f5dbec8e6d0c636faadfde0d]
+link asdi::features::FeatureSet to asdi::features::Feature--><path codeLine="8" d="M136.02,236 C136.02,236 143.26,236 146.25,236 " fill="none" id="asdi::features::FeatureSet-asdi::features::Feature" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="159.37,236,150.37,232,154.37,236,150.37,240,159.37,236" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="154.37" x2="146.37" y1="236" y2="236"/><polygon fill="none" points="124.02,236,130.02,240,136.02,236,130.02,232,124.02,236" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[685156c0fb386b38b50c6d20ad33346e]
+link asdi::features::features to asdi::features::Feature--><path codeLine="20" d="M168.71,152.24 C175.16,171.11 182.11,191.44 187.51,207.24 " fill="none" id="asdi::features::features-to-asdi::features::Feature" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="189.13,211.99,190.0078,202.1803,187.5146,207.2581,182.4368,204.765,189.13,211.99" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[1812589c0a05b26ed1963b6eac5f612a]
+@startuml
+
+!include options.plantuml
+
+namespace asdi::features {
+    class Feature
+    class FeatureSet
+
+    FeatureSet o-> Feature
+
+    class features << module >> {
+        ALL_FEATURES: Feature <<const>>
+        FEATURE_COMPARISONS: Feature <<const>>
+        FEATURE_CONSTRAINTS: Feature <<const>>
+        FEATURE_DISJUNCTION: Feature <<const>>
+        FEATURE_NEGATION: Feature <<const>>
+    }
+    show features fields
+    hide features methods
+
+    features ..> Feature
+}
+
+@enduml
+
+@startuml
+
+set namespaceSeparator ::
+hide enum methods
+hide interface fields
+hide << const >> members
+hide << type >> members
+hide << type >> stereotype
+hide << module >> fields
+hide << module >> circle
+
+namespace asdi::features {
+    class Feature
+    class FeatureSet
+
+    FeatureSet o-> Feature
+
+    class features << module >> {
+        ALL_FEATURES: Feature <<const>>
+        FEATURE_COMPARISONS: Feature <<const>>
+        FEATURE_CONSTRAINTS: Feature <<const>>
+        FEATURE_DISJUNCTION: Feature <<const>>
+        FEATURE_NEGATION: Feature <<const>>
+    }
+    show features fields
+    hide features methods
+
+    features ..> Feature
+}
+
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 10:19:58 PST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

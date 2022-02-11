@@ -1,0 +1,92 @@
+@startuml
+
+!include options.plantuml
+
+interface asdi::AttributeName
+hide "asdi::AttributeName" members
+
+interface asdi::Collection<T>
+hide "asdi::Collection" members
+
+interface asdi::IndexedCollection<K,V>
+hide "asdi::IndexedCollection" members
+
+interface asdi::Labeled
+hide "asdi::Labeled" members
+
+interface asdi::MaybeAnonymous
+hide "asdi::MaybeAnonymous" members
+
+interface asdi::MaybeLabeled<T : AttributeName>
+hide "asdi::MaybeLabeled" members
+
+interface asdi::idb::query::Queryable
+hide "asdi::idb::query::Queryable" members
+
+class asdi::edb::io::FilePragma
+hide "asdi::edb::io::FilePragma" members
+
+namespace asdi::edb {
+    class Attribute<T: AttributeName>
+    class Fact
+    class Predicate
+    class Relation
+    class RelationSet
+    class Schema<T: AttributeName>
+
+    class PredicateRef << (T,#ADD1B2) type >>
+
+    PredicateRef ..> Predicate
+
+    enum AttributeIndex<T: AttributeName> {
+        Label : T
+        Index : usize
+    }
+    enum AttributeKind {
+        Boolean
+        Integer
+        String
+    }
+    enum Constant {
+        Boolean : bool
+        Integer : u64
+        String : String
+    }
+
+    Attribute ..|> asdi::MaybeAnonymous
+    Attribute ..|> asdi::MaybeLabeled
+    Attribute .up.> AttributeKind
+
+    Constant .up.> AttributeKind
+
+    Fact ..|> asdi::Collection
+    Fact ..|> asdi::IndexedCollection
+    Fact ..|> asdi::Labeled
+    Fact o-> Predicate
+    Fact *-> "*" Constant
+  ' Fact ..|> asdi::idb::query::relational::FactOps
+
+    Predicate ..|> asdi::AttributeName
+
+    Relation ..|> asdi::Collection
+    Relation ..|> asdi::IndexedCollection
+    Relation ..|> asdi::Labeled
+    Relation .up.|> asdi::idb::query::Queryable
+    Relation o-> Predicate
+    Relation *-> Schema
+    Relation *-> "*" Fact
+    Relation *-up-> "?" asdi::edb::io::FilePragma
+
+    RelationSet ..|> asdi::Collection
+    RelationSet ..|> asdi::IndexedCollection
+    RelationSet .up.|> asdi::idb::query::Queryable
+    RelationSet *-> "*" Relation
+
+    Schema ..|> asdi::Collection
+    Schema ..|> asdi::IndexedCollection
+    Schema *-> "*" Attribute
+    Schema .up.> AttributeIndex
+}
+
+
+@enduml

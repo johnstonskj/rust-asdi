@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="447px" preserveAspectRatio="none" style="width:1186px;height:447px;background:#FFFFFF;" version="1.1" viewBox="0 0 1186 447" width="1186px" zoomAndPan="magnify"><defs><filter height="300%" id="fwu6n3a5ebori" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[6bc3af5db4038e5494ba0622f07de59b]
+cluster asdi::edb--><polygon fill="#FFFFFF" filter="url(#fwu6n3a5ebori)" points="16,6,84,6,91,28.4883,1169,28.4883,1169,440.5,16,440.5,16,6" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="16" x2="91" y1="28.4883" y2="28.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="62" x="20" y="21.5352">asdi::edb</text><!--MD5=[b33f2e4372094b15554e3bf4225fc453]
+cluster asdi::edb::io--><polygon fill="#FFFFFF" filter="url(#fwu6n3a5ebori)" points="40,49,60,49,67,71.4883,1145,71.4883,1145,348.5,40,348.5,40,49" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="40" x2="67" y1="71.4883" y2="71.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="14" x="44" y="64.5352">io</text><!--MD5=[adc1e1baa9a15b0eb8524bb7df28ce4f]
+cluster asdi::edb::io::csv--><polygon fill="#FFFFFF" filter="url(#fwu6n3a5ebori)" points="171,92,200,92,207,114.4883,430,114.4883,430,191,171,191,171,92" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="171" x2="207" y1="114.4883" y2="114.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="23" x="175" y="107.5352">csv</text><!--MD5=[2591ccf485fd6f52f3198deb8f4ae0b8]
+cluster asdi::edb::io::json--><polygon fill="#FFFFFF" filter="url(#fwu6n3a5ebori)" points="719,92,756,92,763,114.4883,918,114.4883,918,191,719,191,719,92" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="719" x2="763" y1="114.4883" y2="114.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="31" x="723" y="107.5352">json</text><!--MD5=[9b5af0e90232604c6574910c7c2a638f]
+cluster asdi::edb::io::text--><polygon fill="#FFFFFF" filter="url(#fwu6n3a5ebori)" points="454,92,488,92,495,114.4883,695,114.4883,695,191,454,191,454,92" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="454" x2="495" y1="114.4883" y2="114.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="28" x="458" y="107.5352">text</text><!--MD5=[63be3a1481beaba15f9dd2bbcd4a53e1]
+class asdi::edb::Relation--><rect codeLine="4" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="32" id="asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.5;" width="78" x="696" y="392.5"/><ellipse cx="711" cy="408.5" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M707.4277,404.7651 L707.4277,402.6069 L714.8071,402.6069 L714.8071,404.7651 L712.3418,404.7651 L712.3418,412.8418 L714.8071,412.8418 L714.8071,415 L707.4277,415 L707.4277,412.8418 L709.8931,412.8418 L709.8931,404.7651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="46" x="725" y="413.0352">Relation</text><!--MD5=[8ad701a0a58c4c31a6eaf07d661f3312]
+class asdi::edb::io::Reader--><rect codeLine="37" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="40" id="asdi::edb::io::Reader" style="stroke:#A80036;stroke-width:1.5;" width="74" x="698" y="273"/><ellipse cx="713" cy="289" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M709.4277,285.2651 L709.4277,283.1069 L716.8071,283.1069 L716.8071,285.2651 L714.3418,285.2651 L714.3418,293.3418 L716.8071,293.3418 L716.8071,295.5 L709.4277,295.5 L709.4277,293.3418 L711.8931,293.3418 L711.8931,285.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="42" x="727" y="293.5352">Reader</text><line style="stroke:#A80036;stroke-width:1.5;" x1="699" x2="771" y1="305" y2="305"/><!--MD5=[e59e870d1f5d82677b4664da985e5ac1]
+class asdi::edb::io::Writer--><rect codeLine="38" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="40" id="asdi::edb::io::Writer" style="stroke:#A80036;stroke-width:1.5;" width="66" x="597" y="273"/><ellipse cx="612" cy="289" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M608.4277,285.2651 L608.4277,283.1069 L615.8071,283.1069 L615.8071,285.2651 L613.3418,285.2651 L613.3418,293.3418 L615.8071,293.3418 L615.8071,295.5 L608.4277,295.5 L608.4277,293.3418 L610.8931,293.3418 L610.8931,285.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="34" x="626" y="293.5352">Writer</text><line style="stroke:#A80036;stroke-width:1.5;" x1="598" x2="662" y1="305" y2="305"/><!--MD5=[5662166f89f46ad2c4c4921bb72d18ee]
+class asdi::edb::io::FilePragma--><rect codeLine="28" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="48" id="asdi::edb::io::FilePragma" style="stroke:#A80036;stroke-width:1.5;" width="95" x="56.5" y="127"/><ellipse cx="71.5" cy="143" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M73.9731,149.1431 Q73.3921,149.4419 72.7529,149.5913 Q72.1138,149.7407 71.4082,149.7407 Q68.9014,149.7407 67.5815,148.0889 Q66.2617,146.437 66.2617,143.3159 Q66.2617,140.1865 67.5815,138.5347 Q68.9014,136.8828 71.4082,136.8828 Q72.1138,136.8828 72.7612,137.0322 Q73.4087,137.1816 73.9731,137.4805 L73.9731,140.2031 Q73.3423,139.6221 72.7488,139.3523 Q72.1553,139.0825 71.5244,139.0825 Q70.1797,139.0825 69.4949,140.1492 Q68.8101,141.2158 68.8101,143.3159 Q68.8101,145.4077 69.4949,146.4744 Q70.1797,147.541 71.5244,147.541 Q72.1553,147.541 72.7488,147.2712 Q73.3423,147.0015 73.9731,146.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="63" x="85.5" y="147.5352">FilePragma</text><line style="stroke:#A80036;stroke-width:1.5;" x1="57.5" x2="150.5" y1="159" y2="159"/><line style="stroke:#A80036;stroke-width:1.5;" x1="57.5" x2="150.5" y1="167" y2="167"/><!--MD5=[c578819a8518476f94fdeb3945a1ad12]
+class asdi::edb::io::Format--><rect codeLine="29" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="78.8652" id="asdi::edb::io::Format" style="stroke:#A80036;stroke-width:1.5;" width="90" x="59" y="253.5"/><ellipse cx="82.1" cy="269.5" fill="#EB937F" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M85.7143,276 L77.9945,276 L77.9945,263.6069 L85.7143,263.6069 L85.7143,265.7651 L80.4433,265.7651 L80.4433,268.438 L85.2162,268.438 L85.2162,270.5962 L80.4433,270.5962 L80.4433,273.8418 L85.7143,273.8418 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="40" x="97.9" y="274.0352">Format</text><line style="stroke:#A80036;stroke-width:1.5;" x1="60" x2="148" y1="285.5" y2="285.5"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="78" x="65" y="300.1348">DelimitedLines</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="23" x="65" y="313.0898">Json</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="24" x="65" y="326.0449">Text</text><!--MD5=[9aca6155ad57e1bf8189f9cacb2f0d4a]
+class asdi::edb::io::io--><rect codeLine="40" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="85.1309" id="asdi::edb::io::io" style="stroke:#A80036;stroke-width:1.5;" width="191" x="937.5" y="108.5"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="55" x="1005.5" y="125.1016">«module»</text><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="10" x="1028" y="139.2344">io</text><line style="stroke:#A80036;stroke-width:1.5;" x1="938.5" x2="1127.5" y1="146.7656" y2="146.7656"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="150" x="943.5" y="161.4004">print_relation(): Result&lt;())&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="179" x="943.5" y="174.3555">read_relation(): Result&lt;Relation&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="150" x="943.5" y="187.3105">write_relation(): Result&lt;())&gt;</text><!--MD5=[6317661c68014402ef2d159b3df76250]
+class asdi::edb::io::csv::DelimitedLines--><rect codeLine="10" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="48" id="asdi::edb::io::csv::DelimitedLines" style="stroke:#A80036;stroke-width:1.5;" width="116" x="298" y="127"/><ellipse cx="313" cy="143" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M315.4731,149.1431 Q314.8921,149.4419 314.2529,149.5913 Q313.6138,149.7407 312.9082,149.7407 Q310.4014,149.7407 309.0815,148.0889 Q307.7617,146.437 307.7617,143.3159 Q307.7617,140.1865 309.0815,138.5347 Q310.4014,136.8828 312.9082,136.8828 Q313.6138,136.8828 314.2612,137.0322 Q314.9087,137.1816 315.4731,137.4805 L315.4731,140.2031 Q314.8423,139.6221 314.2488,139.3523 Q313.6553,139.0825 313.0244,139.0825 Q311.6797,139.0825 310.9949,140.1492 Q310.3101,141.2158 310.3101,143.3159 Q310.3101,145.4077 310.9949,146.4744 Q311.6797,147.541 313.0244,147.541 Q313.6553,147.541 314.2488,147.2712 Q314.8423,147.0015 315.4731,146.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="84" x="327" y="147.5352">DelimitedLines</text><line style="stroke:#A80036;stroke-width:1.5;" x1="299" x2="413" y1="159" y2="159"/><line style="stroke:#A80036;stroke-width:1.5;" x1="299" x2="413" y1="167" y2="167"/><!--MD5=[dba2b10b9f9c53f7c17306d62c961b0d]
+class asdi::edb::io::csv::Options--><rect codeLine="11" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="48" id="asdi::edb::io::csv::Options" style="stroke:#A80036;stroke-width:1.5;" width="76" x="187" y="127"/><ellipse cx="202" cy="143" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M204.4731,149.1431 Q203.8921,149.4419 203.2529,149.5913 Q202.6138,149.7407 201.9082,149.7407 Q199.4014,149.7407 198.0815,148.0889 Q196.7617,146.437 196.7617,143.3159 Q196.7617,140.1865 198.0815,138.5347 Q199.4014,136.8828 201.9082,136.8828 Q202.6138,136.8828 203.2612,137.0322 Q203.9087,137.1816 204.4731,137.4805 L204.4731,140.2031 Q203.8423,139.6221 203.2488,139.3523 Q202.6553,139.0825 202.0244,139.0825 Q200.6797,139.0825 199.9949,140.1492 Q199.3101,141.2158 199.3101,143.3159 Q199.3101,145.4077 199.9949,146.4744 Q200.6797,147.541 202.0244,147.541 Q202.6553,147.541 203.2488,147.2712 Q203.8423,147.0015 204.4731,146.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="44" x="216" y="147.5352">Options</text><line style="stroke:#A80036;stroke-width:1.5;" x1="188" x2="262" y1="159" y2="159"/><line style="stroke:#A80036;stroke-width:1.5;" x1="188" x2="262" y1="167" y2="167"/><!--MD5=[c184ea69d16d69f81cc3903cc1f1b237]
+class asdi::edb::io::json::Json--><rect codeLine="16" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="48" id="asdi::edb::io::json::Json" style="stroke:#A80036;stroke-width:1.5;" width="56" x="846" y="127"/><ellipse cx="861" cy="143" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M863.4731,149.1431 Q862.8921,149.4419 862.2529,149.5913 Q861.6138,149.7407 860.9082,149.7407 Q858.4014,149.7407 857.0815,148.0889 Q855.7617,146.437 855.7617,143.3159 Q855.7617,140.1865 857.0815,138.5347 Q858.4014,136.8828 860.9082,136.8828 Q861.6138,136.8828 862.2612,137.0322 Q862.9087,137.1816 863.4731,137.4805 L863.4731,140.2031 Q862.8423,139.6221 862.2488,139.3523 Q861.6553,139.0825 861.0244,139.0825 Q859.6797,139.0825 858.9949,140.1492 Q858.3101,141.2158 858.3101,143.3159 Q858.3101,145.4077 858.9949,146.4744 Q859.6797,147.541 861.0244,147.541 Q861.6553,147.541 862.2488,147.2712 Q862.8423,147.0015 863.4731,146.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="24" x="875" y="147.5352">Json</text><line style="stroke:#A80036;stroke-width:1.5;" x1="847" x2="901" y1="159" y2="159"/><line style="stroke:#A80036;stroke-width:1.5;" x1="847" x2="901" y1="167" y2="167"/><!--MD5=[35d881f978b25523aa44f9d057d075ac]
+class asdi::edb::io::json::Options--><rect codeLine="17" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="48" id="asdi::edb::io::json::Options" style="stroke:#A80036;stroke-width:1.5;" width="76" x="735" y="127"/><ellipse cx="750" cy="143" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M752.4731,149.1431 Q751.8921,149.4419 751.2529,149.5913 Q750.6138,149.7407 749.9082,149.7407 Q747.4014,149.7407 746.0815,148.0889 Q744.7617,146.437 744.7617,143.3159 Q744.7617,140.1865 746.0815,138.5347 Q747.4014,136.8828 749.9082,136.8828 Q750.6138,136.8828 751.2612,137.0322 Q751.9087,137.1816 752.4731,137.4805 L752.4731,140.2031 Q751.8423,139.6221 751.2488,139.3523 Q750.6553,139.0825 750.0244,139.0825 Q748.6797,139.0825 747.9949,140.1492 Q747.3101,141.2158 747.3101,143.3159 Q747.3101,145.4077 747.9949,146.4744 Q748.6797,147.541 750.0244,147.541 Q750.6553,147.541 751.2488,147.2712 Q751.8423,147.0015 752.4731,146.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="44" x="764" y="147.5352">Options</text><line style="stroke:#A80036;stroke-width:1.5;" x1="736" x2="810" y1="159" y2="159"/><line style="stroke:#A80036;stroke-width:1.5;" x1="736" x2="810" y1="167" y2="167"/><!--MD5=[f9088939a140ff38ac0ec357d96696d7]
+class asdi::edb::io::text::TextTables--><rect codeLine="22" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="48" id="asdi::edb::io::text::TextTables" style="stroke:#A80036;stroke-width:1.5;" width="97" x="581.5" y="127"/><ellipse cx="596.5" cy="143" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M598.9731,149.1431 Q598.3921,149.4419 597.7529,149.5913 Q597.1138,149.7407 596.4082,149.7407 Q593.9014,149.7407 592.5815,148.0889 Q591.2617,146.437 591.2617,143.3159 Q591.2617,140.1865 592.5815,138.5347 Q593.9014,136.8828 596.4082,136.8828 Q597.1138,136.8828 597.7612,137.0322 Q598.4087,137.1816 598.9731,137.4805 L598.9731,140.2031 Q598.3423,139.6221 597.7488,139.3523 Q597.1553,139.0825 596.5244,139.0825 Q595.1797,139.0825 594.4949,140.1492 Q593.8101,141.2158 593.8101,143.3159 Q593.8101,145.4077 594.4949,146.4744 Q595.1797,147.541 596.5244,147.541 Q597.1553,147.541 597.7488,147.2712 Q598.3423,147.0015 598.9731,146.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="65" x="610.5" y="147.5352">TextTables</text><line style="stroke:#A80036;stroke-width:1.5;" x1="582.5" x2="677.5" y1="159" y2="159"/><line style="stroke:#A80036;stroke-width:1.5;" x1="582.5" x2="677.5" y1="167" y2="167"/><!--MD5=[f5d8db856916089a9fd19320be31fb48]
+class asdi::edb::io::text::Options--><rect codeLine="23" fill="#FEFECE" filter="url(#fwu6n3a5ebori)" height="48" id="asdi::edb::io::text::Options" style="stroke:#A80036;stroke-width:1.5;" width="76" x="470" y="127"/><ellipse cx="485" cy="143" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M487.4731,149.1431 Q486.8921,149.4419 486.2529,149.5913 Q485.6138,149.7407 484.9082,149.7407 Q482.4014,149.7407 481.0815,148.0889 Q479.7617,146.437 479.7617,143.3159 Q479.7617,140.1865 481.0815,138.5347 Q482.4014,136.8828 484.9082,136.8828 Q485.6138,136.8828 486.2612,137.0322 Q486.9087,137.1816 487.4731,137.4805 L487.4731,140.2031 Q486.8423,139.6221 486.2488,139.3523 Q485.6553,139.0825 485.0244,139.0825 Q483.6797,139.0825 482.9949,140.1492 Q482.3101,141.2158 482.3101,143.3159 Q482.3101,145.4077 482.9949,146.4744 Q483.6797,147.541 485.0244,147.541 Q485.6553,147.541 486.2488,147.2712 Q486.8423,147.0015 487.4731,146.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="44" x="499" y="147.5352">Options</text><line style="stroke:#A80036;stroke-width:1.5;" x1="471" x2="545" y1="159" y2="159"/><line style="stroke:#A80036;stroke-width:1.5;" x1="471" x2="545" y1="167" y2="167"/><!--MD5=[067069178eae474d77bf3d0f2d23e1be]
+link asdi::edb::io::csv::DelimitedLines to asdi::edb::io::Reader--><path codeLine="12" d="M399.06,175.08 C415.87,183.44 435.51,192.43 454,199 C551.77,233.74 586.58,210.48 681,253.5 C685.81,255.69 690.64,258.34 695.31,261.2 " fill="none" id="asdi::edb::io::csv::DelimitedLines-to-asdi::edb::io::Reader" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="699.75,255.76,712.28,272.85,691.83,267.3,699.75,255.76" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[3cc9b5e142ed5cc00fcce0a46c003b48]
+link asdi::edb::io::csv::DelimitedLines to asdi::edb::io::Writer--><path codeLine="13" d="M401.25,175.12 C450.14,200.1 527.9,239.83 578.95,265.92 " fill="none" id="asdi::edb::io::csv::DelimitedLines-to-asdi::edb::io::Writer" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="582.15,259.69,596.77,275.02,575.78,272.15,582.15,259.69" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[dfc395bac1aaea855e6cafdbe8f3a4a3]
+link asdi::edb::io::json::Json to asdi::edb::io::Reader--><path codeLine="18" d="M852.15,175.07 C844.83,182.73 836.61,191.27 829,199 C809.33,219 787.02,241.1 769.07,258.73 " fill="none" id="asdi::edb::io::json::Json-to-asdi::edb::io::Reader" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="773.78,263.92,754.6,272.92,763.98,253.92,773.78,263.92" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[b17d28f885325380efbdf90b6b618f61]
+link asdi::edb::io::json::Json to asdi::edb::io::Writer--><path codeLine="19" d="M855.64,175.22 C848.1,183.6 838.83,192.56 829,199 C770.37,237.41 742.52,219.91 681,253.5 C676.97,255.7 672.9,258.2 668.92,260.84 " fill="none" id="asdi::edb::io::json::Json-to-asdi::edb::io::Writer" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="672.68,266.77,652.38,272.85,664.45,255.44,672.68,266.77" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[5cafc9d647b24ed684858a9668107e3b]
+link asdi::edb::io::text::TextTables to asdi::edb::io::Reader--><path codeLine="24" d="M647.34,175.12 C664,197.33 689.4,231.2 708.58,256.77 " fill="none" id="asdi::edb::io::text::TextTables-to-asdi::edb::io::Reader" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="714.28,252.7,720.68,272.9,703.08,261.1,714.28,252.7" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[eb044a2aec14b842014ba211fee867c0]
+link asdi::edb::io::text::TextTables to asdi::edb::io::Writer--><path codeLine="25" d="M630,175.12 C630,196.16 630,227.65 630,252.64 " fill="none" id="asdi::edb::io::text::TextTables-to-asdi::edb::io::Writer" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="637,252.9,630,272.9,623,252.9,637,252.9" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[f74eefd66f2d06b33bc8a0cb71beb998]
+link asdi::edb::io::FilePragma to asdi::edb::io::Format--><path codeLine="35" d="M104,187.12 C104,187.12 104,222.93 104,240.15 " fill="none" id="asdi::edb::io::FilePragma-asdi::edb::io::Format" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="104,253.23,108,244.23,104,248.23,100,244.23,104,253.23" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="104" x2="104" y1="248.23" y2="240.23"/><polygon fill="#A80036" points="104,175.12,100,181.12,104,187.12,108,181.12,104,175.12" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[d0f321dd5c38da54dc71667d2f2777d1]
+link asdi::edb::io::io to asdi::edb::Relation--><path codeLine="46" d="M984.46,193.62 C918.69,250.01 804.04,348.31 756.55,389.02 " fill="none" id="asdi::edb::io::io-to-asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="752.71,392.32,762.1412,389.4823,756.5002,389.059,756.9236,383.418,752.71,392.32" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[bbd27bd6626eb0eae47c9ab5df8756d2]
+link asdi::edb::io::Reader to asdi::edb::Relation--><path codeLine="47" d="M735,313.25 C735,333.78 735,366.14 735,387.1 " fill="none" id="asdi::edb::io::Reader-to-asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="735,392.16,739,383.16,735,387.16,731,383.16,735,392.16" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[7888158d600281a399a5d37408512b6f]
+link asdi::edb::io::Writer to asdi::edb::Relation--><path codeLine="48" d="M644.56,313.13 C654.45,325.79 668.03,342.55 681,356.5 C691.39,367.67 703.71,379.41 713.95,388.8 " fill="none" id="asdi::edb::io::Writer-to-asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="717.92,392.41,713.9616,383.3916,714.2242,389.0424,708.5734,389.3049,717.92,392.41" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[a8fe105c87c4e6089d7566ba14a234b4]
+@startuml
+
+!include options.plantuml
+
+interface asdi::edb::Relation
+hide "asdi::edb::Relation" members
+
+namespace asdi::edb::io {
+
+    namespace csv {
+        class DelimitedLines
+        class Options
+        DelimitedLines ..|> asdi::edb::io::Reader
+        DelimitedLines ..|> asdi::edb::io::Writer
+    }
+    namespace json {
+        class Json
+        class Options
+        Json ..|> asdi::edb::io::Reader
+        Json ..|> asdi::edb::io::Writer
+    }
+    namespace text {
+        class TextTables
+        class Options
+        TextTables ..|> asdi::edb::io::Reader
+        TextTables ..|> asdi::edb::io::Writer
+    }
+
+    class FilePragma
+    enum Format {
+        DelimitedLines
+        Json
+        Text
+    }
+
+    FilePragma *-down-> Format
+
+    interface Reader
+    interface Writer
+
+    class io << module >> {
+        print_relation(): Result<())>
+        read_relation(): Result<Relation>
+        write_relation(): Result<())>
+    }
+
+    io ..> asdi::edb::Relation
+    Reader ..> asdi::edb::Relation
+    Writer ..> asdi::edb::Relation
+}
+
+@enduml
+
+@startuml
+
+set namespaceSeparator ::
+hide enum methods
+hide interface fields
+hide << const >> members
+hide << type >> members
+hide << type >> stereotype
+hide << module >> fields
+hide << module >> circle
+
+interface asdi::edb::Relation
+hide "asdi::edb::Relation" members
+
+namespace asdi::edb::io {
+
+    namespace csv {
+        class DelimitedLines
+        class Options
+        DelimitedLines ..|> asdi::edb::io::Reader
+        DelimitedLines ..|> asdi::edb::io::Writer
+    }
+    namespace json {
+        class Json
+        class Options
+        Json ..|> asdi::edb::io::Reader
+        Json ..|> asdi::edb::io::Writer
+    }
+    namespace text {
+        class TextTables
+        class Options
+        TextTables ..|> asdi::edb::io::Reader
+        TextTables ..|> asdi::edb::io::Writer
+    }
+
+    class FilePragma
+    enum Format {
+        DelimitedLines
+        Json
+        Text
+    }
+
+    FilePragma *-down-> Format
+
+    interface Reader
+    interface Writer
+
+    class io << module >> {
+        print_relation(): Result<())>
+        read_relation(): Result<Relation>
+        write_relation(): Result<())>
+    }
+
+    io ..> asdi::edb::Relation
+    Reader ..> asdi::edb::Relation
+    Writer ..> asdi::edb::Relation
+}
+
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 10:19:58 PST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
