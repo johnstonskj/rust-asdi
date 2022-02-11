@@ -1,5 +1,8 @@
 /*!
 This module provides the common `Error` and `Result` types for this library.
+
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/error.svg)
+
  */
 
 use crate::edb::PredicateRef;

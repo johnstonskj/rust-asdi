@@ -54,7 +54,7 @@ mortal(X) <- human(X).
     print!("{}", program);
     println!("-------------------------------------------------------------------------------");
 
-    let query = program.queries().next().unwrap();
+    let query = program.queries().iter().next().unwrap();
 
     let results = new_intensional.query(query).unwrap().unwrap();
     println!("{}", results);
@@ -113,7 +113,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
     print!("{}", program);
     println!("-------------------------------------------------------------------------------");
 
-    let query = program.queries().next().unwrap();
+    let query = program.queries().iter().next().unwrap();
 
     let results = program.intensional().query(query).unwrap().unwrap();
     println!("{}", results);
@@ -162,7 +162,7 @@ path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
     print!("{}", program);
     println!("-------------------------------------------------------------------------------");
 
-    let query = program.queries().next().unwrap();
+    let query = program.queries().iter().next().unwrap();
 
     let results = results.query(query).unwrap().unwrap();
     assert_eq!(results.schema().len(), 2);

@@ -1,6 +1,6 @@
-use asdi::io::csv::Options as CsvOptions;
-use asdi::io::json::Options as JsonOptions;
-use asdi::io::{print_relation, Format};
+use asdi::edb::io::csv::Options as CsvOptions;
+use asdi::edb::io::json::Options as JsonOptions;
+use asdi::edb::io::{print_relation, Format};
 use asdi::{Collection, ProgramCore};
 
 pub mod common;

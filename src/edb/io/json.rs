@@ -2,10 +2,10 @@
 This module provides the both a [Reader] and [Writer] implementation for JSON files.
  */
 
+use crate::edb::io::{Reader, Writer};
 use crate::edb::{AttributeKind, Constant, Fact};
 use crate::error::Error;
 use crate::error::Result;
-use crate::io::{Reader, Writer};
 use crate::syntax::{TYPE_NAME_CONST_BOOLEAN, TYPE_NAME_CONST_INTEGER, TYPE_NAME_CONST_STRING};
 use crate::{error, Collection, Labeled, Relation};
 use serde_json::{from_reader, Number, Value};

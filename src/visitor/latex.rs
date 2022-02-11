@@ -17,22 +17,13 @@ use crate::idb::{query::Query, Atom, ComparisonOperator, Literal, LiteralInner, 
 use crate::syntax::{
     CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DISJUNCTION_UNICODE_SYMBOL,
 };
+use crate::visitor::Formatter;
 use crate::{Collection, Labeled, MaybePositive, Program, ProgramCore};
 use std::fmt::Write;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
-
-///
-/// This trait must be implemented by a type that can output formatted values as strings.
-///
-pub trait Typesetter {
-    fn program(&self, value: &Program) -> Result<String>;
-    fn fact(&self, value: &Fact, inline: bool) -> Result<String>;
-    fn rule(&self, value: &Rule, inline: bool) -> Result<String>;
-    fn query(&self, value: &Query, inline: bool) -> Result<String>;
-}
 
 ///
 /// An implementation of the trait [Typesetter](trait.Typesetter.html) that outputs LaTeX
@@ -84,10 +75,20 @@ pub struct LatexTypesetter {}
 
 const LATEX_INLINE_LISTING: &str = "|";
 
-impl Typesetter for LatexTypesetter {
+impl Formatter for LatexTypesetter {
+    fn pre_amble(&self) -> Result<String> {
+        Ok(String::from(
+            r"\\begin{lstlisting}[language=Prolog,mathescape]\n",
+        ))
+    }
+
+    fn post_amble(&self) -> Result<String> {
+        Ok(String::from(r"\\end{lstlisting}\n"))
+    }
+
     fn program(&self, value: &Program) -> Result<String> {
         let mut result = String::new();
-        writeln!(result, r"\begin{{lstlisting}}[language=Prolog,mathescape]")?;
+        write!(result, "{}", self.pre_amble()?)?;
 
         for relation in value.extensional().iter() {
             for fact in relation.iter() {
@@ -99,11 +100,11 @@ impl Typesetter for LatexTypesetter {
             writeln!(result, "{}", self.rule(rule, false)?)?;
         }
 
-        for query in value.queries() {
+        for query in value.queries().iter() {
             writeln!(result, "{}", self.query(query, false)?)?;
         }
 
-        write!(result, "{}", r"\end{lstlisting}")?;
+        write!(result, "{}", self.post_amble()?)?;
         Ok(result)
     }
 
@@ -223,14 +224,6 @@ impl LatexTypesetter {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Private Functions
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
-// Modules
-// ------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------------------------
 // Unit Tests
 // ------------------------------------------------------------------------------------------------
 
@@ -238,7 +231,7 @@ impl LatexTypesetter {
 #[cfg(test)]
 mod tests {
     use crate::parse::parse_str;
-    use crate::typeset::{LatexTypesetter, Typesetter};
+    use crate::visitor::{Formatter, LatexTypesetter};
     use crate::{Collection, ProgramCore};
 
     #[test]
@@ -300,7 +293,7 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ parent(Z, Y).
 
         {
             // Test query
-            let query = program.queries().next().unwrap();
+            let query = program.queries().iter().next().unwrap();
             assert_eq!(
                 typesetter.query(query, true).unwrap(),
                 String::from(r"|ancestor($xerces, X$)?|")

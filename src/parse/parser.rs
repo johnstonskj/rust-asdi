@@ -1,3 +1,4 @@
+use crate::edb::io::{string_to_format, FilePragma, Format};
 use crate::edb::{Attribute, AttributeKind, Constant, Predicate};
 use crate::error::{invalid_value, language_feature_disabled, Error, Result, SourceLocation};
 use crate::features::{
@@ -6,7 +7,6 @@ use crate::features::{
 use crate::idb::{
     query::Query, Atom, Comparison, ComparisonOperator, Literal, Rule as DlRule, Term,
 };
-use crate::io::{string_to_format, FilePragma, Format};
 use crate::parse::Parsed;
 use crate::syntax::{TYPE_NAME_CONST_BOOLEAN, TYPE_NAME_CONST_INTEGER};
 use crate::{error, relation_does_not_exist, Collection, Program, ProgramCore};

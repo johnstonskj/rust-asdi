@@ -1,14 +1,16 @@
 /*!
 This module provides a simplified model of the Relational Algebra and includes the capability to
 compile rules and atoms into [relational operations](RelationalOp).
-*/
+
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/idb_query_relational.svg)
+
+ */
 
 use super::{Row, View};
 use crate::edb::{Attribute, Constant, Schema};
 use crate::error::{attribute_index_invalid, nullary_facts_not_allowed, Error, Result};
-use crate::idb::eval::ToGraphViz;
-use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Rule, Term, Variable};
-use crate::{Collection, Labeled, MaybeAnonymous, MaybeLabeled, PredicateRef, ProgramCore};
+use crate::idb::{Atom, Comparison, ComparisonOperator, Rule, Term, Variable};
+use crate::{Collection, Labeled, MaybeAnonymous, MaybePositive, PredicateRef, ProgramCore};
 use paste::paste;
 use regex::Regex;
 use std::collections::HashMap;
@@ -55,10 +57,39 @@ pub trait FactOps {
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum RelationalOp {
-    Relation(PredicateRef),
+    Relation(RelationSource),
+    SetOperation(SetOperation),
     Selection(Selection),
     Projection(Projection),
     Join(Join),
+    Sink(RelationSink),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct RelationSource {
+    source: PredicateRef,
+    is_extensional: Option<bool>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct RelationSink {
+    source: Box<RelationalOp>,
+    sink: PredicateRef,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct SetOperation {
+    lhs: Box<RelationalOp>,
+    op: SetOperator,
+    rhs: Box<RelationalOp>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum SetOperator {
+    Union,
+    Intersection,
+    Difference,
+    CartesianProduct,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -68,6 +99,7 @@ pub struct Join {
     rhs: Box<RelationalOp>,
 }
 
+// TODO: (ISSUE/rust-asdi/12) Need to support constants in the final projection.enhancement
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Projection {
     source: Box<RelationalOp>,
@@ -78,6 +110,7 @@ pub struct Projection {
 pub struct Selection {
     source: Box<RelationalOp>,
     criteria: Vec<Criteria>,
+    negated: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -97,6 +130,7 @@ pub enum CriteriaValue {
 // Public Functions
 // ------------------------------------------------------------------------------------------------
 
+// TODO: (ISSUES/rust-asdi/13) Change current form from cluster-by-rule to cluster-by-strata
 pub fn program_to_graphviz(program: &impl ProgramCore) -> String {
     format!(
         "digraph G {{\n{}\n}}\n",
@@ -106,7 +140,7 @@ pub fn program_to_graphviz(program: &impl ProgramCore) -> String {
             .enumerate()
             .map(|(index, rule)| {
                 let expr = RelationalOp::compile_rule(rule).unwrap();
-                expr.to_graphviz_graph((index + 1) as u32)
+                expr.to_graphviz_graph((index + 1) as u32, Some(rule.to_string()))
             })
             .collect::<Vec<String>>()
             .join("\n")
@@ -124,9 +158,11 @@ impl Display for RelationalOp {
             "{}",
             match self {
                 Self::Relation(v) => v.to_string(),
+                Self::SetOperation(v) => v.to_string(),
                 Self::Selection(v) => v.to_string(),
                 Self::Projection(v) => v.to_string(),
                 Self::Join(v) => v.to_string(),
+                Self::Sink(v) => v.to_string(),
             }
         )
     }
@@ -134,7 +170,13 @@ impl Display for RelationalOp {
 
 impl From<PredicateRef> for RelationalOp {
     fn from(v: PredicateRef) -> Self {
-        Self::Relation(v)
+        Self::Relation(v.into())
+    }
+}
+
+impl From<(PredicateRef, bool)> for RelationalOp {
+    fn from(v: (PredicateRef, bool)) -> Self {
+        Self::Relation(RelationSource::new(v.0, v.1))
     }
 }
 
@@ -166,6 +208,16 @@ impl RelationalOp {
         project_constants: bool,
         criteria: Vec<Criteria>,
     ) -> Result<Self> {
+        println!(
+            "compile_atom_with > {} ({}) {:?}",
+            atom,
+            if project_constants {
+                "project constants"
+            } else {
+                "drop constants"
+            },
+            criteria
+        );
         let projections: Vec<Attribute<Variable>> = atom
             .iter()
             .enumerate()
@@ -186,6 +238,7 @@ impl RelationalOp {
                 attribute
             })
             .collect();
+        println!("compile_atom_with > project {:?}", projections);
 
         if projections.is_empty() {
             Err(nullary_facts_not_allowed())
@@ -200,6 +253,7 @@ impl RelationalOp {
                     value: CriteriaValue::Value(constant.clone()),
                 })
                 .collect();
+            println!("compile_atom_with > static_criteria {:?}", static_criteria);
             static_criteria.extend(criteria.into_iter());
             Ok(
                 match (
@@ -207,28 +261,31 @@ impl RelationalOp {
                     projections.len() == atom.len(), // true if we projection is complete
                     static_criteria.is_empty(),
                 ) {
-                    (_, true, true) => RelationalOp::Relation(atom.label_ref()),
+                    (_, true, true) => RelationalOp::Relation(atom.label_ref().into()),
                     (_, true, false) => RelationalOp::Selection(Selection::new(
                         static_criteria,
-                        RelationalOp::Relation(atom.label_ref()),
+                        RelationalOp::Relation(atom.label_ref().into()),
+                        false,
                     )),
                     (true, false, false) => RelationalOp::Selection(Selection::new(
                         static_criteria,
                         RelationalOp::Projection(Projection::new(
                             projections,
-                            RelationalOp::Relation(atom.label_ref()),
+                            RelationalOp::Relation(atom.label_ref().into()),
                         )),
+                        false,
                     )),
                     (false, false, false) => RelationalOp::Projection(Projection::new(
                         projections,
                         RelationalOp::Selection(Selection::new(
                             static_criteria,
-                            RelationalOp::Relation(atom.label_ref()),
+                            RelationalOp::Relation(atom.label_ref().into()),
+                            false,
                         )),
                     )),
                     (false, false, true) => RelationalOp::Projection(Projection::new(
                         projections,
-                        RelationalOp::Relation(atom.label_ref()),
+                        RelationalOp::Relation(atom.label_ref().into()),
                     )),
                     state => {
                         eprintln!("Unexpected state: {:?}", state);
@@ -240,17 +297,28 @@ impl RelationalOp {
     }
 
     pub fn compile_rule(rule: &Rule) -> Result<Self> {
-        let arithmetic: Vec<&Comparison> =
-            rule.literals().filter_map(Literal::as_arithmetic).collect();
-        let relational: Vec<&Atom> = rule.literals().filter_map(Literal::as_relational).collect();
+        println!("----------------------------------------------------------------------");
+        let arithmetic: Vec<(&Comparison, bool)> = rule
+            .literals()
+            .filter_map(|lit| lit.as_arithmetic().map(|atom| (atom, lit.is_negative())))
+            .collect();
+        let relational: Vec<(&Atom, bool)> = rule
+            .literals()
+            .filter_map(|lit| lit.as_relational().map(|comp| (comp, lit.is_negative())))
+            .collect();
 
         // TODO: (ISSUE/rust-asdi/3) negation
 
         let mut ops: Vec<RelationalOp> = Default::default();
         let mut theta: Vec<&Comparison> = Default::default();
-        for atom in relational {
+        for (atom, atom_negated) in relational {
+            println!("compile_rule > atom {} (negated {})", atom, atom_negated);
             let mut criteria: Vec<Criteria> = Default::default();
-            for comparison in &arithmetic {
+            for (comparison, comparison_negated) in &arithmetic {
+                println!(
+                    "compile_rule > atom > comparison {} (negated {})",
+                    comparison, comparison_negated
+                );
                 if let Err(e) = comparison.sanity_check() {
                     warn!(
                         "Ignoring arithmetic literal '{}', sanity check failed: {}",
@@ -293,7 +361,9 @@ impl RelationalOp {
                     }
                 }
             }
-            ops.push(Self::compile_atom_with(atom, false, criteria)?);
+            let atom_op = Self::compile_atom_with(atom, false, criteria)?;
+            println!("compile_rule > atom >> {}", atom_op);
+            ops.push(atom_op);
         }
 
         warn!(
@@ -304,43 +374,49 @@ impl RelationalOp {
         let mut ops = ops.into_iter().rev();
         let last = ops.next().unwrap();
         let joined = ops.fold(last, |left, right| Join::natural(left, right).into());
+        println!("compile_rule > joined {:?}", joined);
 
         // TODO: (ISSUE/rust-asdi/4) may need rework for disjunction.
+
         let distinguished_terms = rule.distinguished_terms_in_order();
-        if distinguished_terms.len() < rule.terms().len() {
-            Ok(Projection::new(
+        let joined = if distinguished_terms.len() < rule.variables().len() {
+            // TODO: (ISSUE/rust-asdi/12) Need to support constants in the final projection.
+            let joined = RelationalOp::from(Projection::new(
                 distinguished_terms
                     .iter()
                     .filter_map(|t| t.as_variable())
                     .map(|v| Attribute::labeled(v.clone()))
                     .collect::<Vec<Attribute<Variable>>>(),
                 joined,
-            )
-            .into())
+            ));
+            println!("compile_rule > joined {:?}", joined);
+            joined
         } else {
-            Ok(joined)
-        }
+            joined
+        };
+        Ok(RelationalOp::Sink(RelationSink::new(
+            joined,
+            rule.head.get(0).unwrap().label_ref(),
+        )))
     }
 
-    self_is_as!(relation, Relation, PredicateRef);
+    self_is_as!(relation, Relation, RelationSource);
 
-    self_is_as!(selection, Selection, Selection);
+    self_is_as!(selection, Selection);
 
-    self_is_as!(projection, Projection, Projection);
+    self_is_as!(projection, Projection);
 
-    self_is_as!(join, Join, Join);
-}
+    self_is_as!(join, Join);
 
-#[cfg(feature = "graphviz")]
-impl ToGraphViz for RelationalOp {
-    fn to_graphviz_string(&self) -> Result<String> {
-        Ok(self.to_graphviz_graph(1))
-    }
+    self_is_as!(sink, Sink, RelationSink);
 }
 
 #[cfg(feature = "graphviz")]
 impl RelationalOp {
-    fn to_graphviz_graph(&self, graph_index: u32) -> String {
+    pub fn to_graphviz_string(&self) -> Result<String> {
+        Ok(self.to_graphviz_graph(1, None))
+    }
+    fn to_graphviz_graph(&self, graph_index: u32, label: Option<String>) -> String {
         let (_, nodes, edges) = self.graphviz_one(1 + (graph_index * 100));
         format!(
             "{}{}\n{}\n}}",
@@ -348,8 +424,12 @@ impl RelationalOp {
                 "digraph G {{\n".to_string()
             } else {
                 format!(
-                    "subgraph cluster_{} {{\n  color=gray;\n  label=\"Rule {}\";\n\n",
-                    graph_index, graph_index
+                    "subgraph cluster_{} {{\n  color=gray;\n  label=\"{}\";\n\n",
+                    graph_index,
+                    match label {
+                        None => format!("Rule {}", graph_index),
+                        Some(label) => label,
+                    }
                 )
             },
             nodes
@@ -375,7 +455,17 @@ impl RelationalOp {
                 if !node_map.contains_key(self) {
                     node_map.insert(
                         self,
-                        (index, format!("  node{} [label=\"{}\"];\n", index, op)),
+                        (
+                            index,
+                            if op.is_extensional.unwrap_or(false) {
+                                format!(
+                                    " node{}  [style=filled; label=\"{}\"];\n",
+                                    index, op.source
+                                )
+                            } else {
+                                format!("  node{} [label=\"{}\"];", index, op.source)
+                            },
+                        ),
                     );
                 }
                 index + 1
@@ -426,10 +516,10 @@ impl RelationalOp {
                             index,
                             op.attributes
                                 .iter()
-                                .map(|v| if let Some(index) = v.index() {
-                                    index.to_string()
-                                } else if let Some(label) = v.label() {
+                                .map(|v| if let Some(label) = v.label() {
                                     label.to_string()
+                                } else if let Some(index) = v.index() {
+                                    index.to_string()
                                 } else {
                                     unreachable!()
                                 })
@@ -480,8 +570,168 @@ impl RelationalOp {
                 }
                 next_index + 1
             }
+            RelationalOp::SetOperation(op) => {
+                let (first_next_index, nodes, edges) = op.lhs.graphviz_one(index + 1);
+                node_map.extend(nodes.into_iter());
+                edge_vec.extend(edges.into_iter());
+                if let Some((source_index, _)) = node_map.get(op.lhs.as_ref()) {
+                    edge_vec.push((index, *source_index));
+                } else {
+                    unreachable!()
+                }
+
+                let (next_index, nodes, edges) = op.rhs.graphviz_one(first_next_index + 1);
+                node_map.extend(nodes.into_iter());
+                edge_vec.extend(edges.into_iter());
+                if let Some((source_index, _)) = node_map.get(op.rhs.as_ref()) {
+                    edge_vec.push((index, *source_index));
+                } else {
+                    unreachable!()
+                }
+
+                node_map.insert(
+                    self,
+                    (index, format!("  node{} [label=\"{}\"];", index, op.op)),
+                );
+
+                next_index + 1
+            }
+            RelationalOp::Sink(op) => {
+                let (next_index, nodes, edges) = op.source.graphviz_one(index + 1);
+                node_map.extend(nodes.into_iter());
+                edge_vec.extend(edges.into_iter());
+                if let Some((source_index, _)) = node_map.get(op.source.as_ref()) {
+                    edge_vec.push((index, *source_index));
+                } else {
+                    unreachable!()
+                }
+
+                node_map.insert(
+                    self,
+                    (index, format!("  node{} [label=\"{}\"];", index, op.sink)),
+                );
+                next_index + 1
+            }
         };
         (next_index, node_map, edge_vec)
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for RelationSource {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.source)
+    }
+}
+
+impl From<PredicateRef> for RelationSource {
+    fn from(source: PredicateRef) -> Self {
+        Self {
+            source,
+            is_extensional: None,
+        }
+    }
+}
+
+impl RelationSource {
+    pub fn new(source: PredicateRef, is_extensional: bool) -> Self {
+        Self {
+            source,
+            is_extensional: Some(is_extensional),
+        }
+    }
+
+    pub fn extensional(source: PredicateRef) -> Self {
+        Self::new(source, true)
+    }
+
+    pub fn intensional(source: PredicateRef) -> Self {
+        Self::new(source, false)
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for RelationSink {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} ≔ {}", self.sink, self.source)
+    }
+}
+
+impl RelationSink {
+    pub fn new(source: RelationalOp, sink: PredicateRef) -> Self {
+        Self {
+            source: Box::new(source),
+            sink,
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for SetOperation {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}) {} ({})", self.lhs, self.op, self.rhs)
+    }
+}
+
+impl SetOperation {
+    pub fn new<S: Into<RelationalOp>>(lhs: S, op: SetOperator, rhs: S) -> Self {
+        Self {
+            lhs: Box::new(lhs.into()),
+            op,
+            rhs: Box::new(rhs.into()),
+        }
+    }
+
+    pub fn union<S: Into<RelationalOp>>(lhs: S, rhs: S) -> Self {
+        Self {
+            lhs: Box::new(lhs.into()),
+            op: SetOperator::Union,
+            rhs: Box::new(rhs.into()),
+        }
+    }
+
+    pub fn intersection<S: Into<RelationalOp>>(lhs: S, rhs: S) -> Self {
+        Self {
+            lhs: Box::new(lhs.into()),
+            op: SetOperator::Intersection,
+            rhs: Box::new(rhs.into()),
+        }
+    }
+
+    pub fn difference<S: Into<RelationalOp>>(lhs: S, rhs: S) -> Self {
+        Self {
+            lhs: Box::new(lhs.into()),
+            op: SetOperator::Difference,
+            rhs: Box::new(rhs.into()),
+        }
+    }
+
+    pub fn cartesian_product<S: Into<RelationalOp>>(lhs: S, rhs: S) -> Self {
+        Self {
+            lhs: Box::new(lhs.into()),
+            op: SetOperator::CartesianProduct,
+            rhs: Box::new(rhs.into()),
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for SetOperator {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Union => "∪",
+                Self::Intersection => "∩",
+                Self::Difference => "∖",
+                Self::CartesianProduct => "⨯",
+            }
+        )
     }
 }
 
@@ -586,13 +836,13 @@ impl TryFrom<&Atom> for Projection {
             .collect();
 
         if projections.len() == atom.len() {
-            Ok(Self::all(RelationalOp::Relation(atom.label_ref())))
+            Ok(Self::all(RelationalOp::Relation(atom.label_ref().into())))
         } else if projections.is_empty() {
             Err(nullary_facts_not_allowed())
         } else {
             Ok(Self::new(
                 projections,
-                RelationalOp::Relation(atom.label_ref()),
+                RelationalOp::Relation(atom.label_ref().into()),
             ))
         }
     }
@@ -668,7 +918,7 @@ impl TryFrom<&Atom> for Selection {
 
     fn try_from(atom: &Atom) -> std::result::Result<Self, Self::Error> {
         Ok(Self {
-            source: Box::new(RelationalOp::Relation(atom.label_ref())),
+            source: Box::new(RelationalOp::Relation(atom.label_ref().into())),
             criteria: atom
                 .iter()
                 .enumerate()
@@ -679,16 +929,22 @@ impl TryFrom<&Atom> for Selection {
                     value: CriteriaValue::Value(constant.clone()),
                 })
                 .collect(),
+            negated: false,
         })
     }
 }
 
 #[allow(clippy::len_without_is_empty)]
 impl Selection {
-    pub fn new<V: Into<Vec<Criteria>>, S: Into<RelationalOp>>(criteria: V, from: S) -> Self {
+    pub fn new<V: Into<Vec<Criteria>>, S: Into<RelationalOp>>(
+        criteria: V,
+        from: S,
+        negated: bool,
+    ) -> Self {
         Self {
             source: Box::new(from.into()),
             criteria: criteria.into(),
+            negated,
         }
     }
 
@@ -696,11 +952,16 @@ impl Selection {
         Self {
             source: Box::new(from.into()),
             criteria: Default::default(),
+            negated: false,
         }
     }
 
     pub fn is_all(&self) -> bool {
         self.criteria.is_empty()
+    }
+
+    pub fn is_negated(&self) -> bool {
+        self.negated
     }
 
     delegate!(pub len, criteria -> usize);
@@ -816,7 +1077,6 @@ impl CriteriaValue {
 #[cfg(test)]
 mod tests {
     use crate::edb::Predicate;
-    use crate::idb::eval::ToGraphViz;
     use crate::idb::query::relational::RelationalOp;
     use crate::idb::{Atom, Comparison, ComparisonOperator, Literal, Rule, Term, Variable};
     use std::str::FromStr;

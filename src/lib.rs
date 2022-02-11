@@ -4,6 +4,8 @@ Another Simplistic [Datalog](https://en.wikipedia.org/wiki/Datalog) Implementati
 This package provides a data model to represent [Datalog](https://en.wikipedia.org/wiki/Datalog)
 programs in memory, a parser for the textual representation, and some evaluation implementations.
 
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/lib.svg)
+
 The text representation parser is a separate feature, so if you only need to construct and evaluate
 programs using the API you may opt out of the [Pest](https://pest.rs) parser and support.
 
@@ -133,11 +135,11 @@ use crate::error::{
     Result,
 };
 use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION};
-use crate::idb::eval::{Evaluator, PrecedenceGraph};
-use crate::idb::query::{Query, Queryable, View};
+use crate::idb::eval::{strata::PrecedenceGraph, Evaluator};
+use crate::idb::query::{Query, QuerySet, Queryable, View};
 use crate::idb::{Atom, Literal, Rule, RuleForm, RuleSet, Term, Variable, VariableRef};
 use std::cell::RefCell;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 use std::fmt::{Debug, Display, Formatter};
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -146,6 +148,8 @@ use std::str::FromStr;
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
+
+pub const MIME_TYPE_BASE: &str = "text/vnd.datalog";
 
 ///
 /// Core, readable, properties of a Datalog program.
@@ -184,7 +188,7 @@ pub struct Program {
     extensional: RelationSet,
     intensional: RelationSet,
     rules: RuleSet,
-    queries: HashSet<Query>,
+    queries: QuerySet,
 }
 
 ///
@@ -245,15 +249,6 @@ pub trait Collection<T> {
 }
 
 ///
-/// All mutable collections of things in the library implement these basic methods.
-///
-pub trait MutableCollection<T>: Collection<T> {
-    fn iter_mut(&mut self) -> Box<dyn Iterator<Item = &'_ mut T> + '_>;
-
-    fn add(&mut self, new: T) -> Result<()>;
-}
-
-///
 /// All indexed collections of things in the library implement these basic methods.
 ///
 pub trait IndexedCollection<K, V>: Collection<V> {
@@ -263,17 +258,7 @@ pub trait IndexedCollection<K, V>: Collection<V> {
 }
 
 ///
-/// All mutable, indexed, collections of things in the library implement these basic methods.
-///
-pub trait MutableIndexedCollection<K, V>: IndexedCollection<K, V> {
-    fn get_mut<I: Into<K>>(&mut self, index: I) -> Option<&mut V>;
-
-    fn insert<I: Into<K>>(&mut self, index: I, value: V) -> Result<()>;
-}
-
-///
-/// Implemented by types that have, for sure, a label. This type is mutually exclusive with
-/// [MaybeLabeled].
+/// Implemented by types that have a label.
 ///
 pub trait Labeled {
     ///
@@ -299,36 +284,6 @@ pub trait MaybeAnonymous {
     /// Return `true` if this value is anonymous, else `false`.
     ///
     fn is_anonymous(&self) -> bool;
-}
-
-///
-/// Implemented by types that may have a label; note that this infers the existence of an
-/// anonymous value used when an instance has no label.
-///
-pub trait MaybeLabeled<T: AttributeName>: MaybeAnonymous {
-    ///
-    /// Returns this value's label, or `None` if anonymous.
-    ///
-    fn label(&self) -> Option<&AttributeNameRef<T>>;
-
-    ///
-    /// Returns `true` if this value has a label, else `false`.
-    ///
-    fn is_labeled(&self) -> bool {
-        !self.is_anonymous()
-    }
-}
-
-///
-/// Implemented by elements of the IDB that need to distinguish between values containing only
-/// constants and those that contain at least one variable.
-///
-pub trait MaybeGround {
-    ///
-    /// Returns `true` if this value is ground; defined as containing only constant values, else
-    /// `false`.
-    ///
-    fn is_ground(&self) -> bool;
 }
 
 ///
@@ -386,7 +341,7 @@ impl Display for Program {
 
         writeln!(f, "{}", self.rules)?;
 
-        for query in self.queries() {
+        for query in self.queries().iter() {
             writeln!(f, "{}", query)?;
         }
 
@@ -532,7 +487,7 @@ impl Program {
         head_label: PredicateRef,
         head_terms: H,
         body: B,
-    ) -> Result<()> {
+    ) -> Result<bool> {
         let head_label = self.predicate_cache.canonical(head_label);
         let rule = Rule::new_pure(Atom::new(head_label, head_terms), body);
         self.add_rule(rule)
@@ -541,7 +496,7 @@ impl Program {
     ///
     /// Add a new _constraint_ rule to the intensional database with the given list of body literals.
     ///
-    pub fn add_new_constraint_rule<B: Into<Vec<Literal>>>(&mut self, body: B) -> Result<()> {
+    pub fn add_new_constraint_rule<B: Into<Vec<Literal>>>(&mut self, body: B) -> Result<bool> {
         let rule = Rule::new_constraint(body);
         self.add_rule(rule)
     }
@@ -554,7 +509,7 @@ impl Program {
         &mut self,
         head: A,
         body: B,
-    ) -> Result<()> {
+    ) -> Result<bool> {
         let rule = Rule::new_disjunctive(head, body);
         self.add_rule(rule)
     }
@@ -562,7 +517,7 @@ impl Program {
     ///
     /// Add the provided `rule` to the intensional database.
     ///
-    pub fn add_rule(&mut self, rule: Rule) -> Result<()> {
+    pub fn add_rule(&mut self, rule: Rule) -> Result<bool> {
         rule.safety_check(self.features())?;
 
         if rule.form() == RuleForm::Constraint && !self.features().supports(&FEATURE_CONSTRAINTS) {
@@ -596,8 +551,7 @@ impl Program {
             }
         }
 
-        self.rules.add(rule);
-        Ok(())
+        Ok(self.rules.add(rule))
     }
 
     fn infer_attribute(&self, variable: &VariableRef, rule: &Rule) -> Attribute<Predicate> {
@@ -676,8 +630,8 @@ impl Program {
     ///
     /// Return an iterator over the queries in the program.
     ///
-    pub fn queries(&self) -> impl Iterator<Item = &Query> {
-        self.queries.iter()
+    pub fn queries(&self) -> &QuerySet {
+        &self.queries
     }
 
     ///
@@ -701,7 +655,7 @@ impl Program {
         if !self.extensional().contains(&predicate) && !self.intensional().contains(&predicate) {
             Err(relation_does_not_exist(predicate))
         } else {
-            Ok(self.queries.insert(query))
+            Ok(self.queries.add(query))
         }
     }
 
@@ -793,6 +747,7 @@ impl Program {
     pub fn eval_queries(&self) -> Result<Vec<(&Query, Option<View>)>> {
         let results: Result<Vec<Option<View>>> = self
             .queries()
+            .iter()
             .map(|q| self.inner_eval_query(q, self.intensional()))
             .collect();
         match results {
@@ -812,6 +767,7 @@ impl Program {
         let new_idb = _evaluator.inference(self)?;
         let results: Result<Vec<Option<View>>> = self
             .queries()
+            .iter()
             .map(|q| self.inner_eval_query(q, &new_idb))
             .collect();
         match results {
@@ -939,8 +895,6 @@ pub mod edb;
 
 pub mod idb;
 
-pub mod io;
-
 // ------------------------------------------------------------------------------------------------
 // Feature-gated Modules
 // ------------------------------------------------------------------------------------------------
@@ -948,5 +902,4 @@ pub mod io;
 #[cfg(feature = "parser")]
 pub mod parse;
 
-#[cfg(feature = "typeset")]
-pub mod typeset;
+pub mod visitor;

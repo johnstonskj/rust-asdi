@@ -1,6 +1,8 @@
 /*!
 One-line description.
 
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/idb_eval_strata.svg)
+
 More detailed description, with
 
 # Example
@@ -10,7 +12,6 @@ More detailed description, with
 use crate::edb::{Predicate, RelationSet};
 use crate::error::{program_not_stratifiable, Result};
 use crate::features::{FeatureSet, FEATURE_DISJUNCTION};
-use crate::idb::eval::ToGraphViz;
 use crate::idb::{Literal, Rule, RuleSet};
 use crate::{Collection, Labeled, MaybePositive, Program, ProgramCore};
 use std::collections::HashSet;
@@ -252,7 +253,7 @@ impl<'a> SubProgram<'a> {
     }
 
     fn add_rule(&mut self, rule: &Rule) {
-        self.strata.add(rule.clone())
+        self.strata.add(rule.clone());
     }
 }
 
@@ -349,10 +350,8 @@ impl<'a> PrecedenceGraph<'a> {
     fn directly_reachable_nodes_from(&self, source: &Predicate) -> HashSet<&'_ PrecedenceNode<'_>> {
         self.edges().filter(|e| e.source() == source).collect()
     }
-}
 
-impl ToGraphViz for PrecedenceGraph<'_> {
-    fn to_graphviz_string(&self) -> Result<String> {
+    pub fn to_graphviz_string(&self) -> Result<String> {
         let mut edges: Vec<String> = self
             .edges()
             .map(|edge| {
@@ -444,8 +443,7 @@ fn body_predicates(rule: &Rule) -> HashSet<(bool, &Predicate)> {
 
 #[cfg(test)]
 mod tests {
-    use crate::idb::eval::strata::PrecedenceGraph;
-    use crate::idb::eval::{StratifiedProgram, ToGraphViz};
+    use crate::idb::eval::strata::{PrecedenceGraph, StratifiedProgram};
     use crate::parse::parse_str;
     use crate::Predicate;
     use std::str::FromStr;

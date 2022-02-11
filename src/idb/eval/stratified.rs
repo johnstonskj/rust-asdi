@@ -3,7 +3,7 @@ use crate::error::{language_feature_disabled, Result};
 use crate::features::{
     FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION,
 };
-use crate::idb::eval::{Evaluator, StratifiedProgram};
+use crate::idb::eval::{strata::StratifiedProgram, Evaluator};
 use crate::idb::query::{Queryable, View};
 use crate::idb::{Atom, Rule, RuleForm, Term};
 use crate::{Collection, IndexedCollection, Labeled, MaybePositive, Program, ProgramCore};

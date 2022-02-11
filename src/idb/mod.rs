@@ -1,6 +1,8 @@
 /*!
 This module provides the set of types that primarily describe the Intensional Database (IDB).
 
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/idb.svg)
+
 Given the following rule:
 
 ```datalog
@@ -74,7 +76,7 @@ use crate::syntax::{
     TYPE_NAME_COMPARISON_OPERATOR, TYPE_NAME_VARIABLE,
 };
 use crate::{
-    AttributeName, Collection, FeatureSet, IndexedCollection, Labeled, MaybeAnonymous, MaybeGround,
+    AttributeName, Collection, FeatureSet, IndexedCollection, Labeled, MaybeAnonymous,
     MaybePositive, PredicateRef,
 };
 use paste::paste;
@@ -87,6 +89,18 @@ use std::str::FromStr;
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
+
+///
+/// Implemented by elements of the IDB that need to distinguish between values containing only
+/// constants and those that contain at least one variable.
+///
+pub trait MaybeGround {
+    ///
+    /// Returns `true` if this value is ground; defined as containing only constant values, else
+    /// `false`.
+    ///
+    fn is_ground(&self) -> bool;
+}
 
 ///
 /// This is the set of rules that comprise part of the intensional database along with an instance
@@ -317,8 +331,8 @@ impl Collection<Rule> for RuleSet {
 }
 
 impl RuleSet {
-    pub fn add(&mut self, rule: Rule) {
-        self.0.insert(rule);
+    pub fn add(&mut self, rule: Rule) -> bool {
+        self.0.insert(rule)
     }
 }
 

@@ -1,6 +1,8 @@
 /*!
 This module provides the set of types that primarily describe the Extensional Database (EDB).
 
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/edb.svg)
+
 Given the following fact:
 
 ```datalog
@@ -99,15 +101,14 @@ use crate::error::{
 use crate::idb::query::relational::{FactOps, Projection, Selection};
 use crate::idb::query::{Queryable, Row, View};
 use crate::idb::Atom;
-use crate::io::{read_relation, write_relation, FilePragma};
 use crate::syntax::{
     ANONYMOUS_COLUMN_NAME, BOOLEAN_LITERAL_FALSE, BOOLEAN_LITERAL_TRUE, CHAR_COLON, CHAR_COMMA,
     CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, PRAGMA_ID_ASSERT,
     PRAGMA_ID_INFER, RESERVED_PREFIX, TYPE_NAME_PREDICATE,
 };
 use crate::{
-    AttributeName, AttributeNameRef, Collection, IndexedCollection, Labeled, MaybeAnonymous,
-    MaybeLabeled, Term, Variable,
+    AttributeName, AttributeNameRef, Collection, IndexedCollection, Labeled, MaybeAnonymous, Term,
+    Variable,
 };
 use paste::paste;
 use std::collections::{BTreeMap, HashSet};
@@ -135,7 +136,7 @@ pub struct Relation {
     label: PredicateRef,
     schema: Schema<Predicate>,
     facts: HashSet<Fact>,
-    pragma: Option<FilePragma>,
+    pragma: Option<io::FilePragma>,
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -150,7 +151,16 @@ where
 {
     attributes: Vec<Attribute<T>>,
     label_index: BTreeMap<AttributeNameRef<T>, usize>,
+    // TODO: (ISSUE/rust-asdi/17) Add functional dependencies to schema
+    // functional_dependencies: HashSet<FunctionalDependency>,
 }
+
+// TODO: (ISSUE/rust-asdi/17) Add functional dependencies to schema
+// #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+// struct FunctionalDependency {
+//     a: Vec<usize>,
+//     b: Vec<usize>,
+// }
 
 ///
 /// An Attribute structure provides the label and [type](AttributeKind) of an attribute
@@ -450,14 +460,6 @@ where
         self.label.is_none()
     }
 }
-impl<T> MaybeLabeled<T> for Attribute<T>
-where
-    T: AttributeName,
-{
-    fn label(&self) -> Option<&AttributeNameRef<T>> {
-        self.label.as_ref()
-    }
-}
 
 impl<T> Attribute<T>
 where
@@ -519,6 +521,20 @@ where
 
     pub fn set_index(&mut self, index: usize) {
         self.index = Some(index)
+    }
+
+    ///
+    /// Returns this value's label, or `None` if anonymous.
+    ///
+    pub fn label(&self) -> Option<&AttributeNameRef<T>> {
+        self.label.as_ref()
+    }
+
+    ///
+    /// Returns `true` if this value has a label, else `false`.
+    ///
+    pub fn is_labeled(&self) -> bool {
+        !self.is_anonymous()
     }
 
     pub fn kind(&self) -> Option<AttributeKind> {
@@ -956,33 +972,33 @@ impl Relation {
     // --------------------------------------------------------------------------------------------
 
     ///
-    /// Returns `true` if a [FilePragma] (`.input` or `.output`) is attached to this relation.
+    /// Returns `true` if a [io::FilePragma] (`.input` or `.output`) is attached to this relation.
     ///
     pub fn has_file_pragma(&self) -> bool {
         self.pragma.is_some()
     }
 
     ///
-    /// Returns a [FilePragma] if one is attached to this relation, else `None`.
+    /// Returns a [io::FilePragma] if one is attached to this relation, else `None`.
     ///
-    pub fn file_pragma(&self) -> Option<&FilePragma> {
+    pub fn file_pragma(&self) -> Option<&io::FilePragma> {
         self.pragma.as_ref()
     }
 
     ///
-    /// Attach a [FilePragma] to this relation, if one exists already it is overwritten.
+    /// Attach a [io::FilePragma] to this relation, if one exists already it is overwritten.
     ///
-    pub fn set_file_pragma(&mut self, pragma: FilePragma) {
+    pub fn set_file_pragma(&mut self, pragma: io::FilePragma) {
         self.pragma = Some(pragma)
     }
 
     ///
-    /// If a [FilePragma] is attached to this relation then read data from the file into this
+    /// If a [io::FilePragma] is attached to this relation then read data from the file into this
     /// relation's set of facts.
     ///
     pub fn load_from_file(&mut self) -> Result<usize> {
         if let Some(pragma) = &self.pragma {
-            let new_facts = read_relation(self, pragma)?;
+            let new_facts = io::read_relation(self, pragma)?;
             self.extend(new_facts)
         } else {
             Ok(0)
@@ -990,12 +1006,12 @@ impl Relation {
     }
 
     ///
-    /// If a [FilePragma] is attached to this relation then store this relation's set of facts
+    /// If a [io::FilePragma] is attached to this relation then store this relation's set of facts
     /// into the file.
     ///
     pub fn store_to_file(&mut self) -> Result<()> {
         if let Some(pragma) = &self.pragma {
-            write_relation(self, pragma)
+            io::write_relation(self, pragma)
         } else {
             Ok(())
         }
@@ -1234,3 +1250,9 @@ impl AttributeName for Predicate {
 impl Predicate {
     into_inner_fn!(String);
 }
+
+// ------------------------------------------------------------------------------------------------
+// Modules
+// ------------------------------------------------------------------------------------------------
+
+pub mod io;

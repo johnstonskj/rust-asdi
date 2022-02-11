@@ -1,6 +1,9 @@
 /*!
 This module provides the [Query] type that represents a query goal as well as the [View] and [Row].
 types used to return query results.
+
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/idb_query.svg)
+
  */
 
 use self::relational::{FactOps, Projection, RelationOps, Selection};
@@ -8,7 +11,7 @@ use crate::edb::{Attribute, AttributeIndex, AttributeKind, Constant, Fact, Schem
 use crate::error::Result;
 use crate::idb::{Atom, Term, Variable};
 use crate::syntax::{CHAR_PERIOD, QUERY_ASCII_PREFIX};
-use crate::{Collection, IndexedCollection, MaybeLabeled, PredicateRef};
+use crate::{Collection, IndexedCollection, PredicateRef};
 use std::collections::HashSet;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
@@ -39,6 +42,9 @@ use tracing::{error, trace};
 ///
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Query(Atom);
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct QuerySet(HashSet<Query>);
 
 ///
 /// A view is an intermediate structure, a selection/projection of a [relation](../edb/struct.Relation.html),
@@ -90,6 +96,37 @@ impl AsRef<Atom> for Query {
 impl Query {
     pub fn new<T: Into<Vec<Term>>>(predicate: PredicateRef, terms: T) -> Self {
         Self(Atom::new(predicate, terms))
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for QuerySet {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        for rule in self.iter() {
+            writeln!(f, "{}", rule)?;
+        }
+        Ok(())
+    }
+}
+
+impl Collection<Query> for QuerySet {
+    delegate!(is_empty -> bool);
+
+    delegate!(len -> usize);
+
+    fn iter(&self) -> Box<dyn Iterator<Item = &'_ Query> + '_> {
+        Box::new(self.0.iter())
+    }
+
+    fn contains(&self, value: &Query) -> bool {
+        self.0.contains(value)
+    }
+}
+
+impl QuerySet {
+    pub fn add(&mut self, rule: Query) -> bool {
+        self.0.insert(rule)
     }
 }
 

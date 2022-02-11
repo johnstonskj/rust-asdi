@@ -2,8 +2,8 @@
 This module provides the both a [Writer] implementation for tabular text files.
  */
 
+use crate::edb::io::Writer;
 use crate::error::Result;
-use crate::io::Writer;
 use crate::{Collection, Relation};
 use std::fs::File;
 use std::io::Write;

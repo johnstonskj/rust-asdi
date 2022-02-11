@@ -1,6 +1,8 @@
 /*!
 This module provides the [Evaluator] trait used to evaluate a program and infer new rules.
 
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/idb_eval.svg)
+
 This module also provides the following implementations of the [Evaluator] trait:
 
 1. [NoopEvaluator] -- TBD
@@ -41,11 +43,6 @@ pub trait Evaluator: Debug {
 ///
 #[derive(Debug)]
 pub struct NoopEvaluator;
-
-#[cfg(feature = "graphviz")]
-pub trait ToGraphViz {
-    fn to_graphviz_string(&self) -> Result<String>;
-}
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
@@ -93,5 +90,4 @@ pub use naive::NaiveEvaluator;
 mod stratified;
 pub use stratified::StratifiedEvaluator;
 
-mod strata;
-pub use strata::{PrecedenceGraph, PrecedenceNode, StratifiedProgram};
+pub mod strata;

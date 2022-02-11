@@ -1,6 +1,5 @@
 use asdi::edb::{Predicate, PredicateRef};
 use asdi::features::{FeatureSet, FEATURE_NEGATION};
-use asdi::idb::eval::ToGraphViz;
 use asdi::idb::query::relational::{program_to_graphviz, RelationalOp};
 use asdi::idb::{Atom, Comparison, ComparisonOperator, Literal, Rule, Term, Variable};
 use asdi::parse::parse_str;

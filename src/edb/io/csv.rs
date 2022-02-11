@@ -2,11 +2,11 @@
 This module provides the both a [Reader] and [Writer] implementation for CSV files.
  */
 
+use crate::edb::io::{Reader, Writer};
 use crate::edb::{AttributeKind, Constant, Fact};
 use crate::error::{fact_does_not_correspond_to_schema, Error, Result};
-use crate::io::{Reader, Writer};
 use crate::syntax::{ANONYMOUS_COLUMN_NAME, CHAR_COMMA};
-use crate::{Collection, Labeled, MaybeLabeled, Relation};
+use crate::{Collection, Labeled, Relation};
 use csv::{ReaderBuilder, Trim, WriterBuilder};
 use std::fs::File;
 use std::io::{BufReader, Write};
@@ -121,7 +121,7 @@ impl Reader for DelimitedLines {
 
         // MAYBE: (ISSUE/rust-asdi/2) could extend this to do name matching, right now it assumes a positional match
 
-        // if reader.has_headers() {
+        // if reader.has_headers() view
         //     let headers = reader.headers();
         // }
 

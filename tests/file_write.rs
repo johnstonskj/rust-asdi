@@ -1,6 +1,6 @@
-use asdi::io::csv::Options as CsvOptions;
-use asdi::io::json::Options as JsonOptions;
-use asdi::io::{write_relation, FilePragma, Format};
+use asdi::edb::io::csv::Options as CsvOptions;
+use asdi::edb::io::json::Options as JsonOptions;
+use asdi::edb::io::{write_relation, FilePragma, Format};
 use asdi::{Collection, ProgramCore};
 use std::path::PathBuf;
 
