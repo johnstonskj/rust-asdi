@@ -12,7 +12,8 @@ Another Simplistic Datalog Implementation (in Rust).
 [![Audit](https://github.com/johnstonskj/rust-asdi/workflows/Security%20audit/badge.svg)]((https://github.com/johnstonskj/rust-asdi/actions/workflows/cargo-audit.yml))
 
 This package provides a data model to represent [Datalog](https://en.wikipedia.org/wiki/Datalog)
-programs in memory, a parser for the textual representation, and some evaluation implementations.
+programs in memory, a parser for the textual representation, and some evaluation implementations. For more
+information see [the book](https://simonkjohnston.life/rust-asdi/).
 
 The text representation parser is a separate feature, so if you only need to construct and evaluate
 programs using the API you may opt out of the [Pest](https://pest.rs) parser and support.
@@ -99,6 +100,11 @@ fn ancestor_example() {
 ```
 
 ## Changes
+
+**Version 0.2.5**
+
+* The focus is largely on documentation, both rustdoc and mdbook.
+* Some API changes as the documentation uncovered inconsistencies.
 
 **Version 0.2.4**
 
