@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="571px" preserveAspectRatio="none" style="width:522px;height:571px;background:#FFFFFF;" version="1.1" viewBox="0 0 522 571" width="522px" zoomAndPan="magnify"><defs><filter height="300%" id="f9qz7shqb5age" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[c2bf3ad893e82fc363acfc4f73cc10ed]
+cluster std::error--><polygon fill="#FFFFFF" filter="url(#f9qz7shqb5age)" points="86,481.49,156,481.49,163,503.9783,180,503.9783,180,564.49,86,564.49,86,481.49" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="86" x2="163" y1="503.9783" y2="503.9783"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="64" x="90" y="497.0252">std::error</text><!--MD5=[c5352f04a94962915933d4c4cc93c6e4]
+cluster std::result--><polygon fill="#FFFFFF" filter="url(#f9qz7shqb5age)" points="253,481.49,330,481.49,337,503.9783,353,503.9783,353,564.49,253,564.49,253,481.49" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="253" x2="337" y1="503.9783" y2="503.9783"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="71" x="257" y="497.0252">std::result</text><!--MD5=[d1d9d1eb84519a5fd9adc3dd01e30388]
+cluster asdi::error--><polygon fill="#FFFFFF" filter="url(#f9qz7shqb5age)" points="16,43.49,93,43.49,100,65.9783,505,65.9783,505,432.49,16,432.49,16,43.49" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="16" x2="100" y1="65.9783" y2="65.9783"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="71" x="20" y="59.0252">asdi::error</text><!--MD5=[5951de3fb9f82e1fd1927a1ac2c76796]
+class std::error::Error--><rect codeLine="4" fill="#FEFECE" filter="url(#f9qz7shqb5age)" height="32" id="std::error::Error" style="stroke:#A80036;stroke-width:1.5;" width="61" x="102.5" y="516.49"/><ellipse cx="117.5" cy="532.49" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M113.9277,528.7551 L113.9277,526.5969 L121.3071,526.5969 L121.3071,528.7551 L118.8418,528.7551 L118.8418,536.8318 L121.3071,536.8318 L121.3071,538.99 L113.9277,538.99 L113.9277,536.8318 L116.3931,536.8318 L116.3931,528.7551 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="29" x="131.5" y="537.0252">Error</text><!--MD5=[1c8625dc5d4bf9fbae425dee2960b1ab]
+class std::result::Result--><rect codeLine="7" fill="#FEFECE" filter="url(#f9qz7shqb5age)" height="32" id="std::result::Result" style="stroke:#A80036;stroke-width:1.5;" width="67" x="269.5" y="516.49"/><ellipse cx="284.5" cy="532.49" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M286.9731,538.6331 Q286.3921,538.9319 285.7529,539.0813 Q285.1138,539.2307 284.4082,539.2307 Q281.9014,539.2307 280.5815,537.5789 Q279.2617,535.927 279.2617,532.8059 Q279.2617,529.6765 280.5815,528.0247 Q281.9014,526.3728 284.4082,526.3728 Q285.1138,526.3728 285.7612,526.5222 Q286.4087,526.6716 286.9731,526.9705 L286.9731,529.6931 Q286.3423,529.1121 285.7488,528.8423 Q285.1553,528.5725 284.5244,528.5725 Q283.1797,528.5725 282.4949,529.6392 Q281.8101,530.7058 281.8101,532.8059 Q281.8101,534.8977 282.4949,535.9644 Q283.1797,537.031 284.5244,537.031 Q285.1553,537.031 285.7488,536.7612 Q286.3423,536.4915 286.9731,535.9104 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="35" x="298.5" y="537.0252">Result</text><!--MD5=[0a0634c46e291815c40e0ff109ad2314]
+class asdi::error::SourceLocation--><rect codeLine="11" fill="#FEFECE" filter="url(#f9qz7shqb5age)" height="73.9102" id="asdi::error::SourceLocation" style="stroke:#A80036;stroke-width:1.5;" width="117" x="371.5" y="210.49"/><ellipse cx="386.5" cy="226.49" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M388.9731,232.6331 Q388.3921,232.9319 387.7529,233.0813 Q387.1138,233.2307 386.4082,233.2307 Q383.9014,233.2307 382.5815,231.5789 Q381.2617,229.927 381.2617,226.8059 Q381.2617,223.6765 382.5815,222.0247 Q383.9014,220.3728 386.4082,220.3728 Q387.1138,220.3728 387.7612,220.5222 Q388.4087,220.6716 388.9731,220.9705 L388.9731,223.6931 Q388.3423,223.1121 387.7488,222.8423 Q387.1553,222.5725 386.5244,222.5725 Q385.1797,222.5725 384.4949,223.6392 Q383.8101,224.7058 383.8101,226.8059 Q383.8101,228.8977 384.4949,229.9644 Q385.1797,231.031 386.5244,231.031 Q387.1553,231.031 387.7488,230.7612 Q388.3423,230.4915 388.9731,229.9104 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="85" x="400.5" y="231.0252">SourceLocation</text><line style="stroke:#A80036;stroke-width:1.5;" x1="372.5" x2="487.5" y1="242.49" y2="242.49"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="53" x="377.5" y="257.1248">line: usize</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="74" x="377.5" y="270.0798">column: usize</text><line style="stroke:#A80036;stroke-width:1.5;" x1="372.5" x2="487.5" y1="276.4002" y2="276.4002"/><!--MD5=[1fc64c7cc8969cd2122e741499f19245]
+class asdi::error::Error--><rect codeLine="16" fill="#FEFECE" filter="url(#f9qz7shqb5age)" height="337.9668" id="asdi::error::Error" style="stroke:#A80036;stroke-width:1.5;" width="202" x="32" y="78.49"/><ellipse cx="114.25" cy="94.49" fill="#EB937F" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M117.8643,100.99 L110.1445,100.99 L110.1445,88.5969 L117.8643,88.5969 L117.8643,90.7551 L112.5933,90.7551 L112.5933,93.428 L117.3662,93.428 L117.3662,95.5862 L112.5933,95.5862 L112.5933,98.8318 L117.8643,98.8318 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="29" x="134.75" y="99.0252">Error</text><line style="stroke:#A80036;stroke-width:1.5;" x1="33" x2="233" y1="110.49" y2="110.49"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="169" x="38" y="125.1248">AnonymousVariableNotAllowed</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="120" x="38" y="138.0798">AttributeDoesNotExist</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="113" x="38" y="151.0349">AttributeIndexInvalid</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="137" x="38" y="163.99">ComparisonIsAlwaysTrue</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="139" x="38" y="176.9451">ComparisonIsAlwaysFalse</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="171" x="38" y="189.9002">ExtensionalPredicateInRuleHead</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="171" x="38" y="202.8552">FactDoesNotConformToSchema</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="66" x="38" y="215.8103">FormatError</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="153" x="38" y="228.7654">HeadVariablesMissingInBody</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="101" x="38" y="241.7205">IncompatibleTypes</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="124" x="38" y="254.6755">InvalidHeadAtomCount</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="64" x="38" y="267.6306">InvalidValue</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="138" x="38" y="280.5857">LanguageFeatureDisabled</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="163" x="38" y="293.5408">LanguageFeatureUnsupported</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="179" x="38" y="306.4959">NegativeVariablesNotAlsoPositive</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="76" x="38" y="319.4509">NotStratifiable</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="127" x="38" y="332.406">NullaryFactsNotAllowed</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="62" x="38" y="345.3611">ParserError</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="75" x="38" y="358.3162">RelationExists</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="115" x="38" y="371.2713">RelationDoesNotExist</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="65" x="38" y="384.2263">Serialization</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="153" x="38" y="397.1814">SerializationFormatUnknown</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="190" x="38" y="410.1365">SerializationOperationUnsupported</text><!--MD5=[4a6d351d6649321526701cf97419c0f7]
+class asdi::error::Result--><rect codeLine="46" fill="#FEFECE" filter="url(#f9qz7shqb5age)" height="32" id="asdi::error::Result" style="stroke:#A80036;stroke-width:1.5;" width="67" x="269.5" y="231.49"/><ellipse cx="284.5" cy="247.49" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M285.8418,254.74 L283.3931,254.74 L283.3931,244.4885 L280.2471,244.4885 L280.2471,242.3469 L288.9878,242.3469 L288.9878,244.4885 L285.8418,244.4885 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="35" x="298.5" y="252.0252">Result</text><!--MD5=[8ee989aca9c0bef7e9f2139b317d4ff6]
+link asdi::error::Error to std::error::Error--><path codeLine="43" d="M133,416.79 C133,446.8 133,475.14 133,496.15 " fill="none" id="asdi::error::Error-to-std::error::Error" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="140,496.44,133,516.44,126,496.44,140,496.44" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[3d1fbe71e1ab97708506b58761a9711d]
+link asdi::error::Error to asdi::error::SourceLocation--><path codeLine="44" d="M220.6,78.38 C230.52,63.4 241.03,48.87 252,35.49 C276.19,6 300.73,7.26 336.5,20.49 C407.9,46.9 425.18,146.96 429.11,205.04 " fill="none" id="asdi::error::Error-to-asdi::error::SourceLocation" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="429.43,210.18,432.8559,200.9462,429.1154,205.1899,424.8717,201.4495,429.43,210.18" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[e9c2e61b0e51fa0a2da119d2a67dac0e]
+reverse link asdi::error::Error to asdi::error::Result--><path codeLine="48" d="M239.49,247.49 C249.47,247.49 259.46,247.49 269.44,247.49 " fill="none" id="asdi::error::Error-backto-asdi::error::Result" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="234.27,247.49,243.27,251.49,239.27,247.49,243.27,243.49,234.27,247.49" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[bf374d5d2c9160919692154b5c3e1ae7]
+link asdi::error::Result to std::result::Result--><path codeLine="49" d="M303,263.71 C303,311.21 303,456.84 303,510.96 " fill="none" id="asdi::error::Result-to-std::result::Result" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="303,516.2,307,507.2,303,511.2,299,507.2,303,516.2" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="29" x="304" y="462.0584">base</text><!--MD5=[bc9c4f08ae57c49faf9c5b32e53c6a52]
+@startuml
+
+!include options.plantuml
+
+interface std::error::Error
+hide "std::error::Error" members
+
+class std::result::Result
+hide "std::result::Result" members
+
+namespace asdi::error {
+    class SourceLocation {
+        line: usize
+        column: usize
+    }
+
+    enum Error {
+        AnonymousVariableNotAllowed
+        AttributeDoesNotExist
+        AttributeIndexInvalid
+        ComparisonIsAlwaysTrue
+        ComparisonIsAlwaysFalse
+        ExtensionalPredicateInRuleHead
+        FactDoesNotConformToSchema
+        FormatError
+        HeadVariablesMissingInBody
+        IncompatibleTypes
+        InvalidHeadAtomCount
+        InvalidValue
+        LanguageFeatureDisabled
+        LanguageFeatureUnsupported
+        NegativeVariablesNotAlsoPositive
+        NotStratifiable
+        NullaryFactsNotAllowed
+        ParserError
+        RelationExists
+        RelationDoesNotExist
+        Serialization
+        SerializationFormatUnknown
+        SerializationOperationUnsupported
+    }
+    hide Error methods
+
+    Error ..|> std::error::Error
+    Error .right.> SourceLocation
+
+    class Result << (T,#ADD1B2) type >>
+
+    Result .left.> Error
+    Result ..> std::result::Result: base
+}
+
+@enduml
+
+@startuml
+
+set namespaceSeparator ::
+hide enum methods
+hide interface fields
+hide << const >> members
+hide << type >> members
+hide << type >> stereotype
+hide << module >> fields
+hide << module >> circle
+
+interface std::error::Error
+hide "std::error::Error" members
+
+class std::result::Result
+hide "std::result::Result" members
+
+namespace asdi::error {
+    class SourceLocation {
+        line: usize
+        column: usize
+    }
+
+    enum Error {
+        AnonymousVariableNotAllowed
+        AttributeDoesNotExist
+        AttributeIndexInvalid
+        ComparisonIsAlwaysTrue
+        ComparisonIsAlwaysFalse
+        ExtensionalPredicateInRuleHead
+        FactDoesNotConformToSchema
+        FormatError
+        HeadVariablesMissingInBody
+        IncompatibleTypes
+        InvalidHeadAtomCount
+        InvalidValue
+        LanguageFeatureDisabled
+        LanguageFeatureUnsupported
+        NegativeVariablesNotAlsoPositive
+        NotStratifiable
+        NullaryFactsNotAllowed
+        ParserError
+        RelationExists
+        RelationDoesNotExist
+        Serialization
+        SerializationFormatUnknown
+        SerializationOperationUnsupported
+    }
+    hide Error methods
+
+    Error ..|> std::error::Error
+    Error .right.> SourceLocation
+
+    class Result << (T,#ADD1B2) type >>
+
+    Result .left.> Error
+    Result ..> std::result::Result: base
+}
+
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 10:19:58 PST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

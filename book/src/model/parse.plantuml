@@ -1,0 +1,26 @@
+@startuml
+
+!include options.plantuml
+
+class asdi::Program
+hide "asdi::Program" members
+
+class asdi::features::FeatureSet
+hide "asdi::features::FeatureSet" members
+
+namespace asdi::parse {
+    class Parsed
+
+    Parsed --> asdi::Program
+
+    class parse << module >> {
+        parse_file(): Result<Parsed>
+        parse_file_with_features(): Result<Parsed>
+        parse_str(): Result<Parsed>
+        parse_str_with_features(): Result<Parsed>
+    }
+
+    parse ..> asdi::features::FeatureSet
+}
+
+@enduml

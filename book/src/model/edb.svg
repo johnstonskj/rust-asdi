@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="417px" preserveAspectRatio="none" style="width:1391px;height:417px;background:#FFFFFF;" version="1.1" viewBox="0 0 1391 417" width="1391px" zoomAndPan="magnify"><defs><filter height="300%" id="fvfjoh44w4abg" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[e274c4916ac42ef1c11391a83d303c10]
+cluster asdi--><polygon fill="#FFFFFF" filter="url(#fvfjoh44w4abg)" points="16,6,52,6,59,28.4883,1074,28.4883,1074,410,16,410,16,6" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="16" x2="59" y1="28.4883" y2="28.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="30" x="20" y="21.5352">asdi</text><!--MD5=[6bc3af5db4038e5494ba0622f07de59b]
+cluster asdi::edb--><polygon fill="#FFFFFF" filter="url(#fvfjoh44w4abg)" points="40,49,72,49,79,71.4883,1050,71.4883,1050,318,40,318,40,49" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="40" x2="79" y1="71.4883" y2="71.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="26" x="44" y="64.5352">edb</text><!--MD5=[331bdf5c2291f41e90a08533bcc43e12]
+cluster asdi::idb::query--><polygon fill="#FFFFFF" filter="url(#fvfjoh44w4abg)" points="1098,72.5,1209,72.5,1216,94.9883,1222,94.9883,1222,155.5,1098,155.5,1098,72.5" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="1098" x2="1216" y1="94.9883" y2="94.9883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="105" x="1102" y="88.0352">asdi::idb::query</text><!--MD5=[b33f2e4372094b15554e3bf4225fc453]
+cluster asdi::edb::io--><polygon fill="#FFFFFF" filter="url(#fvfjoh44w4abg)" points="1246,72.5,1334,72.5,1341,94.9883,1374,94.9883,1374,155.5,1246,155.5,1246,72.5" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="1246" x2="1341" y1="94.9883" y2="94.9883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="82" x="1250" y="88.0352">asdi::edb::io</text><!--MD5=[2110a1d684b71e50a272297f2c09c595]
+class asdi::AttributeName--><rect codeLine="4" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="32" id="asdi::AttributeName" style="stroke:#A80036;stroke-width:1.5;" width="116" x="942" y="362"/><ellipse cx="957" cy="378" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M953.4277,374.2651 L953.4277,372.1069 L960.8071,372.1069 L960.8071,374.2651 L958.3418,374.2651 L958.3418,382.3418 L960.8071,382.3418 L960.8071,384.5 L953.4277,384.5 L953.4277,382.3418 L955.8931,382.3418 L955.8931,374.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="84" x="971" y="382.5352">AttributeName</text><!--MD5=[e8289714b7028f41fbfaeffd8c17c76d]
+class asdi::Collection--><rect codeLine="7" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="32" id="asdi::Collection" style="stroke:#A80036;stroke-width:1.5;" width="99" x="71.5" y="362"/><ellipse cx="86.5" cy="378" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M82.9277,374.2651 L82.9277,372.1069 L90.3071,372.1069 L90.3071,374.2651 L87.8418,374.2651 L87.8418,382.3418 L90.3071,382.3418 L90.3071,384.5 L82.9277,384.5 L82.9277,382.3418 L85.3931,382.3418 L85.3931,374.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="55" x="100.5" y="382.5352">Collection</text><rect fill="#FFFFFF" height="16.1328" style="stroke:#000000;stroke-width:1.0;stroke-dasharray:2.0,2.0;" width="10" x="163.5" y="359"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="8" x="164.5" y="371.6016">T</text><!--MD5=[ee47b5577acc389a92c0b1543b9a2c9a]
+class asdi::IndexedCollection--><rect codeLine="10" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="32" id="asdi::IndexedCollection" style="stroke:#A80036;stroke-width:1.5;" width="158" x="206" y="362"/><ellipse cx="221" cy="378" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M217.4277,374.2651 L217.4277,372.1069 L224.8071,372.1069 L224.8071,374.2651 L222.3418,374.2651 L222.3418,382.3418 L224.8071,382.3418 L224.8071,384.5 L217.4277,384.5 L217.4277,382.3418 L219.8931,382.3418 L219.8931,374.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="102" x="235" y="382.5352">IndexedCollection</text><rect fill="#FFFFFF" height="16.1328" style="stroke:#000000;stroke-width:1.0;stroke-dasharray:2.0,2.0;" width="22" x="345" y="359"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="20" x="346" y="371.6016">K,V</text><!--MD5=[a769fd774dc4e74f949d393dd195b319]
+class asdi::Labeled--><rect codeLine="13" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="32" id="asdi::Labeled" style="stroke:#A80036;stroke-width:1.5;" width="78" x="399" y="362"/><ellipse cx="414" cy="378" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M410.4277,374.2651 L410.4277,372.1069 L417.8071,372.1069 L417.8071,374.2651 L415.3418,374.2651 L415.3418,382.3418 L417.8071,382.3418 L417.8071,384.5 L410.4277,384.5 L410.4277,382.3418 L412.8931,382.3418 L412.8931,374.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="46" x="428" y="382.5352">Labeled</text><!--MD5=[a36ef1bdba718ac7a4b8a2af506f0d6e]
+class asdi::MaybeAnonymous--><rect codeLine="16" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="32" id="asdi::MaybeAnonymous" style="stroke:#A80036;stroke-width:1.5;" width="136" x="771" y="362"/><ellipse cx="786" cy="378" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M782.4277,374.2651 L782.4277,372.1069 L789.8071,372.1069 L789.8071,374.2651 L787.3418,374.2651 L787.3418,382.3418 L789.8071,382.3418 L789.8071,384.5 L782.4277,384.5 L782.4277,382.3418 L784.8931,382.3418 L784.8931,374.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="104" x="800" y="382.5352">MaybeAnonymous</text><!--MD5=[ade47718bf2e66647b1d7563de4d2432]
+class asdi::MaybeLabeled--><rect codeLine="19" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="32" id="asdi::MaybeLabeled" style="stroke:#A80036;stroke-width:1.5;" width="224" x="512" y="362"/><ellipse cx="527" cy="378" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M523.4277,374.2651 L523.4277,372.1069 L530.8071,372.1069 L530.8071,374.2651 L528.3418,374.2651 L528.3418,382.3418 L530.8071,382.3418 L530.8071,384.5 L523.4277,384.5 L523.4277,382.3418 L525.8931,382.3418 L525.8931,374.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="84" x="541" y="382.5352">MaybeLabeled</text><rect fill="#FFFFFF" height="16.1328" style="stroke:#000000;stroke-width:1.0;stroke-dasharray:2.0,2.0;" width="106" x="633" y="359"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="104" x="634" y="371.6016">T : AttributeName</text><!--MD5=[20c980c506d94534efc3bc917ca7a115]
+class asdi::edb::Attribute--><rect codeLine="29" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="48" id="asdi::edb::Attribute" style="stroke:#A80036;stroke-width:1.5;" width="186" x="727" y="238.5"/><ellipse cx="742" cy="254.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M744.4731,260.6431 Q743.8921,260.9419 743.2529,261.0913 Q742.6138,261.2407 741.9082,261.2407 Q739.4014,261.2407 738.0815,259.5889 Q736.7617,257.937 736.7617,254.8159 Q736.7617,251.6865 738.0815,250.0347 Q739.4014,248.3828 741.9082,248.3828 Q742.6138,248.3828 743.2612,248.5322 Q743.9087,248.6816 744.4731,248.9805 L744.4731,251.7031 Q743.8423,251.1221 743.2488,250.8523 Q742.6553,250.5825 742.0244,250.5825 Q740.6797,250.5825 739.9949,251.6492 Q739.3101,252.7158 739.3101,254.8159 Q739.3101,256.9077 739.9949,257.9744 Q740.6797,259.041 742.0244,259.041 Q742.6553,259.041 743.2488,258.7712 Q743.8423,258.5015 744.4731,257.9204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="50" x="756" y="259.0352">Attribute</text><rect fill="#FFFFFF" height="16.1328" style="stroke:#000000;stroke-width:1.0;stroke-dasharray:2.0,2.0;" width="102" x="814" y="235.5"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="100" x="815" y="248.1016">T: AttributeName</text><line style="stroke:#A80036;stroke-width:1.5;" x1="728" x2="912" y1="270.5" y2="270.5"/><line style="stroke:#A80036;stroke-width:1.5;" x1="728" x2="912" y1="278.5" y2="278.5"/><!--MD5=[b01c1280d4e10e5850c2de04b0afedc0]
+class asdi::edb::Fact--><rect codeLine="30" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="48" id="asdi::edb::Fact" style="stroke:#A80036;stroke-width:1.5;" width="55" x="523.5" y="238.5"/><ellipse cx="538.5" cy="254.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M540.9731,260.6431 Q540.3921,260.9419 539.7529,261.0913 Q539.1138,261.2407 538.4082,261.2407 Q535.9014,261.2407 534.5815,259.5889 Q533.2617,257.937 533.2617,254.8159 Q533.2617,251.6865 534.5815,250.0347 Q535.9014,248.3828 538.4082,248.3828 Q539.1138,248.3828 539.7612,248.5322 Q540.4087,248.6816 540.9731,248.9805 L540.9731,251.7031 Q540.3423,251.1221 539.7488,250.8523 Q539.1553,250.5825 538.5244,250.5825 Q537.1797,250.5825 536.4949,251.6492 Q535.8101,252.7158 535.8101,254.8159 Q535.8101,256.9077 536.4949,257.9744 Q537.1797,259.041 538.5244,259.041 Q539.1553,259.041 539.7488,258.7712 Q540.3423,258.5015 540.9731,257.9204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="23" x="552.5" y="259.0352">Fact</text><line style="stroke:#A80036;stroke-width:1.5;" x1="524.5" x2="577.5" y1="270.5" y2="270.5"/><line style="stroke:#A80036;stroke-width:1.5;" x1="524.5" x2="577.5" y1="278.5" y2="278.5"/><!--MD5=[a5d376e5744e5d84d0764534baa4474d]
+class asdi::edb::Predicate--><rect codeLine="31" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="48" id="asdi::edb::Predicate" style="stroke:#A80036;stroke-width:1.5;" width="86" x="948" y="238.5"/><ellipse cx="963" cy="254.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M965.4731,260.6431 Q964.8921,260.9419 964.2529,261.0913 Q963.6138,261.2407 962.9082,261.2407 Q960.4014,261.2407 959.0815,259.5889 Q957.7617,257.937 957.7617,254.8159 Q957.7617,251.6865 959.0815,250.0347 Q960.4014,248.3828 962.9082,248.3828 Q963.6138,248.3828 964.2612,248.5322 Q964.9087,248.6816 965.4731,248.9805 L965.4731,251.7031 Q964.8423,251.1221 964.2488,250.8523 Q963.6553,250.5825 963.0244,250.5825 Q961.6797,250.5825 960.9949,251.6492 Q960.3101,252.7158 960.3101,254.8159 Q960.3101,256.9077 960.9949,257.9744 Q961.6797,259.041 963.0244,259.041 Q963.6553,259.041 964.2488,258.7712 Q964.8423,258.5015 965.4731,257.9204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="54" x="977" y="259.0352">Predicate</text><line style="stroke:#A80036;stroke-width:1.5;" x1="949" x2="1033" y1="270.5" y2="270.5"/><line style="stroke:#A80036;stroke-width:1.5;" x1="949" x2="1033" y1="278.5" y2="278.5"/><!--MD5=[63be3a1481beaba15f9dd2bbcd4a53e1]
+class asdi::edb::Relation--><rect codeLine="32" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="48" id="asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.5;" width="78" x="614" y="238.5"/><ellipse cx="629" cy="254.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M631.4731,260.6431 Q630.8921,260.9419 630.2529,261.0913 Q629.6138,261.2407 628.9082,261.2407 Q626.4014,261.2407 625.0815,259.5889 Q623.7617,257.937 623.7617,254.8159 Q623.7617,251.6865 625.0815,250.0347 Q626.4014,248.3828 628.9082,248.3828 Q629.6138,248.3828 630.2612,248.5322 Q630.9087,248.6816 631.4731,248.9805 L631.4731,251.7031 Q630.8423,251.1221 630.2488,250.8523 Q629.6553,250.5825 629.0244,250.5825 Q627.6797,250.5825 626.9949,251.6492 Q626.3101,252.7158 626.3101,254.8159 Q626.3101,256.9077 626.9949,257.9744 Q627.6797,259.041 629.0244,259.041 Q629.6553,259.041 630.2488,258.7712 Q630.8423,258.5015 631.4731,257.9204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="46" x="643" y="259.0352">Relation</text><line style="stroke:#A80036;stroke-width:1.5;" x1="615" x2="691" y1="270.5" y2="270.5"/><line style="stroke:#A80036;stroke-width:1.5;" x1="615" x2="691" y1="278.5" y2="278.5"/><!--MD5=[6137f69857c1321f4d06c717c9c09db2]
+class asdi::edb::RelationSet--><rect codeLine="33" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="48" id="asdi::edb::RelationSet" style="stroke:#A80036;stroke-width:1.5;" width="95" x="393.5" y="238.5"/><ellipse cx="408.5" cy="254.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M410.9731,260.6431 Q410.3921,260.9419 409.7529,261.0913 Q409.1138,261.2407 408.4082,261.2407 Q405.9014,261.2407 404.5815,259.5889 Q403.2617,257.937 403.2617,254.8159 Q403.2617,251.6865 404.5815,250.0347 Q405.9014,248.3828 408.4082,248.3828 Q409.1138,248.3828 409.7612,248.5322 Q410.4087,248.6816 410.9731,248.9805 L410.9731,251.7031 Q410.3423,251.1221 409.7488,250.8523 Q409.1553,250.5825 408.5244,250.5825 Q407.1797,250.5825 406.4949,251.6492 Q405.8101,252.7158 405.8101,254.8159 Q405.8101,256.9077 406.4949,257.9744 Q407.1797,259.041 408.5244,259.041 Q409.1553,259.041 409.7488,258.7712 Q410.3423,258.5015 410.9731,257.9204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="63" x="422.5" y="259.0352">RelationSet</text><line style="stroke:#A80036;stroke-width:1.5;" x1="394.5" x2="487.5" y1="270.5" y2="270.5"/><line style="stroke:#A80036;stroke-width:1.5;" x1="394.5" x2="487.5" y1="278.5" y2="278.5"/><!--MD5=[8ef57b1f3eaf719c194464ff4bed18b5]
+class asdi::edb::Schema--><rect codeLine="34" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="48" id="asdi::edb::Schema" style="stroke:#A80036;stroke-width:1.5;" width="180" x="56" y="238.5"/><ellipse cx="71" cy="254.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M73.4731,260.6431 Q72.8921,260.9419 72.2529,261.0913 Q71.6138,261.2407 70.9082,261.2407 Q68.4014,261.2407 67.0815,259.5889 Q65.7617,257.937 65.7617,254.8159 Q65.7617,251.6865 67.0815,250.0347 Q68.4014,248.3828 70.9082,248.3828 Q71.6138,248.3828 72.2612,248.5322 Q72.9087,248.6816 73.4731,248.9805 L73.4731,251.7031 Q72.8423,251.1221 72.2488,250.8523 Q71.6553,250.5825 71.0244,250.5825 Q69.6797,250.5825 68.9949,251.6492 Q68.3101,252.7158 68.3101,254.8159 Q68.3101,256.9077 68.9949,257.9744 Q69.6797,259.041 71.0244,259.041 Q71.6553,259.041 72.2488,258.7712 Q72.8423,258.5015 73.4731,257.9204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="44" x="85" y="259.0352">Schema</text><rect fill="#FFFFFF" height="16.1328" style="stroke:#000000;stroke-width:1.0;stroke-dasharray:2.0,2.0;" width="102" x="137" y="235.5"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="100" x="138" y="248.1016">T: AttributeName</text><line style="stroke:#A80036;stroke-width:1.5;" x1="57" x2="235" y1="270.5" y2="270.5"/><line style="stroke:#A80036;stroke-width:1.5;" x1="57" x2="235" y1="278.5" y2="278.5"/><!--MD5=[63d735a6e8116701ee198db5f4862bbe]
+class asdi::edb::PredicateRef--><rect codeLine="36" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="32" id="asdi::edb::PredicateRef" style="stroke:#A80036;stroke-width:1.5;" width="105" x="928.5" y="107.5"/><ellipse cx="943.5" cy="123.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M944.8418,130.75 L942.3931,130.75 L942.3931,120.4985 L939.2471,120.4985 L939.2471,118.3569 L947.9878,118.3569 L947.9878,120.4985 L944.8418,120.4985 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="73" x="957.5" y="128.0352">PredicateRef</text><!--MD5=[1704a664f01d3b4ca77b91d1ac9e7038]
+class asdi::edb::AttributeIndex--><rect codeLine="40" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="65.9102" id="asdi::edb::AttributeIndex" style="stroke:#A80036;stroke-width:1.5;" width="218" x="56" y="90.5"/><ellipse cx="71" cy="106.5" fill="#EB937F" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M74.6143,113 L66.8945,113 L66.8945,100.6069 L74.6143,100.6069 L74.6143,102.7651 L69.3433,102.7651 L69.3433,105.438 L74.1162,105.438 L74.1162,107.5962 L69.3433,107.5962 L69.3433,110.8418 L74.6143,110.8418 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="82" x="85" y="111.0352">AttributeIndex</text><rect fill="#FFFFFF" height="16.1328" style="stroke:#000000;stroke-width:1.0;stroke-dasharray:2.0,2.0;" width="102" x="175" y="87.5"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="100" x="176" y="100.1016">T: AttributeName</text><line style="stroke:#A80036;stroke-width:1.5;" x1="57" x2="273" y1="122.5" y2="122.5"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="44" x="62" y="137.1348">Label : T</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="67" x="62" y="150.0898">Index : usize</text><!--MD5=[0ac83a4d57200892bb6a6362faf8e364]
+class asdi::edb::AttributeKind--><rect codeLine="44" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="78.8652" id="asdi::edb::AttributeKind" style="stroke:#A80036;stroke-width:1.5;" width="108" x="538" y="84"/><ellipse cx="553" cy="100" fill="#EB937F" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M556.6143,106.5 L548.8945,106.5 L548.8945,94.1069 L556.6143,94.1069 L556.6143,96.2651 L551.3433,96.2651 L551.3433,98.938 L556.1162,98.938 L556.1162,101.0962 L551.3433,101.0962 L551.3433,104.3418 L556.6143,104.3418 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="76" x="567" y="104.5352">AttributeKind</text><line style="stroke:#A80036;stroke-width:1.5;" x1="539" x2="645" y1="116" y2="116"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="42" x="544" y="130.6348">Boolean</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="38" x="544" y="143.5898">Integer</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="32" x="544" y="156.5449">String</text><!--MD5=[58db58f43e0c0eeeb327af7bc687dbb7]
+class asdi::edb::Constant--><rect codeLine="49" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="78.8652" id="asdi::edb::Constant" style="stroke:#A80036;stroke-width:1.5;" width="87" x="271.5" y="223"/><ellipse cx="288.75" cy="239" fill="#EB937F" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M292.3643,245.5 L284.6445,245.5 L284.6445,233.1069 L292.3643,233.1069 L292.3643,235.2651 L287.0933,235.2651 L287.0933,237.938 L291.8662,237.938 L291.8662,240.0962 L287.0933,240.0962 L287.0933,243.3418 L292.3643,243.3418 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="50" x="303.25" y="243.5352">Constant</text><line style="stroke:#A80036;stroke-width:1.5;" x1="272.5" x2="357.5" y1="255" y2="255"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="75" x="277.5" y="269.6348">Boolean : bool</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="68" x="277.5" y="282.5898">Integer : u64</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="73" x="277.5" y="295.5449">String : String</text><!--MD5=[ce86c1ef97f092853a1a6c77d28b6c27]
+class asdi::idb::query::Queryable--><rect codeLine="22" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="32" id="asdi::idb::query::Queryable" style="stroke:#A80036;stroke-width:1.5;" width="91" x="1114.5" y="107.5"/><ellipse cx="1129.5" cy="123.5" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M1125.9277,119.7651 L1125.9277,117.6069 L1133.3071,117.6069 L1133.3071,119.7651 L1130.8418,119.7651 L1130.8418,127.8418 L1133.3071,127.8418 L1133.3071,130 L1125.9277,130 L1125.9277,127.8418 L1128.3931,127.8418 L1128.3931,119.7651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="59" x="1143.5" y="128.0352">Queryable</text><!--MD5=[5662166f89f46ad2c4c4921bb72d18ee]
+class asdi::edb::io::FilePragma--><rect codeLine="25" fill="#FEFECE" filter="url(#fvfjoh44w4abg)" height="32" id="asdi::edb::io::FilePragma" style="stroke:#A80036;stroke-width:1.5;" width="95" x="1262.5" y="107.5"/><ellipse cx="1277.5" cy="123.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M1279.9731,129.6431 Q1279.3921,129.9419 1278.7529,130.0913 Q1278.1138,130.2407 1277.4082,130.2407 Q1274.9014,130.2407 1273.5815,128.5889 Q1272.2617,126.937 1272.2617,123.8159 Q1272.2617,120.6865 1273.5815,119.0347 Q1274.9014,117.3828 1277.4082,117.3828 Q1278.1138,117.3828 1278.7612,117.5322 Q1279.4087,117.6816 1279.9731,117.9805 L1279.9731,120.7031 Q1279.3423,120.1221 1278.7488,119.8523 Q1278.1553,119.5825 1277.5244,119.5825 Q1276.1797,119.5825 1275.4949,120.6492 Q1274.8101,121.7158 1274.8101,123.8159 Q1274.8101,125.9077 1275.4949,126.9744 Q1276.1797,128.041 1277.5244,128.041 Q1278.1553,128.041 1278.7488,127.7712 Q1279.3423,127.5015 1279.9731,126.9204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="63" x="1291.5" y="128.0352">FilePragma</text><!--MD5=[3d62af4edeead7415e603c238c318912]
+link asdi::edb::PredicateRef to asdi::edb::Predicate--><path codeLine="38" d="M982.11,139.68 C983.75,162.11 986.84,204.5 988.91,232.88 " fill="none" id="asdi::edb::PredicateRef-to-asdi::edb::Predicate" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="989.29,238.01,992.6367,228.7472,988.9327,233.0228,984.6572,229.3188,989.29,238.01" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[2b92991d20bd0c0791539a355bbe0e03]
+link asdi::edb::Attribute to asdi::MaybeAnonymous--><path codeLine="55" d="M823.89,286.74 C826.55,302.61 830.11,323.92 833.12,341.85 " fill="none" id="asdi::edb::Attribute-to-asdi::MaybeAnonymous" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="840.05,340.88,836.45,361.77,826.24,343.2,840.05,340.88" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[3a896590467e4d3894f9614672b35dbb]
+link asdi::edb::Attribute to asdi::MaybeLabeled--><path codeLine="56" d="M779.86,286.74 C747.22,305.64 701.24,332.27 667.69,351.7 " fill="none" id="asdi::edb::Attribute-to-asdi::MaybeLabeled" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="670.84,357.97,650.02,361.93,663.82,345.85,670.84,357.97" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[4b43da4d2c011b054994eb139a8c8ff0]
+reverse link asdi::edb::AttributeKind to asdi::edb::Attribute--><path codeLine="57" d="M650.49,159.65 C691.74,184.43 745.82,216.93 781.68,238.48 " fill="none" id="asdi::edb::AttributeKind-backto-asdi::edb::Attribute" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="646.03,156.97,651.6895,165.0304,650.3175,159.5425,655.8054,158.1705,646.03,156.97" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[53e83c4fbbda47579a2437efc4626f26]
+reverse link asdi::edb::AttributeKind to asdi::edb::Constant--><path codeLine="59" d="M533.02,148.83 C489,167.61 427.78,195.02 376,223 C370.27,226.1 364.35,229.52 358.56,233.02 " fill="none" id="asdi::edb::AttributeKind-backto-asdi::edb::Constant" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="537.76,146.82,527.9126,146.6518,533.1569,148.7724,531.0364,154.0167,537.76,146.82" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[f428e3b9a8cddd2800f42749a5d32dad]
+link asdi::edb::Fact to asdi::Collection--><path codeLine="61" d="M540.45,286.7 C532.89,300.5 521.35,317.01 506,326 C448.94,359.41 283.74,351.63 190.49,362.46 " fill="none" id="asdi::edb::Fact-to-asdi::Collection" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="191.42,369.4,170.64,365.26,189.47,355.53,191.42,369.4" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[df4a1784e2e108c5c36efdc7e0ca9674]
+link asdi::edb::Fact to asdi::IndexedCollection--><path codeLine="62" d="M539.72,286.71 C532.03,300.16 520.59,316.3 506,326 C485.61,339.56 432.87,351.98 384.03,361.17 " fill="none" id="asdi::edb::Fact-to-asdi::IndexedCollection" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="385.09,368.09,364.16,364.78,382.59,354.32,385.09,368.09" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[9885bfd967d7f84646d8561db7083779]
+link asdi::edb::Fact to asdi::Labeled--><path codeLine="63" d="M536.7,286.77 C528.53,299.13 517.61,314.16 506,326 C497.67,334.49 487.84,342.7 478.29,349.95 " fill="none" id="asdi::edb::Fact-to-asdi::Labeled" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="482.08,355.84,461.76,361.83,473.91,344.47,482.08,355.84" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[8033dd11f21f1acfa4c07bfb4bf25ace]
+link asdi::edb::Fact to asdi::edb::Predicate--><path codeLine="64" d="M572.5608,228.7459 C572.5608,228.7459 598.01,200.5 614.5,193.25 C675.32,166.5 851.42,169.56 913.5,193.25 C932.49,200.5 949.78,214.78 963.18,228.5 " fill="none" id="asdi::edb::Fact-asdi::edb::Predicate" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="972.22,238.28,969.0512,228.9548,968.8272,234.6072,963.1748,234.3833,972.22,238.28" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="968.8272" x2="963.395" y1="234.6072" y2="228.73"/><polygon fill="none" points="565.42,238.39,572.2051,235.9482,572.5608,228.7459,565.7757,231.1877,565.42,238.39" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[5445f3a5153230dbd5b3c5cd98da15bb]
+link asdi::edb::Fact to asdi::edb::Constant--><path codeLine="65" d="M529.8257,228.6997 C529.8257,228.6997 504.85,200.52 488.5,193.25 C449.92,176.1 432.99,178.32 393.5,193.25 C381.13,197.93 369.46,205.54 359.07,214.04 " fill="none" id="asdi::edb::Fact-asdi::edb::Constant" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="349.15,222.76,358.549,219.8175,352.9037,219.457,353.2642,213.8116,349.15,222.76" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="352.9037" x2="358.915" y1="219.457" y2="214.175"/><polygon fill="#A80036" points="536.89,238.4,536.5913,231.1951,529.8257,228.6997,530.1244,235.9046,536.89,238.4" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="6" x="348.5039" y="212.2473">*</text><!--MD5=[b77f4b207454b30e7787f9262ea05605]
+link asdi::edb::Predicate to asdi::AttributeName--><path codeLine="68" d="M992.84,286.74 C994.09,302.52 995.77,323.68 997.19,341.55 " fill="none" id="asdi::edb::Predicate-to-asdi::AttributeName" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="1004.19,341.27,998.79,361.77,990.23,342.38,1004.19,341.27" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[af45055b7cf5fcd105785369d7567e3f]
+link asdi::edb::Relation to asdi::Collection--><path codeLine="70" d="M638.52,286.61 C628.43,300.55 613.64,317.27 596,326 C519.21,364.02 305.12,349.98 190.76,362.46 " fill="none" id="asdi::edb::Relation-to-asdi::Collection" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="191.36,369.45,170.62,365.12,189.53,355.57,191.36,369.45" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[07db4872f9eb6c599be73b88446de41b]
+link asdi::edb::Relation to asdi::IndexedCollection--><path codeLine="71" d="M637.83,286.78 C627.66,300.43 613.04,316.76 596,326 C593.61,327.3 474.25,346.65 384.12,361.13 " fill="none" id="asdi::edb::Relation-to-asdi::IndexedCollection" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="385.1,368.07,364.24,364.33,382.88,354.24,385.1,368.07" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[1dfd53c334081892e3313d151b22cebe]
+link asdi::edb::Relation to asdi::Labeled--><path codeLine="72" d="M636.84,286.51 C626.5,299.71 612.05,315.67 596,326 C587.23,331.65 537.82,347.22 496.57,359.69 " fill="none" id="asdi::edb::Relation-to-asdi::Labeled" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="498.35,366.46,477.18,365.5,494.33,353.05,498.35,366.46" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[5a6b33b46504b8c37cce216e20126966]
+reverse link asdi::idb::query::Queryable to asdi::edb::Relation--><path codeLine="73" d="M1103.59,146.54 C1086.55,152.64 1067.68,158.85 1050,163.5 C901.63,202.49 852.26,165.58 710,223 C700.37,226.89 690.7,232.58 682.13,238.4 " fill="none" id="asdi::idb::query::Queryable-backto-asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="1101.38,139.9,1122.56,139.53,1106.23,153.03,1101.38,139.9" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[0300a9fd71cd7eb950f7911258df6d6c]
+link asdi::edb::Relation to asdi::edb::Predicate--><path codeLine="74" d="M678.8052,229.3158 C678.8052,229.3158 708.98,200.53 727.5,193.25 C804.44,163.01 836.27,163.77 913.5,193.25 C932.49,200.5 949.78,214.78 963.18,228.5 " fill="none" id="asdi::edb::Relation-asdi::edb::Predicate" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="972.22,238.28,969.0512,228.9548,968.8272,234.6072,963.1748,234.3833,972.22,238.28" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="968.8272" x2="963.395" y1="234.6072" y2="228.73"/><polygon fill="none" points="670.85,238.3,677.8223,236.4596,678.8052,229.3158,671.8329,231.1562,670.85,238.3" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[19b32b4944f82b9d211ce097a387b36e]
+link asdi::edb::Relation to asdi::edb::Schema--><path codeLine="75" d="M627.1948,229.3158 C627.1948,229.3158 597.02,200.53 578.5,193.25 C515,168.3 337.57,176.23 271.5,193.25 C242.43,200.74 212.89,216.54 189.78,231.17 " fill="none" id="asdi::edb::Relation-asdi::edb::Schema" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="178.65,238.43,188.373,236.8605,182.8371,235.6972,184.0005,230.1612,178.65,238.43" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="182.8371" x2="189.54" y1="235.6972" y2="231.325"/><polygon fill="#A80036" points="635.15,238.3,634.1671,231.1562,627.1948,229.3158,628.1777,236.4596,635.15,238.3" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[cbc89493d8f1dfeeebb31cdcc955f708]
+link asdi::edb::Relation to asdi::edb::Fact--><path codeLine="76" d="M601.92,262.5 C601.92,262.5 594.88,262.5 592.03,262.5 " fill="none" id="asdi::edb::Relation-asdi::edb::Fact" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="578.89,262.5,587.89,266.5,583.89,262.5,587.89,258.5,578.89,262.5" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="583.89" x2="591.89" y1="262.5" y2="262.5"/><polygon fill="#A80036" points="613.92,262.5,607.92,258.5,601.92,262.5,607.92,266.5,613.92,262.5" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="6" x="586.4194" y="258.2781">*</text><!--MD5=[f9a1ff5135e484ee4f7678461d409bd1]
+link asdi::edb::io::FilePragma to asdi::edb::Relation--><path codeLine="77" d="M1270.1,145.24 C1255.34,152.08 1238.25,159.07 1222,163.5 C1001,223.82 924.81,143.4 710,223 C704.08,225.19 691.538,232.0197 691.538,232.0197 " fill="none" id="asdi::edb::io::FilePragma-asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="681.4,238.44,688.6091,238.6092,691.538,232.0197,684.3289,231.8505,681.4,238.44" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="1281.87,139.58,1272.0255,139.8724,1277.3632,141.7454,1275.4902,147.0832,1281.87,139.58" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="1277.3632" x2="1270.15" y1="141.7454" y2="145.21"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="5" x="1266.7238" y="160.0107">?</text><!--MD5=[a0ed5618d7f9bad485d6f857e6d684a2]
+link asdi::edb::RelationSet to asdi::Collection--><path codeLine="79" d="M422.94,286.6 C411.06,300.18 394.35,316.5 376,326 C305.61,362.42 275.5,347.21 190.38,361.93 " fill="none" id="asdi::edb::RelationSet-to-asdi::Collection" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="191.68,368.81,170.72,365.69,189.05,355.06,191.68,368.81" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[98d572135116238c027436314c89e86d]
+link asdi::edb::RelationSet to asdi::IndexedCollection--><path codeLine="80" d="M419.7,286.69 C407.58,299.17 391.72,314.34 376,326 C363.2,335.5 348.45,344.49 334.6,352.2 " fill="none" id="asdi::edb::RelationSet-to-asdi::IndexedCollection" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="337.48,358.6,316.54,361.86,330.87,346.26,337.48,358.6" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[81daf5e7aa2919f2b6c1e6bafcfa7e89]
+reverse link asdi::idb::query::Queryable to asdi::edb::RelationSet--><path codeLine="81" d="M1105.06,146.79 C1087.7,153.07 1068.27,159.32 1050,163.5 C812.9,217.72 736.73,146.07 506,223 C494.93,226.69 483.7,232.47 473.76,238.44 " fill="none" id="asdi::idb::query::Queryable-backto-asdi::edb::RelationSet" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="1102.78,140.17,1123.96,139.66,1107.72,153.27,1102.78,140.17" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[065cf3b59e7d91321b368b54952646d1]
+link asdi::edb::RelationSet to asdi::edb::Relation--><path codeLine="82" d="M469.749,229.7187 C469.749,229.7187 503.51,200.53 523.5,193.25 C546.47,184.89 555.75,184.31 578.5,193.25 C597.02,200.53 613.66,214.81 626.5,228.52 " fill="none" id="asdi::edb::RelationSet-asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="635.15,238.3,632.1784,228.9101,631.8354,234.5566,626.1889,234.2136,635.15,238.3" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="631.8354" x2="626.535" y1="234.5566" y2="228.565"/><polygon fill="#A80036" points="461.31,238.25,468.3733,236.7973,469.749,229.7187,462.6857,231.1713,461.31,238.25" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="6" x="623.8072" y="227.785">*</text><!--MD5=[3f6bf05e9011bb20cd83b2fa8e0247c4]
+link asdi::edb::Schema to asdi::Collection--><path codeLine="84" d="M140.88,286.74 C137.37,302.7 132.64,324.15 128.68,342.14 " fill="none" id="asdi::edb::Schema-to-asdi::Collection" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="135.49,343.74,124.36,361.77,121.82,340.73,135.49,343.74" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[ba100030276d35d8d14331b84c6c7602]
+link asdi::edb::Schema to asdi::IndexedCollection--><path codeLine="85" d="M174.46,286.74 C196.58,304.8 227.33,329.91 250.78,349.06 " fill="none" id="asdi::edb::Schema-to-asdi::IndexedCollection" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="255.28,343.69,266.34,361.77,246.42,354.54,255.28,343.69" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[9c90a014583a41a51fa25249858dfc66]
+link asdi::edb::Schema to asdi::edb::Attribute--><path codeLine="86" d="M188.699,231.8712 C188.699,231.8712 242.43,200.74 271.5,193.25 C362.1,169.91 601.82,170.21 692.5,193.25 C722.08,200.77 752.23,216.68 775.77,231.36 " fill="none" id="asdi::edb::Schema-asdi::edb::Attribute" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="786.77,238.43,781.3592,230.2006,782.563,235.7279,777.0358,236.9318,786.77,238.43" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="782.563" x2="775.83" y1="235.7279" y2="231.4"/><polygon fill="#A80036" points="178.65,238.43,185.8608,238.5002,188.699,231.8712,181.4882,231.8009,178.65,238.43" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="6" x="771.4861" y="227.9483">*</text><!--MD5=[26be1b9872456991b81d1f8d9c6c949b]
+reverse link asdi::edb::AttributeIndex to asdi::edb::Schema--><path codeLine="87" d="M159.84,161.71 C156.46,186.09 152.14,217.2 149.24,238.15 " fill="none" id="asdi::edb::AttributeIndex-backto-asdi::edb::Schema" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="160.55,156.62,155.3545,164.987,159.8649,161.5728,163.2791,166.0832,160.55,156.62" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[eb8cfc102d154868ff9695792e73ebbc]
+@startuml
+
+!include options.plantuml
+
+interface asdi::AttributeName
+hide "asdi::AttributeName" members
+
+interface asdi::Collection<T>
+hide "asdi::Collection" members
+
+interface asdi::IndexedCollection<K,V>
+hide "asdi::IndexedCollection" members
+
+interface asdi::Labeled
+hide "asdi::Labeled" members
+
+interface asdi::MaybeAnonymous
+hide "asdi::MaybeAnonymous" members
+
+interface asdi::MaybeLabeled<T : AttributeName>
+hide "asdi::MaybeLabeled" members
+
+interface asdi::idb::query::Queryable
+hide "asdi::idb::query::Queryable" members
+
+class asdi::edb::io::FilePragma
+hide "asdi::edb::io::FilePragma" members
+
+namespace asdi::edb {
+    class Attribute<T: AttributeName>
+    class Fact
+    class Predicate
+    class Relation
+    class RelationSet
+    class Schema<T: AttributeName>
+
+    class PredicateRef << (T,#ADD1B2) type >>
+
+    PredicateRef ..> Predicate
+
+    enum AttributeIndex<T: AttributeName> {
+        Label : T
+        Index : usize
+    }
+    enum AttributeKind {
+        Boolean
+        Integer
+        String
+    }
+    enum Constant {
+        Boolean : bool
+        Integer : u64
+        String : String
+    }
+
+    Attribute ..|> asdi::MaybeAnonymous
+    Attribute ..|> asdi::MaybeLabeled
+    Attribute .up.> AttributeKind
+
+    Constant .up.> AttributeKind
+
+    Fact ..|> asdi::Collection
+    Fact ..|> asdi::IndexedCollection
+    Fact ..|> asdi::Labeled
+    Fact o-> Predicate
+    Fact *-> "*" Constant
+  ' Fact ..|> asdi::idb::query::relational::FactOps
+
+    Predicate ..|> asdi::AttributeName
+
+    Relation ..|> asdi::Collection
+    Relation ..|> asdi::IndexedCollection
+    Relation ..|> asdi::Labeled
+    Relation .up.|> asdi::idb::query::Queryable
+    Relation o-> Predicate
+    Relation *-> Schema
+    Relation *-> "*" Fact
+    Relation *-up-> "?" asdi::edb::io::FilePragma
+
+    RelationSet ..|> asdi::Collection
+    RelationSet ..|> asdi::IndexedCollection
+    RelationSet .up.|> asdi::idb::query::Queryable
+    RelationSet *-> "*" Relation
+
+    Schema ..|> asdi::Collection
+    Schema ..|> asdi::IndexedCollection
+    Schema *-> "*" Attribute
+    Schema .up.> AttributeIndex
+}
+
+
+@enduml
+
+@startuml
+
+set namespaceSeparator ::
+hide enum methods
+hide interface fields
+hide << const >> members
+hide << type >> members
+hide << type >> stereotype
+hide << module >> fields
+hide << module >> circle
+
+interface asdi::AttributeName
+hide "asdi::AttributeName" members
+
+interface asdi::Collection<T>
+hide "asdi::Collection" members
+
+interface asdi::IndexedCollection<K,V>
+hide "asdi::IndexedCollection" members
+
+interface asdi::Labeled
+hide "asdi::Labeled" members
+
+interface asdi::MaybeAnonymous
+hide "asdi::MaybeAnonymous" members
+
+interface asdi::MaybeLabeled<T : AttributeName>
+hide "asdi::MaybeLabeled" members
+
+interface asdi::idb::query::Queryable
+hide "asdi::idb::query::Queryable" members
+
+class asdi::edb::io::FilePragma
+hide "asdi::edb::io::FilePragma" members
+
+namespace asdi::edb {
+    class Attribute<T: AttributeName>
+    class Fact
+    class Predicate
+    class Relation
+    class RelationSet
+    class Schema<T: AttributeName>
+
+    class PredicateRef << (T,#ADD1B2) type >>
+
+    PredicateRef ..> Predicate
+
+    enum AttributeIndex<T: AttributeName> {
+        Label : T
+        Index : usize
+    }
+    enum AttributeKind {
+        Boolean
+        Integer
+        String
+    }
+    enum Constant {
+        Boolean : bool
+        Integer : u64
+        String : String
+    }
+
+    Attribute ..|> asdi::MaybeAnonymous
+    Attribute ..|> asdi::MaybeLabeled
+    Attribute .up.> AttributeKind
+
+    Constant .up.> AttributeKind
+
+    Fact ..|> asdi::Collection
+    Fact ..|> asdi::IndexedCollection
+    Fact ..|> asdi::Labeled
+    Fact o-> Predicate
+    Fact *-> "*" Constant
+
+    Predicate ..|> asdi::AttributeName
+
+    Relation ..|> asdi::Collection
+    Relation ..|> asdi::IndexedCollection
+    Relation ..|> asdi::Labeled
+    Relation .up.|> asdi::idb::query::Queryable
+    Relation o-> Predicate
+    Relation *-> Schema
+    Relation *-> "*" Fact
+    Relation *-up-> "?" asdi::edb::io::FilePragma
+
+    RelationSet ..|> asdi::Collection
+    RelationSet ..|> asdi::IndexedCollection
+    RelationSet .up.|> asdi::idb::query::Queryable
+    RelationSet *-> "*" Relation
+
+    Schema ..|> asdi::Collection
+    Schema ..|> asdi::IndexedCollection
+    Schema *-> "*" Attribute
+    Schema .up.> AttributeIndex
+}
+
+
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 10:19:58 PST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

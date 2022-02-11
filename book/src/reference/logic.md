@@ -81,9 +81,9 @@ The purpose of the descriptions above was to allow for the mapping of Datalog in
 Given a Datalog program \$\small P=\( D_E, D_I, Q \)$ we can construct a new first-order language $\small L=(\mathcal{C},\mathcal{P},\mathcal{F})$ in the following manner.
 
 1. $\mathcal{C}$ is comprised the set of all constant values in any EDB or IDB relation.
-   $$\small \lbrace c | c \in \bigcup \lbrace terms\(atoms\(r\)\) | r \in edb\(P\) \cap idb\(P\) \rbrace \rbrace$$
+   $$\small \lbrace c | c \in \bigcup \lbrace terms\(atoms\(r\)\) | r \in extensional\(P\) \cap intensional\(P\) \rbrace \rbrace$$
 1. $\mathcal{P}$ is comprised the set of labels for all EDB and IDB relations.
-   $$\small \lbrace label\(r\) | r \in edb\(P\) \cap idb\(P\) \rbrace$$
+   $$\small \lbrace label\(r\) | r \in extensional\(P\) \cap intensional\(P\) \rbrace$$
 1. In $\small\text{Datalog}$, which does not allow functions, $\mathcal{F}=\empty$. However, in $\small\text{Datalog}^{\theta}$ which allows certain operators in arithmetic literals $\mathcal{F}=\theta$.
 1. For each rule $\small r \in rules\(P\)$:
 

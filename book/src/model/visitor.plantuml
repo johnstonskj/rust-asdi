@@ -1,0 +1,62 @@
+@startuml
+
+!include options.plantuml
+
+class asdi::Program
+hide "asdi::Program" members
+
+class asdi::edb::RelationSet
+hide "asdi::edb::RelationSet" members
+
+class asdi::edb::Relation
+hide "asdi::edb::Relation" members
+
+class asdi::edb::Fact
+hide "asdi::edb::Fact" members
+
+class asdi::idb::RuleSet
+hide "asdi::idb::RuleSet" members
+
+class asdi::idb::Rule
+hide "asdi::idb::Rule" members
+
+class asdi::idb::query::QuerySet
+hide "asdi::idb::query::QuerySet" members
+
+class asdi::idb::query::Query
+hide "asdi::idb::query::Query" members
+
+namespace asdi::visitor {
+
+    interface Formatter
+
+    interface ProgramVisitor
+    interface RelationVisitor
+    interface RuleVisitor
+    interface QueryVisitor
+
+    ProgramVisitor ..> RelationVisitor
+    ProgramVisitor ..> RuleVisitor
+    ProgramVisitor ..> QueryVisitor
+    ProgramVisitor ..> asdi::Program
+    ProgramVisitor ..> asdi::edb::RelationSet
+    ProgramVisitor ..> asdi::idb::RuleSet
+    ProgramVisitor ..> asdi::idb::query::QuerySet
+
+    RelationVisitor ..> asdi::edb::Relation
+    RelationVisitor ..> asdi::edb::Fact
+
+    RuleVisitor ..> asdi::idb::Rule
+
+    QueryVisitor ..> asdi::idb::query::Query
+
+    class features << module >> {
+        format_program() : String
+        visit_program<T>() : T
+    }
+
+    features ..> ProgramVisitor
+    features ..> Formatter
+}
+
+@enduml

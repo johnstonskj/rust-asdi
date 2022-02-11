@@ -1,0 +1,93 @@
+@startuml
+
+!include options.plantuml
+
+interface asdi::AttributeName
+hide "asdi::AttributeName" members
+
+interface asdi::Labeled
+hide "asdi::Labeled" members
+
+interface asdi::MaybeAnonymous
+hide "asdi::MaybeAnonymous" members
+
+interface asdi::MaybePositive
+hide "asdi::MaybePositive" members
+
+interface asdi::edb::Constant
+hide "asdi::edb::Constant" members
+
+interface asdi::edb::PredicateRef
+hide "asdi::edb::PredicateRef" members
+
+namespace asdi::idb {
+    interface MaybeGround
+
+    class Atom
+    class Comparison
+    class Literal {
+        negative: bool
+    }
+    class Rule
+    class RuleSet
+    class Variable
+
+    enum ComparisonOperator {
+        Equal
+        NotEqual
+        LessThan
+        LessThanOrEqual
+        GreaterThan
+        GreaterThanOrEqual
+    }
+    enum LiteralInner {
+        Relational : Atom
+        Arithmetic : Comparison
+    }
+    enum RuleForm {
+        Pure
+        Constraint
+        Disjunctive
+    }
+    enum Term {
+        Anonymous
+        Variable : VariableRef
+        Constant : Constant
+    }
+
+    class VariableRef << (T,#ADD1B2) type >>
+
+    Atom -down-> "label" asdi::edb::PredicateRef
+    Atom --> "terms *" Term
+    Atom ..|> asdi::Labeled
+    Atom .up.|> MaybeGround
+
+    Comparison --> "lhs, rhs" Term
+    Comparison --> ComparisonOperator
+    Comparison .up.|> MaybeGround
+
+    Rule --> "head *" Atom
+    Rule --> "body *" Literal
+    Rule ..> RuleForm
+    Rule .up.|> MaybeGround
+    Rule ..|> asdi::MaybePositive
+
+    RuleSet -right-> "*" Rule
+
+    Literal *-> LiteralInner
+    Literal .up.|> MaybeGround
+    Literal ..|> asdi::MaybePositive
+
+    LiteralInner ..> Atom
+    LiteralInner ..> Comparison
+    LiteralInner .up.|> MaybeGround
+
+    Term ..> VariableRef
+    Term .down.> asdi::edb::Constant
+    Term ..|> asdi::MaybeAnonymous
+
+    VariableRef .left.> Variable
+    Variable ..|> asdi::AttributeName
+}
+
+@enduml

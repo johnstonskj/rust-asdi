@@ -2,12 +2,26 @@
 
 Another Simplistic [Datalog](https://en.wikipedia.org/wiki/Datalog) Implementation (ASDI), in Rust.
 
-Datalog is a logic programming language and a subset of the earlier
-[Prolog](https://en.wikipedia.org/wiki/Prolog)[^1]. This package provides a data model to represent 
-[Datalog](https://en.wikipedia.org/wiki/Datalog) programs in memory, a parser for the textual representation, 
-and some evaluation implementations.
+Datalog is a logic programming language and a subset of the earlier [Prolog](https://en.wikipedia.org/wiki/Prolog)[^1].
+The language is interesting as it can be used as a data query language akin to [SQL](https://en.wikipedia.org/wiki/SQL)
+with some important additional capabilities such as recursive queries. It is also expressive enough to allow for it's
+use as an entailment mechanism for ontology languages such as the 
+[Web Ontology Language (OWL)](https://en.wikipedia.org/wiki/https://en.wikipedia.org/wiki/Web_Ontology_Language) and 
+the Semantic Web.
 
-## Brief Example
+This package provides an in-memory model to represent [Datalog](https://en.wikipedia.org/wiki/Datalog) programs, a 
+parser for a textual representation, relation input/output implementations and some implementations of common inference
+techniques.
+
+**Chapter 2** will provide an overview of Datalog itself from both an abstract point of view as well as a tour of the 
+concrete syntax used as the textual representation.
+
+**Chapter 3** will
+
+**Chapter 4** will
+
+
+## Brief Datalog Example
 
 We will consider the following syllogism from <span class="bibref inline">[Mill1851](../reference/references.md#Mill1851), vol. 1, chap. 2</span>:
 
@@ -17,7 +31,7 @@ We will consider the following syllogism from <span class="bibref inline">[Mill1
 > 
 > Therefore, Socrates is mortal.
 
-This can be represented in the following Datalog program.
+This can be represented in the following Datalog textual program.
 
 ```datalog
 human("Socrates").

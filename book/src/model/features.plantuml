@@ -1,0 +1,24 @@
+@startuml
+
+!include options.plantuml
+
+namespace asdi::features {
+    class Feature
+    class FeatureSet
+
+    FeatureSet o-> Feature
+
+    class features << module >> {
+        ALL_FEATURES: Feature <<const>>
+        FEATURE_COMPARISONS: Feature <<const>>
+        FEATURE_CONSTRAINTS: Feature <<const>>
+        FEATURE_DISJUNCTION: Feature <<const>>
+        FEATURE_NEGATION: Feature <<const>>
+    }
+    show features fields
+    hide features methods
+
+    features ..> Feature
+}
+
+@enduml

@@ -1,0 +1,52 @@
+@startuml
+
+!include options.plantuml
+
+interface asdi::edb::Relation
+hide "asdi::edb::Relation" members
+
+namespace asdi::edb::io {
+
+    namespace csv {
+        class DelimitedLines
+        class Options
+        DelimitedLines ..|> asdi::edb::io::Reader
+        DelimitedLines ..|> asdi::edb::io::Writer
+    }
+    namespace json {
+        class Json
+        class Options
+        Json ..|> asdi::edb::io::Reader
+        Json ..|> asdi::edb::io::Writer
+    }
+    namespace text {
+        class TextTables
+        class Options
+        TextTables ..|> asdi::edb::io::Reader
+        TextTables ..|> asdi::edb::io::Writer
+    }
+
+    class FilePragma
+    enum Format {
+        DelimitedLines
+        Json
+        Text
+    }
+
+    FilePragma *-down-> Format
+
+    interface Reader
+    interface Writer
+
+    class io << module >> {
+        print_relation(): Result<())>
+        read_relation(): Result<Relation>
+        write_relation(): Result<())>
+    }
+
+    io ..> asdi::edb::Relation
+    Reader ..> asdi::edb::Relation
+    Writer ..> asdi::edb::Relation
+}
+
+@enduml

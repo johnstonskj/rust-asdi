@@ -1,0 +1,53 @@
+@startuml
+
+!include options.plantuml
+
+class std::rc::Rc
+hide "std::rc::Rc" members
+
+class asdi::features::FeatureSet
+hide "asdi::features::FeatureSet" members
+
+class asdi::edb::RelationSet
+hide "asdi::edb::RelationSet" members
+
+class asdi::edb::NameReferenceSet
+hide "asdi::edb::NameReferenceSet" members
+
+class asdi::idb::RuleSet
+hide "asdi::idb::RuleSet" members
+
+class asdi::idb::query::QuerySet
+hide "asdi::idb::query::QuerySet" members
+
+namespace asdi {
+
+    interface AttributeName
+    interface Collection<T>
+    interface IndexedCollection<K,V>
+    interface Labeled
+    interface MaybePositive
+    interface ProgramCore
+
+    IndexedCollection --|> Collection
+    MutableCollection --|> Collection
+    MutableIndexedCollection --|> Collection
+
+    class Program
+
+    Program ..|> ProgramCore
+    Program ..|> MaybePositive
+    Program *-up-> asdi::features::FeatureSet
+    Program *-up-> "extensional" asdi::edb::RelationSet
+    Program *-up-> "intensional" asdi::edb::RelationSet
+    Program *-up-> "predicates" asdi::edb::NameReferenceSet
+    Program *-up-> "variables" asdi::edb::NameReferenceSet
+    Program *-up-> asdi::idb::RuleSet
+    Program *-up-> asdi::idb::query::QuerySet
+
+    class AttributeNameRef<T: AttributeName> << (T,#ADD1B2) type>>
+    AttributeNameRef .up.> std::rc::Rc : base
+    AttributeNameRef ..> AttributeName
+}
+
+@enduml

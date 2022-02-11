@@ -20,8 +20,8 @@ The extensional database in turn is a set of _relations_ each of which is a set 
 
 A program has the following properties.
 
-* $\small edb\(P\)$ returns the set of relations comprising the extensional database.
-* $\small idb\(P\)$ returns the set of relations comprising the intensional database, **IFF** entailment has occured. 
+* $\small extensional\(P\)$ returns the set of relations comprising the extensional database.
+* $\small intensional\(P\)$ returns the set of relations comprising the intensional database, **IFF** entailment has occured. 
 * $\small rules\(P\)$ returns the set of rules associated with the intensional database.
 * $\small positive(r)$ returns true if all intensional rules are _positive_:
    $$\tag{v}\small positive(p) \coloneqq \(\forall{r}\in rules\(p\); positive(r\)\)$$

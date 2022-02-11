@@ -1,0 +1,181 @@
+<link   rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"
+        integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs"
+        crossorigin="anonymous">
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+
+<link   rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/languages/ebnf.min.js"></script>
+
+<script>
+datalog = function(hljs) {
+
+  const PROLOG_LINE_COMMENT = {
+    scope: 'comment',
+    begin: '%',
+    end: '$',
+  };
+
+  const PREDICATE = {
+    scope: 'title.function.invoke',
+    begin: /[a-z][A-Za-z0-9_]*/,
+    relevance: 0
+  };
+
+  const VAR = {
+    scope: 'variable',
+    variants: [
+      {
+        begin: /[A-Z][a-zA-Z0-9_]*/
+      },
+      {
+        begin: /_/
+      }
+    ],
+    relevance: 0
+  };
+
+  const BOOLEAN = {
+    scope: 'literal',
+    begin: /(true|false)/
+  };
+
+  const SYMBOL_STRING = {
+    scope: 'string',
+    begin: /[a-z][A-Za-z0-9_]*(:[A-Za-z][A-Za-z0-9_]*)?/,
+    relevance: 0
+  };
+
+  const REL_TYPES = {
+    scope: 'types',
+    begin: /string|integer|boolean/,
+    relevance: 1
+  };
+
+  const REL_SEPARATOR = {
+    scope: 'punctuation',
+    begin: /:/
+  };
+
+  const INFER_FROM = {
+    scope: 'keyword',
+    begin: /from/,
+    relevance: 1,
+  };
+
+  const PRAGMA_LIST = {
+    scope: 'punctuation',
+    begin: /\(/,
+    end: /\)/,
+    relevance: 0,
+    contains: [
+      PROLOG_LINE_COMMENT,
+      hljs.C_BLOCK_COMMENT_MODE,
+      REL_TYPES,
+      REL_SEPARATOR,
+      BOOLEAN,
+      SYMBOL_STRING,
+      hljs.QUOTE_STRING_MODE,
+      hljs.C_NUMBER_MODE
+    ]
+  };
+
+  const PRAGMA = {
+    beginScope: 'meta',
+    begin: /\.[a-z]+/,
+    end: /\./,
+    contains: [
+      PROLOG_LINE_COMMENT,
+      hljs.C_BLOCK_COMMENT_MODE,
+      INFER_FROM,
+      PREDICATE,
+      PRAGMA_LIST,
+      hljs.QUOTE_STRING_MODE,
+    ],
+    relevance: 0
+  };
+
+  const TERM_LIST = {
+    scope: 'punctuation',
+    begin: /\(/,
+    end: /\)/,
+    relevance: 0,
+    contains: [
+      PROLOG_LINE_COMMENT,
+      hljs.C_BLOCK_COMMENT_MODE,
+      VAR,
+      BOOLEAN,
+      SYMBOL_STRING,
+      hljs.QUOTE_STRING_MODE,
+      hljs.C_NUMBER_MODE
+    ]
+  };
+
+  const IMPLICATION = {
+    scope: 'keyword',
+    begin: /:\-|<\-|⟵|\?\-?/
+  };
+
+  const CONNECTIVE = {
+    scope: 'keyword',
+    begin: /,|&|AND|∧|∨|OR|!|￢|NOT/
+  };
+
+  const COMPARISON_OP = {
+    scope: 'operator',
+    begin: /=|!=|\/=|<|<=|≤|>|>=|≥|\*=|≛|MATCHES/
+  };
+
+  const LINE_TERMINATOR = {
+    scope: 'punctuation',
+    begin: /\./
+  };
+
+  return {
+    name: 'Datalog',
+    contains: [
+      PROLOG_LINE_COMMENT,
+      hljs.C_BLOCK_COMMENT_MODE,
+      PRAGMA,
+      PREDICATE,
+      TERM_LIST,
+      IMPLICATION,
+      CONNECTIVE,
+      COMPARISON_OP,
+      LINE_TERMINATOR,
+      VAR,
+      BOOLEAN,
+      SYMBOL_STRING,
+      hljs.QUOTE_STRING_MODE,
+      hljs.C_NUMBER_MODE
+    ]
+  };
+}
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "\\(", right: "\\)", display: false},
+                {left: "$", right: "$", display: false},
+                {left: "\\[", right: "\\]", display: true}
+            ]
+        });
+    });
+    // load the library and ALL languages
+    document.addEventListener('DOMContentLoaded', (event) => {
+        hljs.registerLanguage("datalog", datalog);
+        document.querySelectorAll('pre.language-prolog code').forEach((el) => {
+            el.classList.add("language-prolog");
+        });
+        hljs.highlightAll();
+    });
+</script>
+
