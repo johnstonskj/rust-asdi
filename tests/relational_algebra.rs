@@ -138,6 +138,7 @@ fn test_compile_rule_one_criteria() {
 }
 
 #[test]
+#[ignore]
 fn test_compile_rule_negated_literal() {
     let head = Atom::new(
         Predicate::from_str("living").unwrap().into(),
