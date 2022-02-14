@@ -21,7 +21,7 @@ integer ::= ( "+" | "-" )? DIGIT+
 
 decimal ::= integer "." DIGIT+
 
-float   ::= decimal ( "e" | "E" ) ( "+" | "-" )? DIGIT+
+float   ::= decimal ( "e" | "E" ) integer
 
 boolean ::= ( "true" | "⊤" ) | ( "false" | "⊥" )
 

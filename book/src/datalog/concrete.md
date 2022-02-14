@@ -81,7 +81,7 @@ Numeric values in ASDI take one of three forms, integers, decimal values, and fl
 number  ::= float | decimal | integer
 ```
 
-Integer values in ASDI are signed, 64-bit values.
+Integer values in ASDI are signed, 64-bit values (`i64`).
 
 ![integer](images/integer.png)
 
@@ -97,12 +97,12 @@ Decimal values in ASDI are ... TBD.
 decimal ::= integer "." DIGIT+
 ```
 
-Floating point values in ASDI are 65-bit IEEE floats.
+Floating point values in ASDI are 65-bit IEEE floats (`f64`).
 
 ![integer](images/float.png)
 
 ```ebnf
-float   ::= decimal ( "e" | "E" ) ( "+" | "-" )? DIGIT+
+float   ::= decimal ( "e" | "E" ) integer
 ```
 
 ### Booleans
