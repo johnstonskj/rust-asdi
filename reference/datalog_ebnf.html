@@ -165,59 +165,67 @@ document.addEventListener("DOMContentLoaded", function() {
                 <div id="content" class="content">
                     <main>
                         <h1 id="appendix-datalog-ebnf"><a class="header" href="#appendix-datalog-ebnf">Appendix: Datalog EBNF</a></h1>
-<pre><code class="language-ebnf">program
-        ::= pragma* ( fact | rule | query )* ;
+<pre><code class="language-ebnf">program ::= pragma* ( fact | rule | query )*
 
-(* ************************************************************************* *)
+/* ************************************************************************* */
 
-fact
-        ::= predicate ( &quot;(&quot; constant ( &quot;,&quot; constant )* &quot;)&quot; )? &quot;.&quot; ;
+fact    ::= predicate ( &quot;(&quot; constant ( &quot;,&quot; constant )* &quot;)&quot; )? &quot;.&quot;
+
 predicate
-        ::= LC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )* ;
+        ::= LC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )*
 
-(* ************************************************************************* *)
+/* ************************************************************************* */
 
 constant
-        ::= string | integer | boolean ;
-string
-        ::= predicate ( &quot;:&quot; ALPHA ( ALPHA | DIGIT | &quot;_&quot; * )? )
-            | DQUOTE [^\u{22}]* DQUOTE ;
-integer
-        ::= ( &quot;+&quot; | &quot;-&quot;)? DIGIT+ ;
-boolean
-        ::= ( &quot;true&quot; | &quot;⊤&quot; ) | ( &quot;false&quot; | &quot;⊥&quot; ) ;
+        ::= string | number | boolean
 
-(* ************************************************************************* *)
+string  ::= predicate ( &quot;:&quot; ALPHA ( ALPHA | DIGIT | &quot;_&quot; * )? )
+            | DQUOTE [^\&quot;]* DQUOTE
 
-rule
-        ::= ( head | &quot;⊥&quot; )? ( &quot;:-&quot; | &quot;&lt;-&quot; | &quot;⟵&quot; ) body &quot;.&quot; ;
-head
-        ::= ( atom ( ( &quot;;&quot; | &quot;|&quot; | &quot;OR&quot; | &quot;∨&quot; ) atom )* ) ;
-body
-        ::= literal ( ( &quot;,&quot; | &quot;&amp;&quot; | &quot;AND&quot; | &quot;∧&quot; ) literal )* ;
+number  ::= float | decimal | integer
 
-(* ************************************************************************* *)
+integer ::= ( &quot;+&quot; | &quot;-&quot; )? DIGIT+
 
-atom
-        ::= predicate &quot;(&quot; term ( &quot;,&quot; term )* &quot;)&quot; ;
-term
-        ::= variable | constant ;
+decimal ::= integer &quot;.&quot; DIGIT+
+
+float   ::= decimal ( &quot;e&quot; | &quot;E&quot; ) ( &quot;+&quot; | &quot;-&quot; )? DIGIT+
+
+boolean ::= ( &quot;true&quot; | &quot;⊤&quot; ) | ( &quot;false&quot; | &quot;⊥&quot; )
+
+/* ************************************************************************* */
+
+rule    ::= ( head | &quot;⊥&quot; )? ( &quot;:-&quot; | &quot;&lt;-&quot; | &quot;⟵&quot; ) body &quot;.&quot;
+
+head    ::= ( atom ( ( &quot;;&quot; | &quot;|&quot; | &quot;OR&quot; | &quot;∨&quot; ) atom )* )
+
+body    ::= literal ( ( &quot;,&quot; | &quot;&amp;&quot; | &quot;AND&quot; | &quot;∧&quot; ) literal )*
+
+
+/* ************************************************************************* */
+
+atom    ::= predicate &quot;(&quot; term ( &quot;,&quot; term )* &quot;)&quot;
+
+term    ::= variable | constant
+
 variable
-        ::= named-variable | anon-variable ;
-named-variable
-        ::= UC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )* ;
-anon-variable
-        ::= &quot;_&quot; ;
+        ::= named-variable | anon-variable
 
-(* ************************************************************************* *)
+named-variable
+        ::= UC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )*
+
+anon-variable
+        ::= &quot;_&quot;
+
+/* ************************************************************************* */
 
 literal
-        ::= ( &quot;!&quot; | &quot;NOT&quot; | &quot;￢&quot; )? ( atom | comparison ) ;
+        ::= ( &quot;!&quot; | &quot;NOT&quot; | &quot;￢&quot; )? ( atom | comparison )
 
-(* ************************************************************************* *)
+/* ************************************************************************* */
 
 comparison
-        ::= ( named-variable | constant ) operator ( named-variable | constant ) ;
+        ::= ( named-variable | constant ) operator ( named-variable | constant )
+
 operator
         ::= &quot;=&quot;
             | (&quot;!=&quot; | &quot;/=&quot; | &quot;≠&quot;)
@@ -225,62 +233,78 @@ operator
             | (&quot;&lt;=&quot; | &quot;≤&quot;)
             | &quot;&gt;&quot;
             | (&quot;&gt;=&quot; | &quot;≥&quot;)
-            | (&quot;*=&quot; | &quot;≛&quot; | &quot;MATCHES&quot;) ;
+            | (&quot;*=&quot; | &quot;≛&quot; | &quot;MATCHES&quot;)
 
-(* ************************************************************************* *)
+/* ************************************************************************* */
 
-query
-        ::= ( &quot;?-&quot; atom &quot;.&quot; ) | ( atom &quot;?&quot; ) ;
+query   ::= ( &quot;?-&quot; atom &quot;.&quot; ) | ( atom &quot;?&quot; )
 
-(* ************************************************************************* *)
+/* ************************************************************************* */
 
-pragma
-        ::= &quot;.&quot; ( feature | assert | infer | input | output ) ;
+pragma  ::= &quot;.&quot; ( feature | assert | infer | fd | input | output ) &quot;.&quot;
 
 feature
-        ::= &quot;feature&quot; &quot;(&quot; feature-id ( &quot;,&quot; feature-id )* &quot;)&quot; &quot;.&quot; ;
+        ::= &quot;feature&quot; &quot;(&quot; feature-id ( &quot;,&quot; feature-id )* &quot;)&quot;
+
 feature-id
-        ::= &quot;comparisons&quot; | &quot;constraints&quot; | &quot;disjunction&quot; | &quot;negation&quot; ;
+        ::= &quot;comparisons&quot;
+        | &quot;constraints&quot;
+        | &quot;disjunction&quot;
+        | &quot;negation&quot;
+        | &quot;functional_dependencies&quot;
 
-assert
-        ::= &quot;assert&quot; predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot; &quot;.&quot; ;
-infer
-        ::= &quot;infer&quot; ( predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot;
-                    | &quot;from&quot; predicate ) &quot;.&quot; ;
+assert  ::= &quot;assert&quot; predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot;
+
 attribute-decl
-        ::= ( predicate &quot;:&quot; )? ( &quot;boolean&quot; | &quot;integer&quot; | &quot;string&quot; ) ;
+        ::= ( predicate &quot;:&quot; )? ( &quot;boolean&quot; | &quot;integer&quot; | &quot;string&quot; )
 
-input
-        ::= &quot;input&quot; io-details &quot;.&quot; ;
-output
-        ::= &quot;output&quot; io-details &quot;.&quot; ;
+infer   ::= &quot;infer&quot;
+            ( predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot;
+            | &quot;from&quot; predicate ) &quot;.&quot;
+
+fd      ::= ( &quot;fd&quot; | &quot;functional_dependency&quot; )
+            predicate &quot;:&quot;
+            attribute-index-list ( &quot;--&gt;&quot; | &quot;⟶&quot; ) attribute-index-list
+
+attribute-index-list
+        ::= attribute-index ( &quot;,&quot; attribute-index )*
+
+attribute-index
+        ::= integer | predicate
+
+input   ::= &quot;input&quot; io-details
+
 io-details
-        ::= &quot;(&quot; predicate &quot;,&quot; quoted-string ( &quot;,&quot; quoted-string )? &quot;)&quot; ;
+        ::= &quot;(&quot; predicate &quot;,&quot; quoted-string ( &quot;,&quot; quoted-string )? &quot;)&quot;
 
-(* ************************************************************************* *)
+output  ::= &quot;output&quot; io-details
 
-comment
-        ::= &quot;%&quot; [^\r\n]* EOL
-            | &quot;/&quot; &quot;\u{2a}&quot; ( [^\u{2a}] | &quot;\u{2a}&quot;+ [^\u{2a}/] )* &quot;\u{2a}&quot;+ &quot;/&quot; ;
+/* ************************************************************************* */
 
-(* ************************************************************************* *)
+comment ::= &quot;%&quot; [^\r\n]* EOL
+            | '/*' ( [^*] | '*'+ [^*/] )* '*'* '*/'
 
-EOL
-        ::= &quot;\n&quot; | &quot;\r\n&quot; | &quot;\r&quot; ;
+/* ************************************************************************* */
+
+/*
+EOL     ::= &quot;\n&quot; | &quot;\\r\\n&quot; | &quot;\r&quot;
+
 WHITESPACE
-        ::= &quot; &quot; | &quot;\t&quot; | EOL ;
+        ::= &quot; &quot; | &quot;\t&quot; | EOL
 
 DQUOTE
-        ::= '&quot;' ;
+        ::= '&quot;'
 
 LC_ALPHA
-        ::= ? corresponds to the Unicode category 'Ll' ? ;
+        ::= ? corresponds to the Unicode category 'Ll' ?
+
 UC_ALPHA
-        ::= ? corresponds to the Unicode category 'Lu' ? ;
-ALPHA
-        ::= LC_ALPHA | UC_ALPHA ;
-DIGIT
-        ::= ? corresponds to the Unicode category 'Nd' (decimal number) ? ;
+        ::= ? corresponds to the Unicode category 'Lu' ?
+
+ALPHA   ::= LC_ALPHA | UC_ALPHA
+
+DIGIT   ::= ? corresponds to the Unicode category 'Nd' (decimal number) ?
+*/
 </code></pre>
 <p>This file is accessible directly <a href="datalog.ebnf">here</a>.</p>
 

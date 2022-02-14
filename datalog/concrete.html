@@ -174,8 +174,7 @@ although any deviations do not significantly affect the meaning of the language.
 comprise the intensional database, and possibly a set of queries to interrogate the result of any
 reasoning performed over the program.</p>
 <p><img src="images/program.png" alt="program" /></p>
-<pre><code class="language-ebnf">program
-        ::= pragma* ( fact | rule | query )* ;
+<pre><code class="language-ebnf">program ::= pragma* ( fact | rule | query )* ;
 </code></pre>
 <p>A program consists of a single file containing facts, rules, and queries as well as any additional
 files referenced via <em>pragmas</em>.</p>
@@ -183,65 +182,71 @@ files referenced via <em>pragmas</em>.</p>
 <p>Facts <strong>must</strong> be expressed in the form of ground atoms and so they have a specific rule rather
 than a constrained form of the <code>atom</code> rule.</p>
 <p><img src="images/fact.png" alt="fact" /></p>
-<pre><code class="language-ebnf">fact
-        ::= predicate ( &quot;(&quot; constant ( &quot;,&quot; constant )* &quot;)&quot; )? &quot;.&quot; ;
+<pre><code class="language-ebnf">fact    ::= predicate ( &quot;(&quot; constant ( &quot;,&quot; constant )* &quot;)&quot; )? &quot;.&quot; ;
 </code></pre>
 <p>A predicate is the identifier shared by a fact and relation.</p>
 <p><img src="images/predicate.png" alt="predicate" /></p>
 <pre><code class="language-ebnf">predicate
         ::= LC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )* ;
 </code></pre>
-<h3 id="example"><a class="header" href="#example">Example</a></h3>
-<p>The following demonstrates a simple fact denoting that the constant <code>brooke</code> representing some
+<p><strong>Example</strong> – the following demonstrates a simple fact denoting that the constant <code>brooke</code> representing some
 individual is the parent of some individual represented by the constant <code>&quot;Xerces&quot;</code>.</p>
 <pre><code class="language-datalog">parent(&quot;Xerces&quot;, brooke).
 </code></pre>
 <h2 id="constant-values"><a class="header" href="#constant-values">Constant Values</a></h2>
-<p>Constants are supported in three types, String, Integer, and Boolean. Whereas some definitions of
+<p>Constants are supported in three types, String, Numbers, and Boolean. Whereas some definitions of
 Datalog introduce an additional Identifier type, ASDI treats these as <em>short strings</em> that can
 safely be expressed without quotes; therefore, the values <code>xerces</code> and <code>&quot;xerces&quot;</code> are equivalent.</p>
 <p><img src="images/constant.png" alt="constant" /></p>
 <pre><code class="language-ebnf">constant
-        ::= string | integer | boolean ;
+        ::= string | number | boolean ;
 </code></pre>
+<h3 id="strings"><a class="header" href="#strings">Strings</a></h3>
 <p>Strings are described in both the identifier and quoted form in the <code>string</code> rule.</p>
 <p><img src="images/string.png" alt="string" /></p>
-<pre><code class="language-ebnf">string
-        ::= predicate ( &quot;:&quot; ALPHA ( ALPHA | DIGIT | &quot;_&quot; * )? )
+<pre><code class="language-ebnf">string  ::= predicate ( &quot;:&quot; ALPHA ( ALPHA | DIGIT | &quot;_&quot; * )? )
             | DQUOTE [^\u{22}]* DQUOTE ;
 </code></pre>
-<p>Integers bounds are currently unspecified, just strings of decimal digits.</p>
-<p><img src="images/integer.png" alt="integer" /></p>
-<pre><code class="language-ebnf">integer
-        ::= ( &quot;+&quot; | &quot;-&quot; )? DIGIT+ ;
+<h3 id="numbers"><a class="header" href="#numbers">Numbers</a></h3>
+<p>Numeric values in ASDI take one of three forms, integers, decimal values, and floating point values.</p>
+<p><img src="images/number.png" alt="integer" /></p>
+<pre><code class="language-ebnf">number  ::= float | decimal | integer
 </code></pre>
+<p>Integer values in ASDI are signed, 64-bit values.</p>
+<p><img src="images/integer.png" alt="integer" /></p>
+<pre><code class="language-ebnf">integer ::= ( &quot;+&quot; | &quot;-&quot; )? DIGIT+
+</code></pre>
+<p>Decimal values in ASDI are … TBD.</p>
+<p><img src="images/decimal.png" alt="integer" /></p>
+<pre><code class="language-ebnf">decimal ::= integer &quot;.&quot; DIGIT+
+</code></pre>
+<p>Floating point values in ASDI are 65-bit IEEE floats.</p>
+<p><img src="images/float.png" alt="integer" /></p>
+<pre><code class="language-ebnf">float   ::= decimal ( &quot;e&quot; | &quot;E&quot; ) ( &quot;+&quot; | &quot;-&quot; )? DIGIT+
+</code></pre>
+<h3 id="booleans"><a class="header" href="#booleans">Booleans</a></h3>
 <p>Boolean values may also be represented using <code>⊤</code> (down tack <code>\u{22a4}</code>) for true, and <code>⊥</code> (up tack
 <code>\u{22a5}</code>) for false where this may improve readability.</p>
 <p><img src="images/boolean.png" alt="boolean" /></p>
-<pre><code class="language-ebnf">boolean
-        ::= ( &quot;true&quot; | &quot;⊤&quot; ) | ( &quot;false&quot; | &quot;⊥&quot; ) ;
+<pre><code class="language-ebnf">boolean ::= ( &quot;true&quot; | &quot;⊤&quot; ) | ( &quot;false&quot; | &quot;⊥&quot; ) ;
 </code></pre>
 <h3 id="rules"><a class="header" href="#rules">Rules</a></h3>
 <p>As facts are syntactically distinct from rules in the text representation there is no need for empty
 bodies – all rules <strong>must</strong> have at least one literal. Material implication may be written using
 the Unicode character <code>⟵</code> (long leftwards arrow<code>\u{27f5}</code>).</p>
 <p><img src="images/rule.png" alt="rule" /></p>
-<pre><code class="language-ebnf">rule
-        ::= ( head | &quot;⊥&quot; )? ( &quot;:-&quot; | &quot;&lt;-&quot; | &quot;⟵&quot; ) body &quot;.&quot; ;
+<pre><code class="language-ebnf">rule    ::= ( head | &quot;⊥&quot; )? ( &quot;:-&quot; | &quot;&lt;-&quot; | &quot;⟵&quot; ) body &quot;.&quot; ;
 </code></pre>
 <p>The head of a rule is a disjunction of atoms, or in the case of a constraint the head may is
 optional or replaced by the value <code>&quot;⊥&quot;</code>.</p>
 <p><img src="images/head.png" alt="head" /></p>
-<pre><code class="language-ebnf">head
-        ::= ( atom ( ( &quot;;&quot; | &quot;|&quot; | &quot;OR&quot; | &quot;∨&quot; ) atom )* ) ;
+<pre><code class="language-ebnf">head    ::= ( atom ( ( &quot;;&quot; | &quot;|&quot; | &quot;OR&quot; | &quot;∨&quot; ) atom )* ) ;
 </code></pre>
 <p>The body of a rule is comprised of one, or more, literals.</p>
 <p><img src="images/body.png" alt="body" /></p>
-<pre><code class="language-ebnf">body
-        ::= literal ( ( &quot;,&quot; | &quot;&amp;&quot; | &quot;AND&quot; | &quot;∧&quot; ) literal )* ;
+<pre><code class="language-ebnf">body    ::= literal ( ( &quot;,&quot; | &quot;&amp;&quot; | &quot;AND&quot; | &quot;∧&quot; ) literal )* ;
 </code></pre>
-<h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
-<p>The following sets of rules are equivalent.</p>
+<p><strong>Example</strong> – the following sets of rules are equivalent.</p>
 <pre><code class="language-datalog">ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Y) &lt;- parent(X, Y).
 ancestor(X, Y) ⟵ parent(X, Y).
@@ -251,7 +256,7 @@ movie_star(X) :- star(X)  &amp;  movie_cast_member(X, _, _).
 movie_star(X) :- star(X) AND movie_cast_member(X, _, _).
 movie_star(X) :- star(X)  ∧  movie_cast_member(X, _, _).
 </code></pre>
-<p>As described in the abstract syntax it is an error to use an extensional relation in the head of
+<p><strong>Example</strong> – as described in the abstract syntax it is an error to use an extensional relation in the head of
 a rule. The following will generate an error:</p>
 <pre><code class="language-datalog">parent(&quot;Xerces&quot;, brooke).
 
@@ -260,7 +265,7 @@ parent(X,Y) :- father(X,Y).
 <p>The language feature <code>disjunction</code> corresponds to the language $\small\text{Datalog}^{\lor}$ and
 allows multiple atoms to appear in the rule’s head with the semantics that these are choices. This
 syntax will not be accepted unless the feature is enabled.</p>
-<p>For example, the following describes the rule that <em>if X is a parent then X is <strong>either</strong> a
+<p><strong>Example</strong> – the following describes the rule that <em>if X is a parent then X is <strong>either</strong> a
 father <strong>or</strong> mother</em>.</p>
 <pre><code class="language-datalog">.feature(disjunction).
 
@@ -303,12 +308,10 @@ positive relational literal, error
 <p>The text representation of an atom is a relatively simple translation from the abstract syntax
 above.</p>
 <p><img src="images/atom.png" alt="atom" /></p>
-<pre><code class="language-ebnf">atom
-        ::= predicate &quot;(&quot; term ( &quot;,&quot; term )* &quot;)&quot; ;
+<pre><code class="language-ebnf">atom    ::= predicate &quot;(&quot; term ( &quot;,&quot; term )* &quot;)&quot; ;
 </code></pre>
 <p><img src="images/term.png" alt="term" /></p>
-<pre><code class="language-ebnf">term
-        ::= variable | constant ;
+<pre><code class="language-ebnf">term    ::= variable | constant ;
 </code></pre>
 <p>Note that we explicitly separate variables into named and anonymous forms here.</p>
 <p><img src="images/variable.png" alt="variable" /></p>
@@ -318,11 +321,11 @@ above.</p>
 <p><img src="images/named-variable.png" alt="named-variable" /></p>
 <pre><code class="language-ebnf">named-variable
         ::= UC_ALPHA ( ALPHA | DIGIT | &quot;_&quot; )* ;
+        
 anon-variable
         ::= &quot;_&quot; ;
 </code></pre>
-<h3 id="example-1"><a class="header" href="#example-1">Example</a></h3>
-<p>The following are all valid body atoms.</p>
+<p><strong>Example</strong> – the following are all valid body atoms.</p>
 <pre><code class="language-datalog">dead(julius_caesar).
 emperor(julius_caesar, rome).
 emperor(X, Y).
@@ -333,11 +336,9 @@ emperor(X, rome).
 literals as well as arithmetic expressions as literals. Conjunction may be written with the Unicode
 character <code>∧</code> (logical and <code>\u{2227}</code>).</p>
 <p><img src="images/literal.png" alt="literal" /></p>
-<pre><code class="language-ebnf">literal
-        ::= ( &quot;!&quot; | &quot;NOT&quot; | &quot;￢&quot; )? ( atom | comparison ) ;
+<pre><code class="language-ebnf">literal ::= ( &quot;!&quot; | &quot;NOT&quot; | &quot;￢&quot; )? ( atom | comparison ) ;
 </code></pre>
-<h3 id="examples-1"><a class="header" href="#examples-1">Examples</a></h3>
-<p>The following rules are all equivalent.</p>
+<p><strong>Example</strong> – the following rules are all equivalent.</p>
 <pre><code class="language-datalog">ancestor(X, Y) ⟵ parent(X, Z)  ,  ancestor(Z, Y).
 ancestor(X, Y) ⟵ parent(X, Z)  &amp;  ancestor(Z, Y).
 ancestor(X, Y) ⟵ parent(X, Z)  ∧  ancestor(Z, Y).
@@ -390,8 +391,7 @@ common arithmetic and string operators.</p>
 <tr><td>Integer</td><td>Yes</td><td>Yes</td><td>No</td></tr>
 <tr><td>Boolean</td><td>Yes</td><td>No</td><td>No</td></tr>
 </tbody></table>
-<h3 id="example-2"><a class="header" href="#example-2">Example</a></h3>
-<p>The following is an example using arithmetic literals and the <em>car</em> relation.</p>
+<p><strong>Example</strong> – the following is an example using arithmetic literals and the <em>car</em> relation.</p>
 <pre><code class="language-datalog">.feature(comparisons).
 .assert car(make: string, model: string, age: integer).
 
@@ -403,11 +403,9 @@ antique(X, Y) :- car(X, Y, Z) AND Z &gt; 50.
 <p>A query is simply an atom, but one identified to the system as a goal with either the prefix <code>?-</code>
 or the suffix <code>?</code>.</p>
 <p><img src="images/query.png" alt="query" /></p>
-<pre><code class="language-ebnf">query
-        ::= ( &quot;?-&quot; atom &quot;.&quot; ) | ( atom &quot;?&quot; ) ;
+<pre><code class="language-ebnf">query   ::= ( &quot;?-&quot; atom &quot;.&quot; ) | ( atom &quot;?&quot; ) ;
 </code></pre>
-<h3 id="examples-2"><a class="header" href="#examples-2">Examples</a></h3>
-<p>The following queries are equivalent and will return the value of the variable <code>X</code> for any facts in
+<p><strong>Example</strong> – the following queries are equivalent and will return the value of the variable <code>X</code> for any facts in
 the <em>ancestor</em> relationship where the first attribute is the string value <code>&quot;xerces&quot;</code>.</p>
 <pre><code class="language-datalog">?- ancestor(xerces, X).
 ancestor(xerces, X)?
@@ -441,77 +439,119 @@ car(&quot;ford&quot;, X, _)?
 <p>Pragmas are declarative statements meant for the parser and runtime tooling, they do not affect
 the meaning of the program itself.</p>
 <p><img src="images/pragma.png" alt="pragma" /></p>
-<pre><code class="language-ebnf">pragma
-        ::= &quot;.&quot; ( feature | assert | infer | input | output ) ;
+<pre><code class="language-ebnf">pragma  ::= &quot;.&quot; ( feature | assert | infer | fd | input | output ) &quot;.&quot; ;
 </code></pre>
+<h3 id="pragma-feature"><a class="header" href="#pragma-feature">pragma feature</a></h3>
 <p>The <code>feature</code> pragma determines which Datalog language is in use. Use of syntax not supported by the
 selected language feature will result in errors.</p>
 <p><img src="images/feature.png" alt="feature" /></p>
-<pre><code class="language-ebnf">feature
-        ::= &quot;feature&quot; &quot;(&quot; feature-id ( &quot;,&quot; feature-id )* &quot;)&quot; &quot;.&quot; ;
+<pre><code class="language-ebnf">feature ::= &quot;feature&quot; &quot;(&quot; feature-id ( &quot;,&quot; feature-id )* &quot;)&quot; ;
 </code></pre>
 <p><img src="images/feature-id.png" alt="feature-id" /></p>
 <pre><code class="language-ebnf">feature-id
-        ::= &quot;comparisons&quot; | &quot;constraints&quot; | &quot;disjunction&quot; | &quot;negation&quot; ;
+        ::= &quot;comparisons&quot;
+        | &quot;constraints&quot;
+        | &quot;disjunction&quot;
+        | &quot;negation&quot;
+        | &quot;functional_dependencies&quot;
 </code></pre>
-<h3 id="example-3"><a class="header" href="#example-3">Example</a></h3>
+<p><strong>Example</strong></p>
 <pre><code class="language-datalog">.feature(negation).
 .feature(comparisons, disjunction).
 </code></pre>
+<h3 id="pragma-assert"><a class="header" href="#pragma-assert">pragma assert</a></h3>
 <p>The <code>assert</code> pragma describes a new relation in the extensional database. The parser can determine
 the schema for facts from their types in the database. The use of this pragma is therefore optional,
 but recommended.</p>
 <p><img src="images/assert.png" alt="assert" /></p>
-<pre><code class="language-ebnf">assert
-        ::= &quot;assert&quot; predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot; &quot;.&quot; ;
+<pre><code class="language-ebnf">assert  ::= &quot;assert&quot; predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot; ;
 </code></pre>
 <p><img src="images/attribute-decl.png" alt="attribute-decl" /></p>
 <pre><code class="language-ebnf">attribute-decl
         ::= ( predicate &quot;:&quot; )? ( &quot;boolean&quot; | &quot;integer&quot; | &quot;string&quot; ) ;
 </code></pre>
-<h3 id="example-4"><a class="header" href="#example-4">Example</a></h3>
+<p><strong>Example</strong></p>
 <pre><code class="language-datalog">.assert human(name: string).
 </code></pre>
+<h3 id="pragma-infer"><a class="header" href="#pragma-infer">pragma infer</a></h3>
 <p>The <code>infer</code> pragma describes a new relation in the intensional database. Typically the parser
 can determine the schema for relational literals from their context, The use of this pragma
 is therefore optional, but recommended. The alternate form is more explicit in that it defines
 an intensional relation in terms of a previously defined extensional relation.</p>
 <p><img src="images/infer.png" alt="infer" /></p>
-<pre><code class="language-ebnf">infer
-        ::= &quot;infer&quot;
+<pre><code class="language-ebnf">infer   ::= &quot;infer&quot;
             ( predicate &quot;(&quot; attribute-decl ( &quot;,&quot; attribute-decl )* &quot;)&quot; )
-            | &quot;from&quot; predicate &quot;.&quot; ;
+            | &quot;from&quot; predicate ;
 </code></pre>
-<h3 id="example-5"><a class="header" href="#example-5">Example</a></h3>
+<p><strong>Example</strong></p>
 <pre><code class="language-datalog">.infer mortal(name: string).
 </code></pre>
 <p>Alternatively the short-cut form is often more convenient.</p>
 <pre><code class="language-datalog">.assert human(name: string).
 .infer mortal from human.
 </code></pre>
+<h3 id="pragma-fd"><a class="header" href="#pragma-fd">pragma fd</a></h3>
+<p>The <code>fd</code> pragma, short for <em>functional dependency</em>, introduces a relationship between one or more attributes on the
+left-hand (determinant) side and one or more attributes on the right-hand (dependent) side. This relationship denotes
+that for a relationship $\small R$ with attributes $\small a_1, \cdots, a_n$, every valid combination of determinant
+values uniquely determines the value of the dependent values.</p>
+<p>Note that this pragma is only valid if the corresponding language feature is enabled.</p>
+<p><img src="images/fd.png" alt="input" /></p>
+<pre><code class="language-ebnf">fd      ::= ( &quot;fd&quot; | &quot;functional_dependency&quot; ) 
+            predicate &quot;:&quot;
+            attribute-index-list ( &quot;--&gt;&quot; | &quot;⟶&quot; ) attribute-index-list
+</code></pre>
+<p><img src="images/attribute-index-list.png" alt="input" /></p>
+<pre><code class="language-ebnf">attribute-index-list
+        ::= attribute-index ( &quot;,&quot; attribute-index )*
+</code></pre>
+<p>An attribute index is <em>either</em> an attribute label, if one has been declared for the relation, or an integer $\small i \in [1,|schema(R)|]$.</p>
+<p><img src="images/attribute-index.png" alt="input" /></p>
+<pre><code class="language-ebnf">attribute-index
+        ::= integer | predicate
+</code></pre>
+<p><strong>Constraints</strong> – given the notational form $\small R: \alpha \rightarrow \Beta$;</p>
+<ol>
+<li>the initial predicate <strong>must</strong> be the label of an extensional relation:
+$$\small R \in D_I \land label(R)$$</li>
+<li>the set of attribute identifiers comprising the set $\small \alpha$ <strong>must</strong> be in $\small R$: 
+$$\small \forall a \in \alpha (a \in schema(R))$$</li>
+<li>the set of attribute identifiers comprising the set $\small \Beta$ <strong>must</strong> be in $\small R$:
+$$\small \forall a \in \Beta (a \in schema(R))$$</li>
+<li>the same attribute identifier <strong>must not</strong> appear in both determinant and dependent:
+$$\small \alpha \cap \Beta = \emptyset$$</li>
+</ol>
+<p><strong>Example</strong> – given the extensional relation <em>employee</em> the two functional dependencies in the 
+following are equivalent. Note that the implementation will ignore such duplicate declarations.</p>
+<pre><code class="language-datalog">.feature(functional_dependencies).
+.assert employee(id:integer, name:string).
+
+.fd employee: id --&gt; name.
+.fd employee: 1 ⟶ 2.
+</code></pre>
+<h3 id="pragma-input"><a class="header" href="#pragma-input">pragma input</a></h3>
 <p>The <code>input</code> pragma instructs the parser to load facts for the named extensional relation from an
 external file. This pragma <strong>requires</strong> that the relation be previously defined via the <code>assert</code>
 pragma.</p>
 <p><img src="images/input.png" alt="input" /></p>
-<pre><code class="language-ebnf">input
-        ::= &quot;input&quot; io-details &quot;.&quot;
+<pre><code class="language-ebnf">input   ::= &quot;input&quot; io-details &quot;.&quot;
 </code></pre>
 <p><img src="images/io-details.png" alt="io-details" /></p>
 <pre><code class="language-ebnf">io-details
         ::= &quot;(&quot; predicate &quot;,&quot; quoted-string ( &quot;,&quot; quoted-string )? &quot;)&quot; ;
 </code></pre>
-<h3 id="example-6"><a class="header" href="#example-6">Example</a></h3>
+<p><strong>Example</strong></p>
 <pre><code class="language-datalog">.assert human(name: string).
 .input(human, &quot;data/humans.csv&quot;, &quot;csv&quot;).
 </code></pre>
+<h3 id="pragma-output"><a class="header" href="#pragma-output">pragma output</a></h3>
 <p>The <code>output</code> pragma instructs the parser to write facts from the named intensional relation to an
 external file. This pragma <strong>requires</strong> that the relation be previously defined via the <code>infer</code>
 pragma.</p>
 <p><img src="images/output.png" alt="output" /></p>
-<pre><code class="language-ebnf">output
-        ::= &quot;output&quot; io-details &quot;.&quot; ;
+<pre><code class="language-ebnf">output  ::= &quot;output&quot; io-details &quot;.&quot; ;
 </code></pre>
-<h3 id="example-7"><a class="header" href="#example-7">Example</a></h3>
+<p><strong>Example</strong></p>
 <pre><code class="language-datalog">.infer mortal(name: string).
 .output(mortal, &quot;data/mortals.txt&quot;).
 </code></pre>
@@ -519,31 +559,33 @@ pragma.</p>
 <p>Comments in Datalog are either 1) the <code>%</code> character and continue to the end of the line, or
 2) C-style with <code>/*</code> to start and <code>*/</code> to end. These correspond to the same rules as Prolog.</p>
 <p><img src="images/comment.png" alt="comment" /></p>
-<pre><code class="language-ebnf">comment
-        ::= &quot;%&quot; [^\r\n]* EOL
+<pre><code class="language-ebnf">comment ::= &quot;%&quot; [^\r\n]* EOL
             | &quot;/&quot; &quot;*&quot; ( [^\*] | &quot;*&quot;+ [^\*\/] )* &quot;*&quot;+ &quot;/&quot; ;
 </code></pre>
-<h3 id="example-8"><a class="header" href="#example-8">Example</a></h3>
+<p><strong>Example</strong></p>
 <pre><code class="language-datalog">% Here's a comment
 ?- ancestor(xerces, X). % and another
 ?- ancestor(brooke /* and one inline */, X). % and another
 </code></pre>
 <h2 id="terminal-lexical-symbols"><a class="header" href="#terminal-lexical-symbols">Terminal (Lexical) Symbols</a></h2>
 <p>The following are lexical rules that can be assumed by the rules above.</p>
-<pre><code class="language-ebnf">EOL
-        ::= &quot;\n&quot; | &quot;\r\n&quot; | &quot;\r&quot; ;
+<pre><code class="language-ebnf">EOL     ::= &quot;\n&quot; | &quot;\r\n&quot; | &quot;\r&quot; ;
+
 WHITESPACE
         ::= &quot; &quot; | &quot;\t&quot; | EOL ;
+        
 DQUOTE
         ::= '&quot;' ;
+        
 LC_ALPHA
-        ::= ? corresponds to the Unicode category 'Ll' ? ;
+        ::= ? corresponds to the Unicode category 'Ll' (letter, lower case) ? ;
+        
 UC_ALPHA
-        ::= ? corresponds to the Unicode category 'Lu' ? ;
-ALPHA
-        ::= LC_ALPHA | UC_ALPHA ;
-DIGIT
-        ::= ? corresponds to the Unicode category 'Nd' (decimal number) ? ;
+        ::= ? corresponds to the Unicode category 'Lu' (letter, upper case) ? ;
+        
+ALPHA   ::= LC_ALPHA | UC_ALPHA ;
+
+DIGIT   ::= ? corresponds to the Unicode category 'Nd' (decimal number) ? ;
 </code></pre>
 <hr />
 <div class="footnote-definition" id="ebnf"><sup class="footnote-definition-label">1</sup>

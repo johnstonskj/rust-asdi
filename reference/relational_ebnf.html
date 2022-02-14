@@ -166,10 +166,10 @@ document.addEventListener("DOMContentLoaded", function() {
                     <main>
                         <h1 id="appendix-relational-algebra-ebnf"><a class="header" href="#appendix-relational-algebra-ebnf">Appendix: Relational Algebra EBNF</a></h1>
 <pre><code class="language-ebnf">program
-        ::= assignment | expression ;
+        ::= assignment | expression
 
 assignment
-        ::= identifier ( &quot;≔&quot; | &quot;:=&quot; ) expression ;
+        ::= identifier ( &quot;≔&quot; | &quot;:=&quot; ) expression
 
 expression
         ::=  relation-identifier
@@ -181,75 +181,74 @@ expression
           |  projection
           |  rename
           |  join
-          |  &quot;(&quot; expression &quot;)&quot; ;
+          |  &quot;(&quot; expression &quot;)&quot;
 
-(* ************************************************************************* *)
+/* ************************************************************************* */
 
-union   ::= expression ( &quot;∪&quot; | &quot;union&quot; ) expression ;
+union   ::= expression ( &quot;∪&quot; | &quot;union&quot; ) expression
 
 intersection
-        ::= expression ( &quot;∩&quot; | &quot;intersect&quot; ) expression ;
+        ::= expression ( &quot;∩&quot; | &quot;intersect&quot; ) expression
 
 difference
-        ::= expression ( &quot;∖&quot; | &quot;-&quot; | &quot;diff&quot; ) expression ;
+        ::= expression ( &quot;∖&quot; | &quot;-&quot; | &quot;diff&quot; ) expression
 
 cartesian-product
-        ::= expression ( &quot;⨯&quot; | &quot;×&quot; | &quot;product&quot; ) expression ;
+        ::= expression ( &quot;⨯&quot; | &quot;×&quot; | &quot;product&quot; ) expression
 
 selection
         ::= expression
             ( &quot;σ&quot; | &quot;select&quot; ) &quot;[&quot; criteria (&quot;,&quot; criteria )* &quot;]&quot;
-            expression ;
+            expression
 
 criteria
         ::= ( attribute-identifier | literal )
             operation
-            ( attribute-identifier | literal ) ;
+            ( attribute-identifier | literal )
 
 operation
-        ::= &quot;=&quot; | &quot;!=&quot; | &quot;&lt;&quot; | &quot;&lt;=&quot; | &quot;&gt;&quot; | &quot;&gt;=&quot; ;
+        ::= &quot;=&quot; | &quot;!=&quot; &quot;&lt;&quot; | &quot;&lt;=&quot; | &quot;&gt;&quot; | &quot;&gt;=&quot;
 
 projection
         ::= expression
-            ( &quot;Π&quot; | &quot;π&quot; | &quot;project&quot; )
-                &quot;[&quot; attribute-identifier (&quot;,&quot; attribute-identifier )* &quot;]&quot;
-            expression ;
+            ( &quot;Π&quot; | &quot;π&quot; | &quot;&quot;project&quot; ) &quot;[&quot; attribute-identifier (&quot;,&quot; attribute-identifier )* &quot;]&quot;
+            expression
 
 rename  ::= expression
             ( &quot;ρ&quot; | &quot;rename&quot; ) &quot;[&quot; rename-pair (&quot;,&quot; rename-pair )* &quot;]&quot;
-            expression ;
+            expression
 
 rename-pair
-        ::= attribute-identifier &quot;=&quot; attribute-identifier ;
+        ::= attribute-identifier &quot;=&quot; attribute-identifier
 
 join    ::= expression
             ( natural-join | theta-join )
-            expression ;
+            expression
 
 natural-join
         ::= &quot;⨝&quot; | &quot;natural-join&quot;
 
 theta-join
-        ::= ( &quot;⨝&quot; | &quot;theta-join&quot; ) &quot;[&quot; criteria  (&quot;,&quot; criteria )* &quot;]&quot; ;
+        ::= ( &quot;⨝&quot; | &quot;theta-join&quot; ) &quot;[&quot; criteria  (&quot;,&quot; criteria )* &quot;]&quot;
 
-(* ************************************************************************* *)
+/* ************************************************************************* */
 
 relation-identifier
-        ::= ALPHA ( ALPHANUM | &quot;_&quot; )* ;
+        ::= ALPHA ( ALPHANUM | &quot;_&quot; )*
 
 attribute-identifier
         ::= relation-identifier
-            ( &quot;.&quot; ( relation-identifier | integer ) ) ;
+            ( &quot;.&quot; ( relation-identifier | integer ) )
 
-(* ************************************************************************* *)
+/* ************************************************************************* */
 
-literal ::= integer | string | boolean ;
+literal ::= integer | string | boolean
 
-integer ::= ( &quot;+&quot; | &quot;-&quot; )? DIGIT+ ;
+integer ::= DIGIT+
 
-string  ::= '&quot;' [^\u{22}]* '&quot;' ;
+string  ::= '&quot;' [^\&quot;]* '&quot;'
 
-boolean ::= &quot;true&quot; | &quot;false&quot; ;
+boolean ::= &quot;true&quot; | &quot;false&quot;
 </code></pre>
 <p>This file is accessible directly <a href="relational.ebnf">here</a>.</p>
 
