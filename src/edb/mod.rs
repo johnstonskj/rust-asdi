@@ -111,13 +111,14 @@ use crate::{
     AttributeName, AttributeNameRef, Collection, IndexedCollection, Labeled, MaybeAnonymous, Term,
     Variable,
 };
+use ordered_float::NotNan;
 use paste::paste;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::Sub;
 use std::rc::Rc;
 use std::str::FromStr;
-use tracing::trace;
+use tracing::{error, trace};
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -196,6 +197,7 @@ where
 pub enum AttributeKind {
     String,
     Integer,
+    Float,
     Boolean,
 }
 
@@ -218,9 +220,12 @@ pub struct Fact {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Constant {
     String(String),
-    Integer(i64),
+    Number(Number),
     Boolean(bool),
 }
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Number(NumberInner);
 
 // ------------------------------------------------------------------------------------------------
 
@@ -247,6 +252,12 @@ pub type PredicateRef = Rc<Predicate>;
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
 // ------------------------------------------------------------------------------------------------
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum NumberInner {
+    Integer(i64),
+    Float(NotNan<f64>),
+}
 
 // ------------------------------------------------------------------------------------------------
 // Private Macros
@@ -719,6 +730,7 @@ impl Display for AttributeKind {
             match self {
                 Self::String => "string",
                 Self::Integer => "integer",
+                Self::Float => "float",
                 Self::Boolean => "boolean",
             }
         )
@@ -732,6 +744,7 @@ impl FromStr for AttributeKind {
         match s {
             "str" | "string" => Ok(Self::String),
             "int" | "integer" => Ok(Self::Integer),
+            "float" => Ok(Self::Float),
             "bool" | "boolean" => Ok(Self::Boolean),
             _ => invalid_value("ConstantKind", s).into(),
         }
@@ -1239,7 +1252,21 @@ impl From<String> for Constant {
     }
 }
 
-impl_enum_from!(Constant, i64, Integer);
+impl_enum_from!(Constant, Number, Number);
+
+impl From<i64> for Constant {
+    fn from(v: i64) -> Self {
+        Self::Number(Number::from(v))
+    }
+}
+
+impl TryFrom<f64> for Constant {
+    type Error = Error;
+
+    fn try_from(v: f64) -> std::result::Result<Self, Self::Error> {
+        Ok(Self::Number(Number::try_from(v)?))
+    }
+}
 
 impl_enum_from!(Constant, bool, Boolean);
 
@@ -1255,7 +1282,7 @@ impl Display for Constant {
                     } else {
                         format!("{:?}", v)
                     },
-                Self::Integer(v) => v.to_string(),
+                Self::Number(v) => v.to_string(),
                 Self::Boolean(v) => {
                     if *v {
                         BOOLEAN_LITERAL_TRUE
@@ -1279,19 +1306,19 @@ impl Constant {
     }
 
     pub fn new_size(v: usize) -> Self {
-        Self::Integer(v as i64)
+        Self::Number(Number::from(v))
     }
 
     self_is_as!(string, String);
 
-    self_is_as!(integer, Integer, i64);
+    self_is_as!(number, Number, Number);
 
     self_is_as!(boolean, Boolean, bool);
 
     pub fn kind(&self) -> AttributeKind {
         match self {
             Self::String(_) => AttributeKind::String,
-            Self::Integer(_) => AttributeKind::Integer,
+            Self::Number(v) => v.kind(),
             Self::Boolean(_) => AttributeKind::Boolean,
         }
     }
@@ -1313,6 +1340,137 @@ impl Constant {
         (!s.is_empty())
             && chars.next().map(|c| c.is_alphabetic()).unwrap()
             && chars.all(|c| c.is_alphanumeric() || c == CHAR_UNDERSCORE)
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for Number {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self.0 {
+                NumberInner::Integer(v) => v.to_string(),
+                NumberInner::Float(v) => v.to_string(),
+            }
+        )
+    }
+}
+
+impl From<usize> for Number {
+    fn from(v: usize) -> Self {
+        Self(NumberInner::Integer(v as i64))
+    }
+}
+
+impl From<u8> for Number {
+    fn from(v: u8) -> Self {
+        Self(NumberInner::Integer(v as i64))
+    }
+}
+
+impl From<i8> for Number {
+    fn from(v: i8) -> Self {
+        Self(NumberInner::Integer(v as i64))
+    }
+}
+
+impl From<u16> for Number {
+    fn from(v: u16) -> Self {
+        Self(NumberInner::Integer(v as i64))
+    }
+}
+
+impl From<i16> for Number {
+    fn from(v: i16) -> Self {
+        Self(NumberInner::Integer(v as i64))
+    }
+}
+
+impl From<u32> for Number {
+    fn from(v: u32) -> Self {
+        Self(NumberInner::Integer(v as i64))
+    }
+}
+
+impl From<i32> for Number {
+    fn from(v: i32) -> Self {
+        Self(NumberInner::Integer(v as i64))
+    }
+}
+
+impl From<i64> for Number {
+    fn from(v: i64) -> Self {
+        Self(NumberInner::Integer(v))
+    }
+}
+
+impl TryFrom<f32> for Number {
+    type Error = Error;
+
+    fn try_from(value: f32) -> std::result::Result<Self, Self::Error> {
+        Self::try_from(value as f64)
+    }
+}
+
+impl TryFrom<f64> for Number {
+    type Error = Error;
+
+    fn try_from(value: f64) -> std::result::Result<Self, Self::Error> {
+        match NotNan::new(value) {
+            Ok(float) => Ok(Self(NumberInner::Float(float))),
+            Err(e) => {
+                error!("Invalid float, cannot be a NaN: {:?}", e);
+                Err(invalid_value("float", &value.to_string()))
+            }
+        }
+    }
+}
+
+impl Number {
+    pub fn from_i64(v: i64) -> Self {
+        Self(NumberInner::Integer(v))
+    }
+
+    pub fn is_integer(&self) -> bool {
+        matches!(&self.0, NumberInner::Integer(_))
+    }
+
+    pub fn as_integer(&self) -> Option<&i64> {
+        match &self.0 {
+            NumberInner::Integer(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn from_f64(v: f64) -> Option<Self> {
+        let v = NotNan::new(v);
+        match v {
+            Ok(v) => Some(Self(NumberInner::Float(v))),
+            Err(e) => {
+                error!("Could not convert to a float, error: {:?}", e);
+                None
+            }
+        }
+    }
+
+    pub fn is_float(&self) -> bool {
+        matches!(&self.0, NumberInner::Float(_))
+    }
+
+    pub fn as_float(&self) -> Option<&f64> {
+        match &self.0 {
+            NumberInner::Float(v) => Some(v.as_ref()),
+            _ => None,
+        }
+    }
+
+    pub fn kind(&self) -> AttributeKind {
+        match &self.0 {
+            NumberInner::Integer(_) => AttributeKind::Integer,
+            NumberInner::Float(_) => AttributeKind::Float,
+        }
     }
 }
 

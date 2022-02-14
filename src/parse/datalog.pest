@@ -240,28 +240,24 @@ string_char = {
     | "\\" ~ ( "u" ~ LEFT_BRACE ~ ASCII_HEX_DIGIT{2,6} ~ RIGHT_BRACE )
 }
 
-number = @{
-    ( "+" | "-" )? ~ ASCII_DIGIT+ ~ ( DOT ~ ASCII_DIGIT+ )?
+number = _{
+    float | integer
 }
 
-new_number = {
-    float | decimal | rational | integer
-}
-
-integer = @{
-    ( "+" | "-" )? ~ ASCII_DIGIT+
-}
-
-rational = @{
-    integer ~ "/" ~ rational
+float = @{
+    decimal ~ ("e" | "E") ~ integer
 }
 
 decimal = @{
     integer ~ DOT ~ ASCII_DIGIT+
 }
 
-float = @{
-    decimal ~ ("e" | "E") ~ integer
+rational = @{
+    integer ~ "/" ~ rational
+}
+
+integer = @{
+    ( "+" | "-" )? ~ ASCII_DIGIT+
 }
 
 boolean = {

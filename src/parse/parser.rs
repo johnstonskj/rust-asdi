@@ -604,7 +604,7 @@ fn parse_constant(mut input_pairs: Pairs<'_, Rule>, _: &mut Program) -> Result<C
     let value = match first.as_rule() {
         Rule::unquoted_string => Constant::String(first.as_str().to_string()),
         Rule::string => Constant::String(first.as_str().to_owned()),
-        Rule::number => i64::from_str(first.as_str())
+        Rule::integer => i64::from_str(first.as_str())
             .map_err(|e| {
                 invalid_value(
                     TYPE_NAME_CONST_INTEGER.to_string(),
@@ -612,6 +612,14 @@ fn parse_constant(mut input_pairs: Pairs<'_, Rule>, _: &mut Program) -> Result<C
                 )
             })?
             .into(),
+        Rule::float => f64::from_str(first.as_str())
+            .map_err(|e| {
+                invalid_value(
+                    TYPE_NAME_CONST_BOOLEAN.to_string(),
+                    format!("{} ({})", first.as_str(), e),
+                )
+            })?
+            .try_into()?,
         Rule::boolean => bool::from_str(first.as_str())
             .map_err(|_| error::invalid_value(TYPE_NAME_CONST_BOOLEAN, first.as_str()))?
             .into(),
