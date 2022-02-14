@@ -30,10 +30,12 @@ namespace asdi::visitor {
 
     interface Formatter
 
-    interface ProgramVisitor
-    interface RelationVisitor
-    interface RuleVisitor
-    interface QueryVisitor
+    interface ProgramVisitor<T>
+    interface RelationVisitor<T>
+    interface RuleVisitor<T>
+    interface QueryVisitor<T>
+
+    Formatter --|> "<String>" ProgramVisitor
 
     ProgramVisitor ..> RelationVisitor
     ProgramVisitor ..> RuleVisitor

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="455px" preserveAspectRatio="none" style="width:686px;height:455px;background:#FFFFFF;" version="1.1" viewBox="0 0 686 455" width="686px" zoomAndPan="magnify"><defs><filter height="300%" id="f1lx2rlpcb3vsb" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[e274c4916ac42ef1c11391a83d303c10]
+cluster asdi--><polygon fill="#FFFFFF" filter="url(#f1lx2rlpcb3vsb)" points="16,6,52,6,59,28.4883,669,28.4883,669,448,16,448,16,6" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="16" x2="59" y1="28.4883" y2="28.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="30" x="20" y="21.5352">asdi</text><!--MD5=[06db1a3c418c087d07f3ad85f7929579]
+cluster asdi::visitor--><polygon fill="#FFFFFF" filter="url(#f1lx2rlpcb3vsb)" points="133,49,186,49,193,71.4883,645,71.4883,645,424,133,424,133,49" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="133" x2="193" y1="71.4883" y2="71.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="47" x="137" y="64.5352">visitor</text><!--MD5=[619a18f3975bec44ed0f3b908af212c9]
+class asdi::Program--><rect codeLine="4" fill="#FFFFFF" filter="url(#f1lx2rlpcb3vsb)" height="32" id="asdi::Program" style="stroke:#A80036;stroke-width:1.5;" width="81" x="32.5" y="104"/><ellipse cx="47.5" cy="120" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M49.9731,126.1431 Q49.3921,126.4419 48.7529,126.5913 Q48.1138,126.7407 47.4082,126.7407 Q44.9014,126.7407 43.5815,125.0889 Q42.2617,123.437 42.2617,120.3159 Q42.2617,117.1865 43.5815,115.5347 Q44.9014,113.8828 47.4082,113.8828 Q48.1138,113.8828 48.7612,114.0322 Q49.4087,114.1816 49.9731,114.4805 L49.9731,117.2031 Q49.3423,116.6221 48.7488,116.3523 Q48.1553,116.0825 47.5244,116.0825 Q46.1797,116.0825 45.4949,117.1492 Q44.8101,118.2158 44.8101,120.3159 Q44.8101,122.4077 45.4949,123.4744 Q46.1797,124.541 47.5244,124.541 Q48.1553,124.541 48.7488,124.2712 Q49.3423,124.0015 49.9731,123.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="49" x="61.5" y="124.5352">Program</text><!--MD5=[49d5ca419763b1c8c26d30ebbc0d8bbd]
+class asdi::visitor::Formatter--><rect codeLine="9" fill="#FEFECE" filter="url(#f1lx2rlpcb3vsb)" height="40" id="asdi::visitor::Formatter" style="stroke:#A80036;stroke-width:1.5;" width="88" x="305" y="216"/><ellipse cx="320" cy="232" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M316.4277,228.2651 L316.4277,226.1069 L323.8071,226.1069 L323.8071,228.2651 L321.3418,228.2651 L321.3418,236.3418 L323.8071,236.3418 L323.8071,238.5 L316.4277,238.5 L316.4277,236.3418 L318.8931,236.3418 L318.8931,228.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="56" x="334" y="236.5352">Formatter</text><line style="stroke:#A80036;stroke-width:1.5;" x1="306" x2="392" y1="248" y2="248"/><!--MD5=[b818c1bc739cda3d875bcb28854b99e7]
+class asdi::visitor::ProgramVisitor--><rect codeLine="11" fill="#FFFFFF" filter="url(#f1lx2rlpcb3vsb)" height="92.4092" id="asdi::visitor::ProgramVisitor" style="stroke:#A80036;stroke-width:1.5;" width="284" x="247" y="316"/><ellipse cx="336.25" cy="332" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M332.6777,328.2651 L332.6777,326.1069 L340.0571,326.1069 L340.0571,328.2651 L337.5918,328.2651 L337.5918,336.3418 L340.0571,336.3418 L340.0571,338.5 L332.6777,338.5 L332.6777,336.3418 L335.1431,336.3418 L335.1431,328.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="85" x="356.75" y="336.5352">ProgramVisitor</text><rect fill="#FFFFFF" height="16.1328" style="stroke:#000000;stroke-width:1.0;stroke-dasharray:2.0,2.0;" width="10" x="524" y="313"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="8" x="525" y="325.6016">T</text><line style="stroke:#A80036;stroke-width:1.5;" x1="248" x2="530" y1="348" y2="348"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="272" x="253" y="362.6348">start_program(program: &amp;Program) -&gt; Result&lt;T&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="255" x="253" y="375.5898">end_program(program: &amp;Program) : Result&lt;T&gt;</text><line style="stroke:#A80036;stroke-width:1.0;" x1="248" x2="375.5" y1="390.7432" y2="390.7432"/><line style="stroke:#A80036;stroke-width:1.0;" x1="248" x2="375.5" y1="392.7432" y2="392.7432"/><text fill="#000000" font-family="sans-serif" font-size="15" font-weight="bold" lengthAdjust="spacing" textLength="27" x="375.5" y="395.9121">•••</text><line style="stroke:#A80036;stroke-width:1.0;" x1="402.5" x2="530" y1="390.7432" y2="390.7432"/><line style="stroke:#A80036;stroke-width:1.0;" x1="402.5" x2="530" y1="392.7432" y2="392.7432"/><!--MD5=[7e3a4c3bb1c98ce5cae9b948d2a61d3f]
+class asdi::visitor::features--><rect codeLine="19" fill="#FEFECE" filter="url(#f1lx2rlpcb3vsb)" height="72.1758" id="asdi::visitor::features" style="stroke:#A80036;stroke-width:1.5;" width="480" x="149" y="84"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="55" x="361.5" y="100.6016">«module»</text><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="47" x="365.5" y="114.7344">features</text><line style="stroke:#A80036;stroke-width:1.5;" x1="150" x2="628" y1="122.2656" y2="122.2656"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="378" x="155" y="136.9004">format_program(program: &amp;Program, visitor: &amp;impl Formatter) : String</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="468" x="155" y="149.8555">visit_program&lt;T&gt;(program: &amp;Program, visitor: &amp;impl ProgramVisitor&lt;T&gt;) : Result&lt;T&gt;</text><!--MD5=[292a115e255385e750f8fe1093e35276]
+link asdi::visitor::Formatter to asdi::visitor::ProgramVisitor--><path codeLine="17" d="M355.16,256.1 C358.73,267.16 363.44,281.78 368.22,296.58 " fill="none" id="asdi::visitor::Formatter-to-asdi::visitor::ProgramVisitor" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="none" points="374.96,294.68,374.44,315.87,361.64,298.98,374.96,294.68" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="57" x="310.8464" y="305.2187">&lt;String&gt;</text><!--MD5=[ca3cb38358d6aacb05b730d9d4362850]
+link asdi::visitor::features to asdi::visitor::ProgramVisitor--><path codeLine="24" d="M399.19,156.3 C403.8,174.05 408.71,195.98 411,216 C414.61,247.55 409.47,282.78 403.26,310.62 " fill="none" id="asdi::visitor::features-to-asdi::visitor::ProgramVisitor" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="402.09,315.72,407.9961,307.8385,403.2049,310.8459,400.1975,306.0547,402.09,315.72" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[99cc7cb08ee19196de509c3f39004e93]
+link asdi::visitor::features to asdi::visitor::Formatter--><path codeLine="25" d="M376.67,156.13 C370.43,173.92 363.02,195.06 357.43,210.97 " fill="none" id="asdi::visitor::features-to-asdi::visitor::Formatter" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="355.76,215.73,362.5183,208.5658,357.4181,211.0129,354.971,205.9128,355.76,215.73" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[99e0b52fd1d7c3f74352192017d5c3a0]
+@startuml
+
+!include ../model/options.plantuml
+
+class asdi::Program #white
+hide "asdi::Program" members
+
+namespace asdi::visitor {
+
+    interface Formatter
+
+    interface ProgramVisitor<T> #white {
+        start_program(program: &Program) -> Result<T>
+        end_program(program: &Program) : Result<T>
+        === ••• ==
+    }
+
+    Formatter - -|> "<String>" ProgramVisitor
+
+    class features << module >> {
+        format_program(program: &Program, visitor: &impl Formatter) : String
+        visit_program<T>(program: &Program, visitor: &impl ProgramVisitor<T>) : Result<T>
+    }
+
+    features ..> ProgramVisitor
+    features ..> Formatter
+}
+
+@enduml
+
+@startuml
+
+set namespaceSeparator ::
+hide enum methods
+hide interface fields
+hide << const >> members
+hide << type >> members
+hide << type >> stereotype
+hide << module >> fields
+hide << module >> circle
+
+class asdi::Program #white
+hide "asdi::Program" members
+
+namespace asdi::visitor {
+
+    interface Formatter
+
+    interface ProgramVisitor<T> #white {
+        start_program(program: &Program) -> Result<T>
+        end_program(program: &Program) : Result<T>
+        === ••• ==
+    }
+
+    Formatter - -|> "<String>" ProgramVisitor
+
+    class features << module >> {
+        format_program(program: &Program, visitor: &impl Formatter) : String
+        visit_program<T>(program: &Program, visitor: &impl ProgramVisitor<T>) : Result<T>
+    }
+
+    features ..> ProgramVisitor
+    features ..> Formatter
+}
+
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 10:19:58 PST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

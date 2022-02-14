@@ -22,7 +22,7 @@
 4. [Model Extension](extension/index.md)
    2. [RelationSet I/O](extension/i_o.md)
    1. [Writing an Evaluator](extension/evaluator.md)
-   3. [Writing a Typesetter](extension/typeset.md)
+   3. [Writing a Typesetter](extension/formatting.md)
 
 5. [Appendix: Abstract Graphical View](reference/abstract_graph.md)
 6. [Appendix: First-Order Logic & Horn Clauses](reference/logic.md)

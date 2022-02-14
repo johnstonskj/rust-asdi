@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="547px" preserveAspectRatio="none" style="width:905px;height:547px;background:#FFFFFF;" version="1.1" viewBox="0 0 905 547" width="905px" zoomAndPan="magnify"><defs><filter height="300%" id="f1dgdptar19j4i" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[6bc3af5db4038e5494ba0622f07de59b]
+cluster asdi::edb--><polygon fill="#FFFFFF" filter="url(#f1dgdptar19j4i)" points="16,6,84,6,91,28.4883,888,28.4883,888,433,16,433,16,6" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="16" x2="91" y1="28.4883" y2="28.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="62" x="20" y="21.5352">asdi::edb</text><!--MD5=[b33f2e4372094b15554e3bf4225fc453]
+cluster asdi::edb::io--><polygon fill="#FFFFFF" filter="url(#f1dgdptar19j4i)" points="126,49,146,49,153,71.4883,864,71.4883,864,409,126,409,126,49" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="126" x2="153" y1="71.4883" y2="71.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="14" x="130" y="64.5352">io</text><!--MD5=[adc1e1baa9a15b0eb8524bb7df28ce4f]
+cluster asdi::edb::io::csv--><polygon fill="#FFFFFF" filter="url(#f1dgdptar19j4i)" points="278,92,307,92,314,114.4883,537,114.4883,537,191,278,191,278,92" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="278" x2="314" y1="114.4883" y2="114.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="23" x="282" y="107.5352">csv</text><!--MD5=[f1cb7313e4da8273a491bdb7c6cff648]
+cluster std::default--><polygon fill="#FFFFFF" filter="url(#f1dgdptar19j4i)" points="364,457,450,457,457,479.4883,470,479.4883,470,540,364,540,364,457" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="364" x2="457" y1="479.4883" y2="479.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="80" x="368" y="472.5352">std::default</text><!--MD5=[63be3a1481beaba15f9dd2bbcd4a53e1]
+class asdi::edb::Relation--><rect codeLine="4" fill="#FFFFFF" filter="url(#f1dgdptar19j4i)" height="32" id="asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.5;" width="78" x="32" y="135"/><ellipse cx="47" cy="151" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M43.4277,147.2651 L43.4277,145.1069 L50.8071,145.1069 L50.8071,147.2651 L48.3418,147.2651 L48.3418,155.3418 L50.8071,155.3418 L50.8071,157.5 L43.4277,157.5 L43.4277,155.3418 L45.8931,155.3418 L45.8931,147.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="46" x="61" y="155.5352">Relation</text><!--MD5=[8ad701a0a58c4c31a6eaf07d661f3312]
+class asdi::edb::io::Reader--><rect codeLine="27" fill="#FEFECE" filter="url(#f1dgdptar19j4i)" height="65.9102" id="asdi::edb::io::Reader" style="stroke:#A80036;stroke-width:1.5;" width="568" x="179" y="235"/><ellipse cx="437.75" cy="251" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M434.1777,247.2651 L434.1777,245.1069 L441.5571,245.1069 L441.5571,247.2651 L439.0918,247.2651 L439.0918,255.3418 L441.5571,255.3418 L441.5571,257.5 L434.1777,257.5 L434.1777,255.3418 L436.6431,255.3418 L436.6431,247.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="42" x="458.25" y="255.5352">Reader</text><line style="stroke:#A80036;stroke-width:1.5;" x1="180" x2="746" y1="267" y2="267"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="377" x="185" y="281.6348">read_from(file_name: &amp;Path, as_relation: &amp;Relation) : Result&lt;Relation&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="556" x="185" y="294.5898">read_from_with_options(file_name: &amp;Path, as_relation: &amp;Relation, options: &amp;Options) : Result&lt;Relation&gt;</text><!--MD5=[e59e870d1f5d82677b4664da985e5ac1]
+class asdi::edb::io::Writer--><rect codeLine="24" fill="#FFFFFF" filter="url(#f1dgdptar19j4i)" height="32" id="asdi::edb::io::Writer" style="stroke:#A80036;stroke-width:1.5;" width="66" x="782" y="252"/><ellipse cx="797" cy="268" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M793.4277,264.2651 L793.4277,262.1069 L800.8071,262.1069 L800.8071,264.2651 L798.3418,264.2651 L798.3418,272.3418 L800.8071,272.3418 L800.8071,274.5 L793.4277,274.5 L793.4277,272.3418 L795.8931,272.3418 L795.8931,264.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="34" x="811" y="272.5352">Writer</text><!--MD5=[623c1bc2600dad6dd6cfc041c89aa81d]
+class asdi::edb::io::Reader::Options--><rect codeLine="20" fill="#FEFECE" filter="url(#f1dgdptar19j4i)" height="32" id="asdi::edb::io::Reader::Options" style="stroke:#A80036;stroke-width:1.5;" width="76" x="334" y="361"/><ellipse cx="349" cy="377" fill="#A9DCDF" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M348.8633,372.3481 L347.7095,377.4199 L350.0254,377.4199 Z M347.3691,370.1069 L350.3657,370.1069 L353.7109,382.5 L351.2622,382.5 L350.4985,379.437 L347.2197,379.437 L346.4727,382.5 L344.0239,382.5 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="44" x="363" y="381.5352">Options</text><!--MD5=[6317661c68014402ef2d159b3df76250]
+class asdi::edb::io::csv::DelimitedLines--><rect codeLine="13" fill="#D3D3D3" filter="url(#f1dgdptar19j4i)" height="48" id="asdi::edb::io::csv::DelimitedLines" style="stroke:#A80036;stroke-width:1.5;" width="116" x="405" y="127"/><ellipse cx="420" cy="143" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M422.4731,149.1431 Q421.8921,149.4419 421.2529,149.5913 Q420.6138,149.7407 419.9082,149.7407 Q417.4014,149.7407 416.0815,148.0889 Q414.7617,146.437 414.7617,143.3159 Q414.7617,140.1865 416.0815,138.5347 Q417.4014,136.8828 419.9082,136.8828 Q420.6138,136.8828 421.2612,137.0322 Q421.9087,137.1816 422.4731,137.4805 L422.4731,140.2031 Q421.8423,139.6221 421.2488,139.3523 Q420.6553,139.0825 420.0244,139.0825 Q418.6797,139.0825 417.9949,140.1492 Q417.3101,141.2158 417.3101,143.3159 Q417.3101,145.4077 417.9949,146.4744 Q418.6797,147.541 420.0244,147.541 Q420.6553,147.541 421.2488,147.2712 Q421.8423,147.0015 422.4731,146.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="84" x="434" y="147.5352">DelimitedLines</text><line style="stroke:#A80036;stroke-width:1.5;" x1="406" x2="520" y1="159" y2="159"/><line style="stroke:#A80036;stroke-width:1.5;" x1="406" x2="520" y1="167" y2="167"/><!--MD5=[dba2b10b9f9c53f7c17306d62c961b0d]
+class asdi::edb::io::csv::Options--><rect codeLine="14" fill="#D3D3D3" filter="url(#f1dgdptar19j4i)" height="48" id="asdi::edb::io::csv::Options" style="stroke:#A80036;stroke-width:1.5;" width="76" x="294" y="127"/><ellipse cx="309" cy="143" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M311.4731,149.1431 Q310.8921,149.4419 310.2529,149.5913 Q309.6138,149.7407 308.9082,149.7407 Q306.4014,149.7407 305.0815,148.0889 Q303.7617,146.437 303.7617,143.3159 Q303.7617,140.1865 305.0815,138.5347 Q306.4014,136.8828 308.9082,136.8828 Q309.6138,136.8828 310.2612,137.0322 Q310.9087,137.1816 311.4731,137.4805 L311.4731,140.2031 Q310.8423,139.6221 310.2488,139.3523 Q309.6553,139.0825 309.0244,139.0825 Q307.6797,139.0825 306.9949,140.1492 Q306.3101,141.2158 306.3101,143.3159 Q306.3101,145.4077 306.9949,146.4744 Q307.6797,147.541 309.0244,147.541 Q309.6553,147.541 310.2488,147.2712 Q310.8423,147.0015 311.4731,146.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="44" x="323" y="147.5352">Options</text><line style="stroke:#A80036;stroke-width:1.5;" x1="295" x2="369" y1="159" y2="159"/><line style="stroke:#A80036;stroke-width:1.5;" x1="295" x2="369" y1="167" y2="167"/><!--MD5=[0784b2fc11df13a1d50fc7e720fd919b]
+class std::default::Default--><rect codeLine="7" fill="#FFFFFF" filter="url(#f1dgdptar19j4i)" height="32" id="std::default::Default" style="stroke:#A80036;stroke-width:1.5;" width="73" x="380.5" y="492"/><ellipse cx="395.5" cy="508" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M391.9277,504.2651 L391.9277,502.1069 L399.3071,502.1069 L399.3071,504.2651 L396.8418,504.2651 L396.8418,512.3418 L399.3071,512.3418 L399.3071,514.5 L391.9277,514.5 L391.9277,512.3418 L394.3931,512.3418 L394.3931,504.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="41" x="409.5" y="512.5352">Default</text><!--MD5=[067069178eae474d77bf3d0f2d23e1be]
+link asdi::edb::io::csv::DelimitedLines to asdi::edb::io::Reader--><path codeLine="15" d="M463,175.27 C463,186.6 463,200.72 463,214.46 " fill="none" id="asdi::edb::io::csv::DelimitedLines-to-asdi::edb::io::Reader" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="470,214.61,463,234.61,456,214.61,470,214.61" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[3cc9b5e142ed5cc00fcce0a46c003b48]
+link asdi::edb::io::csv::DelimitedLines to asdi::edb::io::Writer--><path codeLine="16" d="M521.27,162.58 C583.43,175.09 683.9,198.9 765,235 C768.97,236.77 772.99,238.82 776.94,241.02 " fill="none" id="asdi::edb::io::csv::DelimitedLines-to-asdi::edb::io::Writer" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="781.06,235.34,794.38,251.82,773.69,247.24,781.06,235.34" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[16e4a4b5b0ba94e4d2980c7234d181eb]
+link asdi::edb::io::csv::Options to asdi::edb::io::Reader::Options--><path codeLine="17" d="M315.78,175.17 C308.73,183.75 299.84,192.86 290,199 C239.86,230.28 197.68,187.89 162,235 C144.29,258.38 145.1,277.02 162,301 C199.73,354.54 279.31,370.07 328.95,374.45 " fill="none" id="asdi::edb::io::csv::Options-to-asdi::edb::io::Reader::Options" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="333.95,374.86,325.2987,370.1531,328.966,374.4601,324.6589,378.1274,333.95,374.86" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[e692efb263c10140293b787a30e1f248]
+link asdi::edb::io::Reader::Options to std::default::Default--><path codeLine="22" d="M377.25,393.05 C384.02,412.46 396,446.81 405.05,472.73 " fill="none" id="asdi::edb::io::Reader::Options-to-std::default::Default" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="411.67,470.46,411.64,491.65,398.45,475.07,411.67,470.46" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[d9b821e98b67c02711b7f86373ef7af9]
+link asdi::edb::io::Reader to std::default::Default--><path codeLine="31" d="M456.8,301.1 C448.18,345.7 432.63,426.12 423.74,472.15 " fill="none" id="asdi::edb::io::Reader-to-std::default::Default" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="430.58,473.63,419.91,491.93,416.83,470.97,430.58,473.63" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[0e53f512a8b66395dcdc0f5d347a5898]
+reverse link asdi::edb::io::Reader to asdi::edb::io::Reader::Options--><path codeLine="32" d="M425.87,312.66 C411.29,329.8 395.53,348.34 384.84,360.9 " fill="none" id="asdi::edb::io::Reader-backto-asdi::edb::io::Reader::Options" style="stroke:#A80036;stroke-width:1.0;"/><ellipse cx="430.5188" cy="307.1955" fill="#FFFFFF" rx="8" ry="8" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="425.3376" x2="435.7" y1="313.291" y2="301.1"/><line style="stroke:#A80036;stroke-width:1.0;" x1="424.4233" x2="436.6143" y1="302.0143" y2="312.3767"/><!--MD5=[f64b2eb9e75a4315a3aadfc89693232c]
+reverse link asdi::edb::Relation to asdi::edb::io::Reader--><path codeLine="33" d="M115.09,164.93 C172.47,181.77 274.71,211.76 353.56,234.89 " fill="none" id="asdi::edb::Relation-backto-asdi::edb::io::Reader" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="110.02,163.45,117.5174,169.8367,114.815,164.867,119.7846,162.1647,110.02,163.45" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[3b070076081c99914f3a683613a145f5]
+@startuml
+
+!include ../model/options.plantuml
+
+interface asdi::edb::Relation #white
+hide "asdi::edb::Relation" members
+
+interface std::default::Default #white
+hide "std::default::Default" members
+
+namespace asdi::edb::io {
+
+    namespace csv {
+        class DelimitedLines #lightgray
+        class Options #lightgray
+        DelimitedLines ..|> asdi::edb::io::Reader
+        DelimitedLines ..|> asdi::edb::io::Writer
+        Options ..> asdi::edb::io::Reader::Options
+    }
+
+    abstract class asdi::edb::io::Reader::Options
+    hide "asdi::edb::io::Reader::Options" members
+    asdi::edb::io::Reader::Options ..|> std::default::Default
+
+    interface Writer #white
+    hide Writer members
+
+    interface Reader {
+        read_from(file_name: &Path, as_relation: &Relation) : Result<Relation>
+        read_from_with_options(file_name: &Path, as_relation: &Relation, options: &Options) : Result<Relation>
+    }
+    Reader ..|> std::default::Default
+    Reader +- - asdi::edb::io::Reader::Options
+    Reader .up.> asdi::edb::Relation
+}
+
+@enduml
+
+@startuml
+
+set namespaceSeparator ::
+hide enum methods
+hide interface fields
+hide << const >> members
+hide << type >> members
+hide << type >> stereotype
+hide << module >> fields
+hide << module >> circle
+
+interface asdi::edb::Relation #white
+hide "asdi::edb::Relation" members
+
+interface std::default::Default #white
+hide "std::default::Default" members
+
+namespace asdi::edb::io {
+
+    namespace csv {
+        class DelimitedLines #lightgray
+        class Options #lightgray
+        DelimitedLines ..|> asdi::edb::io::Reader
+        DelimitedLines ..|> asdi::edb::io::Writer
+        Options ..> asdi::edb::io::Reader::Options
+    }
+
+    abstract class asdi::edb::io::Reader::Options
+    hide "asdi::edb::io::Reader::Options" members
+    asdi::edb::io::Reader::Options ..|> std::default::Default
+
+    interface Writer #white
+    hide Writer members
+
+    interface Reader {
+        read_from(file_name: &Path, as_relation: &Relation) : Result<Relation>
+        read_from_with_options(file_name: &Path, as_relation: &Relation, options: &Options) : Result<Relation>
+    }
+    Reader ..|> std::default::Default
+    Reader +- - asdi::edb::io::Reader::Options
+    Reader .up.> asdi::edb::Relation
+}
+
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 10:19:58 PST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

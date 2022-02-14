@@ -1,0 +1,29 @@
+@startuml
+
+!include ../model/options.plantuml
+
+class asdi::Program #white
+hide "asdi::Program" members
+
+class asdi::edb::RelationSet #white
+hide "asdi::edb::RelationSet" members
+
+namespace asdi::idb::eval {
+    interface Evaluator {
+        inference(program: Program) : Result<RelationSet>
+        label() -> &str
+    }
+
+    class StratifiedEvaluator #lightgray
+    class StratifiedProgram
+
+    StratifiedEvaluator ..|> Evaluator
+
+    Evaluator .right.> asdi::Program
+    Evaluator .right.> asdi::edb::RelationSet
+
+
+    StratifiedEvaluator .down.> StratifiedProgram
+}
+
+@enduml

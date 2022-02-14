@@ -15,26 +15,11 @@ use crate::edb::Fact;
 use crate::error::Result;
 use crate::idb::{query::Query, Rule};
 use crate::{Collection, Program, ProgramCore, QuerySet, Relation, RelationSet, RuleSet};
+use std::fmt::Display;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
-
-///
-/// This trait must be implemented by a type that can output formatted values as strings.
-///
-pub trait Formatter {
-    fn pre_amble(&self) -> Result<String> {
-        Ok(String::new())
-    }
-    fn post_amble(&self) -> Result<String> {
-        Ok(String::new())
-    }
-    fn program(&self, value: &Program) -> Result<String>;
-    fn fact(&self, value: &Fact, inline: bool) -> Result<String>;
-    fn rule(&self, value: &Rule, inline: bool) -> Result<String>;
-    fn query(&self, value: &Query, inline: bool) -> Result<String>;
-}
 
 pub trait ProgramVisitor<T> {
     fn start_program(&self, program: &Program) -> Result<T>;
@@ -70,11 +55,18 @@ pub trait QueryVisitor<T> {
     fn end_query(&self, query: &Query) -> Result<T>;
 }
 
+///
+/// A convenience for tools that are formatting and displaying a program. This requires the
+/// underlying visitor to deal with strings and also to support `Display` so that a natural
+/// call to `to_string` will return the calculated representation.
+///
+pub trait Formatter: Display + ProgramVisitor<String> {}
+
 // ------------------------------------------------------------------------------------------------
 // Public Functions
 // ------------------------------------------------------------------------------------------------
 
-pub fn format_program(program: &Program, visitor: &impl ProgramVisitor<String>) -> Result<String> {
+pub fn format_program(program: &Program, visitor: &impl Formatter) -> Result<String> {
     visit_program(program, visitor)
 }
 

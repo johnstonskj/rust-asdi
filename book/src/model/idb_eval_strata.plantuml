@@ -25,7 +25,8 @@ namespace asdi::idb::eval::strata {
     class StratifiedProgram
 
     PrecedenceGraph *-down-> "*" PrecedenceNode
-    PrecedenceNode o-> "source, target" asdi::edb::Predicate
+    PrecedenceNode o-> "source" asdi::edb::Predicate
+    PrecedenceNode o-> "target" asdi::edb::Predicate
 
     StratifiedProgram *-> "*" SubProgram
     StratifiedProgram <.. asdi::idb::eval::StratifiedEvaluator
