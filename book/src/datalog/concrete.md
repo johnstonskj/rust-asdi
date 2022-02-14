@@ -75,6 +75,8 @@ string  ::= predicate ( ":" ALPHA ( ALPHA | DIGIT | "_" * )? )
 
 Numeric values in ASDI take one of three forms, integers, decimal values, and floating point values.
 
+> Currently, decimal types are not implemented.
+
 ![integer](images/number.png)
 
 ```ebnf

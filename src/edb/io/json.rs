@@ -6,7 +6,7 @@ use crate::edb::io::{Reader, Writer};
 use crate::edb::{AttributeKind, Constant, Fact};
 use crate::error::Error;
 use crate::error::Result;
-use crate::syntax::{TYPE_NAME_CONST_BOOLEAN, TYPE_NAME_CONST_INTEGER, TYPE_NAME_CONST_STRING};
+use crate::syntax::{TYPE_NAME_CONST_BOOLEAN, TYPE_NAME_CONST_STRING};
 use crate::{error, Collection, Labeled, Relation};
 use serde_json::{from_reader, Number, Value};
 use std::fs::File;
@@ -150,7 +150,15 @@ fn fact_to_json(fact: &Fact) -> Value {
     for constant in fact.iter() {
         array.push(match constant {
             Constant::String(v) => Value::String(v.to_owned()),
-            Constant::Integer(v) => Value::Number(Number::from(*v)),
+            Constant::Number(v) => {
+                if let Some(i) = v.as_integer() {
+                    Value::Number(Number::from(*i))
+                } else if let Some(f) = v.as_float() {
+                    Value::Number(Number::from_f64(*f).unwrap())
+                } else {
+                    unreachable!()
+                }
+            }
             Constant::Boolean(v) => Value::Bool(*v),
         });
     }
@@ -168,11 +176,15 @@ fn json_value_to_string(v: &Value) -> Result<Constant> {
 
 #[inline]
 fn json_value_to_integer(v: &Value) -> Result<Constant> {
-    let v2: i64 = v
-        .as_i64()
-        .ok_or_else(|| error::invalid_value(TYPE_NAME_CONST_INTEGER, &v.to_string()))?
-        .to_owned();
-    Ok(Constant::Integer(v2))
+    if let Some(v) = v.as_i64() {
+        Ok(Constant::from(v))
+    } else if let Some(v) = v.as_u64() {
+        Ok(Constant::from(v as i64))
+    } else if let Some(v) = v.as_f64() {
+        Constant::try_from(v)
+    } else {
+        unreachable!()
+    }
 }
 
 #[inline]
