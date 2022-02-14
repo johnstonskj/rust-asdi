@@ -209,10 +209,13 @@ safely be expressed without quotes; therefore, the values <code>xerces</code> an
 </code></pre>
 <h3 id="numbers"><a class="header" href="#numbers">Numbers</a></h3>
 <p>Numeric values in ASDI take one of three forms, integers, decimal values, and floating point values.</p>
+<blockquote>
+<p>Currently, decimal types are not implemented.</p>
+</blockquote>
 <p><img src="images/number.png" alt="integer" /></p>
 <pre><code class="language-ebnf">number  ::= float | decimal | integer
 </code></pre>
-<p>Integer values in ASDI are signed, 64-bit values.</p>
+<p>Integer values in ASDI are signed, 64-bit values (<code>i64</code>).</p>
 <p><img src="images/integer.png" alt="integer" /></p>
 <pre><code class="language-ebnf">integer ::= ( &quot;+&quot; | &quot;-&quot; )? DIGIT+
 </code></pre>
@@ -220,9 +223,9 @@ safely be expressed without quotes; therefore, the values <code>xerces</code> an
 <p><img src="images/decimal.png" alt="integer" /></p>
 <pre><code class="language-ebnf">decimal ::= integer &quot;.&quot; DIGIT+
 </code></pre>
-<p>Floating point values in ASDI are 65-bit IEEE floats.</p>
+<p>Floating point values in ASDI are 65-bit IEEE floats (<code>f64</code>).</p>
 <p><img src="images/float.png" alt="integer" /></p>
-<pre><code class="language-ebnf">float   ::= decimal ( &quot;e&quot; | &quot;E&quot; ) ( &quot;+&quot; | &quot;-&quot; )? DIGIT+
+<pre><code class="language-ebnf">float   ::= decimal ( &quot;e&quot; | &quot;E&quot; ) integer
 </code></pre>
 <h3 id="booleans"><a class="header" href="#booleans">Booleans</a></h3>
 <p>Boolean values may also be represented using <code>⊤</code> (down tack <code>\u{22a4}</code>) for true, and <code>⊥</code> (up tack
