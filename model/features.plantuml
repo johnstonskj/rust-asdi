@@ -14,6 +14,7 @@ namespace asdi::features {
         FEATURE_CONSTRAINTS: Feature <<const>>
         FEATURE_DISJUNCTION: Feature <<const>>
         FEATURE_NEGATION: Feature <<const>>
+        FEATURE_FUNCTIONAL_DEPENDENCIES: Feature <<const>>
     }
     show features fields
     hide features methods
