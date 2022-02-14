@@ -94,16 +94,32 @@ identifier_relaxed = @{
     LETTER ~ ( CASED_LETTER | DECIMAL_NUMBER | UNDERSCORE )*
 }
 
+subscript = @ {
+    ASCII_DIGIT+
+}
+
 // ------------------------------------------------------------------------------------------------
 // Pragmas
 // ------------------------------------------------------------------------------------------------
 
 pragma = {
-    DOT ~ (pragma_assert | pragma_infer | pragma_feature | pragma_input | pragma_output) ~ DOT
+    DOT ~ (pragma_assert | pragma_fd | pragma_infer | pragma_feature | pragma_input | pragma_output) ~ DOT
 }
 
 pragma_assert = {
     keyword_assert ~ predicate ~ attribute_declaration_list
+}
+
+pragma_fd = {
+    keyword_fd ~ predicate ~ COLON ~ attribute_index_list ~ depends_on ~ attribute_index_list
+}
+
+attribute_index_list = _{
+    attribute_index ~ ( COMMA ~ attribute_index )*
+}
+
+attribute_index = _{
+    subscript | predicate
 }
 
 pragma_infer = {
@@ -127,7 +143,11 @@ feature_list = _{
 }
 
 feature_id = _{
-    feature_id_negation | feature_id_comparisons | feature_id_constraints | feature_id_disjunction
+    feature_id_negation
+    | feature_id_comparisons
+    | feature_id_constraints
+    | feature_id_disjunction
+    | feature_id_functional_dependencies
 }
 
 pragma_input = {
@@ -144,6 +164,10 @@ keyword_assert = _{
 
 keyword_infer = _{
     "infer"
+}
+
+keyword_fd = _{
+    "fd"
 }
 
 keyword_feature = _{
@@ -190,6 +214,10 @@ feature_id_disjunction = {
     "disjunction"
 }
 
+feature_id_functional_dependencies = {
+    "functional_dependencies"
+}
+
 // ------------------------------------------------------------------------------------------------
 // Constant definitions
 // ------------------------------------------------------------------------------------------------
@@ -216,6 +244,26 @@ number = @{
     ( "+" | "-" )? ~ ASCII_DIGIT+ ~ ( DOT ~ ASCII_DIGIT+ )?
 }
 
+new_number = {
+    float | decimal | rational | integer
+}
+
+integer = @{
+    ( "+" | "-" )? ~ ASCII_DIGIT+
+}
+
+rational = @{
+    integer ~ "/" ~ rational
+}
+
+decimal = @{
+    integer ~ DOT ~ ASCII_DIGIT+
+}
+
+float = @{
+    decimal ~ ("e" | "E") ~ integer
+}
+
 boolean = {
     boolean_true | boolean_false
 }
@@ -231,6 +279,13 @@ boolean_false = _{
 // ------------------------------------------------------------------------------------------------
 // Terminal definitions
 // ------------------------------------------------------------------------------------------------
+
+depends_on = {
+    "-->" | "⟶"
+}
+
+// LONG RIGHTWARDS ARROW
+// Unicode: U+27F6, UTF-8: E2 9F B6
 
 material_implication = _{
     ":-" | "<-" | UC_LEFT_ARROW_FW

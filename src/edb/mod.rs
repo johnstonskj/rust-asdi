@@ -95,16 +95,17 @@ boolean_fact(false).
 */
 
 use crate::error::{
-    fact_does_not_correspond_to_schema, invalid_value, nullary_facts_not_allowed, relation_exists,
-    Error, Result,
+    attribute_does_not_exist, attribute_index_invalid, fact_does_not_correspond_to_schema,
+    invalid_value, nullary_facts_not_allowed, relation_exists, Error, Result,
 };
 use crate::idb::query::relational::{FactOps, Projection, Selection};
 use crate::idb::query::{Queryable, Row, View};
 use crate::idb::Atom;
 use crate::syntax::{
     ANONYMOUS_COLUMN_NAME, BOOLEAN_LITERAL_FALSE, BOOLEAN_LITERAL_TRUE, CHAR_COLON, CHAR_COMMA,
-    CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, PRAGMA_ID_ASSERT,
-    PRAGMA_ID_INFER, RESERVED_PREFIX, TYPE_NAME_PREDICATE,
+    CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, COMMA_SEPARATOR,
+    FUNCTIONAL_DEPENDENCY_UNICODE_SYMBOL, PRAGMA_ID_ASSERT, PRAGMA_ID_INFER, RESERVED_PREFIX,
+    TYPE_NAME_PREDICATE,
 };
 use crate::{
     AttributeName, AttributeNameRef, Collection, IndexedCollection, Labeled, MaybeAnonymous, Term,
@@ -113,6 +114,7 @@ use crate::{
 use paste::paste;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Display, Formatter};
+use std::ops::Sub;
 use std::rc::Rc;
 use std::str::FromStr;
 use tracing::trace;
@@ -144,23 +146,21 @@ pub struct Relation {
 ///
 /// A schema is an ordered list of [attribute descriptions](Attribute).
 ///
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Schema<T>
 where
     T: AttributeName,
 {
     attributes: Vec<Attribute<T>>,
     label_index: BTreeMap<AttributeNameRef<T>, usize>,
-    // TODO: (ISSUE/rust-asdi/17) Add functional dependencies to schema
-    // functional_dependencies: HashSet<FunctionalDependency>,
+    functional_dependencies: HashSet<FunctionalDependency>,
 }
 
-// TODO: (ISSUE/rust-asdi/17) Add functional dependencies to schema
-// #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-// struct FunctionalDependency {
-//     a: Vec<usize>,
-//     b: Vec<usize>,
-// }
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct FunctionalDependency {
+    determinant: Vec<usize>,
+    dependent: Vec<usize>,
+}
 
 ///
 /// An Attribute structure provides the label and [type](AttributeKind) of an attribute
@@ -358,6 +358,7 @@ where
         Self {
             attributes,
             label_index: named,
+            functional_dependencies: Default::default(),
         }
     }
 
@@ -365,6 +366,7 @@ where
         Self {
             attributes: Default::default(),
             label_index: Default::default(),
+            functional_dependencies: Default::default(),
         }
     }
 
@@ -425,6 +427,108 @@ where
             .map(|a| a.to_column_decl(emit_unknown))
             .collect::<Vec<String>>()
             .join(&format!("{} ", CHAR_COMMA))
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    pub fn attribute_index_to_index(&self, index: &AttributeIndex<T>) -> Result<usize> {
+        match index {
+            AttributeIndex::Label(label) => {
+                if let Some(index) = self.label_to_index(label) {
+                    Ok(index)
+                } else {
+                    Err(attribute_does_not_exist(label.to_string()))
+                }
+            }
+            AttributeIndex::Index(index) => {
+                if *index < self.attributes.len() {
+                    Ok(*index)
+                } else {
+                    Err(attribute_index_invalid(*index))
+                }
+            }
+        }
+    }
+
+    pub fn has_functional_dependencies(&self) -> bool {
+        !self.functional_dependencies.is_empty()
+    }
+
+    pub fn functional_dependencies(&self) -> &HashSet<FunctionalDependency> {
+        &self.functional_dependencies
+    }
+
+    pub fn add_functional_attribute(&mut self, determinant: AttributeIndex<T>) -> Result<bool> {
+        let determinant = self.attribute_index_to_index(&determinant)?;
+        let dependents: Vec<usize> = (0..self.attributes.len().sub(determinant)).collect();
+
+        Ok(self
+            .functional_dependencies
+            .insert(FunctionalDependency::new(vec![determinant], dependents)))
+    }
+
+    pub fn add_functional_dependency<V: Into<Vec<AttributeIndex<T>>>>(
+        &mut self,
+        determinant: V,
+        dependent: V,
+    ) -> Result<bool> {
+        let determinant = self.attribute_indices_to_index(&determinant.into())?;
+        let determinant_hash: HashSet<usize> = HashSet::from_iter(determinant.iter().copied());
+        assert_eq!(determinant.len(), determinant_hash.len());
+
+        let dependent = self.attribute_indices_to_index(&dependent.into())?;
+        let dependent_hash: HashSet<usize> = HashSet::from_iter(dependent.iter().cloned());
+        assert_eq!(dependent.len(), dependent_hash.len());
+
+        assert_eq!(determinant_hash.intersection(&dependent_hash).count(), 0);
+
+        Ok(self
+            .functional_dependencies
+            .insert(FunctionalDependency::new(determinant, dependent)))
+    }
+
+    fn attribute_indices_to_index(&self, indices: &[AttributeIndex<T>]) -> Result<Vec<usize>> {
+        indices
+            .iter()
+            .map(|i| self.attribute_index_to_index(i))
+            .collect()
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Display for FunctionalDependency {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {} {}",
+            self.determinants()
+                .map(|d| (d + 1).to_string())
+                .collect::<Vec<String>>()
+                .join(COMMA_SEPARATOR),
+            FUNCTIONAL_DEPENDENCY_UNICODE_SYMBOL,
+            self.dependents()
+                .map(|d| (d + 1).to_string())
+                .collect::<Vec<String>>()
+                .join(COMMA_SEPARATOR),
+        )
+    }
+}
+
+impl FunctionalDependency {
+    fn new<V: Into<Vec<usize>>>(determinants: V, dependents: V) -> Self {
+        Self {
+            determinant: determinants.into(),
+            dependent: dependents.into(),
+        }
+    }
+
+    pub fn determinants(&self) -> impl Iterator<Item = &usize> {
+        self.determinant.iter()
+    }
+
+    pub fn dependents(&self) -> impl Iterator<Item = &usize> {
+        self.dependent.iter()
     }
 }
 
@@ -881,6 +985,10 @@ impl Relation {
 
     pub fn schema(&self) -> &Schema<Predicate> {
         &self.schema
+    }
+
+    pub(crate) fn schema_mut(&mut self) -> &mut Schema<Predicate> {
+        &mut self.schema
     }
 
     pub(crate) fn update_schema(&mut self, other: &Self) {

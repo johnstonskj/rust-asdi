@@ -14,8 +14,7 @@ reasoning performed over the program.
 ![program](images/program.png)
 
 ```ebnf
-program
-        ::= pragma* ( fact | rule | query )* ;
+program ::= pragma* ( fact | rule | query )* ;
 ```
 
 A program consists of a single file containing facts, rules, and queries as well as any additional
@@ -29,8 +28,7 @@ than a constrained form of the `atom` rule.
 ![fact](images/fact.png)
 
 ```ebnf
-fact
-        ::= predicate ( "(" constant ( "," constant )* ")" )? "." ;
+fact    ::= predicate ( "(" constant ( "," constant )* ")" )? "." ;
 ```
 
 A predicate is the identifier shared by a fact and relation.
@@ -42,9 +40,7 @@ predicate
         ::= LC_ALPHA ( ALPHA | DIGIT | "_" )* ;
 ```
 
-### Example
-
-The following demonstrates a simple fact denoting that the constant `brooke` representing some
+**Example** -- the following demonstrates a simple fact denoting that the constant `brooke` representing some
 individual is the parent of some individual represented by the constant `"Xerces"`.
 
 ```datalog
@@ -53,7 +49,7 @@ parent("Xerces", brooke).
 
 ## Constant Values
 
-Constants are supported in three types, String, Integer, and Boolean. Whereas some definitions of
+Constants are supported in three types, String, Numbers, and Boolean. Whereas some definitions of
 Datalog introduce an additional Identifier type, ASDI treats these as _short strings_ that can
 safely be expressed without quotes; therefore, the values `xerces` and `"xerces"` are equivalent.
 
@@ -61,27 +57,55 @@ safely be expressed without quotes; therefore, the values `xerces` and `"xerces"
 
 ```ebnf
 constant
-        ::= string | integer | boolean ;
+        ::= string | number | boolean ;
 ```
+
+### Strings
 
 Strings are described in both the identifier and quoted form in the `string` rule.
 
 ![string](images/string.png)
 
 ```ebnf
-string
-        ::= predicate ( ":" ALPHA ( ALPHA | DIGIT | "_" * )? )
+string  ::= predicate ( ":" ALPHA ( ALPHA | DIGIT | "_" * )? )
             | DQUOTE [^\u{22}]* DQUOTE ;
 ```
 
-Integers bounds are currently unspecified, just strings of decimal digits.
+### Numbers
+
+Numeric values in ASDI take one of three forms, integers, decimal values, and floating point values.
+
+![integer](images/number.png)
+
+```ebnf
+number  ::= float | decimal | integer
+```
+
+Integer values in ASDI are signed, 64-bit values.
 
 ![integer](images/integer.png)
 
 ```ebnf
-integer
-        ::= ( "+" | "-" )? DIGIT+ ;
+integer ::= ( "+" | "-" )? DIGIT+
 ```
+
+Decimal values in ASDI are ... TBD.
+
+![integer](images/decimal.png)
+
+```ebnf
+decimal ::= integer "." DIGIT+
+```
+
+Floating point values in ASDI are 65-bit IEEE floats.
+
+![integer](images/float.png)
+
+```ebnf
+float   ::= decimal ( "e" | "E" ) ( "+" | "-" )? DIGIT+
+```
+
+### Booleans
 
 Boolean values may also be represented using `⊤` (down tack `\u{22a4}`) for true, and `⊥` (up tack
 `\u{22a5}`) for false where this may improve readability.
@@ -89,8 +113,7 @@ Boolean values may also be represented using `⊤` (down tack `\u{22a4}`) for tr
 ![boolean](images/boolean.png)
 
 ```ebnf
-boolean
-        ::= ( "true" | "⊤" ) | ( "false" | "⊥" ) ;
+boolean ::= ( "true" | "⊤" ) | ( "false" | "⊥" ) ;
 ```
 
 ### Rules
@@ -102,8 +125,7 @@ the Unicode character `⟵` (long leftwards arrow`\u{27f5}`).
 ![rule](images/rule.png)
 
 ```ebnf
-rule
-        ::= ( head | "⊥" )? ( ":-" | "<-" | "⟵" ) body "." ;
+rule    ::= ( head | "⊥" )? ( ":-" | "<-" | "⟵" ) body "." ;
 ```
 
 The head of a rule is a disjunction of atoms, or in the case of a constraint the head may is
@@ -112,8 +134,7 @@ optional or replaced by the value `"⊥"`.
 ![head](images/head.png)
 
 ```ebnf
-head
-        ::= ( atom ( ( ";" | "|" | "OR" | "∨" ) atom )* ) ;
+head    ::= ( atom ( ( ";" | "|" | "OR" | "∨" ) atom )* ) ;
 ```
 
 The body of a rule is comprised of one, or more, literals.
@@ -121,13 +142,10 @@ The body of a rule is comprised of one, or more, literals.
 ![body](images/body.png)
 
 ```ebnf
-body
-        ::= literal ( ( "," | "&" | "AND" | "∧" ) literal )* ;
+body    ::= literal ( ( "," | "&" | "AND" | "∧" ) literal )* ;
 ```
 
-### Examples
-
-The following sets of rules are equivalent.
+**Example** -- the following sets of rules are equivalent.
 
 ```datalog
 ancestor(X, Y) :- parent(X, Y).
@@ -140,7 +158,7 @@ movie_star(X) :- star(X) AND movie_cast_member(X, _, _).
 movie_star(X) :- star(X)  ∧  movie_cast_member(X, _, _).
 ```
 
-As described in the abstract syntax it is an error to use an extensional relation in the head of
+**Example** -- as described in the abstract syntax it is an error to use an extensional relation in the head of
 a rule. The following will generate an error:
 
 ```datalog
@@ -153,7 +171,7 @@ The language feature `disjunction` corresponds to the language $\small\text{Data
 allows multiple atoms to appear in the rule's head with the semantics that these are choices. This
 syntax will not be accepted unless the feature is enabled.
 
-For example, the following describes the rule that _if X is a parent then X is **either** a
+**Example** -- the following describes the rule that _if X is a parent then X is **either** a
 father **or** mother_.
 
 ```datalog
@@ -210,15 +228,13 @@ above.
 ![atom](images/atom.png)
 
 ```ebnf
-atom
-        ::= predicate "(" term ( "," term )* ")" ;
+atom    ::= predicate "(" term ( "," term )* ")" ;
 ```
 
 ![term](images/term.png)
 
 ```ebnf
-term
-        ::= variable | constant ;
+term    ::= variable | constant ;
 ```
 
 Note that we explicitly separate variables into named and anonymous forms here.
@@ -235,13 +251,12 @@ variable
 ```ebnf
 named-variable
         ::= UC_ALPHA ( ALPHA | DIGIT | "_" )* ;
+        
 anon-variable
         ::= "_" ;
 ```
 
-### Example
-
-The following are all valid body atoms.
+**Example** -- the following are all valid body atoms.
 
 ```datalog
 dead(julius_caesar).
@@ -259,13 +274,10 @@ character `∧` (logical and `\u{2227}`).
 ![literal](images/literal.png)
 
 ```ebnf
-literal
-        ::= ( "!" | "NOT" | "￢" )? ( atom | comparison ) ;
+literal ::= ( "!" | "NOT" | "￢" )? ( atom | comparison ) ;
 ```
 
-### Examples
-
-The following rules are all equivalent.
+**Example** -- the following rules are all equivalent.
 
 ```datalog
 ancestor(X, Y) ⟵ parent(X, Z)  ,  ancestor(Z, Y).
@@ -340,9 +352,7 @@ Additionally, some operators are not present for all types, as shown in the tabl
 | Integer  | Yes        | Yes                | No  |
 | Boolean  | Yes        | No                 | No  |
 
-### Example
-
-The following is an example using arithmetic literals and the _car_ relation.
+**Example** -- the following is an example using arithmetic literals and the _car_ relation.
 
 ```datalog
 .feature(comparisons).
@@ -361,13 +371,10 @@ or the suffix `?`.
 ![query](images/query.png)
 
 ```ebnf
-query
-        ::= ( "?-" atom "." ) | ( atom "?" ) ;
+query   ::= ( "?-" atom "." ) | ( atom "?" ) ;
 ```
 
-### Examples
-
-The following queries are equivalent and will return the value of the variable `X` for any facts in
+**Example** -- the following queries are equivalent and will return the value of the variable `X` for any facts in
 the _ancestor_ relationship where the first attribute is the string value `"xerces"`.
 
 ```datalog
@@ -414,9 +421,10 @@ the meaning of the program itself.
 ![pragma](images/pragma.png)
 
 ```ebnf
-pragma
-        ::= "." ( feature | assert | infer | input | output ) ;
+pragma  ::= "." ( feature | assert | infer | fd | input | output ) "." ;
 ```
+
+### pragma feature
 
 The `feature` pragma determines which Datalog language is in use. Use of syntax not supported by the
 selected language feature will result in errors.
@@ -424,23 +432,28 @@ selected language feature will result in errors.
 ![feature](images/feature.png)
 
 ```ebnf
-feature
-        ::= "feature" "(" feature-id ( "," feature-id )* ")" "." ;
+feature ::= "feature" "(" feature-id ( "," feature-id )* ")" ;
 ```
 
 ![feature-id](images/feature-id.png)
 
 ```ebnf
 feature-id
-        ::= "comparisons" | "constraints" | "disjunction" | "negation" ;
+        ::= "comparisons"
+        | "constraints"
+        | "disjunction"
+        | "negation"
+        | "functional_dependencies"
 ```
 
-### Example
+**Example**
 
 ```datalog
 .feature(negation).
 .feature(comparisons, disjunction).
 ```
+
+### pragma assert
 
 The `assert` pragma describes a new relation in the extensional database. The parser can determine
 the schema for facts from their types in the database. The use of this pragma is therefore optional,
@@ -449,8 +462,7 @@ but recommended.
 ![assert](images/assert.png)
 
 ```ebnf
-assert
-        ::= "assert" predicate "(" attribute-decl ( "," attribute-decl )* ")" "." ;
+assert  ::= "assert" predicate "(" attribute-decl ( "," attribute-decl )* ")" ;
 ```
 
 ![attribute-decl](images/attribute-decl.png)
@@ -460,11 +472,13 @@ attribute-decl
         ::= ( predicate ":" )? ( "boolean" | "integer" | "string" ) ;
 ```
 
-### Example
+**Example**
 
 ```datalog
 .assert human(name: string).
 ```
+
+### pragma infer
 
 The `infer` pragma describes a new relation in the intensional database. Typically the parser
 can determine the schema for relational literals from their context, The use of this pragma
@@ -474,13 +488,12 @@ an intensional relation in terms of a previously defined extensional relation.
 ![infer](images/infer.png)
 
 ```ebnf
-infer
-        ::= "infer"
+infer   ::= "infer"
             ( predicate "(" attribute-decl ( "," attribute-decl )* ")" )
-            | "from" predicate "." ;
+            | "from" predicate ;
 ```
 
-### Example
+**Example**
 
 ```datalog
 .infer mortal(name: string).
@@ -493,6 +506,63 @@ Alternatively the short-cut form is often more convenient.
 .infer mortal from human.
 ```
 
+### pragma fd
+
+The `fd` pragma, short for _functional dependency_, introduces a relationship between one or more attributes on the
+left-hand (determinant) side and one or more attributes on the right-hand (dependent) side. This relationship denotes
+that for a relationship $\small R$ with attributes $\small a_1, \cdots, a_n$, every valid combination of determinant
+values uniquely determines the value of the dependent values.
+
+Note that this pragma is only valid if the corresponding language feature is enabled.
+
+![input](images/fd.png)
+
+```ebnf
+fd      ::= ( "fd" | "functional_dependency" ) 
+            predicate ":"
+            attribute-index-list ( "-->" | "⟶" ) attribute-index-list
+``` 
+
+![input](images/attribute-index-list.png)
+
+```ebnf
+attribute-index-list
+        ::= attribute-index ( "," attribute-index )*
+```
+
+An attribute index is _either_ an attribute label, if one has been declared for the relation, or an integer $\small i \in \[1,|schema\(R\)|\]$.
+
+![input](images/attribute-index.png)
+
+```ebnf
+attribute-index
+        ::= integer | predicate
+``` 
+
+**Constraints** -- given the notational form $\small R: \alpha \rightarrow \Beta$;
+
+1. the initial predicate **must** be the label of an extensional relation:
+   $$\small R \in D_I \land label\(R\)$$
+2. the set of attribute identifiers comprising the set $\small \alpha$ **must** be in $\small R$: 
+   $$\small \forall a \in \alpha \(a \in schema\(R\)\)$$
+3. the set of attribute identifiers comprising the set $\small \Beta$ **must** be in $\small R$:
+   $$\small \forall a \in \Beta \(a \in schema\(R\)\)$$
+4. the same attribute identifier **must not** appear in both determinant and dependent:
+   $$\small \alpha \cap \Beta = \emptyset$$
+
+**Example** -- given the extensional relation _employee_ the two functional dependencies in the 
+following are equivalent. Note that the implementation will ignore such duplicate declarations.
+
+```datalog
+.feature(functional_dependencies).
+.assert employee(id:integer, name:string).
+
+.fd employee: id --> name.
+.fd employee: 1 ⟶ 2.
+```
+
+### pragma input
+
 The `input` pragma instructs the parser to load facts for the named extensional relation from an
 external file. This pragma **requires** that the relation be previously defined via the `assert`
 pragma.
@@ -500,8 +570,7 @@ pragma.
 ![input](images/input.png)
 
 ```ebnf
-input
-        ::= "input" io-details "."
+input   ::= "input" io-details "."
 ```
 
 ![io-details](images/io-details.png)
@@ -511,12 +580,14 @@ io-details
         ::= "(" predicate "," quoted-string ( "," quoted-string )? ")" ;
 ```
 
-### Example
+**Example**
 
 ```datalog
 .assert human(name: string).
 .input(human, "data/humans.csv", "csv").
 ```
+
+### pragma output
 
 The `output` pragma instructs the parser to write facts from the named intensional relation to an
 external file. This pragma **requires** that the relation be previously defined via the `infer`
@@ -525,11 +596,10 @@ pragma.
 ![output](images/output.png)
 
 ```ebnf
-output
-        ::= "output" io-details "." ;
+output  ::= "output" io-details "." ;
 ```
 
-### Example
+**Example**
 
 ```datalog
 .infer mortal(name: string).
@@ -544,12 +614,11 @@ Comments in Datalog are either 1) the `%` character and continue to the end of t
 ![comment](images/comment.png)
 
 ```ebnf
-comment
-        ::= "%" [^\r\n]* EOL
+comment ::= "%" [^\r\n]* EOL
             | "/" "*" ( [^\*] | "*"+ [^\*\/] )* "*"+ "/" ;
 ```
 
-### Example
+**Example**
 
 ```datalog
 % Here's a comment
@@ -562,20 +631,23 @@ comment
 The following are lexical rules that can be assumed by the rules above.
 
 ```ebnf
-EOL
-        ::= "\n" | "\r\n" | "\r" ;
+EOL     ::= "\n" | "\r\n" | "\r" ;
+
 WHITESPACE
         ::= " " | "\t" | EOL ;
+        
 DQUOTE
         ::= '"' ;
+        
 LC_ALPHA
-        ::= ? corresponds to the Unicode category 'Ll' ? ;
+        ::= ? corresponds to the Unicode category 'Ll' (letter, lower case) ? ;
+        
 UC_ALPHA
-        ::= ? corresponds to the Unicode category 'Lu' ? ;
-ALPHA
-        ::= LC_ALPHA | UC_ALPHA ;
-DIGIT
-        ::= ? corresponds to the Unicode category 'Nd' (decimal number) ? ;
+        ::= ? corresponds to the Unicode category 'Lu' (letter, upper case) ? ;
+        
+ALPHA   ::= LC_ALPHA | UC_ALPHA ;
+
+DIGIT   ::= ? corresponds to the Unicode category 'Nd' (decimal number) ? ;
 ```
 
 ----------

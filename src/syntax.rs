@@ -39,6 +39,7 @@ const_string_block!(
     PRAGMA_ID
     ( ASSERT => "assert" ),
     ( INFER => "infer" ),
+    ( FD => "fd" ),
     ( FEATURE => "feature" ),
     ( INCLUDE => "include" ),
     ( INPUT => "input" ),
@@ -59,8 +60,17 @@ const_string_block!(
     ( DISJUNCTION_ID => "disjunction" ),
     ( DISJUNCTION_SYMBOL => "∨" ),
     // ----------------------------------------
+    ( FUNCTIONAL_DEPENDENCIES_ID => "functional_dependencies" ),
+    ( FUNCTIONAL_DEPENDENCIES_SYMBOL => "⟶" ),
+    // ----------------------------------------
     ( EXCLUSIVE_DISJUNCTION_ID => "exclusive-disjunction" ),
     ( EXCLUSIVE_DISJUNCTION_SYMBOL => "⊕" )
+);
+
+const_string_block!(
+    FUNCTIONAL_DEPENDENCY
+    ( SYMBOL => "-->" ),
+    ( UNICODE_SYMBOL => "⟶" )
 );
 
 // ------------------------------------------------------------------------------------------------
@@ -136,6 +146,8 @@ const_string_block!(
     ( ASCII_PREFIX => "?-" ),
     ( ASCII_SUFFIX => "?" )
 );
+
+const_string!(COMMA_SEPARATOR => ", ");
 
 const_char!(CHAR_LEFT_PAREN => '(');
 const_char!(CHAR_RIGHT_PAREN => ')');

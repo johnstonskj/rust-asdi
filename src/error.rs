@@ -265,7 +265,7 @@ pub fn relation_does_not_exist(label: PredicateRef) -> Error {
     Error::RelationDoesNotExist { label }
 }
 
-/// The named relation does not exist in the selected database
+/// The attribute does not exist in the selected relation or view schema
 #[inline]
 pub fn attribute_does_not_exist<S: Into<String>>(label: S) -> Error {
     Error::AttributeDoesNotExist {

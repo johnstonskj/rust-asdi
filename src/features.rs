@@ -10,6 +10,7 @@ use crate::syntax::{
     CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DEFAULT_LANGUAGE_NAME,
     FEATURE_COMPARISONS_ID, FEATURE_COMPARISONS_SYMBOL, FEATURE_CONSTRAINTS_ID,
     FEATURE_CONSTRAINTS_SYMBOL, FEATURE_DISJUNCTION_ID, FEATURE_DISJUNCTION_SYMBOL,
+    FEATURE_FUNCTIONAL_DEPENDENCIES_ID, FEATURE_FUNCTIONAL_DEPENDENCIES_SYMBOL,
     FEATURE_NEGATION_ID, NEGATION_UNICODE_SYMBOL, PRAGMA_ID_FEATURE, RESERVED_PREFIX,
 };
 use std::fmt::{Display, Formatter};
@@ -23,7 +24,7 @@ use std::fmt::{Display, Formatter};
 /// program.
 ///
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct FeatureSet(u8);
+pub struct FeatureSet(u32);
 
 ///
 /// This type describes a particular feature that may be enabled for any program.
@@ -32,7 +33,7 @@ pub struct FeatureSet(u8);
 pub struct Feature {
     label: &'static str,
     symbol: &'static str,
-    mask: u8,
+    mask: u32,
 }
 
 ///
@@ -42,7 +43,7 @@ pub struct Feature {
 pub const FEATURE_NEGATION: Feature = Feature {
     label: FEATURE_NEGATION_ID,
     symbol: NEGATION_UNICODE_SYMBOL,
-    mask: 1,
+    mask: 1 << 0,
 };
 
 ///
@@ -52,8 +53,25 @@ pub const FEATURE_NEGATION: Feature = Feature {
 pub const FEATURE_COMPARISONS: Feature = Feature {
     label: FEATURE_COMPARISONS_ID,
     symbol: FEATURE_COMPARISONS_SYMBOL,
-    mask: 2,
+    mask: 1 << 1,
 };
+
+///
+/// Corresponds to `.feature(functional_dependencies).` and the language
+/// $\small\text{Datalog}^{\rightarrow}$, without this feature it is an error to add an `fd` pragma
+/// in source.
+///
+pub const FEATURE_FUNCTIONAL_DEPENDENCIES: Feature = Feature {
+    label: FEATURE_FUNCTIONAL_DEPENDENCIES_ID,
+    symbol: FEATURE_FUNCTIONAL_DEPENDENCIES_SYMBOL,
+    mask: 1 << 2,
+};
+
+// pub const FEATURE_EXCLUSIVE_DISJUNCTION: Feature = Feature {
+//     label: PRAGMA_FEATURE_EXCLUSIVE_DISJUNCTION,
+//     symbol: FEATURE_SYMBOL_CIRCLE_PLUS,
+//     mask: 1 << 3,
+// };
 
 ///
 /// Corresponds to `.feature(disjunction).` and the language $\small\text{Datalog}^{\lor}$, without
@@ -62,14 +80,8 @@ pub const FEATURE_COMPARISONS: Feature = Feature {
 pub const FEATURE_DISJUNCTION: Feature = Feature {
     label: FEATURE_DISJUNCTION_ID,
     symbol: FEATURE_DISJUNCTION_SYMBOL,
-    mask: 4,
+    mask: 1 << 4,
 };
-
-// pub const FEATURE_EXCLUSIVE_DISJUNCTION: Feature = Feature {
-//     label: PRAGMA_FEATURE_EXCLUSIVE_DISJUNCTION,
-//     symbol: FEATURE_SYMBOL_CIRCLE_PLUS,
-//     mask: 8,
-// };
 
 ///
 /// Corresponds to `.feature(constraints).` and the language $\small\text{Datalog}^{\Leftarrow}$, without
@@ -78,7 +90,7 @@ pub const FEATURE_DISJUNCTION: Feature = Feature {
 pub const FEATURE_CONSTRAINTS: Feature = Feature {
     label: FEATURE_CONSTRAINTS_ID,
     symbol: FEATURE_CONSTRAINTS_SYMBOL,
-    mask: 16,
+    mask: 1 << 5,
 };
 
 ///
@@ -89,13 +101,14 @@ pub const ALL_FEATURES: &[&Feature] = &[
     &FEATURE_COMPARISONS,
     &FEATURE_CONSTRAINTS,
     &FEATURE_DISJUNCTION,
+    &FEATURE_FUNCTIONAL_DEPENDENCIES,
 ];
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants
 // ------------------------------------------------------------------------------------------------
 
-const DEFAULT_FEATURE_SET: u8 = 0;
+const DEFAULT_FEATURE_SET: u32 = 0;
 
 // ------------------------------------------------------------------------------------------------
 // Implementations

@@ -1,15 +1,19 @@
 use crate::edb::io::{string_to_format, FilePragma, Format};
-use crate::edb::{Attribute, AttributeKind, Constant, Predicate};
-use crate::error::{invalid_value, language_feature_disabled, Error, Result, SourceLocation};
+use crate::edb::{Attribute, AttributeIndex, AttributeKind, Constant, Predicate};
+use crate::error::{
+    attribute_does_not_exist, attribute_index_invalid, invalid_value, language_feature_disabled,
+    Error, Result, SourceLocation,
+};
 use crate::features::{
-    FeatureSet, FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION,
+    FeatureSet, FEATURE_COMPARISONS, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION,
+    FEATURE_FUNCTIONAL_DEPENDENCIES, FEATURE_NEGATION,
 };
 use crate::idb::{
     query::Query, Atom, Comparison, ComparisonOperator, Literal, Rule as DlRule, Term,
 };
 use crate::parse::Parsed;
 use crate::syntax::{TYPE_NAME_CONST_BOOLEAN, TYPE_NAME_CONST_INTEGER};
-use crate::{error, relation_does_not_exist, Collection, Program, ProgramCore};
+use crate::{error, relation_does_not_exist, Collection, IndexedCollection, Program, ProgramCore};
 use pest::iterators::{Pair, Pairs};
 use pest::{Parser, Span};
 use pest_derive::Parser;
@@ -293,6 +297,7 @@ fn parse_pragma(input_pairs: Pairs<'_, Rule>, program: &mut Program) -> Result<(
         inner_pair => program ;
         pragma_assert => parse_decl_asserted_relation,
         pragma_infer => parse_decl_inferred_relation,
+        pragma_fd => parse_decl_pragma_fd,
         pragma_feature => parse_decl_feature,
         pragma_input => parse_decl_input,
         pragma_output => parse_decl_output
@@ -354,6 +359,72 @@ fn parse_decl_inferred_relation(
     Ok(())
 }
 
+fn parse_decl_pragma_fd(mut input_pairs: Pairs<'_, Rule>, program: &mut Program) -> Result<()> {
+    if !program
+        .features()
+        .supports(&FEATURE_FUNCTIONAL_DEPENDENCIES)
+    {
+        return Err(pest_error!(
+            input_pairs.into_iter().next().unwrap().as_span(),
+            language_feature_disabled(FEATURE_FUNCTIONAL_DEPENDENCIES).to_string()
+        ));
+    }
+
+    let relation_label =
+        if_match_str!(input_pairs, predicate => |s:&str|program.predicates().fetch(s));
+
+    if program.extensional().contains(&relation_label) {
+        let mut determinant = Vec::default();
+        let mut dependent = Vec::default();
+        let mut attributes = &mut determinant;
+        {
+            let schema = program.extensional().get(&relation_label).unwrap().schema();
+            for inner_pair in input_pairs {
+                match inner_pair.as_rule() {
+                    Rule::subscript => {
+                        let index = usize::from_str(inner_pair.as_str()).map_err(|e| {
+                            invalid_value(
+                                TYPE_NAME_CONST_INTEGER.to_string(),
+                                format!("{} ({})", inner_pair.as_str(), e),
+                            )
+                        })?;
+                        let attribute_index: AttributeIndex<Predicate> =
+                            AttributeIndex::Index(index - 1);
+                        if schema.contains_index(&attribute_index) {
+                            attributes.push(attribute_index);
+                        } else {
+                            return Err(attribute_index_invalid(index));
+                        }
+                    }
+                    Rule::predicate => {
+                        let label = program.predicates().fetch(inner_pair.as_str())?;
+                        let attribute_index: AttributeIndex<Predicate> =
+                            AttributeIndex::Label(label);
+                        if schema.contains_index(&attribute_index) {
+                            attributes.push(attribute_index);
+                        } else {
+                            return Err(attribute_does_not_exist(inner_pair.as_str()));
+                        }
+                    }
+                    Rule::depends_on => {
+                        attributes = &mut dependent;
+                    }
+                    _ => unexpected_rule!(inner_pair),
+                }
+            }
+        }
+        let schema = program
+            .extensional_mut()
+            .get_mut(&relation_label)
+            .unwrap()
+            .schema_mut();
+        schema.add_functional_dependency(determinant, dependent)?;
+        Ok(())
+    } else {
+        Err(relation_does_not_exist(relation_label))
+    }
+}
+
 #[allow(unused_assignments)]
 fn parse_attribute(
     input_pairs: Pairs<'_, Rule>,
@@ -391,6 +462,9 @@ fn parse_decl_feature(input_pairs: Pairs<'_, Rule>, program: &mut Program) -> Re
             Rule::feature_id_constraints => {
                 program.features_mut().add_support_for(&FEATURE_CONSTRAINTS)
             }
+            Rule::feature_id_functional_dependencies => program
+                .features_mut()
+                .add_support_for(&FEATURE_FUNCTIONAL_DEPENDENCIES),
             _ => unexpected_rule!(inner_pair),
         };
     }

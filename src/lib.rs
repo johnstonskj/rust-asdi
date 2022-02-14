@@ -141,6 +141,7 @@ use crate::idb::{Atom, Literal, Rule, RuleForm, RuleSet, Term, Variable, Variabl
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fmt::{Debug, Display, Formatter};
+use std::hash::Hash;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::str::FromStr;
@@ -216,7 +217,7 @@ where
 /// This trait identifies the minimum set of implementations required for an attribute name.
 ///
 pub trait AttributeName:
-    AsRef<str> + Clone + Debug + Display + FromStr + PartialEq + Eq + PartialOrd + Ord
+    AsRef<str> + Clone + Debug + Display + FromStr + PartialEq + Eq + PartialOrd + Ord + Hash
 {
     ///
     /// Return `true` if the string `s` is a valid value for the implementing type, else `false`.
