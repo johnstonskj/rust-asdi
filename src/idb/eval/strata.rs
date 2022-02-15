@@ -54,7 +54,7 @@ pub struct StratifiedProgram<'a> {
     strata: Vec<SubProgram<'a>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct SubProgram<'a> {
     program: &'a Program,
     strata: RuleSet,
@@ -121,11 +121,29 @@ impl Display for StratifiedProgram<'_> {
         for (i, strata) in self.strata.iter().enumerate() {
             writeln!(f, "[{}", i)?;
             for (j, rule) in strata.rules().iter().enumerate() {
-                writeln!(f, "  [{}] {}", j, rule)?;
+                writeln!(f, "  [{}] {:?}", j, rule)?;
             }
             writeln!(f, "]")?;
         }
         Ok(())
+    }
+}
+
+impl<'a> Collection<SubProgram<'a>> for StratifiedProgram<'a> {
+    fn is_empty(&self) -> bool {
+        self.strata.is_empty()
+    }
+
+    fn len(&self) -> usize {
+        self.strata.len()
+    }
+
+    fn iter(&self) -> Box<dyn Iterator<Item = &'_ SubProgram<'a>> + '_> {
+        Box::new(self.strata.iter())
+    }
+
+    fn contains(&self, value: &SubProgram<'_>) -> bool {
+        self.strata.contains(value)
     }
 }
 
@@ -207,18 +225,6 @@ impl<'a> StratifiedProgram<'a> {
         } else {
             Err(program_not_stratifiable())
         }
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.strata.is_empty()
-    }
-
-    pub fn len(&self) -> usize {
-        self.strata.len()
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = &SubProgram<'_>> {
-        self.strata.iter()
     }
 }
 

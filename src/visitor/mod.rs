@@ -14,104 +14,120 @@ TBD
 use crate::edb::Fact;
 use crate::error::Result;
 use crate::idb::{query::Query, Rule};
-use crate::{Collection, Program, ProgramCore, QuerySet, Relation, RelationSet, RuleSet};
-use std::fmt::Display;
+use crate::{Collection, Program, ProgramCore, QuerySet, Relation, RuleSet};
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
-pub trait ProgramVisitor<T> {
-    fn start_program(&self, program: &Program) -> Result<T>;
-    fn end_program(&self, program: &Program) -> Result<T>;
+pub trait ProgramVisitor {
+    fn start_program(&self, _program: &Program) -> Result<()> {
+        Ok(())
+    }
+    fn end_program(&self, _program: &Program) -> Result<()> {
+        Ok(())
+    }
 
-    fn start_relations(
-        &self,
-        relations: &RelationSet,
-        extensional: bool,
-    ) -> Result<Option<Box<dyn RelationVisitor<T>>>>;
-    fn end_relations(&self, visitor: Box<dyn RelationVisitor<T>>) -> Result<T>;
+    fn relation_visitor(&self) -> Option<&dyn RelationVisitor> {
+        None
+    }
 
-    fn start_rules(&self, relations: &RuleSet) -> Result<Option<Box<dyn RuleVisitor<T>>>>;
-    fn end_rules(&self, visitor: Box<dyn RuleVisitor<T>>) -> Result<T>;
+    fn rule_visitor(&self) -> Option<&dyn RuleVisitor> {
+        None
+    }
 
-    fn start_queries(&self, queries: &QuerySet) -> Result<Option<Box<dyn QueryVisitor<T>>>>;
-    fn end_queries(&self, visitor: Box<dyn QueryVisitor<T>>) -> Result<T>;
+    fn query_visitor(&self) -> Option<&dyn QueryVisitor> {
+        None
+    }
 }
 
-pub trait RelationVisitor<T> {
-    fn start_relation(&self, relation: &Relation) -> Result<T>;
-    fn fact(&self, fact: &Fact) -> Result<T>;
-    fn end_relation(&self, relation: &Relation) -> Result<T>;
+pub trait ProgramWriter: ProgramVisitor {}
+
+pub trait RelationVisitor {
+    fn start_relation(&self, _relation: &Relation, _extensional: bool) -> Result<()> {
+        Ok(())
+    }
+    fn fact(&self, _fact: &Fact) -> Result<()> {
+        Ok(())
+    }
+    fn end_relation(&self, _relation: &Relation, _extensional: bool) -> Result<()> {
+        Ok(())
+    }
 }
 
-pub trait RuleVisitor<T> {
-    fn start_rule(&self, rule: &Rule) -> Result<T>;
-    fn end_rule(&self, rule: &Rule) -> Result<T>;
+pub trait RuleVisitor {
+    fn start_rules(&self, _rules: &RuleSet) -> Result<()> {
+        Ok(())
+    }
+    fn rule(&self, _rule: &Rule) -> Result<()> {
+        Ok(())
+    }
+    fn end_rules(&self, _rules: &RuleSet) -> Result<()> {
+        Ok(())
+    }
 }
 
-pub trait QueryVisitor<T> {
-    fn start_query(&self, query: &Query) -> Result<T>;
-    fn end_query(&self, query: &Query) -> Result<T>;
+pub trait QueryVisitor {
+    fn start_queries(&self, _queries: &QuerySet) -> Result<()> {
+        Ok(())
+    }
+    fn query(&self, _query: &Query) -> Result<()> {
+        Ok(())
+    }
+    fn end_queries(&self, _queries: &QuerySet) -> Result<()> {
+        Ok(())
+    }
 }
-
-///
-/// A convenience for tools that are formatting and displaying a program. This requires the
-/// underlying visitor to deal with strings and also to support `Display` so that a natural
-/// call to `to_string` will return the calculated representation.
-///
-pub trait Formatter: Display + ProgramVisitor<String> {}
 
 // ------------------------------------------------------------------------------------------------
 // Public Functions
 // ------------------------------------------------------------------------------------------------
 
-pub fn format_program(program: &Program, visitor: &impl Formatter) -> Result<String> {
+pub fn write_program(program: &Program, visitor: &impl ProgramWriter) -> Result<()> {
     visit_program(program, visitor)
 }
 
-pub fn visit_program<T>(program: &Program, visitor: &impl ProgramVisitor<T>) -> Result<T> {
+pub fn visit_program(program: &Program, visitor: &impl ProgramVisitor) -> Result<()> {
     visitor.start_program(program)?;
 
-    for edb in [true, false] {
-        let relations = if edb {
-            program.extensional()
-        } else {
-            program.intensional()
-        };
-        if !relations.is_empty() {
-            if let Some(relation_visitor) = visitor.start_relations(&relations, edb)? {
+    if let Some(relation_visitor) = visitor.relation_visitor() {
+        for edb in [true, false] {
+            let relations = if edb {
+                program.extensional()
+            } else {
+                program.intensional()
+            };
+            if !relations.is_empty() {
                 for relation in relations.iter() {
-                    relation_visitor.start_relation(relation)?;
+                    relation_visitor.start_relation(relation, edb)?;
                     for fact in relation.iter() {
                         relation_visitor.fact(fact)?;
                     }
-                    relation_visitor.end_relation(relation)?;
+                    relation_visitor.end_relation(relation, edb)?;
                 }
-                visitor.end_relations(relation_visitor)?;
             }
         }
     }
 
     let rules = program.rules();
     if !rules.is_empty() {
-        if let Some(rule_visitor) = visitor.start_rules(rules)? {
+        if let Some(rule_visitor) = visitor.rule_visitor() {
+            rule_visitor.start_rules(&rules)?;
             for rule in rules.iter() {
-                rule_visitor.start_rule(rule)?;
-                rule_visitor.end_rule(rule)?;
+                rule_visitor.rule(rule)?;
             }
-            visitor.end_rules(rule_visitor)?;
+            rule_visitor.end_rules(&rules)?;
         }
     }
 
     let queries = program.queries();
     if !queries.is_empty() {
-        if let Some(query_visitor) = visitor.start_queries(queries)? {
+        if let Some(query_visitor) = visitor.query_visitor() {
+            query_visitor.start_queries(queries)?;
             for query in queries.iter() {
-                query_visitor.start_query(query)?;
-                query_visitor.end_query(query)?;
+                query_visitor.query(query)?;
             }
-            visitor.end_queries(query_visitor)?;
+            query_visitor.end_queries(queries)?;
         }
     }
 
@@ -123,4 +139,7 @@ pub fn visit_program<T>(program: &Program, visitor: &impl ProgramVisitor<T>) -> 
 // ------------------------------------------------------------------------------------------------
 
 mod latex;
-pub use latex::LatexTypesetter;
+pub use latex::{make_latex_writer, LatexFormatter};
+
+mod native;
+pub use native::{make_native_writer, NativeFormatter};

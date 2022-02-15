@@ -28,14 +28,11 @@ hide "asdi::idb::query::Query" members
 
 namespace asdi::visitor {
 
-    interface Formatter
-
-    interface ProgramVisitor<T>
-    interface RelationVisitor<T>
-    interface RuleVisitor<T>
-    interface QueryVisitor<T>
-
-    Formatter --|> "<String>" ProgramVisitor
+    interface ProgramVisitor
+    interface ProgramWriter
+    interface RelationVisitor
+    interface RuleVisitor
+    interface QueryVisitor
 
     ProgramVisitor ..> RelationVisitor
     ProgramVisitor ..> RuleVisitor
@@ -45,6 +42,8 @@ namespace asdi::visitor {
     ProgramVisitor ..> asdi::idb::RuleSet
     ProgramVisitor ..> asdi::idb::query::QuerySet
 
+    ProgramWriter --|> ProgramVisitor
+
     RelationVisitor ..> asdi::edb::Relation
     RelationVisitor ..> asdi::edb::Fact
 
@@ -52,13 +51,14 @@ namespace asdi::visitor {
 
     QueryVisitor ..> asdi::idb::query::Query
 
-    class features << module >> {
-        format_program() : String
-        visit_program<T>() : T
+
+    class visitor << module >> {
+        visit_program(program: &Program, visitor: &ProgramVisitor) : Result<()>
+        format_program(program: &Program, visitor: &ProgramWriter) : Result<()>
     }
 
-    features ..> ProgramVisitor
-    features ..> Formatter
+    visitor .right.> ProgramVisitor
+    visitor .right.> ProgramWriter
 }
 
 @enduml

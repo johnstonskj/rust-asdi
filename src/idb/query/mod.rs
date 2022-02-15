@@ -103,8 +103,8 @@ impl Query {
 
 impl Display for QuerySet {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        for rule in self.iter() {
-            writeln!(f, "{}", rule)?;
+        for query in self.iter() {
+            writeln!(f, "{}", query)?;
         }
         Ok(())
     }
@@ -201,6 +201,60 @@ impl Collection<Row> for View {
 }
 
 impl RelationOps for View {
+    fn union(self, _other: Self) -> Result<View>
+    where
+        Self: Sized,
+    {
+        todo!()
+    }
+
+    fn intersection(self, _other: Self) -> Result<View>
+    where
+        Self: Sized,
+    {
+        todo!()
+    }
+
+    fn difference(self, _other: Self) -> Result<View>
+    where
+        Self: Sized,
+    {
+        todo!()
+    }
+
+    fn cartesian_product(self, _other: Self) -> Result<View>
+    where
+        Self: Sized,
+    {
+        todo!()
+    }
+
+    fn select(self, selection: &Selection) -> Result<View> {
+        Ok(if selection.is_all() {
+            self
+        } else {
+            let results: Result<Vec<Row>> = self
+                .facts
+                .into_iter()
+                .filter_map(|row| row.select(selection).transpose())
+                .collect();
+            Self::new_with_facts(self.schema, results?)
+        })
+    }
+
+    fn project(self, projection: &Projection) -> Result<View> {
+        Ok(if projection.is_all() {
+            self
+        } else {
+            let results: Result<Vec<Row>> = self
+                .facts
+                .into_iter()
+                .map(|row| row.project(projection))
+                .collect();
+            Self::new_with_facts(self.schema, results?)
+        })
+    }
+
     fn natural_join(self, other: Self) -> Result<Self>
     where
         Self: Sized,
@@ -242,32 +296,6 @@ impl RelationOps for View {
             }
         }
         Ok(new_table)
-    }
-
-    fn project(self, projection: &Projection) -> Result<View> {
-        Ok(if projection.is_all() {
-            self
-        } else {
-            let results: Result<Vec<Row>> = self
-                .facts
-                .into_iter()
-                .map(|row| row.project(projection))
-                .collect();
-            Self::new_with_facts(self.schema, results?)
-        })
-    }
-
-    fn select(self, selection: &Selection) -> Result<View> {
-        Ok(if selection.is_all() {
-            self
-        } else {
-            let results: Result<Vec<Row>> = self
-                .facts
-                .into_iter()
-                .filter_map(|row| row.select(selection).transpose())
-                .collect();
-            Self::new_with_facts(self.schema, results?)
-        })
     }
 
     fn exists(self, criteria: &Selection) -> Result<bool> {

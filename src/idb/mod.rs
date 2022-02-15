@@ -962,6 +962,7 @@ impl Display for Comparison {
         write!(f, "{} {} {}", self.lhs, self.operator, self.rhs,)
     }
 }
+
 impl MaybeGround for Comparison {
     fn is_ground(&self) -> bool {
         self.lhs.is_constant() && self.rhs.is_constant()

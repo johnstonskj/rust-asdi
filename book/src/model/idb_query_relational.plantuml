@@ -27,38 +27,54 @@ namespace asdi::idb::query::relational {
     interface FactOps
     interface RelationalOps
 
-    class Criteria
-    class Join
-    class Projection
+    class RelationSource
+    class SetOperation
     class Selection
+    class Projection
+    class Join
+    class RelationSink
 
+    class Criteria
     enum CriteriaValue {
         Value : asdi::edb::Constant
         Index : usize
     }
+
+    enum SetOperator {
+        Union
+        Intersection
+        Different
+        CartesianProduct
+    }
+
     enum RelationalOp {
-        Relation : asdi::edb::PredicateRef
+        Relation : RelationSource
+        SetOperation : SetOperation
         Selection : Selection
         Projection : Projection
         Join : Join
+        Sink : RelationSink
     }
 
-    CriteriaValue .down.> asdi::edb::Constant
+    RelationSource o-> asdi::edb::PredicateRef
 
-    RelationalOp .down.> asdi::edb::PredicateRef
+    SetOperation *-> RelationalOp
+    SetOperation *-> RelationalOp
+    SetOperation *-down-> SetOperator
 
+    CriteriaValue o-down-> asdi::edb::Constant
     Criteria *-> CriteriaValue
     Criteria *-down-> asdi::idb::ComparisonOperator
 
-    Join o-> RelationalOp
-    Join o-> RelationalOp
+    Join *-> RelationalOp
+    Join *-> RelationalOp
     Join *-> "*" Criteria
 
-    Projection o-> RelationalOp
-    Projection o-down-> "attributes *" asdi::edb::Attribute
+    Projection *-> RelationalOp
+    Projection *-down-> "attributes *" asdi::edb::Attribute
 
-    Selection o-> RelationalOp
-    Selection o-down-> "attributes *" asdi::edb::Attribute
+    Selection *-> RelationalOp
+    Selection *-> Criteria
 
     FactOps ..> Projection
     FactOps ..> Selection
@@ -68,6 +84,9 @@ namespace asdi::idb::query::relational {
     RelationalOps ..> Projection
     RelationalOps ..> Selection
     RelationalOps .up.> asdi::idb::query::View
+
+    RelationSink *-> RelationalOp
+    RelationSink o-> asdi::edb::PredicateRef
 
     class relational << module >> {
         program_to_graphviz(): String

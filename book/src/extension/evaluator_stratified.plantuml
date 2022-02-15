@@ -8,30 +8,23 @@ hide "asdi::Collection" members
 class asdi::Program #white
 hide "asdi::Program" members
 
-class asdi::edb::RelationSet #white
-hide "asdi::edb::RelationSet" members
+interface asdi::ProgramCore #white
+hide "asdi::ProgramCore" members
 
 namespace asdi::idb::eval {
-    interface Evaluator {
-        inference(program: Program) : Result<RelationSet>
-        label() -> &str
+    class PrecedenceGraph #white
+    class SubProgram {
     }
-
-    class StratifiedEvaluator #lightgray
     class StratifiedProgram {
         from(program: &Program) : Result<Self>
     }
 
+    SubProgram o-> asdi::Program
+    SubProgram ..|> asdi::ProgramCore
+
+    StratifiedProgram *-> "*" SubProgram
     StratifiedProgram ..|> "<SubProgram>" asdi::Collection
     StratifiedProgram .up.> PrecedenceGraph
-
-    StratifiedEvaluator ..|> Evaluator
-
-    Evaluator ..> asdi::Program
-    Evaluator ..> asdi::edb::RelationSet
-
-
-    StratifiedEvaluator .down.> StratifiedProgram
 }
 
 @enduml

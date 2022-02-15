@@ -5,7 +5,7 @@ This module provides the both a [Reader] and [Writer] implementation for CSV fil
 use crate::edb::io::{Reader, Writer};
 use crate::edb::{AttributeKind, Constant, Fact};
 use crate::error::{fact_does_not_correspond_to_schema, Error, Result};
-use crate::syntax::{ANONYMOUS_COLUMN_NAME, CHAR_COMMA};
+use crate::syntax::{ANONYMOUS_COLUMN_NAME, COMMA_SEPARATOR};
 use crate::{Collection, Labeled, Relation};
 use csv::{ReaderBuilder, Trim, WriterBuilder};
 use std::fs::File;
@@ -146,7 +146,7 @@ impl Reader for DelimitedLines {
                         .iter()
                         .map(str::to_string)
                         .collect::<Vec<String>>()
-                        .join(&format!("{} ", CHAR_COMMA)),
+                        .join(COMMA_SEPARATOR),
                 ));
             }
         }

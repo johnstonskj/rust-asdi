@@ -138,6 +138,7 @@ use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEAT
 use crate::idb::eval::{strata::PrecedenceGraph, Evaluator};
 use crate::idb::query::{Query, QuerySet, Queryable, View};
 use crate::idb::{Atom, Literal, Rule, RuleForm, RuleSet, Term, Variable, VariableRef};
+use crate::visitor::{make_native_writer, write_program};
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fmt::{Debug, Display, Formatter};
@@ -310,43 +311,13 @@ pub trait MaybePositive {
 
 impl Display for Program {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if !self.features.is_default() {
-            writeln!(f, "{}", self.features)?;
-            writeln!(f)?;
-        }
-
-        if !self.extensional.is_empty() {
-            for relation in self.extensional.iter() {
-                writeln!(f, "{}", relation.to_schema_decl(true, false))?;
-            }
-            writeln!(f)?;
-        }
-
-        if !self.intensional.is_empty() {
-            for relation in self.intensional.iter() {
-                writeln!(f, "{}", relation.to_schema_decl(false, false))?;
-            }
-            writeln!(f)?;
-        }
-
-        for db in [&self.intensional, &self.extensional] {
-            for relation in db.iter() {
-                if !relation.is_empty() {
-                    for fact in relation.iter() {
-                        writeln!(f, "{}", fact)?;
-                    }
-                    writeln!(f)?;
-                }
-            }
-        }
-
-        writeln!(f, "{}", self.rules)?;
-
-        for query in self.queries().iter() {
-            writeln!(f, "{}", query)?;
-        }
-
-        Ok(())
+        use std::io::BufWriter;
+        let mut buffer = BufWriter::new(Vec::new());
+        let visitor = make_native_writer(&mut buffer);
+        // TODO: propagate errors
+        write_program(self, &visitor).unwrap();
+        let s = String::from_utf8(buffer.into_inner().unwrap()).unwrap();
+        write!(f, "{}", s)
     }
 }
 
@@ -714,7 +685,7 @@ impl Program {
         self.store_intensional_data()?;
         let results = self.eval_queries()?;
         for (query, view) in results {
-            println!("{}", query);
+            println!("{:?}", query);
             if let Some(view) = view {
                 println!("{}", view);
             }

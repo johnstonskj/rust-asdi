@@ -102,7 +102,7 @@ use crate::idb::query::relational::{FactOps, Projection, Selection};
 use crate::idb::query::{Queryable, Row, View};
 use crate::idb::Atom;
 use crate::syntax::{
-    ANONYMOUS_COLUMN_NAME, BOOLEAN_LITERAL_FALSE, BOOLEAN_LITERAL_TRUE, CHAR_COLON, CHAR_COMMA,
+    ANONYMOUS_COLUMN_NAME, BOOLEAN_LITERAL_FALSE, BOOLEAN_LITERAL_TRUE, CHAR_COLON,
     CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, CHAR_UNDERSCORE, COMMA_SEPARATOR,
     FUNCTIONAL_DEPENDENCY_UNICODE_SYMBOL, PRAGMA_ID_ASSERT, PRAGMA_ID_INFER, RESERVED_PREFIX,
     TYPE_NAME_PREDICATE,
@@ -437,7 +437,7 @@ where
             .iter()
             .map(|a| a.to_column_decl(emit_unknown))
             .collect::<Vec<String>>()
-            .join(&format!("{} ", CHAR_COMMA))
+            .join(COMMA_SEPARATOR)
     }
 
     // --------------------------------------------------------------------------------------------
@@ -1036,7 +1036,7 @@ impl Relation {
                     .iter()
                     .map(Constant::to_string)
                     .collect::<Vec<String>>()
-                    .join(&format!("{} ", CHAR_COMMA)),
+                    .join(COMMA_SEPARATOR),
             ))
         }
     }
@@ -1050,7 +1050,7 @@ impl Relation {
                 fact.iter()
                     .map(Constant::to_string)
                     .collect::<Vec<String>>()
-                    .join(&format!("{} ", CHAR_COMMA)),
+                    .join(COMMA_SEPARATOR),
             ))
         }
     }
@@ -1170,7 +1170,7 @@ impl Display for Fact {
             self.iter()
                 .map(Constant::to_string)
                 .collect::<Vec<String>>()
-                .join(&format!("{} ", CHAR_COMMA)),
+                .join(COMMA_SEPARATOR),
             CHAR_RIGHT_PAREN,
             CHAR_PERIOD
         )

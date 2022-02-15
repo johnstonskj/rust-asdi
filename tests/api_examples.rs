@@ -77,6 +77,20 @@ ancestor(X, Y) ⟵ parent(X, Z) ∧ ancestor(Z, Y).
 #[test]
 fn test_sourceforge_example() {
     // See http://datalog.sourceforge.net/datalog.html
+    const EXPECTED: &str = r#".assert edge(string, string).
+
+.infer path(string, string).
+
+edge(a, b).
+edge(c, d).
+edge(d, a).
+edge(b, c).
+
+path(X, Y) ⟵ edge(X, Y).
+path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
+
+?- path(X, Y).
+"#;
 
     let mut graph = Program::default();
 
@@ -122,25 +136,10 @@ fn test_sourceforge_example() {
     let query = Query::new(path_predicate, vec![var_x, var_y]);
     graph.add_query(query).unwrap();
 
-    println!("{}", graph);
+    println!(">>>{}<<<", EXPECTED);
+    println!(">>>{}<<<", graph);
 
-    assert_eq_by_line(
-        &graph.to_string(),
-        r#".assert edge(string, string).
-
-.infer path(string, string).
-
-edge(a, b).
-edge(c, d).
-edge(d, a).
-edge(b, c).
-
-path(X, Y) ⟵ edge(X, Y).
-path(X, Y) ⟵ edge(X, Z) ∧ path(Z, Y).
-
-?- path(X, Y).
-"#,
-    );
+    assert_eq_by_line(&graph.to_string(), EXPECTED);
 }
 
 #[test]

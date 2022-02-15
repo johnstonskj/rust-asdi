@@ -23,24 +23,40 @@ use tracing::warn;
 // ------------------------------------------------------------------------------------------------
 
 pub trait RelationOps {
-    fn natural_join(self, other: Self) -> Result<Self>
+    fn union(self, other: Self) -> Result<View>
     where
         Self: Sized;
 
-    fn theta_join<V: Into<Vec<Criteria>>>(self, _other: Self, _criteria: V) -> Result<Self>
+    fn intersection(self, other: Self) -> Result<View>
     where
-        Self: Sized,
-    {
-        unimplemented!()
-    }
+        Self: Sized;
 
-    fn project(self, indices: &Projection) -> Result<View>
+    fn difference(self, other: Self) -> Result<View>
+    where
+        Self: Sized;
+
+    fn cartesian_product(self, other: Self) -> Result<View>
     where
         Self: Sized;
 
     fn select(self, criteria: &Selection) -> Result<View>
     where
         Self: Sized;
+
+    fn project(self, indices: &Projection) -> Result<View>
+    where
+        Self: Sized;
+
+    fn natural_join(self, other: Self) -> Result<View>
+    where
+        Self: Sized;
+
+    fn theta_join<V: Into<Vec<Criteria>>>(self, _other: Self, _criteria: V) -> Result<View>
+    where
+        Self: Sized,
+    {
+        unimplemented!()
+    }
 
     fn exists(self, criteria: &Selection) -> Result<bool>;
 }
@@ -316,12 +332,12 @@ impl RelationalOp {
             let mut criteria: Vec<Criteria> = Default::default();
             for (comparison, comparison_negated) in &arithmetic {
                 println!(
-                    "compile_rule > atom > comparison {} (negated {})",
+                    "compile_rule > atom > comparison {:?} (negated {})",
                     comparison, comparison_negated
                 );
                 if let Err(e) = comparison.sanity_check() {
                     warn!(
-                        "Ignoring arithmetic literal '{}', sanity check failed: {}",
+                        "Ignoring arithmetic literal '{:?}', sanity check failed: {}",
                         comparison, e
                     );
                 } else {

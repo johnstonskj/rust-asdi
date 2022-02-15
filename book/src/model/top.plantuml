@@ -2,7 +2,6 @@
 
 !include options.plantuml
 
-
 namespace asdi {
 
     namespace edb {

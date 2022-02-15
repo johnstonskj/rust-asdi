@@ -7,7 +7,7 @@ extensions to Datalog.
 */
 
 use crate::syntax::{
-    CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, DEFAULT_LANGUAGE_NAME,
+    CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, COMMA_SEPARATOR, DEFAULT_LANGUAGE_NAME,
     FEATURE_COMPARISONS_ID, FEATURE_COMPARISONS_SYMBOL, FEATURE_CONSTRAINTS_ID,
     FEATURE_CONSTRAINTS_SYMBOL, FEATURE_DISJUNCTION_ID, FEATURE_DISJUNCTION_SYMBOL,
     FEATURE_FUNCTIONAL_DEPENDENCIES_ID, FEATURE_FUNCTIONAL_DEPENDENCIES_SYMBOL,
@@ -175,7 +175,7 @@ impl Display for FeatureSet {
                     RESERVED_PREFIX,
                     PRAGMA_ID_FEATURE,
                     CHAR_LEFT_PAREN,
-                    features.join(&format!("{} ", CHAR_COMMA)),
+                    features.join(COMMA_SEPARATOR),
                     CHAR_RIGHT_PAREN,
                     CHAR_PERIOD,
                 )
@@ -254,7 +254,7 @@ impl FeatureSet {
                 self.features()
                     .map(|feat| feat.symbol().to_string())
                     .collect::<Vec<String>>()
-                    .join(&format!("{}", CHAR_COMMA)),
+                    .join(COMMA_SEPARATOR),
                 CHAR_RIGHT_PAREN,
                 DEFAULT_LANGUAGE_NAME,
             )

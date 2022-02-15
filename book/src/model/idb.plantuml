@@ -57,36 +57,37 @@ namespace asdi::idb {
 
     class VariableRef << (T,#ADD1B2) type >>
 
-    Atom -down-> "label" asdi::edb::PredicateRef
-    Atom --> "terms *" Term
+    Atom o-> "label" asdi::edb::PredicateRef
+    Atom *-> "terms *" Term
     Atom ..|> asdi::Labeled
-    Atom .up.|> MaybeGround
+    Atom ..|> MaybeGround
 
-    Comparison --> "lhs, rhs" Term
-    Comparison --> ComparisonOperator
-    Comparison .up.|> MaybeGround
+    Comparison *-> "lhs" Term
+    Comparison *-> "rhs" Term
+    Comparison *-down-> ComparisonOperator
+    Comparison ..|> MaybeGround
 
-    Rule --> "head *" Atom
-    Rule --> "body *" Literal
+    Rule *-> "head *" Atom
+    Rule *-> "body *" Literal
     Rule ..> RuleForm
-    Rule .up.|> MaybeGround
+    Rule ..|> MaybeGround
     Rule ..|> asdi::MaybePositive
 
-    RuleSet -right-> "*" Rule
+    RuleSet *-> "*" Rule
 
     Literal *-> LiteralInner
-    Literal .up.|> MaybeGround
+    Literal ..|> MaybeGround
     Literal ..|> asdi::MaybePositive
 
-    LiteralInner ..> Atom
-    LiteralInner ..> Comparison
-    LiteralInner .up.|> MaybeGround
+    LiteralInner o-> Atom
+    LiteralInner o-down-> Comparison
+    LiteralInner ..|> MaybeGround
 
-    Term ..> VariableRef
-    Term .down.> asdi::edb::Constant
+    Term o-> VariableRef
+    Term o-> asdi::edb::Constant
     Term ..|> asdi::MaybeAnonymous
 
-    VariableRef .left.> Variable
+    VariableRef o--> Variable
     Variable ..|> asdi::AttributeName
 }
 

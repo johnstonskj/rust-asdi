@@ -1,0 +1,88 @@
+@startuml
+
+!include options.plantuml
+
+class asdi::features::FeatureSet
+hide "asdi::features::FeatureSet" members
+
+class asdi::edb::RelationSet
+hide "asdi::edb::RelationSet" members
+
+class asdi::edb::NameReferenceSet
+hide "asdi::edb::NameReferenceSet" members
+
+class asdi::idb::RuleSet
+hide "asdi::idb::RuleSet" members
+
+class asdi::idb::query::QuerySet
+hide "asdi::idb::query::QuerySet" members
+
+namespace asdi {
+
+    interface MaybePositive {
+        is_positive() : bool
+        is_negative() : bool
+    }
+
+    interface ProgramCore {
+        features() : &FeatureSet
+        extensional() : &RelationSet
+        intensional() : &RelationSet
+        rules() : &RuleSet
+    }
+
+    ProgramCore .up.> asdi::features::FeatureSet
+    ProgramCore .up.> "extensional" asdi::edb::RelationSet
+    ProgramCore .up.> "intensional" asdi::edb::RelationSet
+    ProgramCore .up.> asdi::idb::RuleSet
+
+    class Program {
+        new_with_features(FeatureSet) : Self
+        source_file_path() : Option<&PathBuf>
+        == interned ==
+        predicates() : &NameReferenceSet<Predicate>
+        variables() : &NameReferenceSet<Variable>
+        == edb ==
+        extensional_mut() : &mut RelationSet
+        add_new_extensional_relation(PredicateRef, Schema<Predicate>) : Result<&mut Relation>
+        add_extensional_relation(Relation)
+        load_extensional_data() : Result<()>
+        == idb ==
+        intensional_mut() : &mut RelationSet
+        add_new_intensional_relation(PredicateRef, Schema<Predicate>) : Result<&mut Relation>
+        add_intensional_relation(Relation)
+        store_intensional_data() : Result<()>
+        add_new_pure_rule(PredicateRef, Vec<Term>, Vec<Literal>) : Result<bool>
+        add_new_constraint_rule(Vec<Literal>) : Result<bool>
+        add_new_disjunctive_rule(Vec<Atom>, Vec<Literal>) : Result<bool>
+        add_rule(Rule) : Result<bool>
+        add_new_query(Predicate, Vec<Term>) : Result<bool>
+        add_query(Query) : Result<bool>
+        == queries ==
+        queries(&self) -> &QuerySet
+        == predicates ==
+        is_recursive() : bool
+        is_semi_positive() : bool
+        is_linear() : bool
+        is_guarded() : bool
+        is_frontier_guarded() : bool
+        == evaluation ==
+        run(Evaluator, bool) : Result<()>
+        eval_query(&Query) : Result<Option<View>>
+        eval_query_with(&Query, Evaluator) : Result<Option<View>>
+        eval_queries() : Result<Vec<(&Query, Option<View>)>>
+        eval_queries_with(Evaluator) : Result<Vec<(&Query, Option<View>)>>
+        == crate ==
+        - set_source_file_path(PathBuf)
+        - features_mut() : &mut FeatureSet
+    }
+
+    Program ..|> ProgramCore
+    Program ..|> MaybePositive
+    Program *--> "predicates" asdi::edb::NameReferenceSet
+    Program *--> "variables" asdi::edb::NameReferenceSet
+    Program *--> asdi::idb::query::QuerySet
+
+}
+
+@enduml

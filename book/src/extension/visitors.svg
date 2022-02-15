@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="595px" preserveAspectRatio="none" style="width:1257px;height:595px;background:#FFFFFF;" version="1.1" viewBox="0 0 1257 595" width="1257px" zoomAndPan="magnify"><defs><filter height="300%" id="f1ckdz5hnn1wpl" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[e274c4916ac42ef1c11391a83d303c10]
+cluster asdi--><polygon fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" points="86,6,122,6,129,28.4883,1173,28.4883,1173,481,86,481,86,6" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="86" x2="129" y1="28.4883" y2="28.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="30" x="90" y="21.5352">asdi</text><!--MD5=[06db1a3c418c087d07f3ad85f7929579]
+cluster asdi::visitor--><polygon fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" points="110,49,163,49,170,71.4883,1056,71.4883,1056,457,110,457,110,49" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="110" x2="170" y1="71.4883" y2="71.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="47" x="114" y="64.5352">visitor</text><!--MD5=[6bc3af5db4038e5494ba0622f07de59b]
+cluster asdi::edb--><polygon fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" points="16,505,84,505,91,527.4883,348,527.4883,348,588,16,588,16,505" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="16" x2="91" y1="527.4883" y2="527.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="62" x="20" y="520.5352">asdi::edb</text><!--MD5=[ae3c197a01158459eb2ddb806e23d6f2]
+cluster asdi::idb--><polygon fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" points="635,505,700,505,707,527.4883,834,527.4883,834,588,635,588,635,505" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="635" x2="707" y1="527.4883" y2="527.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="59" x="639" y="520.5352">asdi::idb</text><!--MD5=[331bdf5c2291f41e90a08533bcc43e12]
+cluster asdi::idb::query--><polygon fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" points="908,505,1019,505,1026,527.4883,1125,527.4883,1125,588,908,588,908,505" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="908" x2="1026" y1="527.4883" y2="527.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="105" x="912" y="520.5352">asdi::idb::query</text><!--MD5=[619a18f3975bec44ed0f3b908af212c9]
+class asdi::Program--><rect codeLine="4" fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" height="32" id="asdi::Program" style="stroke:#A80036;stroke-width:1.5;" width="81" x="1075.5" y="385.5"/><ellipse cx="1090.5" cy="401.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M1092.9731,407.6431 Q1092.3921,407.9419 1091.7529,408.0913 Q1091.1138,408.2407 1090.4082,408.2407 Q1087.9014,408.2407 1086.5815,406.5889 Q1085.2617,404.937 1085.2617,401.8159 Q1085.2617,398.6865 1086.5815,397.0347 Q1087.9014,395.3828 1090.4082,395.3828 Q1091.1138,395.3828 1091.7612,395.5322 Q1092.4087,395.6816 1092.9731,395.9805 L1092.9731,398.7031 Q1092.3423,398.1221 1091.7488,397.8523 Q1091.1553,397.5825 1090.5244,397.5825 Q1089.1797,397.5825 1088.4949,398.6492 Q1087.8101,399.7158 1087.8101,401.8159 Q1087.8101,403.9077 1088.4949,404.9744 Q1089.1797,406.041 1090.5244,406.041 Q1091.1553,406.041 1091.7488,405.7712 Q1092.3423,405.5015 1092.9731,404.9204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="49" x="1104.5" y="406.0352">Program</text><!--MD5=[b818c1bc739cda3d875bcb28854b99e7]
+class asdi::visitor::ProgramVisitor--><rect codeLine="30" fill="#FEFECE" filter="url(#f1ckdz5hnn1wpl)" height="117.7305" id="asdi::visitor::ProgramVisitor" style="stroke:#A80036;stroke-width:1.5;" width="273" x="315.5" y="184"/><ellipse cx="405.25" cy="200" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M401.6777,196.2651 L401.6777,194.1069 L409.0571,194.1069 L409.0571,196.2651 L406.5918,196.2651 L406.5918,204.3418 L409.0571,204.3418 L409.0571,206.5 L401.6777,206.5 L401.6777,204.3418 L404.1431,204.3418 L404.1431,196.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="85" x="425.75" y="204.5352">ProgramVisitor</text><line style="stroke:#A80036;stroke-width:1.5;" x1="316.5" x2="587.5" y1="216" y2="216"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="261" x="321.5" y="230.6348">start_program(program: &amp;Program) : Result&lt;()&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="256" x="321.5" y="243.5898">end_program(program: &amp;Program) : Result&lt;()&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="0" x="324.5" y="256.5449"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="162" x="321.5" y="269.5">relation_visitor(&amp;self) : Option</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="142" x="321.5" y="282.4551">rule_visitor(&amp;self) : Option</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="152" x="321.5" y="295.4102">query_visitor(&amp;self) : Option</text><!--MD5=[6b5cd0ee3e54b42879072f28315ffba9]
+class asdi::visitor::ProgramWriter--><rect codeLine="38" fill="#FEFECE" filter="url(#f1ckdz5hnn1wpl)" height="40" id="asdi::visitor::ProgramWriter" style="stroke:#A80036;stroke-width:1.5;" width="115" x="584.5" y="84"/><ellipse cx="599.5" cy="100" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M595.9277,96.2651 L595.9277,94.1069 L603.3071,94.1069 L603.3071,96.2651 L600.8418,96.2651 L600.8418,104.3418 L603.3071,104.3418 L603.3071,106.5 L595.9277,106.5 L595.9277,104.3418 L598.3931,104.3418 L598.3931,96.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="83" x="613.5" y="104.5352">ProgramWriter</text><line style="stroke:#A80036;stroke-width:1.5;" x1="585.5" x2="698.5" y1="116" y2="116"/><!--MD5=[8098a62c05abc4d56107425b2c373ae6]
+class asdi::visitor::RelationVisitor--><rect codeLine="39" fill="#FEFECE" filter="url(#f1ckdz5hnn1wpl)" height="78.8652" id="asdi::visitor::RelationVisitor" style="stroke:#A80036;stroke-width:1.5;" width="356" x="126" y="362"/><ellipse cx="258.75" cy="378" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M255.1777,374.2651 L255.1777,372.1069 L262.5571,372.1069 L262.5571,374.2651 L260.0918,374.2651 L260.0918,382.3418 L262.5571,382.3418 L262.5571,384.5 L255.1777,384.5 L255.1777,382.3418 L257.6431,382.3418 L257.6431,374.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="82" x="279.25" y="382.5352">RelationVisitor</text><line style="stroke:#A80036;stroke-width:1.5;" x1="127" x2="481" y1="394" y2="394"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="344" x="132" y="408.6348">start_relation(relation: &amp;Relation, extensional: bool) : Result&lt;()&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="152" x="132" y="421.5898">fact(fact: &amp;Fact) : Result&lt;()&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="339" x="132" y="434.5449">end_relation(relation: &amp;Relation, extensional: bool) : Result&lt;()&gt;</text><!--MD5=[6a568aeb1da860f079019b5e502c14d4]
+class asdi::visitor::RuleVisitor--><rect codeLine="44" fill="#FEFECE" filter="url(#f1ckdz5hnn1wpl)" height="78.8652" id="asdi::visitor::RuleVisitor" style="stroke:#A80036;stroke-width:1.5;" width="226" x="517" y="362"/><ellipse cx="595.25" cy="378" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M591.6777,374.2651 L591.6777,372.1069 L599.0571,372.1069 L599.0571,374.2651 L596.5918,374.2651 L596.5918,382.3418 L599.0571,382.3418 L599.0571,384.5 L591.6777,384.5 L591.6777,382.3418 L594.1431,382.3418 L594.1431,374.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="61" x="615.75" y="382.5352">RuleVisitor</text><line style="stroke:#A80036;stroke-width:1.5;" x1="518" x2="742" y1="394" y2="394"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="214" x="523" y="408.6348">start_rules(rules: &amp;RuleSet) : Result&lt;()&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="155" x="523" y="421.5898">rule(rule: &amp;Rule) : Result&lt;()&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="203" x="523" y="434.5449">end_rules(rule: &amp;RuleSet) : Result&lt;()&gt;</text><!--MD5=[bb4106a81d1aaded467b52484c9a24ed]
+class asdi::visitor::QueryVisitor--><rect codeLine="49" fill="#FEFECE" filter="url(#f1ckdz5hnn1wpl)" height="78.8652" id="asdi::visitor::QueryVisitor" style="stroke:#A80036;stroke-width:1.5;" width="262" x="778" y="362"/><ellipse cx="869.75" cy="378" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M866.1777,374.2651 L866.1777,372.1069 L873.5571,372.1069 L873.5571,374.2651 L871.0918,374.2651 L871.0918,382.3418 L873.5571,382.3418 L873.5571,384.5 L866.1777,384.5 L866.1777,382.3418 L868.6431,382.3418 L868.6431,374.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="70" x="890.25" y="382.5352">QueryVisitor</text><line style="stroke:#A80036;stroke-width:1.5;" x1="779" x2="1039" y1="394" y2="394"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="250" x="784" y="408.6348">start_queries(queries: &amp;QuerySet) : Result&lt;()&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="185" x="784" y="421.5898">query(query: &amp;Query) : Result&lt;()&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="245" x="784" y="434.5449">end_queries(queries: &amp;QuerySet) : Result&lt;()&gt;</text><!--MD5=[4b39025d2f9ab28d6e9baf136d0f932d]
+class asdi::visitor::visitor--><rect codeLine="72" fill="#FEFECE" filter="url(#f1ckdz5hnn1wpl)" height="72.1758" id="asdi::visitor::visitor" style="stroke:#A80036;stroke-width:1.5;" width="416" x="624" y="207"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="55" x="804.5" y="223.6016">«module»</text><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="34" x="815" y="237.7344">visitor</text><line style="stroke:#A80036;stroke-width:1.5;" x1="625" x2="1039" y1="245.2656" y2="245.2656"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="393" x="630" y="259.9004">visit_program(program: &amp;Program, visitor: &amp;ProgramVisitor) : Result&lt;()&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="404" x="630" y="272.8555">format_program(program: &amp;Program, visitor: &amp;ProgramWriter) : Result&lt;()&gt;</text><!--MD5=[6137f69857c1321f4d06c717c9c09db2]
+class asdi::edb::RelationSet--><rect codeLine="7" fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" height="32" id="asdi::edb::RelationSet" style="stroke:#A80036;stroke-width:1.5;" width="95" x="32.5" y="540"/><ellipse cx="47.5" cy="556" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M49.9731,562.1431 Q49.3921,562.4419 48.7529,562.5913 Q48.1138,562.7407 47.4082,562.7407 Q44.9014,562.7407 43.5815,561.0889 Q42.2617,559.437 42.2617,556.3159 Q42.2617,553.1865 43.5815,551.5347 Q44.9014,549.8828 47.4082,549.8828 Q48.1138,549.8828 48.7612,550.0322 Q49.4087,550.1816 49.9731,550.4805 L49.9731,553.2031 Q49.3423,552.6221 48.7488,552.3523 Q48.1553,552.0825 47.5244,552.0825 Q46.1797,552.0825 45.4949,553.1492 Q44.8101,554.2158 44.8101,556.3159 Q44.8101,558.4077 45.4949,559.4744 Q46.1797,560.541 47.5244,560.541 Q48.1553,560.541 48.7488,560.2712 Q49.3423,560.0015 49.9731,559.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="63" x="61.5" y="560.5352">RelationSet</text><!--MD5=[63be3a1481beaba15f9dd2bbcd4a53e1]
+class asdi::edb::Relation--><rect codeLine="10" fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" height="32" id="asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.5;" width="78" x="163" y="540"/><ellipse cx="178" cy="556" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M180.4731,562.1431 Q179.8921,562.4419 179.2529,562.5913 Q178.6138,562.7407 177.9082,562.7407 Q175.4014,562.7407 174.0815,561.0889 Q172.7617,559.437 172.7617,556.3159 Q172.7617,553.1865 174.0815,551.5347 Q175.4014,549.8828 177.9082,549.8828 Q178.6138,549.8828 179.2612,550.0322 Q179.9087,550.1816 180.4731,550.4805 L180.4731,553.2031 Q179.8423,552.6221 179.2488,552.3523 Q178.6553,552.0825 178.0244,552.0825 Q176.6797,552.0825 175.9949,553.1492 Q175.3101,554.2158 175.3101,556.3159 Q175.3101,558.4077 175.9949,559.4744 Q176.6797,560.541 178.0244,560.541 Q178.6553,560.541 179.2488,560.2712 Q179.8423,560.0015 180.4731,559.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="46" x="192" y="560.5352">Relation</text><!--MD5=[b01c1280d4e10e5850c2de04b0afedc0]
+class asdi::edb::Fact--><rect codeLine="13" fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" height="32" id="asdi::edb::Fact" style="stroke:#A80036;stroke-width:1.5;" width="55" x="276.5" y="540"/><ellipse cx="291.5" cy="556" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M293.9731,562.1431 Q293.3921,562.4419 292.7529,562.5913 Q292.1138,562.7407 291.4082,562.7407 Q288.9014,562.7407 287.5815,561.0889 Q286.2617,559.437 286.2617,556.3159 Q286.2617,553.1865 287.5815,551.5347 Q288.9014,549.8828 291.4082,549.8828 Q292.1138,549.8828 292.7612,550.0322 Q293.4087,550.1816 293.9731,550.4805 L293.9731,553.2031 Q293.3423,552.6221 292.7488,552.3523 Q292.1553,552.0825 291.5244,552.0825 Q290.1797,552.0825 289.4949,553.1492 Q288.8101,554.2158 288.8101,556.3159 Q288.8101,558.4077 289.4949,559.4744 Q290.1797,560.541 291.5244,560.541 Q292.1553,560.541 292.7488,560.2712 Q293.3423,560.0015 293.9731,559.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="23" x="305.5" y="560.5352">Fact</text><!--MD5=[30c8d4c59bd3776484494cc31a150236]
+class asdi::idb::RuleSet--><rect codeLine="16" fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" height="32" id="asdi::idb::RuleSet" style="stroke:#A80036;stroke-width:1.5;" width="74" x="744" y="540"/><ellipse cx="759" cy="556" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M761.4731,562.1431 Q760.8921,562.4419 760.2529,562.5913 Q759.6138,562.7407 758.9082,562.7407 Q756.4014,562.7407 755.0815,561.0889 Q753.7617,559.437 753.7617,556.3159 Q753.7617,553.1865 755.0815,551.5347 Q756.4014,549.8828 758.9082,549.8828 Q759.6138,549.8828 760.2612,550.0322 Q760.9087,550.1816 761.4731,550.4805 L761.4731,553.2031 Q760.8423,552.6221 760.2488,552.3523 Q759.6553,552.0825 759.0244,552.0825 Q757.6797,552.0825 756.9949,553.1492 Q756.3101,554.2158 756.3101,556.3159 Q756.3101,558.4077 756.9949,559.4744 Q757.6797,560.541 759.0244,560.541 Q759.6553,560.541 760.2488,560.2712 Q760.8423,560.0015 761.4731,559.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="42" x="773" y="560.5352">RuleSet</text><!--MD5=[afabf50c567fddf1e22749c2d45d6bf2]
+class asdi::idb::Rule--><rect codeLine="19" fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" height="32" id="asdi::idb::Rule" style="stroke:#A80036;stroke-width:1.5;" width="57" x="651.5" y="540"/><ellipse cx="666.5" cy="556" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M668.9731,562.1431 Q668.3921,562.4419 667.7529,562.5913 Q667.1138,562.7407 666.4082,562.7407 Q663.9014,562.7407 662.5815,561.0889 Q661.2617,559.437 661.2617,556.3159 Q661.2617,553.1865 662.5815,551.5347 Q663.9014,549.8828 666.4082,549.8828 Q667.1138,549.8828 667.7612,550.0322 Q668.4087,550.1816 668.9731,550.4805 L668.9731,553.2031 Q668.3423,552.6221 667.7488,552.3523 Q667.1553,552.0825 666.5244,552.0825 Q665.1797,552.0825 664.4949,553.1492 Q663.8101,554.2158 663.8101,556.3159 Q663.8101,558.4077 664.4949,559.4744 Q665.1797,560.541 666.5244,560.541 Q667.1553,560.541 667.7488,560.2712 Q668.3423,560.0015 668.9731,559.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="25" x="680.5" y="560.5352">Rule</text><!--MD5=[862f5ba143deaa96c11c433d25830988]
+class asdi::idb::query::QuerySet--><rect codeLine="22" fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" height="32" id="asdi::idb::query::QuerySet" style="stroke:#A80036;stroke-width:1.5;" width="83" x="1025.5" y="540"/><ellipse cx="1040.5" cy="556" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M1042.9731,562.1431 Q1042.3921,562.4419 1041.7529,562.5913 Q1041.1138,562.7407 1040.4082,562.7407 Q1037.9014,562.7407 1036.5815,561.0889 Q1035.2617,559.437 1035.2617,556.3159 Q1035.2617,553.1865 1036.5815,551.5347 Q1037.9014,549.8828 1040.4082,549.8828 Q1041.1138,549.8828 1041.7612,550.0322 Q1042.4087,550.1816 1042.9731,550.4805 L1042.9731,553.2031 Q1042.3423,552.6221 1041.7488,552.3523 Q1041.1553,552.0825 1040.5244,552.0825 Q1039.1797,552.0825 1038.4949,553.1492 Q1037.8101,554.2158 1037.8101,556.3159 Q1037.8101,558.4077 1038.4949,559.4744 Q1039.1797,560.541 1040.5244,560.541 Q1041.1553,560.541 1041.7488,560.2712 Q1042.3423,560.0015 1042.9731,559.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="51" x="1054.5" y="560.5352">QuerySet</text><!--MD5=[942727c1e5dca949354fc2e6ef4102b1]
+class asdi::idb::query::Query--><rect codeLine="25" fill="#FFFFFF" filter="url(#f1ckdz5hnn1wpl)" height="32" id="asdi::idb::query::Query" style="stroke:#A80036;stroke-width:1.5;" width="66" x="924" y="540"/><ellipse cx="939" cy="556" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M941.4731,562.1431 Q940.8921,562.4419 940.2529,562.5913 Q939.6138,562.7407 938.9082,562.7407 Q936.4014,562.7407 935.0815,561.0889 Q933.7617,559.437 933.7617,556.3159 Q933.7617,553.1865 935.0815,551.5347 Q936.4014,549.8828 938.9082,549.8828 Q939.6138,549.8828 940.2612,550.0322 Q940.9087,550.1816 941.4731,550.4805 L941.4731,553.2031 Q940.8423,552.6221 940.2488,552.3523 Q939.6553,552.0825 939.0244,552.0825 Q937.6797,552.0825 936.9949,553.1492 Q936.3101,554.2158 936.3101,556.3159 Q936.3101,558.4077 936.9949,559.4744 Q937.6797,560.541 939.0244,560.541 Q939.6553,560.541 940.2488,560.2712 Q940.8423,560.0015 941.4731,559.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="34" x="953" y="560.5352">Query</text><!--MD5=[494ff9e1f6b2511c5f41c87db7237760]
+link asdi::visitor::ProgramVisitor to asdi::visitor::RelationVisitor--><path codeLine="55" d="M396.89,302.27 C379.47,320.7 360.55,340.7 344.36,357.82 " fill="none" id="asdi::visitor::ProgramVisitor-to-asdi::visitor::RelationVisitor" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="340.74,361.65,349.8211,357.8377,344.1668,358.009,343.9955,352.3547,340.74,361.65" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[429d92fbb8a463e9b3c688f6a05e31b4]
+link asdi::visitor::ProgramVisitor to asdi::visitor::RuleVisitor--><path codeLine="56" d="M518.03,302.05 C539.27,320.73 562.38,341.05 582.07,358.36 " fill="none" id="asdi::visitor::ProgramVisitor-to-asdi::visitor::RuleVisitor" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="585.96,361.78,581.8376,352.8354,582.2033,358.4804,576.5583,358.8461,585.96,361.78" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[2f2dc5c170bebb2245ea3bf117959349]
+link asdi::visitor::ProgramVisitor to asdi::visitor::QueryVisitor--><path codeLine="57" d="M588.75,295.87 C594.57,297.96 600.34,300.01 606,302 C663.26,322.08 727.07,343.03 781.32,360.43 " fill="none" id="asdi::visitor::ProgramVisitor-to-asdi::visitor::QueryVisitor" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="786.2,361.99,778.8551,355.4285,781.4397,360.4604,776.4078,363.045,786.2,361.99" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[fccae2c952d872fc837ebfd756b62f6a]
+link asdi::visitor::ProgramVisitor to asdi::Program--><path codeLine="58" d="M588.78,297.32 C594.56,299 600.32,300.57 606,302 C801.68,351.21 866.57,292.52 1056,362 C1069.13,366.82 1082.36,374.88 1093.04,382.39 " fill="none" id="asdi::visitor::ProgramVisitor-to-asdi::Program" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="1097.16,385.34,1092.1698,376.849,1093.0942,382.4298,1087.5134,383.3542,1097.16,385.34" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[7d21a56532394ad80200003b95573428]
+link asdi::visitor::ProgramVisitor to asdi::edb::RelationSet--><path codeLine="59" d="M315.25,257 C242.9,271.21 158.77,300.76 108,362 C66.4,412.18 71.53,496.05 76.64,534.55 " fill="none" id="asdi::visitor::ProgramVisitor-to-asdi::edb::RelationSet" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="77.39,539.89,80.0923,530.4191,76.6909,534.9391,72.1709,531.5377,77.39,539.89" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[61010bdf44063d3a25c246bd67ab3326]
+link asdi::visitor::ProgramVisitor to asdi::idb::RuleSet--><path codeLine="60" d="M588.73,297.51 C594.53,299.14 600.3,300.65 606,302 C729.29,331.23 1088.25,267.81 1173,362 C1210.75,403.96 1212.31,448.49 1173,489 C1162.74,499.57 922.34,493.65 908,497 C872.89,505.19 835.71,523.45 810.71,537.3 " fill="none" id="asdi::visitor::ProgramVisitor-to-asdi::idb::RuleSet" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="806.19,539.84,815.9965,538.9277,810.5513,537.3948,812.0842,531.9496,806.19,539.84" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[a4381fc6c5dbf6bbe14a3f8ab6711557]
+link asdi::visitor::ProgramVisitor to asdi::idb::query::QuerySet--><path codeLine="61" d="M588.72,297.56 C594.52,299.18 600.3,300.67 606,302 C738,332.82 1121.99,261.55 1213,362 C1250.9,403.83 1243.61,441.57 1213,489 C1191.22,522.75 1147.56,539.42 1113.63,547.55 " fill="none" id="asdi::visitor::ProgramVisitor-to-asdi::idb::query::QuerySet" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="1108.7,548.69,1118.3653,550.5825,1113.5741,547.5751,1116.5815,542.7839,1108.7,548.69" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[62711189ac6f563fc802545ac53f87e6]
+link asdi::visitor::ProgramWriter to asdi::visitor::ProgramVisitor--><path codeLine="63" d="M615.58,124.05 C598.02,136.71 573.75,154.21 549.29,171.85 " fill="none" id="asdi::visitor::ProgramWriter-to-asdi::visitor::ProgramVisitor" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="none" points="553.14,177.7,532.83,183.72,544.96,166.34,553.14,177.7" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[64f43929574ac4a3026f4fd533c4b461]
+link asdi::visitor::RelationVisitor to asdi::edb::Relation--><path codeLine="65" d="M278,441.38 C257.88,471.45 230.88,511.83 215.06,535.47 " fill="none" id="asdi::visitor::RelationVisitor-to-asdi::edb::Relation" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="212.24,539.68,220.573,534.4301,215.0234,535.5263,213.9272,529.9767,212.24,539.68" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[7fbb9a839cdace1002511cf9afc6f310]
+link asdi::visitor::RelationVisitor to asdi::edb::Fact--><path codeLine="66" d="M304,441.38 C304,471.08 304,510.82 304,534.58 " fill="none" id="asdi::visitor::RelationVisitor-to-asdi::edb::Fact" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="304,539.68,308,530.68,304,534.68,300,530.68,304,539.68" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[7e12fd5c91ccc392961c21c89e14048a]
+link asdi::visitor::RuleVisitor to asdi::idb::Rule--><path codeLine="68" d="M642.75,441.38 C652.52,471.2 665.63,511.16 673.4,534.88 " fill="none" id="asdi::visitor::RuleVisitor-to-asdi::idb::Rule" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="674.98,539.68,675.973,529.8813,673.4203,534.9295,668.3722,532.3768,674.98,539.68" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[ecb9e238fbfdf9c43098799f4d0110c5]
+link asdi::visitor::QueryVisitor to asdi::idb::query::Query--><path codeLine="70" d="M921.24,441.38 C930.62,471.2 943.2,511.16 950.67,534.88 " fill="none" id="asdi::visitor::QueryVisitor-to-asdi::idb::query::Query" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="952.18,539.68,953.2968,529.8947,950.6805,534.9101,945.665,532.2939,952.18,539.68" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[74cc4d21e19a484c8f35383b53fe76a7]
+reverse link asdi::visitor::ProgramVisitor to asdi::visitor::visitor--><path codeLine="77" d="M593.79,243 C603.77,243 613.76,243 623.75,243 " fill="none" id="asdi::visitor::ProgramVisitor-backto-asdi::visitor::visitor" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="588.56,243,597.56,247,593.56,243,597.56,239,588.56,243" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[62d90d556aa4a980f17bbb2a27a97a7a]
+reverse link asdi::visitor::ProgramWriter to asdi::visitor::visitor--><path codeLine="78" d="M672.7,127.14 C702.51,148.63 748.25,181.61 783.09,206.73 " fill="none" id="asdi::visitor::ProgramWriter-backto-asdi::visitor::visitor" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="668.42,124.05,673.3763,132.5609,672.4741,126.9764,678.0586,126.0742,668.42,124.05" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[e7647be84fb94cd034649710e105b7fe]
+link asdi::visitor::visitor to asdi::Program--><path codeLine="79" d="M902.21,279.03 C946.78,301.75 1005.4,332.51 1056,362 C1067.04,368.43 1078.94,375.94 1089.2,382.61 " fill="none" id="asdi::visitor::visitor-to-asdi::Program" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="1093.49,385.41,1088.1349,377.1443,1089.3014,382.6795,1083.7661,383.8461,1093.49,385.41" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[15930621f71d299ade7e453dba4f5977]
+@startuml
+
+!include ../model/options.plantuml
+
+class asdi::Program #white
+hide "asdi::Program" members
+
+class asdi::edb::RelationSet #white
+hide "asdi::edb::RelationSet" members
+
+class asdi::edb::Relation #white
+hide "asdi::edb::Relation" members
+
+class asdi::edb::Fact #white
+hide "asdi::edb::Fact" members
+
+class asdi::idb::RuleSet #white
+hide "asdi::idb::RuleSet" members
+
+class asdi::idb::Rule #white
+hide "asdi::idb::Rule" members
+
+class asdi::idb::query::QuerySet #white
+hide "asdi::idb::query::QuerySet" members
+
+class asdi::idb::query::Query #white
+hide "asdi::idb::query::Query" members
+
+namespace asdi::visitor {
+
+    interface ProgramVisitor {
+        start_program(program: &Program) : Result<()>
+        end_program(program: &Program) : Result<()>
+
+        relation_visitor(&self) : Option<&RelationVisitor>
+        rule_visitor(&self) : Option<&RuleVisitor>
+        query_visitor(&self) : Option<&QueryVisitor>
+    }
+    interface ProgramWriter
+    interface RelationVisitor {
+        start_relation(relation: &Relation, extensional: bool) : Result<()>
+        fact(fact: &Fact) : Result<()>
+        end_relation(relation: &Relation, extensional: bool) : Result<()>
+    }
+    interface RuleVisitor {
+        start_rules(rules: &RuleSet) : Result<()>
+        rule(rule: &Rule) : Result<()>
+        end_rules(rule: &RuleSet) : Result<()>
+    }
+    interface QueryVisitor {
+        start_queries(queries: &QuerySet) : Result<()>
+        query(query: &Query) : Result<()>
+        end_queries(queries: &QuerySet) : Result<()>
+    }
+
+    ProgramVisitor ..> RelationVisitor
+    ProgramVisitor ..> RuleVisitor
+    ProgramVisitor ..> QueryVisitor
+    ProgramVisitor ..> asdi::Program
+    ProgramVisitor ..> asdi::edb::RelationSet
+    ProgramVisitor ..> asdi::idb::RuleSet
+    ProgramVisitor ..> asdi::idb::query::QuerySet
+
+    ProgramWriter - -|> ProgramVisitor
+
+    RelationVisitor ..> asdi::edb::Relation
+    RelationVisitor ..> asdi::edb::Fact
+
+    RuleVisitor ..> asdi::idb::Rule
+
+    QueryVisitor ..> asdi::idb::query::Query
+
+    class visitor << module >> {
+        visit_program(program: &Program, visitor: &ProgramVisitor) : Result<()>
+        format_program(program: &Program, visitor: &ProgramWriter) : Result<()>
+    }
+
+    visitor .left.> ProgramVisitor
+    visitor .left.> ProgramWriter
+    visitor ..> asdi::Program
+}
+
+@enduml
+
+@startuml
+
+set namespaceSeparator ::
+hide enum methods
+hide interface fields
+hide << const >> members
+hide << type >> members
+hide << type >> stereotype
+hide << module >> fields
+hide << module >> circle
+
+class asdi::Program #white
+hide "asdi::Program" members
+
+class asdi::edb::RelationSet #white
+hide "asdi::edb::RelationSet" members
+
+class asdi::edb::Relation #white
+hide "asdi::edb::Relation" members
+
+class asdi::edb::Fact #white
+hide "asdi::edb::Fact" members
+
+class asdi::idb::RuleSet #white
+hide "asdi::idb::RuleSet" members
+
+class asdi::idb::Rule #white
+hide "asdi::idb::Rule" members
+
+class asdi::idb::query::QuerySet #white
+hide "asdi::idb::query::QuerySet" members
+
+class asdi::idb::query::Query #white
+hide "asdi::idb::query::Query" members
+
+namespace asdi::visitor {
+
+    interface ProgramVisitor {
+        start_program(program: &Program) : Result<()>
+        end_program(program: &Program) : Result<()>
+
+        relation_visitor(&self) : Option<&RelationVisitor>
+        rule_visitor(&self) : Option<&RuleVisitor>
+        query_visitor(&self) : Option<&QueryVisitor>
+    }
+    interface ProgramWriter
+    interface RelationVisitor {
+        start_relation(relation: &Relation, extensional: bool) : Result<()>
+        fact(fact: &Fact) : Result<()>
+        end_relation(relation: &Relation, extensional: bool) : Result<()>
+    }
+    interface RuleVisitor {
+        start_rules(rules: &RuleSet) : Result<()>
+        rule(rule: &Rule) : Result<()>
+        end_rules(rule: &RuleSet) : Result<()>
+    }
+    interface QueryVisitor {
+        start_queries(queries: &QuerySet) : Result<()>
+        query(query: &Query) : Result<()>
+        end_queries(queries: &QuerySet) : Result<()>
+    }
+
+    ProgramVisitor ..> RelationVisitor
+    ProgramVisitor ..> RuleVisitor
+    ProgramVisitor ..> QueryVisitor
+    ProgramVisitor ..> asdi::Program
+    ProgramVisitor ..> asdi::edb::RelationSet
+    ProgramVisitor ..> asdi::idb::RuleSet
+    ProgramVisitor ..> asdi::idb::query::QuerySet
+
+    ProgramWriter - -|> ProgramVisitor
+
+    RelationVisitor ..> asdi::edb::Relation
+    RelationVisitor ..> asdi::edb::Fact
+
+    RuleVisitor ..> asdi::idb::Rule
+
+    QueryVisitor ..> asdi::idb::query::Query
+
+    class visitor << module >> {
+        visit_program(program: &Program, visitor: &ProgramVisitor) : Result<()>
+        format_program(program: &Program, visitor: &ProgramWriter) : Result<()>
+    }
+
+    visitor .left.> ProgramVisitor
+    visitor .left.> ProgramWriter
+    visitor ..> asdi::Program
+}
+
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 10:19:58 PST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
