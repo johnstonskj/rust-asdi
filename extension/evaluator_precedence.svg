@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="387px" preserveAspectRatio="none" style="width:638px;height:387px;background:#FFFFFF;" version="1.1" viewBox="0 0 638 387" width="638px" zoomAndPan="magnify"><defs><filter height="300%" id="f1d7zbjdb03wa" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[6bc3af5db4038e5494ba0622f07de59b]
+cluster asdi::edb--><polygon fill="#FFFFFF" filter="url(#f1d7zbjdb03wa)" points="139,297,207,297,214,319.4883,257,319.4883,257,380,139,380,139,297" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="139" x2="214" y1="319.4883" y2="319.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="62" x="143" y="312.5352">asdi::edb</text><!--MD5=[e274c4916ac42ef1c11391a83d303c10]
+cluster asdi--><polygon fill="#FFFFFF" filter="url(#f1d7zbjdb03wa)" points="363,297,399,297,406,319.4883,477,319.4883,477,380,363,380,363,297" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="363" x2="406" y1="319.4883" y2="319.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="30" x="367" y="312.5352">asdi</text><!--MD5=[bbfb16aff101aff206c25fb1af5c6b4b]
+cluster asdi::idb::eval--><polygon fill="#FFFFFF" filter="url(#f1d7zbjdb03wa)" points="16,6,116,6,123,28.4883,621,28.4883,621,273,16,273,16,6" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="16" x2="123" y1="28.4883" y2="28.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="94" x="20" y="21.5352">asdi::idb::eval</text><!--MD5=[a5d376e5744e5d84d0764534baa4474d]
+class asdi::edb::Predicate--><rect codeLine="4" fill="#FFFFFF" filter="url(#f1d7zbjdb03wa)" height="32" id="asdi::edb::Predicate" style="stroke:#A80036;stroke-width:1.5;" width="86" x="155" y="332"/><ellipse cx="170" cy="348" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M172.4731,354.1431 Q171.8921,354.4419 171.2529,354.5913 Q170.6138,354.7407 169.9082,354.7407 Q167.4014,354.7407 166.0815,353.0889 Q164.7617,351.437 164.7617,348.3159 Q164.7617,345.1865 166.0815,343.5347 Q167.4014,341.8828 169.9082,341.8828 Q170.6138,341.8828 171.2612,342.0322 Q171.9087,342.1816 172.4731,342.4805 L172.4731,345.2031 Q171.8423,344.6221 171.2488,344.3523 Q170.6553,344.0825 170.0244,344.0825 Q168.6797,344.0825 167.9949,345.1492 Q167.3101,346.2158 167.3101,348.3159 Q167.3101,350.4077 167.9949,351.4744 Q168.6797,352.541 170.0244,352.541 Q170.6553,352.541 171.2488,352.2712 Q171.8423,352.0015 172.4731,351.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="54" x="184" y="352.5352">Predicate</text><!--MD5=[619a18f3975bec44ed0f3b908af212c9]
+class asdi::Program--><rect codeLine="7" fill="#FFFFFF" filter="url(#f1d7zbjdb03wa)" height="32" id="asdi::Program" style="stroke:#A80036;stroke-width:1.5;" width="81" x="379.5" y="332"/><ellipse cx="394.5" cy="348" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M396.9731,354.1431 Q396.3921,354.4419 395.7529,354.5913 Q395.1138,354.7407 394.4082,354.7407 Q391.9014,354.7407 390.5815,353.0889 Q389.2617,351.437 389.2617,348.3159 Q389.2617,345.1865 390.5815,343.5347 Q391.9014,341.8828 394.4082,341.8828 Q395.1138,341.8828 395.7612,342.0322 Q396.4087,342.1816 396.9731,342.4805 L396.9731,345.2031 Q396.3423,344.6221 395.7488,344.3523 Q395.1553,344.0825 394.5244,344.0825 Q393.1797,344.0825 392.4949,345.1492 Q391.8101,346.2158 391.8101,348.3159 Q391.8101,350.4077 392.4949,351.4744 Q393.1797,352.541 394.5244,352.541 Q395.1553,352.541 395.7488,352.2712 Q396.3423,352.0015 396.9731,351.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="49" x="408.5" y="352.5352">Program</text><!--MD5=[9a662da35d9021e4f98a277b74a14cb8]
+class asdi::idb::eval::PrecedenceGraph--><rect codeLine="11" fill="#FEFECE" filter="url(#f1d7zbjdb03wa)" height="216.416" id="asdi::idb::eval::PrecedenceGraph" style="stroke:#A80036;stroke-width:1.5;" width="369" x="235.5" y="41"/><ellipse cx="364.25" cy="57" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M366.7231,63.1431 Q366.1421,63.4419 365.5029,63.5913 Q364.8638,63.7407 364.1582,63.7407 Q361.6514,63.7407 360.3315,62.0889 Q359.0117,60.437 359.0117,57.3159 Q359.0117,54.1865 360.3315,52.5347 Q361.6514,50.8828 364.1582,50.8828 Q364.8638,50.8828 365.5112,51.0322 Q366.1587,51.1816 366.7231,51.4805 L366.7231,54.2031 Q366.0923,53.6221 365.4988,53.3523 Q364.9053,53.0825 364.2744,53.0825 Q362.9297,53.0825 362.2449,54.1492 Q361.5601,55.2158 361.5601,57.3159 Q361.5601,59.4077 362.2449,60.4744 Q362.9297,61.541 364.2744,61.541 Q364.9053,61.541 365.4988,61.2712 Q366.0923,61.0015 366.7231,60.4204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="103" x="384.75" y="61.5352">PrecedenceGraph</text><line style="stroke:#A80036;stroke-width:1.5;" x1="236.5" x2="603.5" y1="73" y2="73"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="169" x="241.5" y="87.6348">from(program: &amp;Program) : Self</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="196" x="241.5" y="117.5449">edges() : Iterator&lt;PrecedenceNode&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="170" x="241.5" y="130.5">sources() : HashSet&lt;Predicate&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="165" x="241.5" y="143.4551">targets() : HashSet&lt;Predicate&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="357" x="241.5" y="156.4102">directly_reachable_from(source: &amp;Predicate) : HashSet&lt;Predicate&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="311" x="241.5" y="169.3652">reachable_from(source: &amp;Predicate) : HashSet&lt;Predicate&gt;</text><line style="stroke:#A80036;stroke-width:1.0;" x1="236.5" x2="405" y1="100.4326" y2="100.4326"/><line style="stroke:#A80036;stroke-width:1.0;" x1="236.5" x2="405" y1="102.4326" y2="102.4326"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="30" x="405" y="104.0898">paths</text><line style="stroke:#A80036;stroke-width:1.0;" x1="435" x2="603.5" y1="100.4326" y2="100.4326"/><line style="stroke:#A80036;stroke-width:1.0;" x1="435" x2="603.5" y1="102.4326" y2="102.4326"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="210" x="241.5" y="199.2754">is_level_zero(source: &amp;Predicate) : bool</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="106" x="241.5" y="212.2305">is_recursive() : bool</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="98" x="241.5" y="225.1855">is_positive() : bool</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="129" x="241.5" y="238.1406">is_semi_positive() : bool</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="113" x="241.5" y="251.0957">is_stratifiable() : bool</text><line style="stroke:#A80036;stroke-width:1.0;" x1="236.5" x2="392" y1="182.1631" y2="182.1631"/><line style="stroke:#A80036;stroke-width:1.0;" x1="236.5" x2="392" y1="184.1631" y2="184.1631"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="56" x="392" y="185.8203">predicates</text><line style="stroke:#A80036;stroke-width:1.0;" x1="448" x2="603.5" y1="182.1631" y2="182.1631"/><line style="stroke:#A80036;stroke-width:1.0;" x1="448" x2="603.5" y1="184.1631" y2="184.1631"/><!--MD5=[4615c5274794b948ee8e0f7fd198fb36]
+class asdi::idb::eval::PrecedenceNode--><rect codeLine="27" fill="#FEFECE" filter="url(#f1d7zbjdb03wa)" height="108.7754" id="asdi::idb::eval::PrecedenceNode" style="stroke:#A80036;stroke-width:1.5;" width="168" x="32" y="94.5"/><ellipse cx="64.1" cy="110.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M66.5731,116.6431 Q65.9921,116.9419 65.3529,117.0913 Q64.7138,117.2407 64.0082,117.2407 Q61.5014,117.2407 60.1815,115.5889 Q58.8617,113.937 58.8617,110.8159 Q58.8617,107.6865 60.1815,106.0347 Q61.5014,104.3828 64.0082,104.3828 Q64.7138,104.3828 65.3612,104.5322 Q66.0087,104.6816 66.5731,104.9805 L66.5731,107.7031 Q65.9423,107.1221 65.3488,106.8523 Q64.7553,106.5825 64.1244,106.5825 Q62.7797,106.5825 62.0949,107.6492 Q61.4101,108.7158 61.4101,110.8159 Q61.4101,112.9077 62.0949,113.9744 Q62.7797,115.041 64.1244,115.041 Q64.7553,115.041 65.3488,114.7712 Q65.9423,114.5015 66.5731,113.9204 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="98" x="81.9" y="115.0352">PrecedenceNode</text><line style="stroke:#A80036;stroke-width:1.5;" x1="33" x2="199" y1="126.5" y2="126.5"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="103" x="38" y="141.1348">source() : Predicate</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="98" x="38" y="154.0898">target() : Predicate</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="139" x="38" y="184">is_negative_target() : bool</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="156" x="38" y="196.9551">is_extensional_target() : bool</text><line style="stroke:#A80036;stroke-width:1.0;" x1="33" x2="88" y1="166.8877" y2="166.8877"/><line style="stroke:#A80036;stroke-width:1.0;" x1="33" x2="88" y1="168.8877" y2="168.8877"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="56" x="88" y="170.5449">predicates</text><line style="stroke:#A80036;stroke-width:1.0;" x1="144" x2="199" y1="166.8877" y2="166.8877"/><line style="stroke:#A80036;stroke-width:1.0;" x1="144" x2="199" y1="168.8877" y2="168.8877"/><!--MD5=[d15f0b35eda5fb6547e36bcac22fd86d]
+link asdi::idb::eval::PrecedenceGraph to asdi::idb::eval::PrecedenceNode--><path codeLine="35" d="M223.25,149 C223.25,149 216.21,149 213.23,149 " fill="none" id="asdi::idb::eval::PrecedenceGraph-asdi::idb::eval::PrecedenceNode" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="200.02,149,209.02,153,205.02,149,209.02,145,200.02,149" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="205.02" x2="213.02" y1="149" y2="149"/><polygon fill="#A80036" points="235.25,149,229.25,145,223.25,149,229.25,153,235.25,149" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="6" x="208.0422" y="145.9016">*</text><!--MD5=[a73d4f3966748e8b81e30a5d634dd95b]
+link asdi::idb::eval::PrecedenceGraph to asdi::edb::Predicate--><path codeLine="36" d="M299.26,257.15 C268.24,284.67 238.26,311.28 219.07,328.3 " fill="none" id="asdi::idb::eval::PrecedenceGraph-to-asdi::edb::Predicate" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="214.91,332,224.2998,329.0282,218.6533,328.6853,218.9962,323.0388,214.91,332" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[6d33a22ccaa1e09ca9ee81969b924f20]
+link asdi::idb::eval::PrecedenceGraph to asdi::Program--><path codeLine="37" d="M420,257.15 C420,283.74 420,309.49 420,326.55 " fill="none" id="asdi::idb::eval::PrecedenceGraph-to-asdi::Program" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="420,332,424,323,420,327,416,323,420,332" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[7ff2fd4b106f49b261f1130501359431]
+link asdi::idb::eval::PrecedenceNode to asdi::edb::Predicate--><path codeLine="39" d="M138.3,203.57 C155.33,244.5 177.85,298.6 189.78,327.24 " fill="none" id="asdi::idb::eval::PrecedenceNode-to-asdi::edb::Predicate" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#A80036" points="191.74,331.95,191.96,322.1036,189.8119,327.3367,184.5787,325.1886,191.74,331.95" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[2668c2bdba20b79c78d4fe262f15354b]
+@startuml
+
+!include ../model/options.plantuml
+
+class asdi::edb::Predicate #white
+hide "asdi::edb::Predicate" members
+
+class asdi::Program #white
+hide "asdi::Program" members
+
+namespace asdi::idb::eval {
+    class PrecedenceGraph {
+        from(program: &Program) : Self
+        == paths ==
+        edges() : Iterator<PrecedenceNode>
+        sources() : HashSet<Predicate>
+        targets() : HashSet<Predicate>
+        directly_reachable_from(source: &Predicate) : HashSet<Predicate>
+        reachable_from(source: &Predicate) : HashSet<Predicate>
+        == predicates ==
+        is_level_zero(source: &Predicate) : bool
+        is_recursive() : bool
+        is_positive() : bool
+        is_semi_positive() : bool
+        is_stratifiable() : bool
+    }
+
+    class PrecedenceNode {
+        source() : Predicate
+        target() : Predicate
+        == predicates ==
+        is_negative_target() : bool
+        is_extensional_target() : bool
+    }
+
+    PrecedenceGraph *-> "*" PrecedenceNode
+    PrecedenceGraph ..> asdi::edb::Predicate
+    PrecedenceGraph ..> asdi::Program
+
+    PrecedenceNode ..> asdi::edb::Predicate
+}
+
+@enduml
+
+@startuml
+
+set namespaceSeparator ::
+hide enum methods
+hide interface fields
+hide << const >> members
+hide << type >> members
+hide << type >> stereotype
+hide << module >> fields
+hide << module >> circle
+
+class asdi::edb::Predicate #white
+hide "asdi::edb::Predicate" members
+
+class asdi::Program #white
+hide "asdi::Program" members
+
+namespace asdi::idb::eval {
+    class PrecedenceGraph {
+        from(program: &Program) : Self
+        == paths ==
+        edges() : Iterator<PrecedenceNode>
+        sources() : HashSet<Predicate>
+        targets() : HashSet<Predicate>
+        directly_reachable_from(source: &Predicate) : HashSet<Predicate>
+        reachable_from(source: &Predicate) : HashSet<Predicate>
+        == predicates ==
+        is_level_zero(source: &Predicate) : bool
+        is_recursive() : bool
+        is_positive() : bool
+        is_semi_positive() : bool
+        is_stratifiable() : bool
+    }
+
+    class PrecedenceNode {
+        source() : Predicate
+        target() : Predicate
+        == predicates ==
+        is_negative_target() : bool
+        is_extensional_target() : bool
+    }
+
+    PrecedenceGraph *-> "*" PrecedenceNode
+    PrecedenceGraph ..> asdi::edb::Predicate
+    PrecedenceGraph ..> asdi::Program
+
+    PrecedenceNode ..> asdi::edb::Predicate
+}
+
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 10:19:58 PST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

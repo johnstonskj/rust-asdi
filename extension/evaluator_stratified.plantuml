@@ -1,0 +1,30 @@
+@startuml
+
+!include ../model/options.plantuml
+
+interface asdi::Collection #white
+hide "asdi::Collection" members
+
+class asdi::Program #white
+hide "asdi::Program" members
+
+interface asdi::ProgramCore #white
+hide "asdi::ProgramCore" members
+
+namespace asdi::idb::eval {
+    class PrecedenceGraph #white
+    class SubProgram {
+    }
+    class StratifiedProgram {
+        from(program: &Program) : Result<Self>
+    }
+
+    SubProgram o-> asdi::Program
+    SubProgram ..|> asdi::ProgramCore
+
+    StratifiedProgram *-> "*" SubProgram
+    StratifiedProgram ..|> "<SubProgram>" asdi::Collection
+    StratifiedProgram .up.> PrecedenceGraph
+}
+
+@enduml

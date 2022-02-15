@@ -8,22 +8,20 @@ hide "asdi::edb::Relation" members
 namespace asdi::edb::io {
 
     namespace csv {
-        class DelimitedLines
-        class Options
-        DelimitedLines ..|> asdi::edb::io::Reader
-        DelimitedLines ..|> asdi::edb::io::Writer
+        class DelimitedLines #white
+        class Options #white
     }
     namespace json {
-        class Json
-        class Options
-        Json ..|> asdi::edb::io::Reader
-        Json ..|> asdi::edb::io::Writer
+        class Json #white
+        class Options #white
     }
     namespace text {
         class TextTables
         class Options
         TextTables ..|> asdi::edb::io::Reader
         TextTables ..|> asdi::edb::io::Writer
+        Options ..> asdi::edb::io::Reader::Options
+        Options ..> asdi::edb::io::Writer::Options
     }
 
     class FilePragma
@@ -35,8 +33,24 @@ namespace asdi::edb::io {
 
     FilePragma *-down-> Format
 
+
+    abstract class asdi::edb::io::Reader::Options
+    hide "asdi::edb::io::Reader::Options" members
+    asdi::edb::io::Reader::Options ..|> std::default::Default
+
     interface Reader
+    Reader ..|> std::default::Default
+    Reader +-- asdi::edb::io::Reader::Options
+    Reader ..> asdi::edb::Relation
+
+    abstract class asdi::edb::io::Writer::Options
+    hide "asdi::edb::io::Writer::Options" members
+    asdi::edb::io::Writer::Options ..|> std::default::Default
+
     interface Writer
+    Writer ..|> std::default::Default
+    Writer +-- asdi::edb::io::Writer::Options
+    Writer ..> asdi::edb::Relation
 
     class io << module >> {
         print_relation(): Result<())>
@@ -45,7 +59,6 @@ namespace asdi::edb::io {
     }
 
     io ..> asdi::edb::Relation
-    Reader ..> asdi::edb::Relation
     Writer ..> asdi::edb::Relation
 }
 

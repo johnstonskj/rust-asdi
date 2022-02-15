@@ -1,0 +1,43 @@
+@startuml
+
+!include ../model/options.plantuml
+
+class asdi::edb::Predicate #white
+hide "asdi::edb::Predicate" members
+
+class asdi::Program #white
+hide "asdi::Program" members
+
+namespace asdi::idb::eval {
+    class PrecedenceGraph {
+        from(program: &Program) : Self
+        == paths ==
+        edges() : Iterator<PrecedenceNode>
+        sources() : HashSet<Predicate>
+        targets() : HashSet<Predicate>
+        directly_reachable_from(source: &Predicate) : HashSet<Predicate>
+        reachable_from(source: &Predicate) : HashSet<Predicate>
+        == predicates ==
+        is_level_zero(source: &Predicate) : bool
+        is_recursive() : bool
+        is_positive() : bool
+        is_semi_positive() : bool
+        is_stratifiable() : bool
+    }
+
+    class PrecedenceNode {
+        source() : Predicate
+        target() : Predicate
+        == predicates ==
+        is_negative_target() : bool
+        is_extensional_target() : bool
+    }
+
+    PrecedenceGraph *-> "*" PrecedenceNode
+    PrecedenceGraph ..> asdi::edb::Predicate
+    PrecedenceGraph ..> asdi::Program
+
+    PrecedenceNode ..> asdi::edb::Predicate
+}
+
+@enduml

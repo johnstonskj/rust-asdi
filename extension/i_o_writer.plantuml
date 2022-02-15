@@ -1,0 +1,39 @@
+@startuml
+
+!include ../model/options.plantuml
+
+interface asdi::edb::Relation #white
+hide "asdi::edb::Relation" members
+
+interface std::default::Default #white
+hide "std::default::Default" members
+
+namespace asdi::edb::io {
+
+    namespace csv {
+        class DelimitedLines #lightgray
+        class Options #lightgray
+        DelimitedLines ..|> asdi::edb::io::Reader
+        DelimitedLines ..|> asdi::edb::io::Writer
+        Options ..> asdi::edb::io::Writer::Options
+    }
+
+    abstract class asdi::edb::io::Writer::Options
+    hide "asdi::edb::io::Writer::Options" members
+    asdi::edb::io::Writer::Options ..|> std::default::Default
+
+    interface Reader #white
+    hide Reader members
+
+    interface Writer {
+        write_to(file_name: &Path, from_relation: &Relation) : Result<()>
+        write_to_with_options(file_name: &Path, from_relation: &Relation, options: &Options) -> Result<()>
+        print(from_relation: &Relation) : Result<()>
+        print_with_options(from_relation: &Relation, options: &Self::Options) : Result<()>
+    }
+    Writer ..|> std::default::Default
+    Writer +-- asdi::edb::io::Writer::Options
+    Writer .up.> asdi::edb::Relation
+}
+
+@enduml

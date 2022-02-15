@@ -2,19 +2,19 @@
 
 !include options.plantuml
 
-
 namespace asdi {
 
-    namespace edb {}
+    namespace edb {
+        namespace io {}
+    }
     namespace error {}
     namespace features {}
     namespace idb {
         namespace eval {}
         namespace query {}
     }
-    namespace io {}
     namespace parse {}
-    namespace typeset {}
+    namespace visitor {}
 }
 
 @enduml

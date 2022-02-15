@@ -25,13 +25,13 @@ namespace asdi::idb::query {
     class Row
     class View
 
-    Queryable *-> asdi::idb::Atom
+    Queryable ..> Query
     Queryable ..> View
 
     Query *-> asdi::idb::Atom
     Query ..|> asdi::Collection
 
-    QuerySet *-> "*" Query
+    QuerySet *-down-> "*" Query
 
     Row *-> "*" asdi::edb::Constant
     Row ..|> asdi::Collection

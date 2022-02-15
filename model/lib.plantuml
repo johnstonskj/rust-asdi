@@ -22,16 +22,40 @@ hide "asdi::idb::query::QuerySet" members
 
 namespace asdi {
 
-    interface AttributeName
-    interface Collection<T>
-    interface IndexedCollection<K,V>
-    interface Labeled
-    interface MaybePositive
-    interface ProgramCore
+    interface AttributeName {
+        is_valid(s: &str) : bool
+        type_name() : &str
+    }
+    interface Collection<T> {
+        is_empty() : bool
+        len() : usize
+        iter() : Iterator<&T>
+        contains(v: &T) : bool
+    }
+    interface IndexedCollection<K,V> {
+        get(index: &K) : Option<V>
+        contains_index(index: &K) : bool
+    }
+    interface Labeled {
+        label() : Predicate
+        label_ref() : PredicateRef
+    }
+    interface MaybeAnonymous {
+        anonymous() : Self
+        is_anonymous() : bool
+    }
+    interface MaybePositive {
+        is_positive() : bool
+        is_negative() : bool
+    }
+    interface ProgramCore {
+        features() : &FeatureSet
+        extensional() : &RelationSet
+        intensional() : &RelationSet
+        rules() : &RuleSet
+    }
 
     IndexedCollection --|> Collection
-    MutableCollection --|> Collection
-    MutableIndexedCollection --|> Collection
 
     class Program
 
@@ -47,7 +71,7 @@ namespace asdi {
 
     class AttributeNameRef<T: AttributeName> << (T,#ADD1B2) type>>
     AttributeNameRef .up.> std::rc::Rc : base
-    AttributeNameRef ..> AttributeName
+    AttributeNameRef o-down-> AttributeName
 }
 
 @enduml

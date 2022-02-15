@@ -1,0 +1,83 @@
+@startuml
+
+!include ../model/options.plantuml
+
+class asdi::Program #white
+hide "asdi::Program" members
+
+class asdi::edb::RelationSet #white
+hide "asdi::edb::RelationSet" members
+
+class asdi::edb::Relation #white
+hide "asdi::edb::Relation" members
+
+class asdi::edb::Fact #white
+hide "asdi::edb::Fact" members
+
+class asdi::idb::RuleSet #white
+hide "asdi::idb::RuleSet" members
+
+class asdi::idb::Rule #white
+hide "asdi::idb::Rule" members
+
+class asdi::idb::query::QuerySet #white
+hide "asdi::idb::query::QuerySet" members
+
+class asdi::idb::query::Query #white
+hide "asdi::idb::query::Query" members
+
+namespace asdi::visitor {
+
+    interface ProgramVisitor {
+        start_program(program: &Program) : Result<()>
+        end_program(program: &Program) : Result<()>
+
+        relation_visitor(&self) : Option<&RelationVisitor>
+        rule_visitor(&self) : Option<&RuleVisitor>
+        query_visitor(&self) : Option<&QueryVisitor>
+    }
+    interface ProgramWriter
+    interface RelationVisitor {
+        start_relation(relation: &Relation, extensional: bool) : Result<()>
+        fact(fact: &Fact) : Result<()>
+        end_relation(relation: &Relation, extensional: bool) : Result<()>
+    }
+    interface RuleVisitor {
+        start_rules(rules: &RuleSet) : Result<()>
+        rule(rule: &Rule) : Result<()>
+        end_rules(rule: &RuleSet) : Result<()>
+    }
+    interface QueryVisitor {
+        start_queries(queries: &QuerySet) : Result<()>
+        query(query: &Query) : Result<()>
+        end_queries(queries: &QuerySet) : Result<()>
+    }
+
+    ProgramVisitor ..> RelationVisitor
+    ProgramVisitor ..> RuleVisitor
+    ProgramVisitor ..> QueryVisitor
+    ProgramVisitor ..> asdi::Program
+    ProgramVisitor ..> asdi::edb::RelationSet
+    ProgramVisitor ..> asdi::idb::RuleSet
+    ProgramVisitor ..> asdi::idb::query::QuerySet
+
+    ProgramWriter --|> ProgramVisitor
+
+    RelationVisitor ..> asdi::edb::Relation
+    RelationVisitor ..> asdi::edb::Fact
+
+    RuleVisitor ..> asdi::idb::Rule
+
+    QueryVisitor ..> asdi::idb::query::Query
+
+    class visitor << module >> {
+        visit_program(program: &Program, visitor: &ProgramVisitor) : Result<()>
+        format_program(program: &Program, visitor: &ProgramWriter) : Result<()>
+    }
+
+    visitor .left.> ProgramVisitor
+    visitor .left.> ProgramWriter
+    visitor ..> asdi::Program
+}
+
+@enduml
