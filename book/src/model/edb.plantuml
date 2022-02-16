@@ -17,9 +17,6 @@ hide "asdi::Labeled" members
 interface asdi::MaybeAnonymous
 hide "asdi::MaybeAnonymous" members
 
-interface asdi::MaybeLabeled<T : AttributeName>
-hide "asdi::MaybeLabeled" members
-
 interface asdi::idb::query::Queryable
 hide "asdi::idb::query::Queryable" members
 
@@ -36,8 +33,6 @@ namespace asdi::edb {
     class Number <<opaque>>
     class FunctionalDependency
     class PredicateRef << (T,#ADD1B2) type >>
-
-    PredicateRef o-> Predicate
 
     enum AttributeIndex<T: AttributeName> {
         Label : T
@@ -56,7 +51,6 @@ namespace asdi::edb {
     }
 
     Attribute .down.|> asdi::MaybeAnonymous
-    Attribute ..|> asdi::MaybeLabeled
     Attribute *--> asdi::AttributeName
     Attribute *--> AttributeKind
 
@@ -66,7 +60,7 @@ namespace asdi::edb {
     Fact ..|> asdi::Collection
     Fact ..|> asdi::IndexedCollection
     Fact ..|> asdi::Labeled
-    Fact o-> PredicateRef
+    Fact o-> PredicateRef: label >
     Fact *-up-> "*" Constant
   ' Fact ..|> asdi::idb::query::relational::FactOps
 
@@ -91,6 +85,8 @@ namespace asdi::edb {
     Schema ..|> asdi::IndexedCollection
     Schema *-> "*" Attribute
     Schema .up.> AttributeIndex
+
+    PredicateRef o-> Predicate: <<rc>>
 }
 
 

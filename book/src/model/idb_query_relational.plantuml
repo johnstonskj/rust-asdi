@@ -79,14 +79,16 @@ namespace asdi::idb::query::relational {
     FactOps ..> Projection
     FactOps ..> Selection
     FactOps .up.> asdi::idb::query::Row
+    FactOps <|.up. asdi::idb::query::Row
 
     RelationalOps ..> Criteria
     RelationalOps ..> Projection
     RelationalOps ..> Selection
     RelationalOps .up.> asdi::idb::query::View
+    RelationalOps <|.up. asdi::idb::query::View
 
     RelationSink *-> RelationalOp
-    RelationSink o-> asdi::edb::PredicateRef
+    RelationSink *-> asdi::edb::PredicateRef
 
     class relational << module >> {
         program_to_graphviz(): String

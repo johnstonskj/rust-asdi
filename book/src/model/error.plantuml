@@ -18,8 +18,8 @@ namespace asdi::error {
         AnonymousVariableNotAllowed
         AttributeDoesNotExist
         AttributeIndexInvalid
-        ComparisonIsAlwaysTrue
         ComparisonIsAlwaysFalse
+        ComparisonIsAlwaysTrue
         ExtensionalPredicateInRuleHead
         FactDoesNotConformToSchema
         FormatError
@@ -33,13 +33,39 @@ namespace asdi::error {
         NotStratifiable
         NullaryFactsNotAllowed
         ParserError
-        RelationExists
         RelationDoesNotExist
+        RelationExists
         Serialization
         SerializationFormatUnknown
         SerializationOperationUnsupported
     }
     hide Error methods
+
+    class error <<module>> {
+        anonymous_variable_not_allowed() : Error
+        attribute_does_not_exist() : Error
+        attribute_index_Invalid() : Error
+        comparison_is_always_false() : Error
+        comparison_is_always_true() : Error
+        extensional_predicate_in_rule_head() : Error
+        fact_does_not_conform_to_schema() : Error
+        format_error() : Error
+        head_variables_missing_in_body() : Error
+        incompatible_types() : Error
+        invalid_head_atom_count() : Error
+        invalid_value() : Error
+        language_feature_disabled() : Error
+        language_feature_unsupported() : Error
+        negative_variables_not_also_positive() : Error
+        not_stratifiable() : Error
+        nullary_facts_not_allowed() : Error
+        parser_error() : Error
+        relation_does_not_exist() : Error
+        relation_exists() : Error
+        serialization() : Error
+        serialization_format_unknown() : Error
+        serialization_operation_unsupported() : Error
+    }
 
     Error ..|> std::error::Error
     Error .right.> SourceLocation
@@ -48,6 +74,8 @@ namespace asdi::error {
 
     Result .left.> Error
     Result ..> std::result::Result: base
+
+    error .right.> Error
 }
 
 @enduml

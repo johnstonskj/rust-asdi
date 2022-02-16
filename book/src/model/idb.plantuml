@@ -85,9 +85,9 @@ namespace asdi::idb {
 
     Term o-> VariableRef
     Term o-> asdi::edb::Constant
-    Term ..|> asdi::MaybeAnonymous
+    Term .down.|> asdi::MaybeAnonymous
 
-    VariableRef o--> Variable
+    VariableRef o--> Variable: <<rc>>
     Variable ..|> asdi::AttributeName
 }
 
