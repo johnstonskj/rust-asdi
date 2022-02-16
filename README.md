@@ -27,7 +27,7 @@ programs using the API you may opt out of the [Pest](https://pest.rs) parser and
    reading/writing relations as well as basic JSON and CSV support.
 6. **Evaluation** currently have a naïve and a stratified semi-naïve implementation.
 
-# Example
+## Example
 
 ```datalog
 parent(xerces, brooke).
@@ -97,6 +97,18 @@ fn ancestor_example() {
     println!(">{}<", ancestors);
 }
 ```
+
+## Crate features
+
+| Feature    | Default      | Enables                                                       |
+|------------|--------------|---------------------------------------------------------------|
+| `graphviz` | Yes          | Graph representation for dependency graphs and stratification |
+| `parser`   | Yes          | Parsing of textual representation                             |
+| `tabular`  | Yes          | Tabular output for views                                      |
+| `io`       | Yes          | collects all the common I/O formats                           |
+| `io_csv`   | _Indirectly_ | Delimited line format support                                 |
+| `io_json`  | _Indirectly_ | JSON format support                                           |
+| `io_text`  | _Indirectly_ | Native text format (write only) support                       |
 
 ## Changes
 

@@ -6,8 +6,20 @@ programs in memory, a parser for the textual representation, and some evaluation
 
 ![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/lib.svg)
 
-The text representation parser is a separate feature, so if you only need to construct and evaluate
-programs using the API you may opt out of the [Pest](https://pest.rs) parser and support.
+# Library features
+
+The library has a number of features, most of which are **opt-out** as they are included in the
+`default` feature.
+
+| Feature    | Default      | Enables                                                       |
+|------------|--------------|---------------------------------------------------------------|
+| `graphviz` | Yes          | Graph representation for dependency graphs and stratification |
+| `parser`   | Yes          | Parsing of textual representation                             |
+| `tabular`  | Yes          | Tabular output for views                                      |
+| `io`       | Yes          | collects all the common I/O formats                           |
+| `io_csv`   | _Indirectly_ | Delimited line format support                                 |
+| `io_json`  | _Indirectly_ | JSON format support                                           |
+| `io_text`  | _Indirectly_ | Native text format (write only) support                       |
 
 # Example
 
