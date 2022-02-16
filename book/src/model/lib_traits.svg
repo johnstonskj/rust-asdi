@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="299px" preserveAspectRatio="none" style="width:874px;height:299px;background:#FFFFFF;" version="1.1" viewBox="0 0 874 299" width="874px" zoomAndPan="magnify"><defs><filter height="300%" id="fll8f4fz0xzy3" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[e274c4916ac42ef1c11391a83d303c10]
+cluster asdi--><polygon fill="#FFFFFF" filter="url(#fll8f4fz0xzy3)" points="16,6,52,6,59,28.4883,857,28.4883,857,292,16,292,16,6" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="16" x2="59" y1="28.4883" y2="28.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="30" x="20" y="21.5352">asdi</text><!--MD5=[2110a1d684b71e50a272297f2c09c595]
+class asdi::AttributeName--><rect codeLine="6" fill="#FEFECE" filter="url(#fll8f4fz0xzy3)" height="65.9102" id="asdi::AttributeName" style="stroke:#A80036;stroke-width:1.5;" width="128" x="88" y="197"/><ellipse cx="108.4" cy="213" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M104.8277,209.2651 L104.8277,207.1069 L112.2071,207.1069 L112.2071,209.2651 L109.7418,209.2651 L109.7418,217.3418 L112.2071,217.3418 L112.2071,219.5 L104.8277,219.5 L104.8277,217.3418 L107.2931,217.3418 L107.2931,209.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="84" x="123.6" y="217.5352">AttributeName</text><line style="stroke:#A80036;stroke-width:1.5;" x1="89" x2="215" y1="229" y2="229"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="116" x="94" y="243.6348">is_valid(s: &amp;str) : bool</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="98" x="94" y="256.5898">type_name() : &amp;str</text><!--MD5=[e8289714b7028f41fbfaeffd8c17c76d]
+class asdi::Collection--><rect codeLine="10" fill="#FEFECE" filter="url(#fll8f4fz0xzy3)" height="91.8203" id="asdi::Collection" style="stroke:#A80036;stroke-width:1.5;" width="126" x="337" y="184"/><ellipse cx="364.15" cy="200" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M360.5777,196.2651 L360.5777,194.1069 L367.9571,194.1069 L367.9571,196.2651 L365.4918,196.2651 L365.4918,204.3418 L367.9571,204.3418 L367.9571,206.5 L360.5777,206.5 L360.5777,204.3418 L363.0431,204.3418 L363.0431,196.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="55" x="380.85" y="204.5352">Collection</text><rect fill="#FFFFFF" height="16.1328" style="stroke:#000000;stroke-width:1.0;stroke-dasharray:2.0,2.0;" width="10" x="456" y="181"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="8" x="457" y="193.6016">T</text><line style="stroke:#A80036;stroke-width:1.5;" x1="338" x2="462" y1="216" y2="216"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="89" x="343" y="230.6348">is_empty() : bool</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="61" x="343" y="243.5898">len() : usize</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="75" x="343" y="256.5449">iter() : Iterator</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="114" x="343" y="269.5">contains(v: &amp;T) : bool</text><!--MD5=[ee47b5577acc389a92c0b1543b9a2c9a]
+class asdi::IndexedCollection--><rect codeLine="16" fill="#FEFECE" filter="url(#fll8f4fz0xzy3)" height="65.9102" id="asdi::IndexedCollection" style="stroke:#A80036;stroke-width:1.5;" width="186" x="307" y="41"/><ellipse cx="334.6" cy="57" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M331.0277,53.2651 L331.0277,51.1069 L338.4071,51.1069 L338.4071,53.2651 L335.9418,53.2651 L335.9418,61.3418 L338.4071,61.3418 L338.4071,63.5 L331.0277,63.5 L331.0277,61.3418 L333.4931,61.3418 L333.4931,53.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="102" x="351.4" y="61.5352">IndexedCollection</text><rect fill="#FFFFFF" height="16.1328" style="stroke:#000000;stroke-width:1.0;stroke-dasharray:2.0,2.0;" width="22" x="474" y="38"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="20" x="475" y="50.6016">K,V</text><line style="stroke:#A80036;stroke-width:1.5;" x1="308" x2="492" y1="73" y2="73"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="147" x="313" y="87.6348">get(index: &amp;K) : Option&lt;V&gt;</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="174" x="313" y="100.5898">contains_index(index: &amp;K) : bool</text><!--MD5=[a769fd774dc4e74f949d393dd195b319]
+class asdi::Labeled--><rect codeLine="20" fill="#FEFECE" filter="url(#fll8f4fz0xzy3)" height="65.9102" id="asdi::Labeled" style="stroke:#A80036;stroke-width:1.5;" width="141" x="528.5" y="41"/><ellipse cx="571.85" cy="57" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M568.2777,53.2651 L568.2777,51.1069 L575.6571,51.1069 L575.6571,53.2651 L573.1918,53.2651 L573.1918,61.3418 L575.6571,61.3418 L575.6571,63.5 L568.2777,63.5 L568.2777,61.3418 L570.7431,61.3418 L570.7431,53.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="46" x="592.15" y="61.5352">Labeled</text><line style="stroke:#A80036;stroke-width:1.5;" x1="529.5" x2="668.5" y1="73" y2="73"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="91" x="534.5" y="87.6348">label() : Predicate</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="129" x="534.5" y="100.5898">label_ref() : PredicateRef</text><!--MD5=[a36ef1bdba718ac7a4b8a2af506f0d6e]
+class asdi::MaybeAnonymous--><rect codeLine="24" fill="#FEFECE" filter="url(#fll8f4fz0xzy3)" height="65.9102" id="asdi::MaybeAnonymous" style="stroke:#A80036;stroke-width:1.5;" width="136" x="705" y="41"/><ellipse cx="720" cy="57" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M716.4277,53.2651 L716.4277,51.1069 L723.8071,51.1069 L723.8071,53.2651 L721.3418,53.2651 L721.3418,61.3418 L723.8071,61.3418 L723.8071,63.5 L716.4277,63.5 L716.4277,61.3418 L718.8931,61.3418 L718.8931,53.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="104" x="734" y="61.5352">MaybeAnonymous</text><line style="stroke:#A80036;stroke-width:1.5;" x1="706" x2="840" y1="73" y2="73"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="99" x="711" y="87.6348">anonymous() : Self</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="119" x="711" y="100.5898">is_anonymous() : bool</text><!--MD5=[fa1011c7bd77eedf14cd9274bd452e29]
+class asdi::MaybePositive--><rect codeLine="28" fill="#FEFECE" filter="url(#fll8f4fz0xzy3)" height="65.9102" id="asdi::MaybePositive" style="stroke:#A80036;stroke-width:1.5;" width="113" x="534.5" y="197"/><ellipse cx="549.5" cy="213" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M545.9277,209.2651 L545.9277,207.1069 L553.3071,207.1069 L553.3071,209.2651 L550.8418,209.2651 L550.8418,217.3418 L553.3071,217.3418 L553.3071,219.5 L545.9277,219.5 L545.9277,217.3418 L548.3931,217.3418 L548.3931,209.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="81" x="563.5" y="217.5352">MaybePositive</text><line style="stroke:#A80036;stroke-width:1.5;" x1="535.5" x2="646.5" y1="229" y2="229"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="98" x="540.5" y="243.6348">is_positive() : bool</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="101" x="540.5" y="256.5898">is_negative() : bool</text><!--MD5=[91cc3482fb0350396608f11633162af9]
+class asdi::ProgramCore--><rect codeLine="32" fill="#FEFECE" filter="url(#fll8f4fz0xzy3)" height="91.8203" id="asdi::ProgramCore" style="stroke:#A80036;stroke-width:1.5;" width="158" x="683" y="184"/><ellipse cx="720.5" cy="200" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M716.9277,196.2651 L716.9277,194.1069 L724.3071,194.1069 L724.3071,196.2651 L721.8418,196.2651 L721.8418,204.3418 L724.3071,204.3418 L724.3071,206.5 L716.9277,206.5 L716.9277,204.3418 L719.3931,204.3418 L719.3931,196.2651 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="76" x="739.5" y="204.5352">ProgramCore</text><line style="stroke:#A80036;stroke-width:1.5;" x1="684" x2="840" y1="216" y2="216"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="125" x="689" y="230.6348">features() : &amp;FeatureSet</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="146" x="689" y="243.5898">extensional() : &amp;RelationSet</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="143" x="689" y="256.5449">intensional() : &amp;RelationSet</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="91" x="689" y="269.5">rules() : &amp;RuleSet</text><!--MD5=[842cd022249741fa742cbf18a1c342e8]
+class asdi::AttributeNameRef--><rect codeLine="42" fill="#FEFECE" filter="url(#fll8f4fz0xzy3)" height="54.2656" id="asdi::AttributeNameRef" style="stroke:#A80036;stroke-width:1.5;" width="239" x="32.5" y="47"/><ellipse cx="47.5" cy="66.1328" fill="#ADD1B2" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M48.8418,73.3828 L46.3931,73.3828 L46.3931,63.1313 L43.2471,63.1313 L43.2471,60.9897 L51.9878,60.9897 L51.9878,63.1313 L48.8418,63.1313 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="37" x="94.5" y="63.6016">«type»</text><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="103" x="61.5" y="77.7344">AttributeNameRef</text><rect fill="#FFFFFF" height="16.1328" style="stroke:#000000;stroke-width:1.0;stroke-dasharray:2.0,2.0;" width="102" x="172.5" y="44"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="100" x="173.5" y="56.6016">T: AttributeName</text><line style="stroke:#A80036;stroke-width:1.5;" x1="33.5" x2="270.5" y1="85.2656" y2="85.2656"/><line style="stroke:#A80036;stroke-width:1.5;" x1="33.5" x2="270.5" y1="93.2656" y2="93.2656"/><!--MD5=[050da77a24a9253f629d0b4ed41f1d76]
+link asdi::IndexedCollection to asdi::Collection--><path codeLine="39" d="M400,107.28 C400,123.69 400,144.25 400,163.77 " fill="none" id="asdi::IndexedCollection-to-asdi::Collection" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="none" points="407,163.91,400,183.91,393,163.91,407,163.91" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[011ca43a3a27a88ec64181b14c315f9b]
+link asdi::AttributeNameRef to asdi::AttributeName--><path codeLine="43" d="M152,113.12 C152,113.12 152,161.82 152,183.8 " fill="none" id="asdi::AttributeNameRef-asdi::AttributeName" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="152,196.86,156,187.86,152,191.86,148,187.86,152,196.86" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;" x1="152" x2="152" y1="191.86" y2="183.86"/><polygon fill="none" points="152,101.12,148,107.12,152,113.12,156,107.12,152,101.12" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="26" x="153" y="150.5684">«rc»</text><!--MD5=[81a9cafdf90afa209b23072943344efe]
+link asdi::Labeled to asdi::MaybeAnonymous--><!--MD5=[017f6f85eda09348aa4c83e41b18adee]
+link asdi::Labeled to asdi::MaybePositive--><!--MD5=[c7fcfae4023fca1ae28dfaa3e9a5d8e9]
+link asdi::MaybePositive to asdi::ProgramCore--><!--MD5=[fbbd104c124fbcc5a2207c08c9005d49]
+@startuml
+
+!include options.plantuml
+
+namespace asdi {
+
+    interface AttributeName {
+        is_valid(s: &str) : bool
+        type_name() : &str
+    }
+    interface Collection<T> {
+        is_empty() : bool
+        len() : usize
+        iter() : Iterator<&T>
+        contains(v: &T) : bool
+    }
+    interface IndexedCollection<K,V> {
+        get(index: &K) : Option<V>
+        contains_index(index: &K) : bool
+    }
+    interface Labeled {
+        label() : Predicate
+        label_ref() : PredicateRef
+    }
+    interface MaybeAnonymous {
+        anonymous() : Self
+        is_anonymous() : bool
+    }
+    interface MaybePositive {
+        is_positive() : bool
+        is_negative() : bool
+    }
+    interface ProgramCore {
+        features() : &FeatureSet
+        extensional() : &RelationSet
+        intensional() : &RelationSet
+        rules() : &RuleSet
+    }
+
+    IndexedCollection - -|> Collection
+
+
+    class AttributeNameRef<T: AttributeName> << (T,#ADD1B2) type>>
+    AttributeNameRef o-down-> AttributeName: <<rc>>
+}
+
+@enduml
+
+@startuml
+
+set namespaceSeparator ::
+hide enum methods
+hide interface fields
+hide << const >> members
+hide << type >> members
+hide << type >> stereotype
+hide << module >> fields
+hide << module >> circle
+
+namespace asdi {
+
+    interface AttributeName {
+        is_valid(s: &str) : bool
+        type_name() : &str
+    }
+    interface Collection<T> {
+        is_empty() : bool
+        len() : usize
+        iter() : Iterator<&T>
+        contains(v: &T) : bool
+    }
+    interface IndexedCollection<K,V> {
+        get(index: &K) : Option<V>
+        contains_index(index: &K) : bool
+    }
+    interface Labeled {
+        label() : Predicate
+        label_ref() : PredicateRef
+    }
+    interface MaybeAnonymous {
+        anonymous() : Self
+        is_anonymous() : bool
+    }
+    interface MaybePositive {
+        is_positive() : bool
+        is_negative() : bool
+    }
+    interface ProgramCore {
+        features() : &FeatureSet
+        extensional() : &RelationSet
+        intensional() : &RelationSet
+        rules() : &RuleSet
+    }
+
+    IndexedCollection - -|> Collection
+
+
+    class AttributeNameRef<T: AttributeName> << (T,#ADD1B2) type>>
+    AttributeNameRef o-down-> AttributeName: <<rc>>
+}
+
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 10:19:58 PST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

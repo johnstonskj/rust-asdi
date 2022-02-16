@@ -13,12 +13,16 @@ This package provides an in-memory model to represent [Datalog](https://en.wikip
 parser for a textual representation, relation input/output implementations and some implementations of common inference
 techniques.
 
+**Chapter 1**, provides a brief simple description of Datalog by example. 
+
 **Chapter 2** will provide an overview of Datalog itself from both an abstract point of view as well as a tour of the 
 concrete syntax used as the textual representation.
 
-**Chapter 3** will
+**Chapter 3** will provide a guide to the crate API in a more scenario-based fashion and relies on the 
+[rust doc](https://docs.rs/asdi/latest/asdi/) to provide the definitive reference.
 
-**Chapter 4** will
+**Chapter 4** will cover the major extension points in the crate and identify how to contribute new implementations for
+specific extension traits.
 
 
 ## Brief Datalog Example
@@ -103,6 +107,24 @@ syllogism
     .add_new_query(p_mortal, ["Socrates".into()])
     .unwrap();
 ```
+
+The textual form of Datalog also has a set of pragmas, or directives, which allow us to specify details of the relations
+in our program. For example, in the text below we use the `assert` pragma to identify an EDB relation named "human" with
+a single column of type `string`. We then go on to use the `infer` pragma to identify an IDB relation named "mortal",
+and we declare that it's schema is the same as the EDB relation "human".
+
+```datalog
+.assert human(string).
+.infer mortal from human.
+
+human("Socrates").
+
+mortal(X) <- human(X).
+
+?- mortal("Socrates").
+```
+
+## 
 
 ----------
 

@@ -8,9 +8,6 @@ hide "asdi::features::FeatureSet" members
 class asdi::edb::RelationSet
 hide "asdi::edb::RelationSet" members
 
-class asdi::edb::NameReferenceSet
-hide "asdi::edb::NameReferenceSet" members
-
 class asdi::idb::RuleSet
 hide "asdi::idb::RuleSet" members
 
@@ -19,55 +16,31 @@ hide "asdi::idb::query::QuerySet" members
 
 namespace asdi {
 
-    interface AttributeName {
-        is_valid(s: &str) : bool
-        type_name() : &str
-    }
-    interface Collection<T> {
-        is_empty() : bool
-        len() : usize
-        iter() : Iterator<&T>
-        contains(v: &T) : bool
-    }
-    interface IndexedCollection<K,V> {
-        get(index: &K) : Option<V>
-        contains_index(index: &K) : bool
-    }
-    interface Labeled {
-        label() : Predicate
-        label_ref() : PredicateRef
-    }
-    interface MaybeAnonymous {
-        anonymous() : Self
-        is_anonymous() : bool
-    }
-    interface MaybePositive {
-        is_positive() : bool
-        is_negative() : bool
-    }
-    interface ProgramCore {
-        features() : &FeatureSet
-        extensional() : &RelationSet
-        intensional() : &RelationSet
-        rules() : &RuleSet
-    }
+    interface AttributeName
+    interface Collection<T>
+    interface IndexedCollection<K,V>
+    interface Labeled
+    interface MaybeAnonymous
+    interface MaybePositive
+    interface ProgramCore
+
+    class AttributeNameRef<T: AttributeName> << (T,#ADD1B2) type>>
+    class NameReferenceSet<T: AttributeName>
+    class "**Program**" as Program
+
+    AttributeNameRef o-down-> AttributeName: <<rc>>
 
     IndexedCollection --|> Collection
 
-    class Program
-
     Program ..|> ProgramCore
     Program ..|> MaybePositive
-    Program *-up-> asdi::features::FeatureSet
-    Program *-up-> "extensional" asdi::edb::RelationSet
-    Program *-up-> "intensional" asdi::edb::RelationSet
-    Program *-up-> "predicates" asdi::edb::NameReferenceSet
-    Program *-up-> "variables" asdi::edb::NameReferenceSet
-    Program *-up-> asdi::idb::RuleSet
-    Program *-up-> asdi::idb::query::QuerySet
-
-    class AttributeNameRef<T: AttributeName> << (T,#ADD1B2) type>>
-    AttributeNameRef o-down-> AttributeName: <<rc>>
+    Program *--> asdi::features::FeatureSet
+    Program *-> "extensional" asdi::edb::RelationSet
+    Program *--> "intensional" asdi::edb::RelationSet
+    Program *--> "predicates" NameReferenceSet
+    Program *--> "variables" NameReferenceSet
+    Program *-> asdi::idb::RuleSet
+    Program *-> asdi::idb::query::QuerySet
 }
 
 @enduml
