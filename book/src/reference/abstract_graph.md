@@ -6,7 +6,7 @@ composite is defined as $\small A \oplus B$ a small filled diamond shape represe
 Finally, some edges in the graph are labeled with "`*`", "`+`", and "`?`" which are the common cardinality notation used
 in regular expressions and BNF notation. 
 
-![Graphical View](graphviz.svg)
+![Graphical View](abstract_graph.svg)
 
 1. The edge between _rule_ and _head_ has the label "`?/*`" as it has differing cardinality under $\small\text{Datalog}$, 
    $\small\text{Datalog}^{\lor}$, and $\small\text{Datalog}^{\bot}$. 
