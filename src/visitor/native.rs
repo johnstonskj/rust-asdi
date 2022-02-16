@@ -122,7 +122,7 @@ impl<W: Write> ProgramVisitor for NativeFormatter<W> {
 
 impl<W: Write> RelationVisitor for NativeFormatter<W> {
     fn fact(&self, fact: &Fact) -> crate::Result<()> {
-        write!(self.writer.borrow_mut(), "{}", fact)?;
+        writeln!(self.writer.borrow_mut(), "{}", fact)?;
         Ok(())
     }
 
@@ -136,7 +136,7 @@ impl<W: Write> RelationVisitor for NativeFormatter<W> {
 
 impl<W: Write> RuleVisitor for NativeFormatter<W> {
     fn rule(&self, rule: &Rule) -> crate::Result<()> {
-        write!(self.writer.borrow_mut(), "{}", rule)?;
+        writeln!(self.writer.borrow_mut(), "{}", rule)?;
         Ok(())
     }
 
@@ -148,7 +148,7 @@ impl<W: Write> RuleVisitor for NativeFormatter<W> {
 
 impl<W: Write> QueryVisitor for NativeFormatter<W> {
     fn query(&self, query: &Query) -> crate::Result<()> {
-        write!(self.writer.borrow_mut(), "{}", query)?;
+        writeln!(self.writer.borrow_mut(), "{}", query)?;
         Ok(())
     }
 }

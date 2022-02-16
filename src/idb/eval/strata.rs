@@ -55,6 +55,7 @@ pub struct StratifiedProgram<'a> {
 }
 
 #[derive(Debug, PartialEq)]
+#[allow(single_use_lifetimes)]
 pub struct SubProgram<'a> {
     program: &'a Program,
     strata: RuleSet,
