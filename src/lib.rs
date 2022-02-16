@@ -4,7 +4,11 @@ Another Simplistic [Datalog](https://en.wikipedia.org/wiki/Datalog) Implementati
 This package provides a data model to represent [Datalog](https://en.wikipedia.org/wiki/Datalog)
 programs in memory, a parser for the textual representation, and some evaluation implementations.
 
-![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/lib.svg)
+For more information see the [ASDI book](https://simonkjohnston.life/rust-asdi/).
+
+# Library Overview
+
+![module UML](https://raw.githubusercontent.com/johnstonskj/rust-asdi/main/book/src/model/top.svg)
 
 # Library features
 

@@ -12,20 +12,32 @@ Another Simplistic Datalog Implementation (in Rust).
 [![Audit](https://github.com/johnstonskj/rust-asdi/workflows/Security%20audit/badge.svg)]((https://github.com/johnstonskj/rust-asdi/actions/workflows/cargo-audit.yml))
 
 This package provides a data model to represent [Datalog](https://en.wikipedia.org/wiki/Datalog)
-programs in memory, a parser for the textual representation, and some evaluation implementations. For more
-information see the [ASDI book](https://simonkjohnston.life/rust-asdi/).
+programs in memory, a parser for the textual representation, and some evaluation implementations. 
 
-The text representation parser is a separate feature, so if you only need to construct and evaluate
-programs using the API you may opt out of the [Pest](https://pest.rs) parser and support.
+## Status
 
-# Status
-
-1. Library **API** mostly stable, the next effort will be to make the construction API more ergonomic.
-2. Library **Documentation** good top-level documentation but very little else right now.
-4. **Parser** full support for the core language as well as pragmas, require more unit tests.
-5. **I/O** relations are now connected to the file input/output pragmas, the `io` module includes traits for 
+1. **API**: mostly stable, the next effort will be to make the construction API more ergonomic.
+2. **Documentation**: OK top-level documentation but very little else right now.
+3. **Book**: structure there, now need to start on the model and extension sections.
+4. **Parser**: full support for the core language as well as pragmas, require more unit tests.
+5. **I/O**: relations are now connected to the file input/output pragmas, the `io` module includes traits for 
    reading/writing relations as well as basic JSON and CSV support.
-6. **Evaluation** currently have a naïve and a stratified semi-naïve implementation.
+6. **Evaluation**: currently have a naïve and a stratified semi-naïve implementation.
+
+## Crate features
+
+The crate has a number of features, most of which are **opt-out** as they are included in the
+`default` feature.
+
+| Feature    | Default      | Enables                                                       |
+|------------|--------------|---------------------------------------------------------------|
+| `graphviz` | Yes          | Graph representation for dependency graphs and stratification |
+| `parser`   | Yes          | Parsing of textual representation                             |
+| `tabular`  | Yes          | Tabular output for views                                      |
+| `io`       | Yes          | collects all the common I/O formats                           |
+| `io_csv`   | _Indirectly_ | Delimited line format support                                 |
+| `io_json`  | _Indirectly_ | JSON format support                                           |
+| `io_text`  | _Indirectly_ | Native text format (write only) support                       |
 
 ## Example
 
@@ -97,18 +109,6 @@ fn ancestor_example() {
     println!(">{}<", ancestors);
 }
 ```
-
-## Crate features
-
-| Feature    | Default      | Enables                                                       |
-|------------|--------------|---------------------------------------------------------------|
-| `graphviz` | Yes          | Graph representation for dependency graphs and stratification |
-| `parser`   | Yes          | Parsing of textual representation                             |
-| `tabular`  | Yes          | Tabular output for views                                      |
-| `io`       | Yes          | collects all the common I/O formats                           |
-| `io_csv`   | _Indirectly_ | Delimited line format support                                 |
-| `io_json`  | _Indirectly_ | JSON format support                                           |
-| `io_text`  | _Indirectly_ | Native text format (write only) support                       |
 
 ## Changes
 
