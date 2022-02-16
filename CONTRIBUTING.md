@@ -1,8 +1,8 @@
 # Contributing
 
 We love pull requests from everyone. By participating in this project, you
-agree to abide by the our [code of conduct](CODE_OF_CONDUCT.md), and
-[License](LICENSE)
+agree to abide by our [code of conduct](CODE_OF_CONDUCT.md), and
+[License](LICENSE).
 
 Fork, then clone the repo:
 
@@ -17,10 +17,15 @@ Make sure the tests pass:
 
     cargo test --package asdi --no-fail-fast --all-features -- --exact
 
-Make your change. Add tests for your change.
+Make your change. Add tests, and documentation, for your change.
 
+    cargo doc --all-features --no-deps
     cargo fmt
     cargo clippy
+
+If you have made any changes to `Cargo.toml`, also check:
+
+    cargo outdated
     cargo audit
 
 Push to your fork and [submit a pull request](https://github.com/johnstonskj/rust-asdi/compare/).
@@ -32,4 +37,4 @@ some changes or improvements or alternatives.
 Some things that will increase the chance that your pull request is accepted:
 
 * Write tests.
-* Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
+* Write a [good commit message](https://cbea.ms/git-commit/https://cbea.ms/git-commit/).

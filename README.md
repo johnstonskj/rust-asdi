@@ -110,6 +110,10 @@ fn ancestor_example() {
 }
 ```
 
+## Contributing
+
+Please review our [Contributing](CONTRIBUTING.md) guidelines.
+
 ## Changes
 
 **Version 0.2.5**
