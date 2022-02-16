@@ -13,20 +13,19 @@ Another Simplistic Datalog Implementation (in Rust).
 
 This package provides a data model to represent [Datalog](https://en.wikipedia.org/wiki/Datalog)
 programs in memory, a parser for the textual representation, and some evaluation implementations. For more
-information see [the book](https://simonkjohnston.life/rust-asdi/).
+information see the [ASDI book](https://simonkjohnston.life/rust-asdi/).
 
 The text representation parser is a separate feature, so if you only need to construct and evaluate
 programs using the API you may opt out of the [Pest](https://pest.rs) parser and support.
 
 # Status
 
-1. Library **API** mostly stable, but minimal, will try and make the construction API more ergonomic.
+1. Library **API** mostly stable, the next effort will be to make the construction API more ergonomic.
 2. Library **Documentation** good top-level documentation but very little else right now.
-3. Library **validation checking** basic checking, but some is done in the parser and needs to be in the library.
 4. **Parser** full support for the core language as well as pragmas, require more unit tests.
 5. **I/O** relations are now connected to the file input/output pragmas, the `io` module includes traits for 
    reading/writing relations as well as basic JSON and CSV support.
-6. **Evaluation** current evaluator is basically top-down brute force and does not support any additional language features.
+6. **Evaluation** currently have a naïve and a stratified semi-naïve implementation.
 
 # Example
 
@@ -104,7 +103,9 @@ fn ancestor_example() {
 **Version 0.2.5**
 
 * The focus is largely on documentation, both rustdoc and mdbook.
+* Book now contains much better concrete documentation and UML for most major model areas.
 * Some API changes as the documentation uncovered inconsistencies.
+* Significant changes in the visitor and writer areas.
 
 **Version 0.2.4**
 
