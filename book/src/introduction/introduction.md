@@ -15,7 +15,7 @@ techniques.
 
 **Chapter 1**, provides a brief simple description of Datalog by example. 
 
-**Chapter 2** will provide an overview of Datalog itself from both an abstract point of view as well as a tour of the 
+**Chapter 2** will provide a more detailed overview of Datalog itself from both an abstract point of view, and a tour of the 
 concrete syntax used as the textual representation.
 
 **Chapter 3** will provide a guide to the crate API in a more scenario-based fashion and relies on the 

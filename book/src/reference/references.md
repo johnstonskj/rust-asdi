@@ -13,6 +13,7 @@
 1. <span class="bibkey" id="Shep88">Shep88</span>Shepherdson, John C. _Negation in Logic Programming_ in Foundations of Deductive Databases and Logic Programming. (1988).
 1. <span class="bibkey" id="WikiDatalog">WikiDatalog</span>Datalog. (January 9, 2022). In _Wikipedia_. Retrieved January 24, 2022, from  [en.wikipedia.org/Datalog](https://en.wikipedia.org/w/index.php?title=Datalog&oldid=1064721744). 
 1. <span class="bibkey" id="WikiRelalg">WikiRelalg</span>Relational algebra. (December 1, 2021). In _Wikipedia_. Retrieved January 24, 2022, from [en.wikipedia.org/Relational_algebra](https://en.wikipedia.org/w/index.php?title=Relational_algebra&oldid=1058055410). 
-
+1. <span class="bibkey" id="Wilfrid22">Wilfrid22</span>Hodges, W. _Model Theory_. in The Stanford Encyclopedia of Philosophy (ed. Zalta, E. N.) (2022). [plato.stanford.edu/archives/spr2022/entries/model-theory/](https://plato.stanford.edu/archives/spr2022/entries/model-theory/)
 </div>
 
+  

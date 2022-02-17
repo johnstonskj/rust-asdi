@@ -9,10 +9,7 @@ For Propositional logic we define a language comprising the following:
 1. An infinite set of propositional _variables_, $\small \mathcal{V}$.
 1. The _constant_ values `true` and `false`.
 1. Propositional formulae $\small\varphi$, comprising variables, constants, the unary connective negation ($\small\lnot$) and the following binary connectives;
-   1. disjunction ($\small\lor$),
-   1. conjunction ($\small\land$), 
-   1. implication ($\small\rightarrow$),
-   1. equivalence ($\small\leftrightarrow$).
+   disjunction ($\small\lor$), conjunction ($\small\land$), implication ($\small\rightarrow$), and equivalence ($\small\leftrightarrow$).
 
 A _literal_ is a (sub-)formula comprising a single variable or constant that may be negated, i.e. $\small p$ or $\small \lnot p$.
 
@@ -31,10 +28,7 @@ First-Order Predicate logic is a more general language than propositional logic 
 1. A set of n-ary predicate symbols, $\small \mathcal{P}$.
 1. A set of n-ary function symbols, $\small \mathcal{F}$.
 1. _Well-formed formulae_ (WFF) comprising variables, constants, the unary connective negation ($\small\lnot$) and the following binary connectives;
-   1. disjunction ($\small\lor$),
-   1. conjunction ($\small\land$),
-   1. implication ($\small\rightarrow$),
-   1. equivalence ($\small\leftrightarrow$).
+   disjunction ($\small\lor$), conjunction ($\small\land$), implication ($\small\rightarrow$), and equivalence ($\small\leftrightarrow$).
 1. The univeral quantifier $\small\forall$ and the existential quantifier $\small\exists$.
 
 An _atom_ corresponds to the a propositional variable and is either `true`, `false`, or $\small p(t_1, \cdots, t_n)$, where $\small p$ is a predicate symbol and $\small t_1, \cdots, t_n$ are terms.

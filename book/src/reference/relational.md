@@ -1,7 +1,8 @@
 # Relational Algebra Mapping
 
 
-Every expression in the _basic_ relational algebra can be expressed as a $\small\text{Datalog}$
+Every expression in the _basic_ [relational algebra](https://en.wikipedia.org/wiki/Relational_algebra) 
+can be expressed as a $\small\text{Datalog}$
 query. However, operations in the extended relational algebra (grouping, aggregation, and sorting)
 have no corresponding capability in $\small\text{Datalog}$. Similarly, $\small\text{Datalog}$ can
 express recursion, which the relational algebra cannot. The following describes the foundational
@@ -209,7 +210,7 @@ r_plus(X, Z) :- r(X, Y), r_plus(Y, Z).
 ## Acknowledgements
 
 Examples in this section are taken from _Introduction to Data Management CSE 344, Lecture 10:
-Datalog_<span class="bibref">[Balaz12](../reference/references.md#Balaz12)</span>, and definitions for 
+Datalog_<span class="bibref">[Balaz12](references.md#Balaz12)</span>, and definitions for 
 the relational algebra are taken from _Relational algebra_<span 
-class="bibref">[WikiRelalg](../reference/references.md#WikiRelalg)</span>. The _Relational Algebra Query Converter_<span class="bibref">[QConv](../reference/references.md#QConv)</span> is a useful tool to take a SQL query 
+class="bibref">[WikiRelalg](references.md#WikiRelalg)</span>. The _Relational Algebra Query Converter_<span class="bibref">[QConv](references.md#QConv)</span> is a useful tool to take a SQL query 
 and convert to relational algebra which can then be converted to Datalog using the examples above.

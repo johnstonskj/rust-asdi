@@ -2,12 +2,9 @@
 
 This section describes the structure of $\small\text{Datalog}$ languages without reference to any concrete syntax
 or serialized representation. The most common concrete syntax is derived from Prolog and will be described in detail in 
-the [following section](concrete.md). 
+the [following section](concrete.md). In this section, text in **bold** indicates a key concept in the language while
+text in _italics_ indicates a forward reference to such a concept.
 
-It is common in definitions of Datalog to start from a basis in 
-[predicate logic](https://en.wikipedia.org/wiki/First-order_logic) or [Horn clauses](https://en.wikipedia.org/wiki/Horn_clause)
-and demonstrate how these relate to the rules in a Datalog program. This section takes a more direct approach leaving
-the relationship with other logic forms for a brief [appendix](../reference/logic.md).
 
 ## Programs
 
@@ -20,10 +17,11 @@ The extensional database in turn is a set of _relations_ each of which is a set 
 
 A program has the following properties.
 
-* $\small extensional\(P\)$ returns the set of relations comprising the extensional database.
-* $\small intensional\(P\)$ returns the set of relations comprising the intensional database, **IFF** entailment has occured. 
-* $\small rules\(P\)$ returns the set of rules associated with the intensional database.
-* $\small positive(r)$ returns true if all intensional rules are _positive_:
+* $\small program\(x\)$ a boolean predicate which returns `true` **IFF** $\small x$ is a program.
+* $\small extensional\(P\) \equiv D_E$ returns the set of relations comprising the extensional database.
+* $\small intensional\(P\) \equiv \lbrace r | r \in D_I \land relation(r) \rbrace$ returns the set of relations comprising the intensional database, **IFF** entailment has occurred. 
+* $\small rules\(P\) \equiv \lbrace r | r \in D_I \land rule(r) \rbrace$ returns the set of rules associated with the intensional database.
+* $\small positive(r)$ a boolean predicate which returns true **IFF** all intensional rules are _positive_:
    $$\tag{v}\small positive(p) \coloneqq \(\forall{r}\in rules\(p\); positive(r\)\)$$
 
 ## Rules
@@ -38,9 +36,9 @@ that contains the
 * $\small \mathcal{V}$ — the finite set of alphanumeric character strings that begin with an
    uppercase character; e.g. `X`, `A`, `Var`.
 
-While it would appear that the values from $\small \mathcal{P}$ or $\small \mathcal{V}$ would
-overlap, these values must remain distinct. For example, the value `human` is a valid predicate and
-string constant but they have distinct types in ASDI that ensure they are distinct.
+While it would appear that the values from $\small \mathcal{C}$ and $\small \mathcal{P}$ would
+intersect, these values must remain distinct. For example, the value `human` is a valid predicate and
+string constant, but they have distinct types in ASDI that ensure they have distinct identities.
 
 Each rule $\small r \in R$ has the form:
 
@@ -48,15 +46,16 @@ $$\tag{i}\small A_1, \ldots, A_m \leftarrow L_1, \ldots, L_n$$
 
 as well as the following properties:
 
+* $\small rule\(x\)$ a boolean predicate which returns `true` **IFF** $\small x$ is a rule.
 * $\small head(r)$ (the consequence), returns the set of _atom_ values $\small A_1, \ldots, A_m$ where $\small m \in \mathbb{N}$,
 * $\small body(r)$ (the antecedence), returns the set of _literal_ values $\small L_1, \ldots, L_n$ where $\small n \in \mathbb{N}$,
 * $\small distinguished(r)$ returns the set of _terms_ in the head of a rule,
    $$\tag{ii}\small distinguished(r) \coloneqq \lbrace t | t \in \bigcup\lbrace terms(a) | a \in head(r) \rbrace \rbrace$$
 * $\small non\text{-}distinguished(r)$ returns the set of _terms_ in the body that of a rule that are not in the head,
    $$\tag{iii}\small non\text{-}distinguished(r) \coloneqq \lbrace t | t \in \( \bigcup\lbrace terms(a) | a \in body(r) \rbrace - distinguished(r) \rbrace\)\rbrace$$
-* $\small ground(r)$  returns true if its head and its body are both _ground_:
+* $\small ground(r)$  a boolean predicate which returns `true` **IFF** its head and its body are both _ground_:
    $$\tag{iv}\small ground\(r\) \coloneqq \(\forall{a}\in head\(r\); ground\(a\)\) \land \(\forall{l}\in body\(r\); ground\(l\)\)$$
-* $\small positive(r)$ returns true if all body _literals_ are _positive_:
+* $\small positive(r)$ a boolean predicate which returns `true` **IFF** all body _literals_ are _positive_:
    $$\tag{v}\small positive(r) \coloneqq \(\forall{l}\in body\(r\); positive(l\)\)$$
 
 A _pure_ rule is one where there is only a single atom in the head; if the body is true, the head is
@@ -107,9 +106,10 @@ anonymous variable.
 
 Terms have the following properties:
 
-* $\small constant\(t\)$ returns true if the term argument is a constant value.
-* $\small variable\(t\)$ returns true if the term argument is a variable.
-* $\small anonymous\(t\)$ returns true if the term argument is the anonymous variable, $\small\bar{t}$.
+* $\small term\(x\)$ a boolean predicate which returns `true` **IFF** $\small x$ is a term.
+* $\small constant\(t\)$ a boolean predicate which returns `true` **IFF** the term argument is a constant value.
+* $\small variable\(t\)$ a boolean predicate which returns `true` **IFF** the term argument is a variable.
+* $\small anonymous\(t\)$ a boolean predicate which returns `true` **IFF** the term argument is the anonymous variable, $\small\bar{t}$.
 
 With the definition of rules so far it is possible to write rules that generate an an
 infinite number of results. To avoid such problems Datalog rules are required to satisfy the
@@ -142,6 +142,7 @@ $$\tag{ix}\small p\(t_1, \ldots, t_k\)$$
 
 as well as the following properties:
 
+* $\small atom\(x\)$ a boolean predicate which returns `true` **IFF** $\small x$ is a atom.
 * $\small label\(a\)$ returns the predicate $\small p$,
 * $\small terms\(a\)$ returns the tuple of term values $\small t_1, \ldots, t_k$; where
   $\small t \in \mathcal{T}$ and $\small k \in \mathbb{N}^{+}$,
@@ -153,17 +154,19 @@ as well as the following properties:
   * $\small type\(t\)$ returns the type $\small \tau$ for that term,
   * $\small types\(a\)$ returns a tuple such that;
     $\small \(i \in \{1, \ldots, arity(a)\} | type(t_i)\)$,
-* $\small ground(a)$ returns true if its terms are all constants:
+* $\small ground(a)$ a boolean predicate which returns `true` **IFF** its terms are all constants:
   $$\tag{x}\small ground\(a\) \coloneqq \(\forall{t}\in terms\(a\); t \in \mathcal{C}\)$$
 
 ## Relations
 
 Every relation $\small r$ has a schema that describes a set of attributes
-$\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$, and each attribute may be named, and may in
-$\small\text{Datalog}^{\Gamma}$ also have a type.
+$\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$, and each attribute may be labeled, and may in
+$\small\text{Datalog}^{\Gamma}$ also have a type. In general, we refer to attributes by index, a value in
+$\small 1, \cdots, j$.
 
 Relations have the following properties:
 
+* $\small relation\(x\)$ a boolean predicate which returns `true` **IFF** $\small x$ is a relation.
 * $\small label\(r\)$ returns the predicate $\small p$,
 * $\small schema\(r\)$ returns the set of attributes $\small \lbrace \alpha_1, \ldots, \alpha_j \rbrace$;
    where $\small k \in \mathbb{N}^{+}$,
@@ -171,8 +174,15 @@ Relations have the following properties:
    atoms within the relation; $\small arity\(r\) \equiv |schema(a)| \equiv j$.
 * $\small atoms\(r\)$ returns the set of atoms that comprise this relation.
 
+> You will sometimes find the term _sort_ used instead of _schema_. This term is used with meaning derived from 
+> [Model Theory](https://en.wikipedia.org/wiki/Model_theory) (see also 
+> <span class="bibref inline">[Wilfred22](../reference/references.md#Wilfred22)</span>) as a partition of objects 
+> into similarly structured forms. Sort is used in this way extensively in 
+> <span class="bibref inline">[AbHuVi94](../reference/references.md#AbHuVi94)</span>.
+
 Attributes have the following properties:
 
+* $\small index\(\alpha\)$ returns the index of this attribute in the schema, where $\small index \in \lbrace 1, \cdots, j \rbrace$.
 * $\small label\(\alpha\)$ returns either the predicate label of the attribute, or $\small\bot$.
 * in $\small\text{Datalog}^{\Gamma}$:
   * $\small type\(\alpha\)$ returns a type $\small \tau$ for the attribute, where $\small \tau \in \Gamma$, or $\small\bot$.
@@ -225,8 +235,9 @@ rule's head to be considered true.
     system-dependent definition of the property $\small compatible(\tau_{lhs}, \tau_{rhs}, \theta)$,
 * in $\small\text{Datalog}^{\lnot}$ a literal may be negated, appearing as $\small \lnot l$,
 * and has the following properties:
-  * $\small relational\(l\)$ returns true if the literal argument is a relational literal.
-  * $\small arithmetic\(l\)$ returns true if the literal argument is a arithmetic literal.
+  * $\small literal\(x\)$ a boolean predicate which returns `true` **IFF** $\small x$ is a literal.
+  * $\small relational\(l\)$ a boolean predicate which returns `true` **IFF** the literal argument is a relational literal.
+  * $\small arithmetic\(l\)$ a boolean predicate which returns `true` **IFF** the literal argument is a arithmetic literal.
   * $\small terms\(l\)$ returns the set of terms in a literal,
        $$\tag{xiii}\small
        terms(l) \coloneqq
@@ -234,9 +245,9 @@ rule's head to be considered true.
        terms(l), &\text{if } relational(l) \\\\
        \lbrace t_{lhs}, t_{rhs} \rbrace, &\text{if } arithmetic(l) \land \text{Datalog}^{\theta}
        \end{cases}$$
-  * $\small ground\(l\)$ returns true if its terms are all constants $\small \(\forall{t}\in terms\(l\); t \in \mathcal{C}\)$,
-  * $\small positive\(l\)$ in $\small\text{Datalog}^{\lnot}$ returns false if negated,
-       otherwise it will always return true.
+  * $\small ground\(l\)$ a boolean predicate which returns `true` **IFF** its terms are all constants $\small \(\forall{t}\in terms\(l\); t \in \mathcal{C}\)$,
+  * $\small positive\(l\)$ in $\small\text{Datalog}^{\lnot}$ returns `false` if negated,
+       otherwise it will always return `true`.
 
 
 |                        | $\small relational\(l\)$ | $\small arithmetic\(l\)$ | $\small terms\(l\)$           | $\small ground\(l\)$ | $\small positive\(l\)$ | 
@@ -250,13 +261,22 @@ rule's head to be considered true.
 
 > † note that while $\small \lnot X = 1$ **is** a negative literal, the corresponding literal $\small X \neq 1$ **is not**.
 
+It is sometimes useful to consider the values `⊤` (tautology) and `⊥` (absurdity) as _pseudo-literals_ given that certain 
+expressions can be reduced to them. For example, the arithmetic literal $\small 1=1$ must always be `true` and can 
+therefore be reduced to `⊤` (or discarded entirely); similarly the arithmetic literal $\small 1=2$ must always be 
+`false` and can therefore be reduced to `⊥`. Any rule where any literal reduces to `⊥` can itself never be `true`. 
+Any rule that only comprises literals that reduce to `⊤` must always be `true`.
+
 ## Facts
 
 Any ground rule where $\small m=1$ and where $\small n=0$ is termed a **Fact** as it is true by
 nature of having an empty body, or alternatively we may consider the body be comprised of the truth
 value $\small\top$.
 
-$$\tag{xiv}\small fact(r) \coloneqq \(ground\(r\) \land form\(r\)=pure \land body\(r\)=\empty\)$$
+Facts have the following properties:
+
+* $\small fact\(x\)$ a boolean predicate which returns `true` **IFF** $\small x$ is a fact. 
+  $$\tag{xiv}\small fact(r) \coloneqq \(ground\(r\) \land form\(r\)=pure \land body\(r\)=\empty\)$$
 
 ## Queries
 
@@ -275,3 +295,7 @@ $$\tag{xvi}\small \mathcal{P}_P = \mathcal{P}_E \cup \mathcal{P}_I$$
 It should be noted that the same exists for constants and variables;
 $\small \mathcal{C}_P = \mathcal{C}_E \cup \mathcal{C}_I$ and
 $\small \mathcal{V}_P = \mathcal{V}_E \cup \mathcal{V}_I$.
+
+Queries have the following properties:
+
+* $\small query\(x\)$ a boolean predicate which returns `true` **IFF** $\small x$ is a query.
