@@ -12,7 +12,9 @@ Another Simplistic Datalog Implementation (in Rust).
 [![Audit](https://github.com/johnstonskj/rust-asdi/workflows/Security%20audit/badge.svg)]((https://github.com/johnstonskj/rust-asdi/actions/workflows/cargo-audit.yml))
 
 This package provides a data model to represent [Datalog](https://en.wikipedia.org/wiki/Datalog)
-programs in memory, a parser for the textual representation, and some evaluation implementations. 
+programs in memory, a parser for the textual representation, and some evaluation implementations. As well as the
+generated rustdoc we also maintain a [mdbook](https://rust-lang.github.io/mdBook/) generated site with 
+[more information](https://simonkjohnston.life/rust-asdi/).
 
 ## Status
 
@@ -112,7 +114,7 @@ fn ancestor_example() {
 
 ## Contributing
 
-Please review our [Contributing](CONTRIBUTING.md) guidelines.
+Please review our [Contributing](CONTRIBUTING.md) guidelines, [Code of Conduct](CODE_OF_CONDUCT.md) and [License](LICENSE).
 
 ## Changes
 

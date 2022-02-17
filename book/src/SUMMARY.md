@@ -20,9 +20,10 @@
       1. [Relational Algebra](model/query_relational.md)
    6. [Error Handling](model/errors.md)
 4. [Model Extension](extension/index.md)
-   2. [RelationSet I/O](extension/i_o.md)
-   1. [Writing an Evaluator](extension/evaluator.md)
-   3. [Writing a Typesetter](extension/formatting.md)
+   1. [RelationSet I/O](extension/i_o.md)
+   2. [Writing an Evaluator](extension/evaluator.md)
+   3. [Writing a Formatter](extension/formatting.md)
+   4. [Contributing](extension/contributing.md)
 
 5. [Appendix: Abstract Graphical View](reference/abstract_graph.md)
 6. [Appendix: First-Order Logic & Horn Clauses](reference/logic.md)

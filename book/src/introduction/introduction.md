@@ -124,7 +124,11 @@ mortal(X) <- human(X).
 ?- mortal("Socrates").
 ```
 
-## 
+## License
+
+```text
+{{#include ../../../LICENSE}}
+```
 
 ----------
 
