@@ -46,10 +46,7 @@ pub const PRAGMA_ID: &str = "csv";
 
 impl Default for Options {
     fn default() -> Self {
-        Self {
-            delimiter: b',',
-            has_headers: false,
-        }
+        Self::comma_separated()
     }
 }
 

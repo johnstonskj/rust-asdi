@@ -2,6 +2,7 @@
 # Files created by development tools
 /.idea/
 *.iml
+**/#*#
 **/*.rs~
 **/*.md~
 
