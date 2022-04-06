@@ -1211,7 +1211,7 @@ impl FactOps for Fact {
     }
 
     fn select(self, criteria: &Selection) -> Result<Option<Row>> {
-        Ok(if criteria.is_all() || criteria.matches(self.values())? {
+        Ok(if criteria.is_all() || criteria.is_match(self.values())? {
             Some(Row::from(self))
         } else {
             None

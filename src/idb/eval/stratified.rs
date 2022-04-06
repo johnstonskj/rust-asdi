@@ -94,7 +94,7 @@ fn infer_from_program_rules(
                 "infer_from_program_rules > joining all ({}) result views",
                 matches.len()
             );
-            let results = View::join_all(matches)?;
+            let results = View::natural_join_all(matches)?;
             for fact in results.iter() {
                 let head_predicates = rule.head().collect::<Vec<&Atom>>();
                 let head = head_predicates.get(0).unwrap();

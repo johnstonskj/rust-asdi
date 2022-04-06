@@ -1,6 +1,8 @@
 use asdi::edb::{Predicate, PredicateRef};
 use asdi::features::{FeatureSet, FEATURE_NEGATION};
-use asdi::idb::query::relational::{program_to_graphviz, RelationalOp};
+#[cfg(feature = "graphviz")]
+use asdi::idb::query::relational::program_to_graphviz;
+use asdi::idb::query::relational::RelationalOp;
 use asdi::idb::{Atom, Comparison, ComparisonOperator, Literal, Rule, Term, Variable};
 use asdi::parse::parse_str;
 use std::str::FromStr;
@@ -204,10 +206,11 @@ fn test_compile_rule_two() {
     println!(">>> {}", rule);
     let relational = RelationalOp::compile_rule(&rule).unwrap();
     println!("<<< {}", relational);
+    #[cfg(feature = "graphviz")]
     println!("{}", relational.to_graphviz_string().unwrap());
     assert_eq!(
         relational.to_string(),
-        "path ≔ Π[X, Y]((path) ⨝ (edge))".to_string()
+        "path ≔ Π[X, Y]((path) ⨝  (edge))".to_string()
     );
 }
 
@@ -254,10 +257,11 @@ fn test_compile_rule_two_with_rule() {
     println!(">>> {}", rule);
     let relational = RelationalOp::compile_rule(&rule).unwrap();
     println!("<<< {}", relational);
+    #[cfg(feature = "graphviz")]
     println!("{}", relational.to_graphviz_string().unwrap());
     assert_eq!(
         relational.to_string(),
-        "path ≔ Π[X, Y]((σ[0!=101](path)) ⨝ (σ[1!=101](edge)))".to_string()
+        "path ≔ Π[X, Y]((σ[0!=101](path)) ⨝  (σ[1!=101](edge)))".to_string()
     );
 }
 
@@ -384,5 +388,8 @@ instanceOf(P, C2) :- instanceOf(P, C1), subProperty(C1, C2).
 "#;
     let program = parse_str(PROGRAM_SOURCE).unwrap().into_parsed();
 
+    println!("{}", program);
+
+    #[cfg(feature = "graphviz")]
     println!("{}", program_to_graphviz(&program));
 }

@@ -8,12 +8,13 @@ compile rules and atoms into [relational operations](RelationalOp).
 
 use super::{Row, View};
 use crate::edb::{Attribute, Constant, Schema};
-use crate::error::{attribute_index_invalid, nullary_facts_not_allowed, Error, Result};
+use crate::error::{
+    attribute_index_invalid, incompatible_types, nullary_facts_not_allowed, Error, Result,
+};
 use crate::idb::{Atom, Comparison, ComparisonOperator, Rule, Term, Variable};
-use crate::{Collection, Labeled, MaybeAnonymous, MaybePositive, PredicateRef, ProgramCore};
+use crate::{Collection, Labeled, MaybeAnonymous, MaybePositive, PredicateRef};
 use paste::paste;
 use regex::Regex;
-use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
 use tracing::warn;
@@ -140,27 +141,6 @@ pub struct Criteria {
 pub enum CriteriaValue {
     Value(Constant),
     Index(usize),
-}
-
-// ------------------------------------------------------------------------------------------------
-// Public Functions
-// ------------------------------------------------------------------------------------------------
-
-// TODO: (ISSUES/rust-asdi/13) Change current form from cluster-by-rule to cluster-by-strata
-pub fn program_to_graphviz(program: &impl ProgramCore) -> String {
-    format!(
-        "digraph G {{\n{}\n}}\n",
-        program
-            .rules()
-            .iter()
-            .enumerate()
-            .map(|(index, rule)| {
-                let expr = RelationalOp::compile_rule(rule).unwrap();
-                expr.to_graphviz_graph((index + 1) as u32, Some(rule.to_string()))
-            })
-            .collect::<Vec<String>>()
-            .join("\n")
-    )
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -427,212 +407,6 @@ impl RelationalOp {
     self_is_as!(sink, Sink, RelationSink);
 }
 
-#[cfg(feature = "graphviz")]
-impl RelationalOp {
-    pub fn to_graphviz_string(&self) -> Result<String> {
-        Ok(self.to_graphviz_graph(1, None))
-    }
-    fn to_graphviz_graph(&self, graph_index: u32, label: Option<String>) -> String {
-        let (_, nodes, edges) = self.graphviz_one(1 + (graph_index * 100));
-        format!(
-            "{}{}\n{}\n}}",
-            if graph_index == 0 {
-                "digraph G {{\n".to_string()
-            } else {
-                format!(
-                    "subgraph cluster_{} {{\n  color=gray;\n  label=\"{}\";\n\n",
-                    graph_index,
-                    match label {
-                        None => format!("Rule {}", graph_index),
-                        Some(label) => label,
-                    }
-                )
-            },
-            nodes
-                .into_iter()
-                .map(|(_, (_, string))| string)
-                .collect::<Vec<String>>()
-                .join("\n"),
-            edges
-                .into_iter()
-                .map(|(lhs, rhs)| format!("  node{} -> node{};", lhs, rhs))
-                .collect::<Vec<String>>()
-                .join("\n"),
-        )
-    }
-
-    #[allow(clippy::type_complexity)]
-    fn graphviz_one(&self, index: u32) -> (u32, HashMap<&Self, (u32, String)>, Vec<(u32, u32)>) {
-        let mut node_map: HashMap<&Self, (u32, String)> = Default::default();
-        let mut edge_vec: Vec<(u32, u32)> = Default::default();
-
-        let next_index = match self {
-            RelationalOp::Relation(op) => {
-                if !node_map.contains_key(self) {
-                    node_map.insert(
-                        self,
-                        (
-                            index,
-                            if op.is_extensional.unwrap_or(false) {
-                                format!(
-                                    " node{}  [style=filled; label=\"{}\"];\n",
-                                    index, op.source
-                                )
-                            } else {
-                                format!("  node{} [label=\"{}\"];", index, op.source)
-                            },
-                        ),
-                    );
-                }
-                index + 1
-            }
-            RelationalOp::Selection(op) => {
-                let (next_index, nodes, edges) = op.source.graphviz_one(index + 1);
-                node_map.extend(nodes.into_iter());
-                edge_vec.extend(edges.into_iter());
-                if let Some((source_index, _)) = node_map.get(op.source.as_ref()) {
-                    edge_vec.push((index, *source_index));
-                } else {
-                    unreachable!()
-                }
-
-                node_map.insert(
-                    self,
-                    (
-                        index,
-                        format!(
-                            "  node{} [label=\"σ\\n[{}]\"];",
-                            index,
-                            op.criteria
-                                .iter()
-                                .map(|c| c.to_string())
-                                .collect::<Vec<String>>()
-                                .join(", "),
-                        ),
-                    ),
-                );
-                next_index + 1
-            }
-            RelationalOp::Projection(op) => {
-                let (next_index, nodes, edges) = op.source.graphviz_one(index + 1);
-                node_map.extend(nodes.into_iter());
-                edge_vec.extend(edges.into_iter());
-                if let Some((source_index, _)) = node_map.get(op.source.as_ref()) {
-                    edge_vec.push((index, *source_index));
-                } else {
-                    unreachable!()
-                }
-
-                node_map.insert(
-                    self,
-                    (
-                        index,
-                        format!(
-                            "  node{} [label=\"Π\\n[{}]\"];",
-                            index,
-                            op.attributes
-                                .iter()
-                                .map(|v| if let Some(label) = v.label() {
-                                    label.to_string()
-                                } else if let Some(index) = v.index() {
-                                    index.to_string()
-                                } else {
-                                    unreachable!()
-                                })
-                                .collect::<Vec<String>>()
-                                .join(", "),
-                        ),
-                    ),
-                );
-                next_index + 1
-            }
-            RelationalOp::Join(op) => {
-                let (first_next_index, nodes, edges) = op.lhs.graphviz_one(index + 1);
-                node_map.extend(nodes.into_iter());
-                edge_vec.extend(edges.into_iter());
-                if let Some((source_index, _)) = node_map.get(op.lhs.as_ref()) {
-                    edge_vec.push((index, *source_index));
-                } else {
-                    unreachable!()
-                }
-
-                let (next_index, nodes, edges) = op.rhs.graphviz_one(first_next_index + 1);
-                node_map.extend(nodes.into_iter());
-                edge_vec.extend(edges.into_iter());
-                if let Some((source_index, _)) = node_map.get(op.rhs.as_ref()) {
-                    edge_vec.push((index, *source_index));
-                } else {
-                    unreachable!()
-                }
-
-                if op.is_natural() {
-                    node_map.insert(self, (index, format!("  node{} [label=\"⨝\"];", index,)));
-                } else {
-                    node_map.insert(
-                        self,
-                        (
-                            index,
-                            format!(
-                                "  node{} [label=\"⨝𝞱\\n[{}]\"];",
-                                index,
-                                op.criteria
-                                    .iter()
-                                    .map(|c| c.to_string())
-                                    .collect::<Vec<String>>()
-                                    .join(", "),
-                            ),
-                        ),
-                    );
-                }
-                next_index + 1
-            }
-            RelationalOp::SetOperation(op) => {
-                let (first_next_index, nodes, edges) = op.lhs.graphviz_one(index + 1);
-                node_map.extend(nodes.into_iter());
-                edge_vec.extend(edges.into_iter());
-                if let Some((source_index, _)) = node_map.get(op.lhs.as_ref()) {
-                    edge_vec.push((index, *source_index));
-                } else {
-                    unreachable!()
-                }
-
-                let (next_index, nodes, edges) = op.rhs.graphviz_one(first_next_index + 1);
-                node_map.extend(nodes.into_iter());
-                edge_vec.extend(edges.into_iter());
-                if let Some((source_index, _)) = node_map.get(op.rhs.as_ref()) {
-                    edge_vec.push((index, *source_index));
-                } else {
-                    unreachable!()
-                }
-
-                node_map.insert(
-                    self,
-                    (index, format!("  node{} [label=\"{}\"];", index, op.op)),
-                );
-
-                next_index + 1
-            }
-            RelationalOp::Sink(op) => {
-                let (next_index, nodes, edges) = op.source.graphviz_one(index + 1);
-                node_map.extend(nodes.into_iter());
-                edge_vec.extend(edges.into_iter());
-                if let Some((source_index, _)) = node_map.get(op.source.as_ref()) {
-                    edge_vec.push((index, *source_index));
-                } else {
-                    unreachable!()
-                }
-
-                node_map.insert(
-                    self,
-                    (index, format!("  node{} [label=\"{}\"];", index, op.sink)),
-                );
-                next_index + 1
-            }
-        };
-        (next_index, node_map, edge_vec)
-    }
-}
-
 // ------------------------------------------------------------------------------------------------
 
 impl Display for RelationSource {
@@ -756,7 +530,7 @@ impl Display for SetOperator {
 impl Display for Join {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.is_natural() {
-            write!(f, "({}) ⨝ ({})", self.lhs, self.rhs)
+            write!(f, "({}) ⨝  ({})", self.lhs, self.rhs)
         } else {
             write!(
                 f,
@@ -932,10 +706,10 @@ impl Display for Selection {
 impl TryFrom<&Atom> for Selection {
     type Error = Error;
 
-    fn try_from(atom: &Atom) -> std::result::Result<Self, Self::Error> {
+    fn try_from(value: &Atom) -> std::result::Result<Self, Self::Error> {
         Ok(Self {
-            source: Box::new(RelationalOp::Relation(atom.label_ref().into())),
-            criteria: atom
+            source: Box::new(RelationalOp::Relation(value.label_ref().into())),
+            criteria: value
                 .iter()
                 .enumerate()
                 .filter_map(|(i, term)| term.as_constant().map(|c| (i, c)))
@@ -947,6 +721,14 @@ impl TryFrom<&Atom> for Selection {
                 .collect(),
             negated: false,
         })
+    }
+}
+
+impl TryFrom<&Rule> for Selection {
+    type Error = Error;
+
+    fn try_from(_value: &Rule) -> std::result::Result<Self, Self::Error> {
+        unimplemented!()
     }
 }
 
@@ -992,38 +774,13 @@ impl Selection {
         self.criteria.push(criteria);
     }
 
-    pub fn matches(&self, fact: &[Constant]) -> Result<bool> {
+    pub fn is_match(&self, fact: &[Constant]) -> Result<bool> {
         for criteria in &self.criteria {
-            if !self.matches_one(fact, criteria)? {
+            if !criteria.is_match(fact)? {
                 return Ok(false);
             }
         }
         Ok(true)
-    }
-
-    fn matches_one(&self, fact: &[Constant], criteria: &Criteria) -> Result<bool> {
-        let lhs = fact
-            .get(criteria.index)
-            .ok_or_else(|| attribute_index_invalid(criteria.index))?;
-        let rhs = match &criteria.value {
-            CriteriaValue::Value(v) => v,
-            CriteriaValue::Index(i) => fact.get(*i).ok_or_else(|| attribute_index_invalid(*i))?,
-        };
-        assert_eq!(lhs.kind(), rhs.kind());
-        Ok(match criteria.op {
-            ComparisonOperator::Equal => lhs == rhs,
-            ComparisonOperator::NotEqual => lhs != rhs,
-            ComparisonOperator::LessThan => lhs < rhs,
-            ComparisonOperator::LessThanOrEqual => lhs <= rhs,
-            ComparisonOperator::GreaterThan => lhs > rhs,
-            ComparisonOperator::GreaterThanOrEqual => lhs >= rhs,
-            ComparisonOperator::StringMatch => {
-                let lhs = lhs.as_string().unwrap();
-                let rhs = rhs.as_string().unwrap();
-                let regex: Regex = Regex::new(rhs).unwrap();
-                regex.is_match(lhs)
-            }
-        })
     }
 }
 
@@ -1050,6 +807,38 @@ impl Criteria {
 
     pub fn compare_to(&self) -> &CriteriaValue {
         &self.value
+    }
+
+    pub fn is_match(&self, fact: &[Constant]) -> Result<bool> {
+        let lhs = fact
+            .get(self.index)
+            .ok_or_else(|| attribute_index_invalid(self.index))?;
+        let rhs = match &self.value {
+            CriteriaValue::Value(v) => v,
+            CriteriaValue::Index(i) => fact.get(*i).ok_or_else(|| attribute_index_invalid(*i))?,
+        };
+        if lhs.kind() != rhs.kind() {
+            Err(incompatible_types(
+                lhs.kind().to_string(),
+                rhs.kind().to_string(),
+            ))
+        } else {
+            Ok(match self.op {
+                ComparisonOperator::Equal => lhs == rhs,
+                ComparisonOperator::NotEqual => lhs != rhs,
+                ComparisonOperator::LessThan => lhs < rhs,
+                ComparisonOperator::LessThanOrEqual => lhs <= rhs,
+                ComparisonOperator::GreaterThan => lhs > rhs,
+                ComparisonOperator::GreaterThanOrEqual => lhs >= rhs,
+                ComparisonOperator::StringMatch => {
+                    // TODO: cache regex
+                    let lhs = lhs.as_string().unwrap();
+                    let rhs = rhs.as_string().unwrap();
+                    let regex: Regex = Regex::new(rhs).unwrap();
+                    regex.is_match(lhs)
+                }
+            })
+        }
     }
 }
 
@@ -1087,6 +876,15 @@ impl CriteriaValue {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Modules
+// ------------------------------------------------------------------------------------------------
+
+pub mod ops;
+
+#[cfg(feature = "graphviz")]
+pub mod graph;
+
+// ------------------------------------------------------------------------------------------------
 // Unit Tests
 // ------------------------------------------------------------------------------------------------
 
@@ -1098,7 +896,6 @@ mod tests {
     use std::str::FromStr;
 
     #[test]
-    #[ignore]
     fn test_compile_rule_with_theta_join() {
         let head = Atom::new(
             Predicate::from_str("baz").unwrap().into(),
@@ -1139,10 +936,14 @@ mod tests {
         println!(">>> {}", rule);
         let relational = RelationalOp::compile_rule(&rule).unwrap();
         println!("<<< {}", relational);
+        println!("<<< {:#?}", relational);
+
+        #[cfg(feature = "graphviz")]
         println!("{}", relational.to_graphviz_string().unwrap());
+
         assert_eq!(
             relational.to_string(),
-            "Π[X, Y]((path) ⨝𝞱[A=B] (edge))".to_string()
+            "baz ≔ Π[X, Y]((bar) ⨝  (foo))".to_string()
         );
     }
 }

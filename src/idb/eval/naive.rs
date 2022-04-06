@@ -99,12 +99,12 @@ impl Evaluator for NaiveEvaluator {
 
                     if matches.iter().all(|result| !result.is_empty()) {
                         trace!("Joining all ({}) result views", matches.len());
-                        let results = View::join_all(matches)?;
+                        let results = View::natural_join_all(matches)?;
                         for fact in results.iter() {
-                            let head_predicates = rule.head().collect::<Vec<&Atom>>();
+                            let head_predicates: Vec<&Atom> = rule.head().collect();
                             let head = head_predicates.get(0).unwrap();
                             let relation = new_db.get_mut(head.label()).unwrap();
-                            let new_fact = head
+                            let new_fact: Vec<Constant> = head
                                 .iter()
                                 .map(|term| match term {
                                     Term::Anonymous => unreachable!(),
@@ -114,7 +114,7 @@ impl Evaluator for NaiveEvaluator {
                                     Term::Constant(c) => c,
                                 })
                                 .cloned()
-                                .collect::<Vec<Constant>>();
+                                .collect();
                             relation.add_as_fact(new_fact)?;
                         }
                     }

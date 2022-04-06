@@ -300,7 +300,7 @@ impl RelationOps for View {
 
     fn exists(self, criteria: &Selection) -> Result<bool> {
         for row in self.facts.into_iter() {
-            if criteria.is_all() || criteria.matches(row.values())? {
+            if criteria.is_all() || criteria.is_match(row.values())? {
                 return Ok(true);
             }
         }
@@ -381,7 +381,7 @@ impl View {
     // --------------------------------------------------------------------------------------------
     // --------------------------------------------------------------------------------------------
 
-    pub fn join_all<V: Into<Vec<View>>>(views: V) -> Result<Self> {
+    pub fn natural_join_all<V: Into<Vec<View>>>(views: V) -> Result<Self> {
         let mut views = views.into();
         assert!(!views.is_empty());
         if views.len() == 1 {
@@ -474,7 +474,7 @@ impl FactOps for Row {
     }
 
     fn select(self, criteria: &Selection) -> Result<Option<Row>> {
-        Ok(if criteria.is_all() || criteria.matches(self.values())? {
+        Ok(if criteria.is_all() || criteria.is_match(self.values())? {
             Some(self)
         } else {
             None
