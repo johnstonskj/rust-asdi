@@ -2,19 +2,16 @@
 
 !include options.plantuml
 
-class asdi::features::FeatureSet
+class asdi::features::FeatureSet #white
 hide "asdi::features::FeatureSet" members
 
-class asdi::edb::RelationSet
+class asdi::edb::RelationSet #white
 hide "asdi::edb::RelationSet" members
 
-class asdi::edb::NameReferenceSet
-hide "asdi::edb::NameReferenceSet" members
-
-class asdi::idb::RuleSet
+class asdi::idb::RuleSet #white
 hide "asdi::idb::RuleSet" members
 
-class asdi::idb::query::QuerySet
+class asdi::idb::query::QuerySet #white
 hide "asdi::idb::query::QuerySet" members
 
 namespace asdi {
@@ -29,6 +26,14 @@ namespace asdi {
         extensional() : &RelationSet
         intensional() : &RelationSet
         rules() : &RuleSet
+    }
+
+    class NameReferenceSet<T: AttributeName> {
+        add(&str) : Result<()>
+        add_all(Iterator<&str>) : Result<()>
+        contains(&str) : bool
+        fetch(&str) : Result<AttributeNameRef<T>>
+        canonical(AttributeNameRef<T>) : AttributeNameRef<T>
     }
 
     ProgramCore .up.> asdi::features::FeatureSet
@@ -79,8 +84,8 @@ namespace asdi {
 
     Program ..|> ProgramCore
     Program ..|> MaybePositive
-    Program *--> "predicates" asdi::edb::NameReferenceSet
-    Program *--> "variables" asdi::edb::NameReferenceSet
+    Program *--> "predicates" NameReferenceSet
+    Program *--> "variables" NameReferenceSet
     Program *--> asdi::idb::query::QuerySet
 
 }

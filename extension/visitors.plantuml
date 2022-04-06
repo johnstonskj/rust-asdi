@@ -31,10 +31,10 @@ namespace asdi::visitor {
     interface ProgramVisitor {
         start_program(program: &Program) : Result<()>
         end_program(program: &Program) : Result<()>
-
-        relation_visitor(&self) : Option<&RelationVisitor>
-        rule_visitor(&self) : Option<&RuleVisitor>
-        query_visitor(&self) : Option<&QueryVisitor>
+        == sub-visitors ==
+        relation_visitor(&self) : Option<RelationVisitor>
+        rule_visitor(&self) : Option<RuleVisitor>
+        query_visitor(&self) : Option<QueryVisitor>
     }
     interface ProgramWriter
     interface RelationVisitor {

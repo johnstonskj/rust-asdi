@@ -9,9 +9,11 @@ class asdi::features::FeatureSet
 hide "asdi::features::FeatureSet" members
 
 namespace asdi::parse {
-    class Parsed
+    class Parsed {
+        rest: Option<String>
+    }
 
-    Parsed --> asdi::Program
+    Parsed *-down-> asdi::Program
 
     class parse << module >> {
         parse_file(): Result<Parsed>
@@ -21,6 +23,7 @@ namespace asdi::parse {
     }
 
     parse ..> asdi::features::FeatureSet
+    parse .left.> Parsed
 }
 
 @enduml

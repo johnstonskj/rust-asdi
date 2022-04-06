@@ -2,7 +2,7 @@
 
 !include options.plantuml
 
-class asdi::Collection
+class asdi::Collection<T>
 hide "asdi::Collection" members
 
 class asdi::Program

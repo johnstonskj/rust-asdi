@@ -2,7 +2,7 @@
 
 !include ../model/options.plantuml
 
-interface asdi::Collection #white
+interface asdi::Collection<T> #white
 hide "asdi::Collection" members
 
 class asdi::Program #white

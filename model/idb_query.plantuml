@@ -2,10 +2,10 @@
 
 !include options.plantuml
 
-interface asdi::Collection
+interface asdi::Collection<T>
 hide "asdi::Collection" members
 
-interface asdi::IndexedCollection
+interface asdi::IndexedCollection<T>
 hide "asdi::IndexedCollection" members
 
 interface asdi::idb::Atom
@@ -14,7 +14,7 @@ hide "asdi::idb::Atom" members
 interface asdi::edb::Constant
 hide "asdi::edb::Constant" members
 
-class asdi::edb::Schema
+class asdi::edb::Schema<T: AttributeName>
 hide "asdi::edb::Schema" members
 
 namespace asdi::idb::query {

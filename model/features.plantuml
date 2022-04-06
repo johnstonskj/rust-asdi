@@ -3,8 +3,23 @@
 !include options.plantuml
 
 namespace asdi::features {
-    class Feature
-    class FeatureSet
+    class Feature {
+        label() : String
+        symbol() : String
+    }
+    class FeatureSet {
+        default() : FeatureSet
+        all() : FeatureSet
+        == query ==
+        is_default() : bool
+        supports(&Feature) : bool
+        features() : Iterator<&Feature>
+        == update ==
+        add_support_for(&Feature) : Self
+        remove_support_for(&Feature) : Self
+        == descriptive ==
+        language() : String
+    }
 
     FeatureSet o-> Feature
 

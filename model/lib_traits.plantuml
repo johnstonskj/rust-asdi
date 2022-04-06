@@ -1,0 +1,47 @@
+@startuml
+
+!include options.plantuml
+
+namespace asdi {
+
+    interface AttributeName {
+        is_valid(s: &str) : bool
+        type_name() : &str
+    }
+    interface Collection<T> {
+        is_empty() : bool
+        len() : usize
+        iter() : Iterator<&T>
+        contains(v: &T) : bool
+    }
+    interface IndexedCollection<K,V> {
+        get(index: &K) : Option<V>
+        contains_index(index: &K) : bool
+    }
+    interface Labeled {
+        label() : Predicate
+        label_ref() : PredicateRef
+    }
+    interface MaybeAnonymous {
+        anonymous() : Self
+        is_anonymous() : bool
+    }
+    interface MaybePositive {
+        is_positive() : bool
+        is_negative() : bool
+    }
+    interface ProgramCore {
+        features() : &FeatureSet
+        extensional() : &RelationSet
+        intensional() : &RelationSet
+        rules() : &RuleSet
+    }
+
+    IndexedCollection --|> Collection
+
+
+    class AttributeNameRef<T: AttributeName> << (T,#ADD1B2) type>>
+    AttributeNameRef o-down-> AttributeName: <<rc>>
+}
+
+@enduml
