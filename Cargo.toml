@@ -25,7 +25,7 @@ io_text = ["tabular"]
 command_line = ["structopt"]
 
 [dependencies]
-ordered-float = "2.10"
+ordered-float = "3.0"
 paste = "1.0.7"
 regex = "1.5.5"
 tracing = "0.1.32"
