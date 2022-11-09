@@ -1,20 +1,20 @@
-# Contributing
+# How to contribute
 
-You can contribute to [ASDI](https://github.com/johnstonskj/rust-asdi) in a number of ways,
+I'm really glad you're reading this, because we need volunteer developers to help this project continue to grow and improve.
 
-1. file [bugs](https://github.com/johnstonskj/rust-asdi/issues/new?assignees=&labels=bug&template=bug_report.md&title=) and
-   [enhancement requests](https://github.com/johnstonskj/rust-asdi/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=)
-2. review the [documentation](https://docs.rs/asdi) and the [book](https://simonkjohnston.life/rust-asdi/) and let us
-   know if you find are issues there
-3. Fix or Add something and send us a pull request.
+1. file [bugs](../../issues/new?assignees=&labels=bug&template=bug_report.md) and
+   [enhancement requests](../../issues/new?assignees=&labels=enhancement&template=feature_request.md)
+2. review the project documentation know if you find are issues, or missing content, there
+3. Fix or Add something and send us a pull request;  you may like to pick up one of the issues marked [help wanted](../../labels/help%20wanted) or [good first issue](../../labels/good%20first%20issue) as an introduction. Alternatively, [documentation](../../labels/documentation) issues can be a great way to understand the project and help improve the developer experience.
 
-We love pull requests from everyone. By participating in this project, you
-agree to abide by our [code of conduct](https://github.com/johnstonskj/rust-asdi/CODE_OF_CONDUCT.md), and
-[License](https://github.com/johnstonskj/rust-asdi/LICENSE).
+## Submitting changes
+
+
+We love pull requests from everyone. By participating in this project, you agree to abide by our [code of conduct](./CODE_OF_CONDUCT.md), and [License](./LICENSE).
 
 Fork, then clone the repo:
 
-    git clone git@github.com:johnstonskj/rust-asdi.git
+    git clone git@github.com:johnstonskj/{{repository-name}}.git
 
 Ensure you have a good Rust install, usually managed by [Rustup](https://rustup.rs/).
 You can ensure the latest tools with the following:
@@ -23,7 +23,7 @@ You can ensure the latest tools with the following:
 
 Make sure the tests pass:
 
-    cargo test --package asdi --no-fail-fast --all-features -- --exact
+    cargo test --package {{package-name}} --no-fail-fast --all-features -- --exact
 
 Make your change. Add tests, and documentation, for your change. Ensure not only that tests pass, but the following all run successfully.
 
@@ -40,7 +40,7 @@ If you have made any changes to `Cargo.toml`, also check:
     cargo outdated
     cargo audit
 
-Push to your fork and [submit a pull request](https://github.com/johnstonskj/rust-asdi/compare/).
+Push to your fork and [submit a pull request](../../compare/) using our [template](./pull_request_template.md).
 
 At this point you're waiting on us. We like to at least comment on pull requests
 within three business days (and, typically, one business day). We may suggest
@@ -48,6 +48,16 @@ some changes or improvements or alternatives.
 
 Some things that will increase the chance that your pull request is accepted:
 
-* Write tests.
+* Write unit tests. 
 * Write API documentation.
 * Write a [good commit message](https://cbea.ms/git-commit/https://cbea.ms/git-commit/).
+
+## Coding conventions
+
+The primary tool for coding conventions is rustfmt, and specifically `cargo fmt` is a part of the build process and will cause Actions to fail. 
+
+DO NOT create or update any existing `rustfmt.toml` file to change the default formatting rules.
+
+DO NOT alter any `warn` or `deny` library attributes. 
+
+DO NOT add any `feature` attributes that would prohibit building on the stable channel. In some cases new crate-level features can be used to introduce an unstable feature dependency but these MUST be clearly documented and optional.

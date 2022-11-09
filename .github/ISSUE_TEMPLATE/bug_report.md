@@ -7,23 +7,23 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+## Describe the bug
+
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Minimal Working Example (MWE) that demonstrates the issue.
-
-**Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## Minimal Reproducible Examples (MRE)
+
+Please try to provide information which will help us to fix the issue faster. MREs with few dependencies are especially lovely <3.
+
+If applicable, add logs/screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
- - version of crate you depend upon (in your `Cargo.toml`)
- - output of command `uname -a` (or Windows equivalent)
- - output of command `cargo --version`
- - output of command `rustc --version`
+ - Platform: [e.g.`uname -a`]
+ - Rust [e.g.`rustic -vV`]
+ - Cargo [e.g.`cargo -vV`]
 
-**Additional context**
-Add any other context about the problem here.
+## Additional context
+
+Add any other context about the problem here. For example, environment variables like `CARGO`, `RUSTUP_HOME` or `CARGO_HOME`.
