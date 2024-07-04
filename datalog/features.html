@@ -1,40 +1,42 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>Language Features - Another Simplistic Datalog Implementation (in Rust)</title>
+
+
         <!-- Custom HTML head -->
-<link   rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"
-        integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs"
-        crossorigin="anonymous">
-<script defer
-        src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
-        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
-        crossorigin="anonymous"></script>
-<script defer
-        src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
-        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
-        crossorigin="anonymous"></script>
+        <link   rel="stylesheet"
+                href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"
+                integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs"
+                crossorigin="anonymous">
+        <script defer
+                src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+                integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+                crossorigin="anonymous"></script>
+        <script defer
+                src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+                integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+                crossorigin="anonymous"></script>
+        
+        <script defer>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+        </script>
+        
 
-<script defer>
-document.addEventListener("DOMContentLoaded", function() {
-    renderMathInElement(document.body, {
-        delimiters: [
-            {left: "$$", right: "$$", display: true},
-            {left: "\\(", right: "\\)", display: false},
-            {left: "$", right: "$", display: false},
-            {left: "\\[", right: "\\]", display: true}
-        ]
-    });
-});
-</script>
-
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="../favicon.svg">
         <link rel="shortcut icon" href="../favicon.png">
@@ -42,9 +44,11 @@ document.addEventListener("DOMContentLoaded", function() {
         <link rel="stylesheet" href="../css/general.css">
         <link rel="stylesheet" href="../css/chrome.css">
         <link rel="stylesheet" href="../css/print.css" media="print">
+
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
         <link rel="stylesheet" href="../fonts/fonts.css">
+
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css">
         <link rel="stylesheet" href="../tomorrow-night.css">
@@ -52,16 +56,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
         <!-- Custom theme stylesheets -->
         <link rel="stylesheet" href="../asdi.css">
+
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
         <!-- Provide site root to javascript -->
-        <script type="text/javascript">
+        <script>
             var path_to_root = "../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script type="text/javascript">
+        <script>
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -77,50 +83,81 @@ document.addEventListener("DOMContentLoaded", function() {
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script type="text/javascript">
+        <script>
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
 
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script type="text/javascript">
-            var html = document.querySelector('html');
-            var sidebar = 'hidden';
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../datalog/index.html"><strong aria-hidden="true">2.</strong> Datalog</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datalog/abstract.html"><strong aria-hidden="true">2.1.</strong> Abstract Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/concrete.html"><strong aria-hidden="true">2.2.</strong> Concrete Syntax</a></li><li class="chapter-item expanded "><a href="../datalog/features.html" class="active"><strong aria-hidden="true">2.3.</strong> Language Features</a></li></ol></li><li class="chapter-item expanded "><a href="../model/index.html"><strong aria-hidden="true">3.</strong> Model API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/programs.html"><strong aria-hidden="true">3.1.</strong> Programs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/program_features.html"><strong aria-hidden="true">3.1.1.</strong> Features</a></li><li class="chapter-item expanded "><a href="../model/program_parser.html"><strong aria-hidden="true">3.1.2.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../model/program_visitor.html"><strong aria-hidden="true">3.1.3.</strong> Visitor</a></li></ol></li><li class="chapter-item expanded "><a href="../model/relations.html"><strong aria-hidden="true">3.2.</strong> Relations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/relation_io.html"><strong aria-hidden="true">3.2.1.</strong> Input/Output</a></li></ol></li><li class="chapter-item expanded "><a href="../model/rules.html"><strong aria-hidden="true">3.3.</strong> Rules</a></li><li class="chapter-item expanded "><a href="../model/eval.html"><strong aria-hidden="true">3.4.</strong> Evaluation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/eval_strata.html"><strong aria-hidden="true">3.4.1.</strong> Stratification</a></li></ol></li><li class="chapter-item expanded "><a href="../model/queries.html"><strong aria-hidden="true">3.5.</strong> Queries & Views</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../model/query_relational.html"><strong aria-hidden="true">3.5.1.</strong> Relational Algebra</a></li></ol></li><li class="chapter-item expanded "><a href="../model/errors.html"><strong aria-hidden="true">3.6.</strong> Error Handling</a></li></ol></li><li class="chapter-item expanded "><a href="../extension/index.html"><strong aria-hidden="true">4.</strong> Model Extension</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../extension/i_o.html"><strong aria-hidden="true">4.1.</strong> RelationSet I/O</a></li><li class="chapter-item expanded "><a href="../extension/evaluator.html"><strong aria-hidden="true">4.2.</strong> Writing an Evaluator</a></li><li class="chapter-item expanded "><a href="../extension/formatting.html"><strong aria-hidden="true">4.3.</strong> Writing a Formatter</a></li><li class="chapter-item expanded "><a href="../extension/contributing.html"><strong aria-hidden="true">4.4.</strong> Contributing</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/abstract_graph.html"><strong aria-hidden="true">5.</strong> Appendix: Abstract Graphical View</a></li><li class="chapter-item expanded "><a href="../reference/datalog_ebnf.html"><strong aria-hidden="true">6.</strong> Appendix: Datalog EBNF</a></li><li class="chapter-item expanded "><a href="../reference/relational.html"><strong aria-hidden="true">7.</strong> Appendix: Relational Algebra Mapping</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../reference/relational_ebnf.html"><strong aria-hidden="true">7.1.</strong> Relational Algebra EBNF</a></li></ol></li><li class="chapter-item expanded "><a href="../reference/logic.html"><strong aria-hidden="true">8.</strong> Appendix: Horn Clause Mapping</a></li><li class="chapter-item expanded "><a href="../reference/references.html"><strong aria-hidden="true">9.</strong> Appendix: References</a></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
 
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
-                <div id="menu-bar" class="menu-bar sticky bordered">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
@@ -140,6 +177,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <a href="https://github.com/johnstonskj/rust-asdi" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
+
                     </div>
                 </div>
 
@@ -153,8 +191,9 @@ document.addEventListener("DOMContentLoaded", function() {
                         </ul>
                     </div>
                 </div>
+
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script type="text/javascript">
+                <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -178,7 +217,7 @@ language is often described as $\text{\small{Datalog}}^{\lnot}$.</p>
 alive(X) :- person(X) AND NOT dead(X).
 alive(X) :- person(X) ∧ ￢dead(X).
 </code></pre>
-<p>The text representation allows for <code>&quot;!&quot;</code>, <code>&quot;￢&quot;</code>, and <code>&quot;NOT&quot;</code> to be used to denote negation.</p>
+<p>The text representation allows for <code>"!"</code>, <code>"￢"</code>, and <code>"NOT"</code> to be used to denote negation.</p>
 <h2 id="constraints"><a class="header" href="#constraints">Constraints</a></h2>
 <p>The feature <code>constraints</code> enables the specification of rules that have no head, which in turn
 specifies a rule that <em>may never</em> be true. This language is described herein as
@@ -187,7 +226,7 @@ $\text{\small{Datalog}}^{\bot}$.</p>
 ⊥ :- dead(X) AND alive(X).
 :- dead(X) AND alive(X).
 </code></pre>
-<p>The text allows for either an entirely missing head, or the value <code>&quot;⊥&quot;</code> as the head to denote
+<p>The text allows for either an entirely missing head, or the value <code>"⊥"</code> as the head to denote
 a constraint. The latter signifies that the rule implies falsity (or absurdity).</p>
 <h2 id="comparisons"><a class="header" href="#comparisons">Comparisons</a></h2>
 <p>The feature <code>comparisons</code> enables the inclusion of literal terms that use standard comparison
@@ -195,9 +234,9 @@ operators. This language is described herein as $\text{\small{Datalog}}^{\theta}
 <pre><code class="language-datalog">.features(comparisons).
 old(X) :- age(X, Y) ∧ Y &gt; 75.
 </code></pre>
-<p>The text representation supports the operators equality (<code>&quot;=&quot;</code>), inequality (<code>&quot;!=&quot;</code>, <code>&quot;/=&quot;</code>,
-or <code>&quot;≠&quot;</code>), less than (<code>&quot;&lt;&quot;</code>), less than or equal-to (<code>&quot;&lt;=&quot;</code>, or <code>&quot;≤&quot;</code>), greater than (<code>&quot;&gt;&quot;</code>), and
-greater than or equal-to (<code>&quot;&gt;=&quot;</code>, or <code>&quot;≥&quot;</code>).</p>
+<p>The text representation supports the operators equality (<code>"="</code>), inequality (<code>"!="</code>, <code>"/="</code>,
+or <code>"≠"</code>), less than (<code>"&lt;"</code>), less than or equal-to (<code>"&lt;="</code>, or <code>"≤"</code>), greater than (<code>"&gt;"</code>), and
+greater than or equal-to (<code>"&gt;="</code>, or <code>"≥"</code>).</p>
 <h2 id="disjunction"><a class="header" href="#disjunction">Disjunction</a></h2>
 <p>The feature <code>disjunction</code> enables the negation of individual literals in the body of a rule. This
 language is often described as $\text{\small{Datalog}}^{\lor}$.</p>
@@ -205,7 +244,7 @@ language is often described as $\text{\small{Datalog}}^{\lor}$.</p>
 mother(X, Y) OR father(X, Y) :- parent(X, Y).
 mother(X, Y) ∨ father(X, Y) :- parent(X, Y).
 </code></pre>
-<p>The text representation allows for <code>&quot;;&quot;</code>, “|”<code>, </code>“∨”<code>, and </code>“OR”` to be used to denote disjunction.</p>
+<p>The text representation allows for <code>";"</code>, “|”<code>, </code>“∨”<code>, and </code>“OR”` to be used to denote disjunction.</p>
 <h2 id="example"><a class="header" href="#example">Example</a></h2>
 <p>The following demonstrates the text representation support for enabling features.</p>
 <pre><code class="language-datalog">.features(negation, comparisons, disjunction).
@@ -223,9 +262,8 @@ let features = FeatureSet::from(vec![FEATURE_NEGATION, FEATURE_DISJUNCTION]);
 assert!(features.supports(&amp;FEATURE_NEGATION));
 assert!(!features.supports(&amp;FEATURE_COMPARISONS));
 
-assert_eq!(features.to_string(), &quot;.feature(negation, disjunction).&quot;);
-<span class="boring">}
-</span></code></pre></pre>
+assert_eq!(features.to_string(), ".feature(negation, disjunction).");
+<span class="boring">}</span></code></pre></pre>
 
                     </main>
 
@@ -234,9 +272,11 @@ assert_eq!(features.to_string(), &quot;.feature(negation, disjunction).&quot;);
                             <a rel="prev" href="../datalog/concrete.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                            <a rel="next" href="../model/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+
+                            <a rel="next prefetch" href="../model/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
+
                         <div style="clear: both"></div>
                     </nav>
                 </div>
@@ -246,26 +286,36 @@ assert_eq!(features.to_string(), &quot;.feature(negation, disjunction).&quot;);
                     <a rel="prev" href="../datalog/concrete.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                    <a rel="next" href="../model/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+
+                    <a rel="next prefetch" href="../model/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <script type="text/javascript">
+
+
+
+        <script>
             window.playground_copyable = true;
         </script>
-        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script type="text/javascript" src="../datalog.js"></script>
-        <script type="text/javascript" src="../dot.js"></script>
-        <script type="text/javascript" src="../asdi.js"></script>
+        <script src="../datalog.js"></script>
+        <script src="../dot.js"></script>
+        <script src="../asdi.js"></script>
+
+
+    </div>
     </body>
 </html>
