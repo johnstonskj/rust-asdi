@@ -696,16 +696,9 @@ impl Program {
             self.load_extensional_data()?;
         }
         let new_idb = evaluator.inference(self)?;
-        println!("{:?}", new_idb);
         self.intensional_mut().merge_from(new_idb)?;
         self.store_intensional_data()?;
         let results = self.eval_queries()?;
-        for (query, view) in results {
-            println!("{:?}", query);
-            if let Some(view) = view {
-                println!("{}", view);
-            }
-        }
         Ok(())
     }
 
