@@ -128,6 +128,12 @@ pub enum Error {
 
     /// Anonymous variables not allowed in the current context.
     AnonymousVariableNotAllowed,
+
+    /// An integrity constraint (`:- body.`) was violated by the derived
+    /// model: there exists a binding of the body that holds in the final
+    /// EDB ∪ IDB, which by definition the program asserts cannot happen.
+    /// Carries a rendering of the offending constraint for diagnostics.
+    ConstraintViolated { constraint: String },
 }
 
 ///
@@ -322,6 +328,14 @@ pub fn incompatible_types<S: Into<String>>(lhs_type: S, rhs_type: S) -> Error {
     }
 }
 
+/// An integrity constraint (`:- body.`) was violated by the derived model.
+#[inline]
+pub fn constraint_violated<S: Into<String>>(constraint: S) -> Error {
+    Error::ConstraintViolated {
+        constraint: constraint.into(),
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
 // Implementations
 // ------------------------------------------------------------------------------------------------
@@ -428,6 +442,7 @@ impl Display for Error {
                 Error::ComparisonIsAlwaysTrue { comparison } => format!("A comparison operator, or selection criteria, will always be true/⊤ (`{}`).", comparison),
                 Error::ComparisonIsAlwaysFalse { comparison } => format!("A comparison operator, or selection criteria, will always be false/⊥ (`{}`).", comparison),
                 Error::AnonymousVariableNotAllowed => "Anonymous variables not allowed in the current context.".to_string(),
+                Error::ConstraintViolated { constraint } => format!("Integrity constraint violated: the body of `{}` holds in the derived model.", constraint),
                 Error::IncompatibleTypes { lhs_type, rhs_type } => format!("A requested operation cannot be performed as the values have incompatible types `{}`, `{}`.", lhs_type, rhs_type),
             }
         )

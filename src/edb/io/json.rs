@@ -82,7 +82,6 @@ impl Reader for Json {
         for fact in facts {
             let values: &Vec<Value> = fact.as_array().unwrap();
             assert_eq!(values.len(), arity);
-            println!("{:?}", values);
             let constants: Result<Vec<Constant>> = values
                 .iter()
                 .enumerate()

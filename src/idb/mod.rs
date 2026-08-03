@@ -58,10 +58,9 @@ ancestor(X, Y) ⟵ parent(X, Z), ancestor(Z, Y).
 
 use crate::edb::{AttributeIndex, Constant, Predicate, Relation};
 use crate::error::{
-    anonymous_variable_not_allowed, comparison_is_always_false, comparison_is_always_true,
-    fact_does_not_correspond_to_schema, head_variables_missing_in_body, incompatible_types,
-    invalid_head_atom_count, invalid_value, negative_variables_not_also_positive, Error, Result,
-    SourceLocation,
+    anonymous_variable_not_allowed, fact_does_not_correspond_to_schema,
+    head_variables_missing_in_body, incompatible_types, invalid_head_atom_count, invalid_value,
+    negative_variables_not_also_positive, Error, Result, SourceLocation,
 };
 use crate::features::{FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
 use crate::syntax::{
@@ -85,6 +84,7 @@ use std::fmt::{Display, Formatter};
 use std::hash::Hash;
 use std::rc::Rc;
 use std::str::FromStr;
+use tracing::warn;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -346,7 +346,7 @@ impl Display for Rule {
             if self.head.is_empty() {
                 FALSE_UNICODE_SYMBOL.to_string()
             } else if self.head.len() == 1 {
-                self.head.get(0).unwrap().to_string()
+                self.head.first().unwrap().to_string()
             } else {
                 self.head
                     .iter()
@@ -355,7 +355,10 @@ impl Display for Rule {
                     .join(&format!(" {} ", DISJUNCTION_UNICODE_SYMBOL))
             },
             if self.body.is_empty() {
-                unreachable!("Rule body is empty!")
+                // A rule with an empty body is structurally invalid (see
+                // safety_check), but Display must never panic. Emit a
+                // syntactically-recognizable placeholder instead.
+                format!(" {} <empty>", IMPLICATION_UNICODE_ARROW)
             } else {
                 format!(
                     " {} {}",
@@ -455,11 +458,11 @@ impl Rule {
     // --------------------------------------------------------------------------------------------
 
     pub fn distinguished_terms(&self) -> HashSet<&Term> {
-        self.head().map(|atom| atom.iter()).flatten().collect()
+        self.head().flat_map(|atom| atom.iter()).collect()
     }
 
     pub fn distinguished_terms_in_order(&self) -> Vec<&Term> {
-        let terms: Vec<&Term> = self.head().map(|atom| atom.iter()).flatten().collect();
+        let terms: Vec<&Term> = self.head().flat_map(|atom| atom.iter()).collect();
         dedup_in_place(terms)
     }
 
@@ -474,8 +477,7 @@ impl Rule {
     pub fn terms(&self) -> HashSet<&Term> {
         self.body
             .iter()
-            .map(|lit| lit.terms())
-            .flatten()
+            .flat_map(|lit| lit.terms())
             .collect::<HashSet<&Term>>()
             .union(&self.distinguished_terms())
             .copied()
@@ -486,8 +488,7 @@ impl Rule {
         self.body
             .iter()
             .filter(|lit| lit.is_positive())
-            .map(|lit| lit.terms())
-            .flatten()
+            .flat_map(|lit| lit.terms())
             .collect()
     }
 
@@ -495,22 +496,20 @@ impl Rule {
         self.body
             .iter()
             .filter(|lit| !lit.is_positive())
-            .map(|lit| lit.terms())
-            .flatten()
+            .flat_map(|lit| lit.terms())
             .collect()
     }
 
     // --------------------------------------------------------------------------------------------
 
     pub fn head_variables(&self) -> HashSet<&VariableRef> {
-        self.head().map(|atom| atom.variables()).flatten().collect()
+        self.head().flat_map(|atom| atom.variables()).collect()
     }
 
     pub fn variables(&self) -> HashSet<&VariableRef> {
         self.body
             .iter()
-            .map(|lit| lit.variables())
-            .flatten()
+            .flat_map(|lit| lit.variables())
             .collect()
     }
 
@@ -518,8 +517,7 @@ impl Rule {
         self.body
             .iter()
             .filter(|lit| lit.is_positive())
-            .map(|lit| lit.variables())
-            .flatten()
+            .flat_map(|lit| lit.variables())
             .collect()
     }
 
@@ -527,8 +525,7 @@ impl Rule {
         self.body
             .iter()
             .filter(|lit| !lit.is_positive())
-            .map(|lit| lit.variables())
-            .flatten()
+            .flat_map(|lit| lit.variables())
             .collect()
     }
 
@@ -542,7 +539,7 @@ impl Rule {
         let all_variables = self.variables();
         self.literals().any(|lit| {
             let lit_variables: HashSet<&VariableRef> =
-                HashSet::from_iter(lit.variables().into_iter());
+                HashSet::from_iter(lit.variables());
             lit_variables == all_variables
         })
     }
@@ -560,7 +557,7 @@ impl Rule {
             .collect();
         self.literals().any(|lit| {
             let lit_variables: HashSet<&VariableRef> =
-                HashSet::from_iter(lit.variables().into_iter());
+                HashSet::from_iter(lit.variables());
             lit_variables == frontier_variables
         })
     }
@@ -598,12 +595,11 @@ impl Rule {
         };
         let head_len = self.head.len();
         if head_len < min || head_len > max {
-            println!("HC: {:#?}", self);
             return Err(invalid_head_atom_count(
                 head_len,
                 min,
                 max,
-                match self.head.get(0) {
+                match self.head.first() {
                     None => None,
                     Some(atom) => atom.source_location().cloned(),
                 },
@@ -615,7 +611,6 @@ impl Rule {
         for atom in self.head() {
             let missing: Vec<&Term> = atom
                 .iter()
-                .into_iter()
                 .filter(|term| {
                     if term.is_variable() {
                         !body_positive_terms.contains(term)
@@ -670,15 +665,13 @@ impl Display for Atom {
             "{}{}{}{}",
             self.label,
             CHAR_LEFT_PAREN,
-            if self.terms.is_empty() {
-                unreachable!("Atom terms are empty")
-            } else {
-                self.terms
-                    .iter()
-                    .map(Term::to_string)
-                    .collect::<Vec<String>>()
-                    .join(", ")
-            },
+            // A 0-arity atom is structurally invalid (see Atom::new), but
+            // Display must never panic — fall back to an empty argument list.
+            self.terms
+                .iter()
+                .map(Term::to_string)
+                .collect::<Vec<String>>()
+                .join(", "),
             CHAR_RIGHT_PAREN,
         )
     }
@@ -992,55 +985,78 @@ impl Comparison {
         }
     }
 
+    ///
+    /// Validate the comparison.
+    ///
+    /// Returns `Err` for *hard* errors that the spec catalogues as `ERR_*`:
+    /// anonymous variables in a comparison (illegal) and constants of
+    /// incompatible types (illegal).
+    ///
+    /// **Soft** diagnostics — the `WARN_ARITHMETIC_LITERAL_IS_ALWAYS_TRUE`
+    /// and `WARN_ARITHMETIC_LITERAL_IS_ALWAYS_FALSE` cases — are reported
+    /// via `tracing::warn!` and produce `Ok(())`. The spec is explicit that
+    /// these are warnings, not errors (`§ Diagnostic Catalogue`); a
+    /// machine-generated rule like `:- X = X, foo(X).` should not be a hard
+    /// failure.
+    ///
     pub fn sanity_check(&self) -> Result<()> {
-        match (
-            &self.lhs,
-            self.operator == ComparisonOperator::Equal,
-            &self.rhs,
-        ) {
-            (Term::Anonymous, _, _) | (_, _, Term::Anonymous) => {
-                Err(anonymous_variable_not_allowed())
+        let is_equal = self.operator == ComparisonOperator::Equal;
+        match (&self.lhs, &self.rhs) {
+            // -- Hard errors ---------------------------------------------
+            (Term::Anonymous, _) | (_, Term::Anonymous) => {
+                return Err(anonymous_variable_not_allowed());
             }
-            (Term::Constant(lhs), true, Term::Constant(rhs)) => {
-                if lhs.kind() != rhs.kind() {
-                    Err(incompatible_types(
-                        lhs.kind().to_string(),
-                        rhs.kind().to_string(),
-                    ))
-                } else if lhs == rhs {
-                    Err(comparison_is_always_true(self.to_string()))
+            (Term::Constant(lhs), Term::Constant(rhs)) if lhs.kind() != rhs.kind() => {
+                return Err(incompatible_types(
+                    lhs.kind().to_string(),
+                    rhs.kind().to_string(),
+                ));
+            }
+
+            // -- Tautologies / contradictions on two constants -----------
+            (Term::Constant(lhs), Term::Constant(rhs)) => {
+                let lhs_eq_rhs = lhs == rhs;
+                // `=`  : true when equal,  false otherwise.
+                // `!=` : false when equal, true otherwise.
+                // Any other operator (`<`, `>=`, ...) on equal constants is
+                // statically decidable too, but we'd need a full evaluator
+                // here; the spec only requires WARN for the *trivial*
+                // patterns, which we catch with the equality test.
+                if lhs_eq_rhs == is_equal {
+                    self.warn_always_true();
                 } else {
-                    Err(comparison_is_always_false(self.to_string()))
+                    self.warn_always_false();
                 }
             }
-            (Term::Constant(lhs), false, Term::Constant(rhs)) => {
-                if lhs.kind() != rhs.kind() {
-                    Err(incompatible_types(
-                        lhs.kind().to_string(),
-                        rhs.kind().to_string(),
-                    ))
-                } else if lhs == rhs {
-                    Err(comparison_is_always_false(self.to_string()))
+
+            // -- Tautologies on two variables (X = X, X != X, ...) -------
+            (Term::Variable(lhs), Term::Variable(rhs)) if lhs == rhs => {
+                if is_equal {
+                    self.warn_always_true();
                 } else {
-                    Err(comparison_is_always_true(self.to_string()))
+                    self.warn_always_false();
                 }
             }
-            (Term::Variable(lhs), true, Term::Variable(rhs)) => {
-                if lhs == rhs {
-                    Err(comparison_is_always_true(self.to_string()))
-                } else {
-                    Ok(())
-                }
-            }
-            (Term::Variable(lhs), false, Term::Variable(rhs)) => {
-                if lhs == rhs {
-                    Err(comparison_is_always_false(self.to_string()))
-                } else {
-                    Ok(())
-                }
-            }
-            _ => Ok(()),
+
+            _ => {}
         }
+        Ok(())
+    }
+
+    fn warn_always_true(&self) {
+        warn!(
+            target: "asdi::warning",
+            "WARN_ARITHMETIC_LITERAL_IS_ALWAYS_TRUE: {}",
+            self
+        );
+    }
+
+    fn warn_always_false(&self) {
+        warn!(
+            target: "asdi::warning",
+            "WARN_ARITHMETIC_LITERAL_IS_ALWAYS_FALSE: {}",
+            self
+        );
     }
 
     pub fn eq<L: Into<Term>, R: Into<Term>>(left: L, right: R) -> Result<Self> {

@@ -8,7 +8,7 @@ types used to return query results.
 
 use self::relational::{FactOps, Projection, RelationOps, Selection};
 use crate::edb::{Attribute, AttributeIndex, AttributeKind, Constant, Fact, Schema};
-use crate::error::Result;
+use crate::error::{invalid_value, Result};
 use crate::idb::{Atom, Term, Variable};
 use crate::syntax::{CHAR_PERIOD, QUERY_ASCII_PREFIX};
 use crate::{Collection, IndexedCollection, PredicateRef};
@@ -200,33 +200,111 @@ impl Collection<Row> for View {
     }
 }
 
+/// Schema-compatibility precondition shared by `union`, `intersection`,
+/// and `difference`. Centralised so the error message stays uniform —
+/// previously `difference` panicked via `assert_eq!` and the others
+/// `todo!()`'d, neither of which is friendly to library users.
+fn require_same_schema(a: &View, b: &View, op: &'static str) -> Result<()> {
+    if a.schema == b.schema {
+        Ok(())
+    } else {
+        Err(invalid_value(
+            format!("union-compatible schemas for {}", op),
+            format!("{:?} vs {:?}", a.schema, b.schema),
+        ))
+    }
+}
+
 impl RelationOps for View {
-    fn union(self, _other: Self) -> Result<View>
+    /// Set union of two union-compatible views (identical schemas).
+    /// The result preserves `self`'s schema. Row order is
+    /// implementation-defined (we materialise through a `HashSet`).
+    fn union(self, other: Self) -> Result<View>
     where
         Self: Sized,
     {
-        todo!()
+        require_same_schema(&self, &other, "union")?;
+        // `new_with_facts` builds a `HashSet`, so duplicates collapse.
+        let merged: Vec<Row> = self.facts.into_iter().chain(other.facts).collect();
+        Ok(Self::new_with_facts(self.schema, merged))
     }
 
-    fn intersection(self, _other: Self) -> Result<View>
+    /// Set intersection of two union-compatible views.
+    fn intersection(self, other: Self) -> Result<View>
     where
         Self: Sized,
     {
-        todo!()
+        require_same_schema(&self, &other, "intersection")?;
+        // Drive iteration off the smaller side so we do O(min(|a|,|b|))
+        // membership checks against the larger HashSet.
+        let (smaller, larger) = if self.facts.len() <= other.facts.len() {
+            (self.facts, other.facts)
+        } else {
+            (other.facts, self.facts)
+        };
+        let kept: Vec<Row> = smaller
+            .into_iter()
+            .filter(|row| larger.contains(row))
+            .collect();
+        Ok(Self::new_with_facts(self.schema, kept))
     }
 
-    fn difference(self, _other: Self) -> Result<View>
+    fn difference(self, other: Self) -> Result<View>
     where
         Self: Sized,
     {
-        todo!()
+        // Set difference is only defined for union-compatible relations:
+        // schemas must be identical (same labels in the same order,
+        // same kinds).
+        require_same_schema(&self, &other, "difference")?;
+        let kept: Vec<Row> = self
+            .facts
+            .into_iter()
+            .filter(|row| !other.facts.contains(row))
+            .collect();
+        Ok(Self::new_with_facts(self.schema, kept))
     }
 
-    fn cartesian_product(self, _other: Self) -> Result<View>
+    /// Cartesian product. The two input schemas must be *disjoint* by
+    /// label — otherwise the result wouldn't be a valid relation
+    /// (duplicate column names). The result schema is `self`'s labels
+    /// followed by `other`'s; result rows are pairwise concatenations.
+    fn cartesian_product(self, other: Self) -> Result<View>
     where
         Self: Sized,
     {
-        todo!()
+        // Per relational algebra: schemas must share no labels. (If
+        // they do, the caller wanted `natural_join`.)
+        let overlap = self.schema.label_intersection(&other.schema);
+        if !overlap.is_empty() {
+            let names: Vec<String> = overlap
+                .iter()
+                .map(|(label, _, _)| label.to_string())
+                .collect();
+            return Err(invalid_value(
+                "disjoint schemas for cartesian product",
+                &format!("schemas share labels: [{}]", names.join(", ")),
+            ));
+        }
+
+        // Build the joint schema. `label_union` does the right thing
+        // when schemas are disjoint — it just concatenates.
+        let labels = self.schema.label_union(&other.schema);
+        let joint_schema: Schema<Variable> = labels
+            .into_iter()
+            .map(Attribute::<Variable>::from)
+            .collect::<Vec<_>>()
+            .into();
+
+        let mut rows: Vec<Row> = Vec::with_capacity(self.facts.len() * other.facts.len());
+        for left in &self.facts {
+            for right in &other.facts {
+                let mut values: Vec<Constant> = left.values().clone();
+                values.extend(right.values().iter().cloned());
+                rows.push(Row::from(values));
+            }
+        }
+        Ok(Self::new_with_facts(joint_schema, rows))
     }
 
     fn select(self, selection: &Selection) -> Result<View> {
@@ -356,9 +434,8 @@ impl View {
             AttributeIndex::Label(n) => self.schema.label_to_index(n),
             AttributeIndex::Index(i) => Some(*i),
         };
-        index.map(|index| {
+        index.inspect(|&index| {
             assert!(index < self.schema.len());
-            index
         })
     }
 
@@ -399,6 +476,80 @@ impl View {
     fn filter(&self, values: Vec<(Constant, usize)>) -> impl Iterator<Item = &Row> {
         self.iter()
             .filter(move |row| values.iter().all(|(v, i)| row.get(i).unwrap() == v))
+    }
+
+    ///
+    /// Anti-join: keep every row of `self` for which **no** row of `other`
+    /// agrees on the labels they have in common.
+    ///
+    /// This is the relational primitive used to evaluate a negated literal in
+    /// a rule body. By the safety condition enforced at rule construction
+    /// (every variable of a negated literal must also occur in some positive
+    /// literal), `other`'s labelled columns are always a subset of `self`'s
+    /// labelled columns.
+    ///
+    /// The result keeps `self`'s schema unchanged.
+    ///
+    pub fn anti_join(self, other: Self) -> Result<Self> {
+        // Map each label in `other` to (index-in-self, index-in-other). If a
+        // label is missing from `self`, the corresponding negative literal
+        // mentions a variable that wasn't bound positively — a safety
+        // violation that should have been caught earlier.
+        let shared: Vec<(usize, usize)> = other
+            .schema()
+            .labels()
+            .map(|label| {
+                let self_i = self.schema().label_to_index(label).unwrap_or_else(|| {
+                    panic!(
+                        "anti_join: label {:?} from negated literal is not bound by any \
+                         positive literal — safety check should have rejected this rule",
+                        label
+                    )
+                });
+                // unwrap: the label came from other.schema(), so it must be there.
+                let other_i = other.schema().label_to_index(label).unwrap();
+                (self_i, other_i)
+            })
+            .collect();
+
+        // Degenerate case: if `other` has no labelled columns at all, the
+        // anti-join collapses to "is `other` empty?". This handles atoms like
+        // `NOT p()` (no variables), which is rare but legal.
+        if shared.is_empty() {
+            return Ok(if other.is_empty() {
+                self
+            } else {
+                Self::new(self.schema)
+            });
+        }
+
+        // Project every row of `other` onto the shared columns (in the order
+        // they appear in `other.schema()`) and stash them in a HashSet so the
+        // membership test is O(1).
+        let forbidden: HashSet<Vec<Constant>> = other
+            .facts
+            .iter()
+            .map(|row| {
+                shared
+                    .iter()
+                    .map(|(_, oi)| row.get(oi).unwrap().clone())
+                    .collect()
+            })
+            .collect();
+
+        let kept: Vec<Row> = self
+            .facts
+            .into_iter()
+            .filter(|row| {
+                let key: Vec<Constant> = shared
+                    .iter()
+                    .map(|(si, _)| row.get(si).unwrap().clone())
+                    .collect();
+                !forbidden.contains(&key)
+            })
+            .collect();
+
+        Ok(Self::new_with_facts(self.schema, kept))
     }
 }
 

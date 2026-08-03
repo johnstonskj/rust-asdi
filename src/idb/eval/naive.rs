@@ -102,7 +102,7 @@ impl Evaluator for NaiveEvaluator {
                         let results = View::natural_join_all(matches)?;
                         for fact in results.iter() {
                             let head_predicates: Vec<&Atom> = rule.head().collect();
-                            let head = head_predicates.get(0).unwrap();
+                            let head = head_predicates.first().unwrap();
                             let relation = new_db.get_mut(head.label()).unwrap();
                             let new_fact: Vec<Constant> = head
                                 .iter()

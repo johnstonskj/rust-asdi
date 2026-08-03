@@ -10,8 +10,19 @@ program = {
 // Intermediate definitions
 // ------------------------------------------------------------------------------------------------
 
+// Per the datalog spec § Relations & Facts:
+//   fact       ::= assertion | retraction ;
+//   assertion  ::= fact-body "." ;
+//   retraction ::= fact-body "~" ;
+// We model that as a single `fact` production with a non-silent
+// `fact_terminator` so the parser can tell `.` (assert) from `~`
+// (retract) by inspecting the matched text.
 fact = {
-    predicate ~ (LEFT_PAREN ~ constant_list ~ RIGHT_PAREN)? ~ DOT
+    predicate ~ (LEFT_PAREN ~ constant_list ~ RIGHT_PAREN)? ~ fact_terminator
+}
+
+fact_terminator = {
+    DOT | TILDE
 }
 
 rule = {
@@ -103,7 +114,18 @@ subscript = @ {
 // ------------------------------------------------------------------------------------------------
 
 pragma = {
-    DOT ~ (pragma_assert | pragma_fd | pragma_infer | pragma_feature | pragma_input | pragma_output) ~ DOT
+    DOT ~ (pragma_assert | pragma_fd | pragma_infer | pragma_feature | pragma_input | pragma_output | pragma_pragma) ~ DOT
+}
+
+// Per the datalog spec § Pragmas:
+//   pi-pragma ::= "pragma" predicate ( "=" constant )? ;
+// The universal pragma form. Known names map to feature flags
+// (`negation`, `comparisons`, …) or program-level settings (`strict`,
+// `base`, `results`, `extended_numerics`); unknown names trigger a
+// `tracing::warn!` in lax mode (the default) and would be an error
+// once `strict` mode is honored.
+pragma_pragma = {
+    keyword_pragma ~ predicate ~ ( EQUALS ~ constant )?
 }
 
 pragma_assert = {
@@ -150,12 +172,43 @@ feature_id = _{
     | feature_id_functional_dependencies
 }
 
+// Per spec § Processing Instructions:
+//   pi-input              ::= "input" io-details ;
+//   io-details            ::= predicate parameter-list ;
+//   parameter-list        ::= "(" parameter-assignment ( "," parameter-assignment )* ")" ;
+//   parameter-assignment  ::= predicate "=" constant ;
+//
+// Example (spec-conformant):
+//   .input(human, uri="data/humans.csv", type="text/csv", header=present).
+//
+// The legacy positional form is kept for back-compat:
+//   .input(human, "data/humans.csv", "csv").
+//
+// The two forms are distinguished by pest's alternation: the new form
+// starts with `predicate ~ EQUALS`, the legacy form with
+// `quoted_string`. Order matters — `io_parameter_list` must come
+// first so a `predicate` token isn't accidentally consumed as a
+// bareword by the positional path's (non-existent) bareword arm.
 pragma_input = {
-    keyword_input ~ LEFT_PAREN ~ predicate ~ COMMA ~ quoted_string ~ ( COMMA ~ quoted_string )? ~ RIGHT_PAREN
+    keyword_input ~ LEFT_PAREN ~ predicate ~ COMMA
+        ~ ( io_parameter_list | io_positional ) ~ RIGHT_PAREN
 }
 
 pragma_output = {
-    keyword_output ~ LEFT_PAREN ~ predicate ~ COMMA ~ quoted_string ~ ( COMMA ~ quoted_string )? ~ RIGHT_PAREN
+    keyword_output ~ LEFT_PAREN ~ predicate ~ COMMA
+        ~ ( io_parameter_list | io_positional ) ~ RIGHT_PAREN
+}
+
+io_parameter_list = {
+    parameter_assignment ~ ( COMMA ~ parameter_assignment )*
+}
+
+parameter_assignment = {
+    predicate ~ EQUALS ~ constant
+}
+
+io_positional = {
+    quoted_string ~ ( COMMA ~ quoted_string )?
 }
 
 keyword_assert = _{
@@ -172,6 +225,10 @@ keyword_fd = _{
 
 keyword_feature = _{
     "feature"
+}
+
+keyword_pragma = _{
+    "pragma"
 }
 
 keyword_include = _{
@@ -234,18 +291,51 @@ string = @{
     string_char*
 }
 
+// Per the datalog spec § Strings:
+//   string-escape ::= "\\" ( DQUOTE | [tnr] )
+//                  | "\u{" HEXDIGIT{4} ( HEXDIGIT{4} )? "}" ;
+// i.e. one-character escapes are `\"`, `\t`, `\n`, `\r`; Unicode escapes
+// are `\u{XXXX}` (4 hex) or `\u{XXXXXXXX}` (exactly 8 hex). We also
+// permit `\\` (universally-assumed self-escape; arguably a spec bug).
+//
+// Note: in a pest ordered choice, the longer `{8}` alternative MUST come
+// before `{4}`, otherwise the parser commits to a 4-digit match and
+// leaves the remaining hex chars as literal characters in the string.
 string_char = {
     !( "\"" | "\\" ) ~ ANY
-    | "\\" ~ ( "\"" | "\\" | "t" )
-    | "\\" ~ ( "u" ~ LEFT_BRACE ~ ASCII_HEX_DIGIT{2,6} ~ RIGHT_BRACE )
+    | "\\" ~ ( "\"" | "\\" | "t" | "n" | "r" )
+    | "\\" ~ "u" ~ LEFT_BRACE ~ ( ASCII_HEX_DIGIT{8} | ASCII_HEX_DIGIT{4} ) ~ RIGHT_BRACE
 }
 
+// Per spec § Numbers:
+//   - `integer` (always supported, ≥64-bit signed).
+//   - `float` (requires `extended_numerics`) — supports plain decimal
+//     notation (`3.14`), scientific notation (`1.5e3`), and the R7RS
+//     IEEE-special literals `+inf.0`, `-inf.0`, `+nan.0`.
+//   - `decimal` (requires `extended_numerics`, 128-bit fixed-point) is
+//     spec-mandated but not yet implemented at the constant level —
+//     plain-decimal literals currently flow through `Number::Float`.
+//
+// Alternative order matters: `float_special` and `float` must come
+// before `integer`, because `+1.5` would otherwise greedy-match `+1`
+// as integer and leave `.5` dangling.
 number = _{
-    float | integer
+    float_special | float | integer
 }
+
+float_special = @{
+    ( "+" | "-" ) ~ "inf.0"
+}
+
+// Note: `+nan.0` is intentionally NOT included here. The current
+// `Constant::Number(Number)` wraps a `NotNan<f64>`, so a NaN literal
+// would fail at constant construction. Adding `+nan.0` requires
+// migrating to `OrderedFloat<f64>` and auditing the codepaths that
+// rely on `from_f64(...).is_some()` meaning "finite". Tracked in
+// IMPROVEMENTS.md §1.4 item 5.
 
 float = @{
-    decimal ~ ("e" | "E") ~ integer
+    decimal ~ ( ("e" | "E") ~ integer )?
 }
 
 decimal = @{
@@ -383,6 +473,8 @@ VERTICAL_BAR = _{ "|" }
 EXCLAMATION = _{ "!" }
 
 DOT = _{ "." }
+
+TILDE = _{ "~" }
 
 COMMA = _{ "," }
 

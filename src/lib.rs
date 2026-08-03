@@ -134,7 +134,11 @@ The program will select all matching (in this case all) facts from the _mortal_ 
 #![deny(
     // ---------- Public
     exported_private_dependencies,
-    private_in_public,
+    // `private_in_public` was removed in Rust 2024-era toolchains;
+    // replaced by the `unnameable_types` lint group. See RFC 2145.
+    // Keeping `exported_private_dependencies` covers the practical
+    // overlap.
+    // private_in_public, // <-- removed-lint, see comment
     // ---------- Deprecated
     anonymous_parameters,
     bare_trait_objects,
@@ -150,7 +154,7 @@ use crate::error::{
     extensional_predicate_in_rule_head, language_feature_unsupported, relation_does_not_exist,
     Result,
 };
-use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION, FEATURE_NEGATION};
+use crate::features::{FeatureSet, FEATURE_CONSTRAINTS, FEATURE_DISJUNCTION};
 use crate::idb::eval::{strata::PrecedenceGraph, Evaluator};
 use crate::idb::query::{Query, QuerySet, Queryable, View};
 use crate::idb::{Atom, Literal, Rule, RuleForm, RuleSet, Term, Variable, VariableRef};
@@ -162,12 +166,16 @@ use std::hash::Hash;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::str::FromStr;
+use tracing::info;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
 // ------------------------------------------------------------------------------------------------
 
-pub const MIME_TYPE_BASE: &str = "text/vnd.datalog";
+/// The IANA-registered media type for Datalog source documents, per the
+/// `application/vnd.datalog` registration described at
+/// <https://datalog-specs.info>.
+pub const MIME_TYPE_BASE: &str = "application/vnd.datalog";
 
 ///
 /// Core, readable, properties of a Datalog program.
@@ -207,6 +215,30 @@ pub struct Program {
     intensional: RelationSet,
     rules: RuleSet,
     queries: QuerySet,
+    // ---- spec § Pragmas, universal `.pragma <name>[=<value>].` form ----
+    // Three settings that aren't language-feature flags but rather tune
+    // program-level behaviour. Stored as plain owned values to keep
+    // `Program` self-contained and `Clone`/`PartialEq`/`Eq` derivable.
+    //
+    // `strict_mode` (spec § Strict Mode) — when true, undeclared
+    // relations, unknown pragmas, and inferred schemas MUST be
+    // diagnosed as errors. Currently only wired into the pragma
+    // parser (unknown pragma names in strict mode become errors
+    // rather than warnings); broader strict-mode enforcement is
+    // still TODO.
+    //
+    // `base_uri` (spec § URI References) — sets the base URI against
+    // which relative URIs in `.input(...)` / `.output(...)` are
+    // resolved. Today only *stored*; the I/O resolver (§1.6) is the
+    // intended consumer.
+    //
+    // `results_format` (spec § Results Format) — `native` (default,
+    // implementation-defined) or `tabular`. Currently *stored only*;
+    // no consumer yet, but exposed so a `Program::run`-style helper
+    // could pick it up.
+    strict_mode: bool,
+    base_uri: Option<String>,
+    results_format: Option<String>,
 }
 
 ///
@@ -372,7 +404,50 @@ impl Program {
             intensional: Default::default(),
             queries: Default::default(),
             rules: Default::default(),
+            strict_mode: false,
+            base_uri: None,
+            results_format: None,
         }
+    }
+
+    // --------------------------------------------------------------------------------------------
+    // Pragma-driven program-level settings — see spec § Pragmas.
+    // --------------------------------------------------------------------------------------------
+
+    /// True when `.pragma strict.` has been seen (or set programmatically).
+    pub fn is_strict(&self) -> bool {
+        self.strict_mode
+    }
+
+    /// Set the strict-mode flag programmatically. Mirrors what
+    /// `.pragma strict.` does in source, but available to library
+    /// users who build a `Program` by hand.
+    pub fn set_strict_mode(&mut self, strict: bool) {
+        self.strict_mode = strict;
+    }
+
+    /// Base URI for resolving relative URIs in I/O pragmas; `None` if
+    /// `.pragma base="...".` was not specified.
+    pub fn base_uri(&self) -> Option<&str> {
+        self.base_uri.as_deref()
+    }
+
+    /// Set the base URI programmatically. Mirrors
+    /// `.pragma base = "<uri>".` in source.
+    pub fn set_base_uri(&mut self, uri: String) {
+        self.base_uri = Some(uri);
+    }
+
+    /// Requested results-rendering format from `.pragma results=...`,
+    /// or `None` for the implementation default.
+    pub fn results_format(&self) -> Option<&str> {
+        self.results_format.as_deref()
+    }
+
+    /// Set the results-format identifier programmatically. Mirrors
+    /// `.pragma results = "<fmt>".` in source.
+    pub fn set_results_format(&mut self, fmt: String) {
+        self.results_format = Some(fmt);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -571,14 +646,11 @@ impl Program {
 
     ///
     /// In $\small\text{Datalog}^{\lnot}$ a program is _semi-positive_ **iff** the only literals that
-    /// are negated are EDB relations.
+    /// are negated are EDB relations. A purely positive program is trivially semi-positive, so this
+    /// holds independently of whether the `negation` feature is enabled.
     ///
     pub fn is_semi_positive(&self) -> bool {
-        if self.features().supports(&FEATURE_NEGATION) {
-            PrecedenceGraph::from(self).is_semi_positive()
-        } else {
-            false
-        }
+        PrecedenceGraph::from(self).is_semi_positive()
     }
 
     ///
@@ -696,14 +768,14 @@ impl Program {
             self.load_extensional_data()?;
         }
         let new_idb = evaluator.inference(self)?;
-        println!("{:?}", new_idb);
+        info!("inferred intensional database: {:?}", new_idb);
         self.intensional_mut().merge_from(new_idb)?;
         self.store_intensional_data()?;
         let results = self.eval_queries()?;
         for (query, view) in results {
-            println!("{:?}", query);
+            info!("query result for {:?}", query);
             if let Some(view) = view {
-                println!("{}", view);
+                info!("\n{}", view);
             }
         }
         Ok(())
@@ -739,7 +811,7 @@ impl Program {
             .map(|q| self.inner_eval_query(q, self.intensional()))
             .collect();
         match results {
-            Ok(results) => Ok(self.queries.iter().zip(results.into_iter()).collect()),
+            Ok(results) => Ok(self.queries.iter().zip(results).collect()),
             Err(e) => Err(e),
         }
     }
@@ -759,7 +831,7 @@ impl Program {
             .map(|q| self.inner_eval_query(q, &new_idb))
             .collect();
         match results {
-            Ok(results) => Ok(self.queries.iter().zip(results.into_iter()).collect()),
+            Ok(results) => Ok(self.queries.iter().zip(results).collect()),
             Err(e) => Err(e),
         }
     }

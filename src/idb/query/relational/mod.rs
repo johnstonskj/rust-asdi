@@ -17,7 +17,7 @@ use paste::paste;
 use regex::Regex;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
-use tracing::warn;
+use tracing::{error, trace, warn};
 
 // ------------------------------------------------------------------------------------------------
 // Public Types & Constants
@@ -52,11 +52,19 @@ pub trait RelationOps {
     where
         Self: Sized;
 
+    /// Theta-join: natural-join followed by a selection. Not yet
+    /// plumbed — the evaluator currently feature-gates arithmetic
+    /// comparisons in rule bodies. Returns a typed error rather than
+    /// panicking so library users who call this directly get a
+    /// recoverable failure. Tracking issue: rust-asdi/3.
     fn theta_join<V: Into<Vec<Criteria>>>(self, _other: Self, _criteria: V) -> Result<View>
     where
         Self: Sized,
     {
-        unimplemented!()
+        Err(crate::error::invalid_value(
+            "theta_join implementation",
+            "not yet implemented (rust-asdi/3); use natural_join + select for now",
+        ))
     }
 
     fn exists(self, criteria: &Selection) -> Result<bool>;
@@ -204,7 +212,7 @@ impl RelationalOp {
         project_constants: bool,
         criteria: Vec<Criteria>,
     ) -> Result<Self> {
-        println!(
+        trace!(
             "compile_atom_with > {} ({}) {:?}",
             atom,
             if project_constants {
@@ -234,7 +242,7 @@ impl RelationalOp {
                 attribute
             })
             .collect();
-        println!("compile_atom_with > project {:?}", projections);
+        trace!("compile_atom_with > project {:?}", projections);
 
         if projections.is_empty() {
             Err(nullary_facts_not_allowed())
@@ -249,8 +257,8 @@ impl RelationalOp {
                     value: CriteriaValue::Value(constant.clone()),
                 })
                 .collect();
-            println!("compile_atom_with > static_criteria {:?}", static_criteria);
-            static_criteria.extend(criteria.into_iter());
+            trace!("compile_atom_with > static_criteria {:?}", static_criteria);
+            static_criteria.extend(criteria);
             Ok(
                 match (
                     project_constants,
@@ -284,7 +292,7 @@ impl RelationalOp {
                         RelationalOp::Relation(atom.label_ref().into()),
                     )),
                     state => {
-                        eprintln!("Unexpected state: {:?}", state);
+                        error!("Unexpected state in compile_atom_with: {:?}", state);
                         unreachable!()
                     }
                 },
@@ -293,7 +301,7 @@ impl RelationalOp {
     }
 
     pub fn compile_rule(rule: &Rule) -> Result<Self> {
-        println!("----------------------------------------------------------------------");
+        trace!("compile_rule > -----------------------------------------------------------");
         let arithmetic: Vec<(&Comparison, bool)> = rule
             .literals()
             .filter_map(|lit| lit.as_arithmetic().map(|atom| (atom, lit.is_negative())))
@@ -308,10 +316,10 @@ impl RelationalOp {
         let mut ops: Vec<RelationalOp> = Default::default();
         let mut theta: Vec<&Comparison> = Default::default();
         for (atom, atom_negated) in relational {
-            println!("compile_rule > atom {} (negated {})", atom, atom_negated);
+            trace!("compile_rule > atom {} (negated {})", atom, atom_negated);
             let mut criteria: Vec<Criteria> = Default::default();
             for (comparison, comparison_negated) in &arithmetic {
-                println!(
+                trace!(
                     "compile_rule > atom > comparison {:?} (negated {})",
                     comparison, comparison_negated
                 );
@@ -358,7 +366,7 @@ impl RelationalOp {
                 }
             }
             let atom_op = Self::compile_atom_with(atom, false, criteria)?;
-            println!("compile_rule > atom >> {}", atom_op);
+            trace!("compile_rule > atom >> {}", atom_op);
             ops.push(atom_op);
         }
 
@@ -370,7 +378,7 @@ impl RelationalOp {
         let mut ops = ops.into_iter().rev();
         let last = ops.next().unwrap();
         let joined = ops.fold(last, |left, right| Join::natural(left, right).into());
-        println!("compile_rule > joined {:?}", joined);
+        trace!("compile_rule > joined {:?}", joined);
 
         // TODO: (ISSUE/rust-asdi/4) may need rework for disjunction.
 
@@ -385,14 +393,14 @@ impl RelationalOp {
                     .collect::<Vec<Attribute<Variable>>>(),
                 joined,
             ));
-            println!("compile_rule > joined {:?}", joined);
+            trace!("compile_rule > joined {:?}", joined);
             joined
         } else {
             joined
         };
         Ok(RelationalOp::Sink(RelationSink::new(
             joined,
-            rule.head.get(0).unwrap().label_ref(),
+            rule.head.first().unwrap().label_ref(),
         )))
     }
 
@@ -727,8 +735,14 @@ impl TryFrom<&Atom> for Selection {
 impl TryFrom<&Rule> for Selection {
     type Error = Error;
 
+    /// Not yet implemented — there is no live caller in the crate.
+    /// Returns a typed error rather than panicking so library users
+    /// who stumble across this conversion get a recoverable failure.
     fn try_from(_value: &Rule) -> std::result::Result<Self, Self::Error> {
-        unimplemented!()
+        Err(crate::error::invalid_value(
+            "Selection-from-Rule conversion",
+            "not yet implemented (no live caller in the crate)",
+        ))
     }
 }
 

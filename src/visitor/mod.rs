@@ -112,11 +112,11 @@ pub fn visit_program(program: &Program, visitor: &impl ProgramVisitor) -> Result
     let rules = program.rules();
     if !rules.is_empty() {
         if let Some(rule_visitor) = visitor.rule_visitor() {
-            rule_visitor.start_rules(&rules)?;
+            rule_visitor.start_rules(rules)?;
             for rule in rules.iter() {
                 rule_visitor.rule(rule)?;
             }
-            rule_visitor.end_rules(&rules)?;
+            rule_visitor.end_rules(rules)?;
         }
     }
 
