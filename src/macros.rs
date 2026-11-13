@@ -12,16 +12,15 @@ More detailed description, with
 // ------------------------------------------------------------------------------------------------
 
 macro_rules! self_is_as {
+    // Sugar — default to `pub` and re-use the variant name as the type.
     ($fn_root:ident, $variant_and_type:ident) => {
         self_is_as!(pub $fn_root, $variant_and_type, $variant_and_type);
     };
-    ($vis:vis $fn_root:ident, $variant_and_type:ident) => {
-        self_is_as!($fn_root, $variant_and_type, $variant_and_type);
-    };
+    // Sugar — supplied visibility, re-use the variant name as the type.
     ($fn_root:ident, $variant:ident, $value_type:ident) => {
         self_is_as!(pub $fn_root, $variant, $value_type);
     };
-    // --------------------------------------------------------------------------------------------
+    // The actual implementation arm.
     ($vis:vis $fn_root:ident, $variant:ident, $value_type:ident) => {
         paste! {
             $vis fn [<is_ $fn_root>](&self) -> bool {
@@ -51,10 +50,6 @@ macro_rules! get {
 }
 
 macro_rules! get_cloned {
-    ($vis:vis $fn_and_field_name:ident -> $type_name:ty) => {
-        get_cloned!($vis $fn_and_field_name, $fn_and_field_name -> $type_name)
-    };
-    // --------------------------------------------------------------------------------------------
     ($vis:vis $fn_name:ident, $field_name:ident -> $type_name:ty) => {
         $vis fn $fn_name(&self) -> $type_name {
             self.$field_name.clone()
@@ -63,17 +58,6 @@ macro_rules! get_cloned {
 }
 
 macro_rules! delegate {
-    ($vis:vis $fn_name:ident) => {
-        $vis fn $fn_name(&self) {
-            self.0.$fn_name()
-        }
-    };
-    ($vis:vis $fn_name:ident, $inner:ident) => {
-        $vis fn $fn_name(&self) {
-            self.$inner.$fn_name()
-        }
-    };
-    // --------------------------------------------------------------------------------------------
     ($vis:vis $fn_name:ident -> $return_type:ty) => {
         $vis fn $fn_name(&self) -> $return_type {
             self.0.$fn_name()
@@ -92,13 +76,6 @@ macro_rules! impl_labeled {
             get!(label -> Predicate);
 
             get_cloned!(label_ref, label -> PredicateRef);
-        }
-    };
-    ($for_type:ty, $field_name:ident) => {
-        impl Labeled for $for_type {
-            get!(label, $field_name -> Predicate);
-
-            get_cloned!(label_ref, $field_name -> PredicateRef);
         }
     };
 }
@@ -159,9 +136,6 @@ macro_rules! into_inner_fn {
 }
 
 macro_rules! const_value {
-    ($name:ident: $kind:ty => $value:expr) => {
-        const_value!(pub(crate) $name: $kind => $value);
-    };
     ($vis:vis $name:ident: $kind:ty => $value:expr) => {
         $vis const $name: $kind = $value;
     };

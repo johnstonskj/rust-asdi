@@ -25,8 +25,15 @@ pub struct Options {
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct DelimitedLines {}
 
-/// The string used in the `.input` and `.output` pragmas to identify this format.
+/// The string used in the `.input` and `.output` pragmas to identify the
+/// comma-separated form of this format.
 pub const PRAGMA_ID: &str = "csv";
+
+/// The string used in the `.input` and `.output` pragmas to identify the
+/// tab-separated form of this format. Per the datalog spec § Dataset
+/// Media Types, `tsv` (with media-type `text/tab-separated-values`) is a
+/// MUST-implement format alongside `csv`.
+pub const PRAGMA_ID_TSV: &str = "tsv";
 
 // ------------------------------------------------------------------------------------------------
 // Private Types & Constants

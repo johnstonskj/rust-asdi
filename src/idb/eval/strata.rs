@@ -12,7 +12,7 @@ More detailed description, with
 use crate::edb::{Predicate, RelationSet};
 use crate::error::{program_not_stratifiable, Result};
 use crate::features::{FeatureSet, FEATURE_DISJUNCTION};
-use crate::idb::{Literal, Rule, RuleSet};
+use crate::idb::{Literal, Rule, RuleForm, RuleSet};
 use crate::{Collection, Labeled, MaybePositive, Program, ProgramCore};
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
@@ -150,8 +150,13 @@ impl<'a> Collection<SubProgram<'a>> for StratifiedProgram<'a> {
 
 impl<'a> StratifiedProgram<'a> {
     pub fn from(program: &'a Program) -> Result<Self> {
-        // TODO: (ISSUE/rust-asdi/7) Design for disjunction
-        assert!(!program.features().supports(&FEATURE_DISJUNCTION));
+        // Disjunctive rules are stratified as if they had a single head
+        // per defined predicate — the rule-placement loop below already
+        // looks at *all* head predicates of a rule (see the
+        // `head_labels: HashSet<_>` collection). Multi-head split
+        // semantics live in the evaluator (`apply_rule_into`), not here.
+        let _ = FEATURE_DISJUNCTION; // keep the import alive after the
+                                     // historic `assert!` was removed.
 
         let start = Instant::now();
 
@@ -161,58 +166,61 @@ impl<'a> StratifiedProgram<'a> {
 
         if graph.is_stratifiable() {
             for rule in rules.iter() {
+                // Constraints (`:- body.`) have no head and contribute nothing
+                // to forward inference. They're handled separately by the
+                // evaluator *after* all strata run (as integrity checks), so
+                // they don't belong in the precedence-graph stratification
+                // at all. Skip them here.
+                if rule.form() == RuleForm::Constraint {
+                    continue;
+                }
+
                 if strata.is_empty() {
                     strata.push(SubProgram::from_with_rule(program, rule));
-                } else {
-                    let mut leveled: bool = false;
-                    let head_label = rule.head().map(|atom| atom.label()).next().unwrap();
+                    continue;
+                }
 
-                    // 1. All the rules defining the same IDB relation are in the same partition.
-                    for stratum in strata.iter_mut() {
-                        if stratum
-                            .rules()
-                            .iter()
-                            .next()
-                            .unwrap()
-                            .head()
-                            .map(|atom| atom.label())
-                            .next()
-                            .unwrap()
-                            == head_label
-                        {
-                            stratum.add_rule(rule);
+                let mut leveled: bool = false;
+                // For disjunctive rules (`H1 ; H2 :- ...`) the rule defines
+                // *every* head predicate; we want it placed in a stratum
+                // whose existing rules define any of those predicates.
+                let head_labels: HashSet<&Predicate> = rule.head().map(|a| a.label()).collect();
+
+                // 1. All rules defining the same IDB relation are in the same partition.
+                for stratum in strata.iter_mut() {
+                    let stratum_heads: HashSet<&Predicate> = stratum
+                        .rules()
+                        .iter()
+                        .flat_map(|r| r.head())
+                        .map(|atom| atom.label())
+                        .collect();
+                    if head_labels.iter().any(|h| stratum_heads.contains(h)) {
+                        stratum.add_rule(rule);
+                        leveled = true;
+                        break;
+                    }
+                }
+
+                // 2. If an IDB R appears positive in the body of a rule with head R0, R should
+                //    be defined in a partition before or where R0 is defined.
+                // 3. If an IDB R appears negated in the body of a rule with head R0, R should
+                //    be defined in a partition strictly before where R0 is defined.
+                if !leveled {
+                    for (i, stratum) in strata.iter().enumerate() {
+                        if stratum.rules().iter().any(|r2| {
+                            r2.literals()
+                                .filter_map(Literal::as_relational)
+                                .any(|atom| head_labels.contains(atom.label()))
+                        }) {
+                            strata.insert(i, SubProgram::from_with_rule(program, rule));
                             leveled = true;
                             break;
                         }
                     }
+                }
 
-                    // 2. If an IDB R appears positive in the body of a rule with head R0, R should
-                    //    be defined in a partition before or where R0 is defined.
-                    //
-                    // r0(X) :- r(X). => [[r...][r0...]] | [[r..., r0...]]
-                    //
-                    // 3. If an IDB R appears negated in the body of a rule with head R0, R should
-                    //    be defined in partition strictly before where R0 is defined.
-                    //
-                    // r0(X) :- r(X). => [[r...][r0...]]
-                    //
-                    if !leveled {
-                        for (i, stratum) in strata.iter().enumerate() {
-                            if stratum.rules().iter().any(|r2| {
-                                r2.literals()
-                                    .filter_map(Literal::as_relational)
-                                    .any(|atom| atom.label() == head_label)
-                            }) {
-                                strata.insert(i, SubProgram::from_with_rule(program, rule));
-                                leveled = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if !leveled {
-                        strata.push(SubProgram::from_with_rule(program, rule));
-                    }
+                if !leveled {
+                    strata.push(SubProgram::from_with_rule(program, rule));
                 }
             }
             let delta = start.elapsed();
@@ -346,8 +354,7 @@ impl<'a> PrecedenceGraph<'a> {
         } else {
             let next: HashSet<&Predicate> = initial
                 .iter()
-                .map(|s| self.directly_reachable_from(s))
-                .flatten()
+                .flat_map(|s| self.directly_reachable_from(s))
                 .collect();
             initial.extend(next);
             initial

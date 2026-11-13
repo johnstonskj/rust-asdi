@@ -10,9 +10,9 @@ use crate::syntax::{
     CHAR_COMMA, CHAR_LEFT_PAREN, CHAR_PERIOD, CHAR_RIGHT_PAREN, COMMA_SEPARATOR,
     DEFAULT_LANGUAGE_NAME, FEATURE_COMPARISONS_ID, FEATURE_COMPARISONS_SYMBOL,
     FEATURE_CONSTRAINTS_ID, FEATURE_CONSTRAINTS_SYMBOL, FEATURE_DISJUNCTION_ID,
-    FEATURE_DISJUNCTION_SYMBOL, FEATURE_FUNCTIONAL_DEPENDENCIES_ID,
-    FEATURE_FUNCTIONAL_DEPENDENCIES_SYMBOL, FEATURE_NEGATION_ID, NEGATION_UNICODE_SYMBOL,
-    PRAGMA_ID_FEATURE, RESERVED_PREFIX,
+    FEATURE_DISJUNCTION_SYMBOL, FEATURE_EXTENDED_NUMERICS_ID, FEATURE_EXTENDED_NUMERICS_SYMBOL,
+    FEATURE_FUNCTIONAL_DEPENDENCIES_ID, FEATURE_FUNCTIONAL_DEPENDENCIES_SYMBOL,
+    FEATURE_NEGATION_ID, NEGATION_UNICODE_SYMBOL, PRAGMA_ID_FEATURE, RESERVED_PREFIX,
 };
 use std::fmt::{Display, Formatter};
 
@@ -95,6 +95,26 @@ pub const FEATURE_CONSTRAINTS: Feature = Feature {
 };
 
 ///
+/// Corresponds to `.pragma extended_numerics.` (spec § Numbers). When
+/// enabled, the `float` and `decimal` attribute types are accepted in
+/// schema declarations and the corresponding number literals are
+/// permitted. Without this feature the parser/semantic-analyser MUST
+/// signal `ERR_FEATURE_NOT_ENABLED`.
+///
+/// Note: the *parsing* of float literals (e.g. `3.14`) is not yet gated
+/// on this flag — the integer/float discrimination happens at the
+/// lexer level. The flag currently controls only whether the schema
+/// declaration accepts `float`/`decimal` keywords, of which only
+/// `float` is partially wired today. Full decimal-type support (128-bit
+/// fixed-precision per spec) is tracked in IMPROVEMENTS.md §1.4.
+///
+pub const FEATURE_EXTENDED_NUMERICS: Feature = Feature {
+    label: FEATURE_EXTENDED_NUMERICS_ID,
+    symbol: FEATURE_EXTENDED_NUMERICS_SYMBOL,
+    mask: 1 << 6,
+};
+
+///
 /// This value is a list of all supported features.
 ///
 pub const ALL_FEATURES: &[&Feature] = &[
@@ -103,6 +123,7 @@ pub const ALL_FEATURES: &[&Feature] = &[
     &FEATURE_CONSTRAINTS,
     &FEATURE_DISJUNCTION,
     &FEATURE_FUNCTIONAL_DEPENDENCIES,
+    &FEATURE_EXTENDED_NUMERICS,
 ];
 
 // ------------------------------------------------------------------------------------------------
@@ -204,6 +225,8 @@ impl FeatureSet {
             FEATURE_COMPARISONS,
             FEATURE_CONSTRAINTS,
             FEATURE_DISJUNCTION,
+            FEATURE_FUNCTIONAL_DEPENDENCIES,
+            FEATURE_EXTENDED_NUMERICS,
         ])
     }
 

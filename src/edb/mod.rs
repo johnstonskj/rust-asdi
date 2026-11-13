@@ -217,6 +217,20 @@ pub struct Fact {
 ///
 /// A constant value, with variants matching those in [AttributeKind](AttributeKind).
 ///
+/// # Identifier strings (qnames)
+///
+/// The datalog spec § Types & Constants defines an `identifier-string`
+/// production allowing colon-separated qnames, e.g. `rdfs:Class`. The
+/// parser accepts these (see grammar rule `unquoted_string`), but the
+/// resulting value is **flattened** into [`Constant::String`] — the
+/// qname structure (namespace prefix vs. local name) is **not**
+/// preserved at the type level. If you need to recover that structure,
+/// split the string on the first `':'`.
+///
+/// A future major version may introduce a dedicated
+/// `Constant::Identifier { ns: String, name: String }` variant; see
+/// §1.5 of `IMPROVEMENTS.md` for the design discussion.
+///
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Constant {
     String(String),
@@ -343,7 +357,7 @@ where
 
     fn contains_index(&self, index: &AttributeIndex<T>) -> bool {
         match index {
-            AttributeIndex::Label(n) => self.label_index.get(n).is_some(),
+            AttributeIndex::Label(n) => self.label_index.contains_key(n),
             AttributeIndex::Index(i) => *i < self.len(),
         }
     }
@@ -838,7 +852,6 @@ impl RelationSet {
             predicate,
             schema
         );
-        let predicate = predicate;
         if self.0.contains_key(&predicate) {
             Err(relation_exists(predicate))
         } else {
@@ -1048,6 +1061,49 @@ impl Relation {
             Err(fact_does_not_correspond_to_schema(
                 fact.label_ref(),
                 fact.iter()
+                    .map(Constant::to_string)
+                    .collect::<Vec<String>>()
+                    .join(COMMA_SEPARATOR),
+            ))
+        }
+    }
+
+    ///
+    /// Remove `fact` from this relation. Returns `Ok(true)` when a
+    /// matching fact was present and removed, `Ok(false)` when no
+    /// such fact existed (per spec § Retraction: retraction of a
+    /// non-existent fact is **not** an error). An `Err` is returned
+    /// only if the fact's label doesn't match this relation, since
+    /// that's a programming-time schema mismatch.
+    ///
+    pub fn retract(&mut self, fact: Fact) -> Result<bool> {
+        if fact.label() == self.label() {
+            Ok(self.facts.remove(&fact))
+        } else {
+            Err(fact_does_not_correspond_to_schema(
+                fact.label_ref(),
+                fact.iter()
+                    .map(Constant::to_string)
+                    .collect::<Vec<String>>()
+                    .join(COMMA_SEPARATOR),
+            ))
+        }
+    }
+
+    ///
+    /// Convenience companion to `add_as_fact`: build a `Fact` from a
+    /// list of constants (validating against the schema), then remove
+    /// it. Same `Ok(true)` / `Ok(false)` semantics as `retract`.
+    ///
+    pub fn retract_as_fact<V: Into<Vec<Constant>>>(&mut self, values: V) -> Result<bool> {
+        let values: Vec<Constant> = values.into();
+        if self.schema.conforms(&values) {
+            self.retract(Fact::new(self.label.clone(), values)?)
+        } else {
+            Err(fact_does_not_correspond_to_schema(
+                self.label_ref(),
+                values
+                    .iter()
                     .map(Constant::to_string)
                     .collect::<Vec<String>>()
                     .join(COMMA_SEPARATOR),
@@ -1328,7 +1384,7 @@ impl Constant {
         if parts.len() == 1 {
             Predicate::is_valid(s)
         } else if parts.len() == 2 {
-            Predicate::is_valid(parts.get(0).unwrap())
+            Predicate::is_valid(parts.first().unwrap())
                 && Self::is_identifier_relaxed(parts.get(1).unwrap())
         } else {
             false

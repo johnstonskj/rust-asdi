@@ -91,7 +91,9 @@ pub trait Writer: Default {
 pub(crate) fn string_to_format(s: &str) -> Result<Format> {
     match s {
         #[cfg(feature = "io_csv")]
-        csv::PRAGMA_ID => Ok(Format::DelimitedLines(Default::default())),
+        csv::PRAGMA_ID => Ok(Format::DelimitedLines(csv::Options::comma_separated())),
+        #[cfg(feature = "io_csv")]
+        csv::PRAGMA_ID_TSV => Ok(Format::DelimitedLines(csv::Options::tab_separated())),
         #[cfg(feature = "io_json")]
         json::PRAGMA_ID => Ok(Format::Json(Default::default())),
         #[cfg(feature = "io_text")]
@@ -175,6 +177,8 @@ pub fn print_relation(relation: &Relation, file_format: &Format) -> Result<()> {
 impl Format {
     pub fn label(&self) -> &'static str {
         match self {
+            #[cfg(feature = "io_csv")]
+            Format::DelimitedLines(opts) if opts.delimiter == b'\t' => csv::PRAGMA_ID_TSV,
             #[cfg(feature = "io_csv")]
             Format::DelimitedLines(_) => csv::PRAGMA_ID,
             #[cfg(feature = "io_json")]

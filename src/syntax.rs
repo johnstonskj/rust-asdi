@@ -43,7 +43,8 @@ const_string_block!(
     ( FEATURE => "feature" ),
     ( INCLUDE => "include" ),
     ( INPUT => "input" ),
-    ( OUTPUT => "output" )
+    ( OUTPUT => "output" ),
+    ( PRAGMA => "pragma" )
 );
 
 const_string_block!(
@@ -63,8 +64,21 @@ const_string_block!(
     ( FUNCTIONAL_DEPENDENCIES_ID => "functional_dependencies" ),
     ( FUNCTIONAL_DEPENDENCIES_SYMBOL => "⟶" ),
     // ----------------------------------------
+    ( EXTENDED_NUMERICS_ID => "extended_numerics" ),
+    ( EXTENDED_NUMERICS_SYMBOL => "ℝ" ),
+    // ----------------------------------------
     ( EXCLUSIVE_DISJUNCTION_ID => "exclusive-disjunction" ),
     ( EXCLUSIVE_DISJUNCTION_SYMBOL => "⊕" )
+);
+
+// Names accepted by the universal `.pragma <name>[=<value>].` form
+// (spec § Pragmas) that are NOT feature flags — they tune program-level
+// behaviour rather than enabling a language extension.
+const_string_block!(
+    PRAGMA_SETTING
+    ( STRICT => "strict" ),
+    ( BASE => "base" ),
+    ( RESULTS => "results" )
 );
 
 const_string_block!(

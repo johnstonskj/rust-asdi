@@ -180,7 +180,7 @@ impl<W: Write> LatexFormatter<W> {
             if head.is_empty() {
                 "$\\bot$".to_string()
             } else if head.len() == 1 {
-                self.format_atom(head.get(0).unwrap())?
+                self.format_atom(head.first().unwrap())?
             } else {
                 head.iter()
                     .map(|atom| atom.to_string())
